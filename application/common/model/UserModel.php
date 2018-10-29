@@ -24,29 +24,31 @@ class UserModel extends CommonModel
      * @param  array $attr_data 陪玩师扩展信息
      * @return int              返回添加结果
      */
-    public function admission($type, $user_data, $attr_data = null)
+    public function admission($user_data, $attr_data = null)
     {
         Db::startTrans();
         try {
             $res = $this->add($user_data);
             if (!$res) {
                 Db::rollback();
-                return 2;
+                return 7;
             }
-            if ($type == 2) {
-                $ua               = new UserAttrModel();
-                $attr_data['uid'] = $res;
-                $res              = $ua->add($attr_data);
+            if ($user_data['type'] == 2) {
+                $ua = new UserAttrModel();
+                foreach ($attr_data as &$attr) {
+                    $attr['uid'] = $res;
+                }
+                $res = $ua->addArr($attr_data);
                 if (!$res) {
                     DB::rollback();
-                    return 3;
+                    return 8;
                 }
             }
             Db::commit();
             return true;
         } catch (\Exception $e) {
             Db::rollback();
-            return 1;
+            return 9;
         }
     }
 }

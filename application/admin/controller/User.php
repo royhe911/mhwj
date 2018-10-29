@@ -1,6 +1,7 @@
 <?php
 namespace app\admin\controller;
 
+use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
 
 /**
@@ -48,5 +49,48 @@ class User extends \think\Controller
         $count = $u->getCount($where);
         $pages = ceil($count / $pagesize);
         return $this->fetch('list', ['list' => $list, 'pages' => $pages]);
+    }
+
+    /**
+     * 用户详情
+     * @author 贺强
+     * @time   2018-10-29 15:46:55
+     * @param  UserModel     $u  UserModel 实例
+     * @param  UserAttrModel $ua UserAttrModel 实例
+     */
+    public function detail(UserModel $u, UserAttrModel $ua)
+    {
+        $id = $this->request->get('id');
+        if (!preg_match('/^\d+$/', $id)) {
+            echo "非法参数";exit;
+        }
+        $user = $u->getModel(['id' => $id]);
+        if (empty($user)) {
+            echo "用户不存在";exit;
+        }
+        $user['type_txt'] = '玩家';
+        if ($user['type'] === 2) {
+            $user['type_txt'] = '陪玩师';
+            $attrs            = $ua->getList(['uid' => ['in', $id]]);
+            $user['attrs']    = $attrs;
+        }
+        if ($user['sex'] === 1) {
+            $user['sex'] = '男';
+        } elseif ($user['sex'] === 3) {
+            $user['sex'] = '女';
+        } else {
+            $user['sex'] = '保密';
+        }
+        if ($user['status'] === 0) {
+            $user['status_txt'] = '正常';
+        }
+        if (!empty($user['addtime'])) {
+            $user['addtime'] = date('Y-m-d H:i:s', $user['addtime']);
+        }
+        if (!empty($user['login_time'])) {
+            $user['login_time']=date('Y-m-d H:i:s',$user['login_time']);
+        }
+
+        return $this->fetch('detail', ['user' => $user]);
     }
 }

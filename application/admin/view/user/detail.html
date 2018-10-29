@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>修改资料</title>
+    <title>用户详情</title>
     <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
     <!-- Data Tables -->
@@ -14,7 +14,6 @@
     <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
     <style type="text/css">
         .form-control{width: 200px;}
-        .sj,.kf{display: none;}
         #preview{max-width: 120px;max-height: 120px;display: none;}
     </style>
 </head>
@@ -24,142 +23,90 @@
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>修改资料</h5>
+                    <h5>用户详情</h5>
                 </div>
                 <div class="ibox-content">
                     <form class="form-horizontal" onsubmit="return false">
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">登录账号</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="username" value="{$admin.username}" disabled="disabled">
-                            </div>
+                            <label class="col-sm-2 control-label">用户昵称</label>
+                            <div class="col-sm-10">{$user.nickname}</div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">登录密码</label>
-                            <div class="col-sm-10">
-                                <input type="password" class="form-control" id="pwd1">
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">确认密码</label>
-                            <div class="col-sm-10">
-                                <input type="password" class="form-control" id="pwd2">
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">用户角色</label>
-                            <div class="col-sm-10">
-                                <select id="role_id" class="form-control"{if($role_id!=1)} disabled="disabled"{/if}>
-                                    <option value="0">…请选择用户角色…</option>
-                                    {foreach $roles as $r}
-                                    <option value="{$r.id}"{if($admin.role_id==$r.id)} selected="selected"{/if}>{$r.name}</option>
-                                    {/foreach}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">真实姓名</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="realname" value="{$admin.realname}">
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed kf"{if($admin.role_id==5)} style="display: block;"{/if}></div>
-                        <div class="form-group kf"{if($admin.role_id==5)} style="display: block;"{/if}>
-                            <label class="col-sm-2 control-label">主管</label>
-                            <div class="col-sm-10">
-                                <select id="z_id" class="form-control">
-                                    <option value="0">…请选择业务员…</option>
-                                    {foreach $executive as $e}
-                                    <option value="{$e['id']}"{if($admin.z_id==$e.id)} selected="selected"{/if}>{$e['nickname']}</option>
-                                    {/foreach}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group sj"{if($admin.role_id==3)} style="display: block;"{/if}>
-                            <label class="col-sm-2 control-label">昵称/商家名称</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="nickname" value="{$admin.nickname}">
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed sj"{if($admin.role_id==3)} style="display: block;"{/if}></div>
-                        <div class="form-group sj"{if($admin.role_id==3)} style="display: block;"{/if}>
-                            <label class="col-sm-2 control-label">业务员</label>
-                            <div class="col-sm-10">
-                                <select id="s_id" class="form-control">
-                                    <option value="0">…请选择业务员…</option>
-                                    {foreach $salesman as $s}
-                                    <option value="{$s['id']}"{if($admin.s_id==$s.id)} selected="selected"{/if}>{$s.nickname}</option>
-                                    {/foreach}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed sj"{if($admin.role_id==3)} style="display: block;"{/if}></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">头像</label>
-                            <div class="col-sm-10">
-                                <table width="100%">
-                                    <tr>
-                                        <td valign="top" width="120px"><input id="file_upload" name="file_upload" type="file"></td>
-                                        <td valign="top"><input class="btn btn-primary" type="button" data-action="upload" value="上传"></td>
-                                    </tr>
-                                    <tr><td colspan="2"><div id="progress"></div><input type="hidden" id="avatar"></td></tr>
-                                    <tr><td colspan="2"><img id="preview" src=""></td></tr>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">电子邮箱</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="email" value="{$admin.email}">
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">旺旺号</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="wangwang" value="{$admin.wangwang}">
-                            </div>
+                            <label class="col-sm-2 control-label">用户类型</label>
+                            <div class="col-sm-10">{$user.type_txt}</div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
                             <label class="col-sm-2 control-label">手机</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="mobile" value="{$admin.mobile}">
-                            </div>
+                            <div class="col-sm-10">{$user.mobile}</div>
                         </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
+                        <div class="hr-line-dashed kf"></div>
+                        <div class="form-group kf">
                             <label class="col-sm-2 control-label">QQ</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="qq" value="{$admin.qq}">
-                            </div>
+                            <div class="col-sm-10">{$user.qq}</div>
                         </div>
                         <div class="hr-line-dashed"></div>
-                        <div class="form-group">
+                        <div class="form-group sj">
                             <label class="col-sm-2 control-label">微信</label>
+                            <div class="col-sm-10">{$user.wx}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">头像</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" id="wx" value="{$admin.wx}">
+                                <img id="preview" src="{$user.avatar}">
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">银行卡号</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="bank_card" value="{$admin.bank_card}">
-                            </div>
+                            <label class="col-sm-2 control-label">年龄</label>
+                            <div class="col-sm-10">{$user.age}</div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">持卡人姓名</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="bank_name" value="{$admin.bank_name}">
-                            </div>
+                            <label class="col-sm-2 control-label">性别</label>
+                            <div class="col-sm-10">{$user.sex}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">来源</label>
+                            <div class="col-sm-10">{$user.origin}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">简介</label>
+                            <div class="col-sm-10">{$user.introduce}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">贡献值</label>
+                            <div class="col-sm-10">{$user.contribution}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">评分</label>
+                            <div class="col-sm-10">{$user.score}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">状态</label>
+                            <div class="col-sm-10">{$user.status_txt}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">入驻时间</label>
+                            <div class="col-sm-10">{$user.addtime}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">登录时间</label>
+                            <div class="col-sm-10">{$user.login_time}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">登录次数</label>
+                            <div class="col-sm-10">{$user.count}</div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
@@ -175,12 +122,8 @@
 </div>
 </body>
 <script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
-<script type="text/javascript" src="/static/h+/js/plugins/iCheck/icheck.min.js"></script>
-<script type="text/javascript" src="/static/layer/layer.js"></script>
-<script type="text/javascript" src="/static/uploadifive/jquery.uploadifive.js"></script>
 <script type="text/javascript">
     $(function(){
-        $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",});
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'cancel') {

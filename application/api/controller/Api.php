@@ -40,8 +40,8 @@ class Api extends \think\Controller
      */
     public function user_admission(UserModel $u)
     {
-        $msg   = [];
-        $param = $this->request->post();
+        $param = file_get_contents('php://input');
+        $param = json_decode($param, true);
         if (empty($param['user'])) {
             echo json_encode(['status' => 1, 'info' => '非法参数']);exit;
         }
@@ -49,7 +49,6 @@ class Api extends \think\Controller
         if (empty($user['type'])) {
             echo json_encode(['status' => 2, 'info' => '用户类型不能为空']);exit;
         }
-        $type = $user['type'];
         if (empty($user['nickname'])) {
             echo json_encode(['status' => 3, 'info' => '用户昵称不能为空']);exit;
         }
@@ -63,7 +62,30 @@ class Api extends \think\Controller
         $attr            = [];
         if (!empty($param['attr'])) {
             $attr = $param['attr'];
+            foreach ($attr as $tt) {
+                $regx = '/^\d+$/';
+                if (!preg_match($regx, $tt['game_id']) || !preg_match($regx, $tt['curr_para']) || !preg_match($regx, $tt['play_para']) || !preg_match($regx, $tt['play_type']) || empty($tt['level_url'])) {
+                    echo json_encode(['status' => 6, 'info' => '参数缺失或不合法']);exit;
+                    break;
+                }
+            }
         }
-        $res = $u->admission($type, $user);
+        $res = $u->admission($user, $attr);
+        if ($res !== true) {
+            $msg = ['status' => $res];
+            switch ($res) {
+                case 7:
+                    $msg['info'] = '用户基本信息入库失败';
+                    break;
+                case 8:
+                    $msg['info'] = '陪玩师游戏段位入库失败';
+                    break;
+                case 9:
+                    $msg['info'] = '服务器异常';
+                    break;
+            }
+            echo json_encode($msg);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '入驻成功']);exit;
     }
 }
