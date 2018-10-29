@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加用户</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/iCheck/custom.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
+    <style type="text/css">
+        .form-control{width: 200px;}
+        #preview{max-width: 120px;max-height: 120px;display: none;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>添加用户</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal" onsubmit="return false">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">登录账号</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="username">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">登录密码</label>
+                            <div class="col-sm-10">
+                                <input type="password" class="form-control" id="pwd1">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">确认密码</label>
+                            <div class="col-sm-10">
+                                <input type="password" class="form-control" id="pwd2">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">用户角色</label>
+                            <div class="col-sm-10">
+                                <select id="role_id" class="form-control">
+                                    <option value="0">…请选择用户角色…</option>
+                                    {foreach $roles as $r}
+                                    <option value="{$r['id']}">{$r['name']}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">真实姓名</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="realname">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed sj"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">头像</label>
+                            <div class="col-sm-10">
+                                <table width="100%">
+                                    <tr>
+                                        <td valign="top" width="120px"><input id="file_upload" name="file_upload" type="file"></td>
+                                        <td valign="top"><input class="btn btn-primary" type="button" data-action="upload" value="上传"></td>
+                                    </tr>
+                                    <tr><td colspan="2"><div id="progress"></div><input type="hidden" id="avatar"></td></tr>
+                                    <tr><td colspan="2"><img id="preview" src=""></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <input class="btn btn-primary" type="button" data-action="save" value="保存内容">
+                                <input class="btn btn-white" type="button" data-action="cancel" value="取消">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/h+/js/plugins/iCheck/icheck.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript" src="/static/uploadifive/jquery.uploadifive.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",});
+        $('#cancel').click(function(){
+            location.href = '/admin/list';
+        });
+        $('input[data-action]').click(function(){
+            $action = $(this).data('action');
+            if ($action == 'save') {
+                var username = $('#username'), pwd1 = $('#pwd1'), pwd2 = $('#pwd2'), role_id = $('#role_id').val(), realname = $('#realname'), nickname = $('#nickname'), z_id = $('#z_id').val(), s_id = $('#s_id').val(), avatar = $('#avatar').val();
+                if (username.val() == '') {
+                    layer.msg('登录账号不能为空', {icon: 5, time: 1000}, function(){username.focus()});
+                    return false
+                }
+                if (pwd1.val() == '') {
+                    layer.msg('登录密码不能为空', {icon: 5, time: 1000}, function(){pwd1.focus()});
+                    return false
+                }
+                if (pwd2.val() == '') {
+                    layer.msg('请确认密码', {icon: 5, time: 1000}, function(){pwd2.focus()});
+                    return false
+                }
+                if (pwd1.val() != pwd2.val()) {
+                    layer.msg('再次输入的密码不一致', {icon: 5, time: 1000}, function(){pwd1.focus()});
+                    return false
+                }
+                if (role_id <= 0) {
+                    layer.msg('请选择用户角色', {icon: 5, time: 1000});
+                    return false
+                }
+                if (realname.val() == '') {
+                    layer.msg('真实姓名不能为空', {icon: 5, time: 1000}, function(){realname.focus()});
+                    return false
+                }
+                if (avatar == '') {
+                    layer.msg('请上传头像', {icon: 5, time: 1000});
+                    return false
+                }
+                $.ajax({
+                    type: 'post', cache: false, dataType: 'json',
+                    url: '/admin/add',
+                    data: {'username': username.val(), 'pwd': pwd2.val(), 'role_id': role_id, 'realname': realname.val(), 'nickname': nickname.val(), 's_id': s_id, 'avatar': avatar},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 6, time: 1000});
+                            // layer.confirm(data.info + '<br />是否继续添加？', {
+                            //     btn: ['是', '否'],
+                            //     shade: false,
+                            //     closeBtn: 0
+                            // }, function(){
+                            //     location.reload()
+                            // }, function(){
+                            //     location.href = '/admin/list'
+                            // })
+                        }else{
+                            layer.msg(data.info, {icon: 5, time: 1000});
+                        }
+                    }
+                })
+            } else if ($action == 'cancel') {
+                location.href = '/admin/list'
+            } else if ($action == 'upload') {
+                $('#file_upload').uploadifive('upload')
+            }
+        });
+        $('#file_upload').uploadifive({
+            'auto'             : false,
+            'buttonText'       : '选择图片',
+            'queueID'          : 'progress',
+            'fileTypeDesc'     : 'Image Files',
+            'fileTypeExts'     : '*.jpg;*.gif;*.png',
+            'multi'            : false,
+            'removeCompleted'  : true,
+            'formData'         : {
+                'timestamp' : '{$time}',
+                'token'     : '{$token}'
+            },
+            'uploadScript'     : '/upload',
+            'onUploadComplete' : function(file, data) {
+                // data = eval('(' + data + ')');
+                data = JSON.parse(data);
+                $('#avatar').val(data.path);
+            }
+        });
+    });
+</script>
+</html>

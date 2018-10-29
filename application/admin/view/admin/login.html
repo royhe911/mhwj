@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 登录</title>
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="/static/h+/css/bootstrap.min14ed.css?v=3.3.6" rel="stylesheet">
+    <link href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0" rel="stylesheet">
+    <link href="/static/h+/css/animate.min.css" rel="stylesheet">
+    <link href="/static/h+/css/style.min862f.css?v=4.1.0" rel="stylesheet">
+    <!--[if lt IE 9]>
+    <meta http-equiv="refresh" content="0;ie.html" />
+    <![endif]-->
+    <script>if(window.top !== window.self){ window.top.location = window.location;}</script>
+</head>
+<body class="gray-bg">
+    <div class="middle-box text-center loginscreen  animated fadeInDown">
+        <div>
+            <div style="margin-top: 200px;">
+                <h1 class="logo-name">幕后玩家</h1>
+            </div>
+            <h3>后台管理</h3>
+            <form class="m-t" role="form" action="#" method="post">
+                <div class="form-group">
+                    <input type="text" id="username" name="username" class="form-control" placeholder="用户名" required="">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="pwd" name="pwd" class="form-control" placeholder="密码" required="">
+                </div>
+                <input type="button" id="submit" class="btn btn-primary block full-width" value="登录">
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript" src="/static/h+/js/jquery.min.js?v=2.1.4"></script>
+    <script type="text/javascript" src="/static/h+/js/bootstrap.min.js?v=3.3.6"></script>
+    <script type="text/javascript" src="/static/layer/layer.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            $(document).keydown(function(e){
+                if(e.keyCode == 13){
+                    $('#submit').click();
+                }
+            });
+            $('#submit').click(function(){
+                var username = $('#username');
+                var pwd = $('#pwd');
+                if(username.val() == ''){
+                    layer.msg('登录用户名不能为空', {icon: 2, time: 1500}, function(){
+                        username.focus();
+                        return false;
+                    });
+                }else if(pwd.val() == ''){
+                    layer.msg('登录密码不能为空', {icon: 2, time: 1500}, function(){
+                        pwd.focus();
+                        return false;
+                    });
+                }else{
+                    $.ajax({
+                        type: 'post', dataType: 'json', cache: false,
+                        url: '/admin/doLogin',
+                        data: {'username': username.val(), 'pwd': pwd.val()},
+                        success: function(msg){
+                            if (msg.status == 0) {
+                                layer.msg(msg.info, {icon: 1, time: 1000}, function(){
+                                    location.href = '/admin';
+                                });
+                            }else{
+                                layer.msg(msg.info, {icon: 2, time: 1500});
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
