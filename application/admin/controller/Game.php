@@ -111,7 +111,8 @@ class Game extends \think\Controller
         $list     = $g->getList($where, true, "$page,$pagesize");
         foreach ($list as &$item) {
             if (!empty($item['url'])) {
-                $item['url'] = config('WEBSITE') . $item['url'];
+                //config('WEBSITE') .
+                $item['url'] = $item['url'];
             }
             if (!empty($item['addtime'])) {
                 $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
