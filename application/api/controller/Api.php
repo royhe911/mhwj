@@ -27,7 +27,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 300, 'info' => '非法参数', 'data' => null]);exit;
         }
         $vericode = $param['vericode'];
-        // unset($param['vericode']);
+        unset($param['vericode']);
         // ksort($param);
         // $str = '';
         // foreach ($param as $key => $p) {
