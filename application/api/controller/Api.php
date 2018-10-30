@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use app\common\model\NoticeModel;
+use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
 
 /**
@@ -49,7 +50,7 @@ class Api extends \think\Controller
         // }
         $new_code = md5(config('MD5_PARAM'));
         if ($vericode !== $new_code) {
-            echo json_encode(['status' => 100, 'info' => '非法参数', 'data' => $new_code]);exit;
+            echo json_encode(['status' => 100, 'info' => '非法参数', 'data' => null]);exit;
         }
         $this->param = $param;
     }
@@ -168,6 +169,7 @@ class Api extends \think\Controller
                 $msg = ['status' => 3, 'info' => '登录失败', 'data' => null];
             }
         } else {
+            $data['type']       = 1;
             $data['addtime']    = time();
             $data['login_time'] = time();
             $id                 = $u->add($data);
@@ -192,11 +194,34 @@ class Api extends \think\Controller
         if (empty($this->param['id']) || empty($this->param['nickname']) || empty($this->param['sex']) || empty($this->param['avatar'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
         }
+        $this->param['updatetime'] = time();
+        // 修改信息
         $res = $u->modify($this->param, ['id' => $this->param['id']]);
         if ($res !== false) {
             $msg = ['status' => 0, 'info' => '同步成功', 'data' => null];
         } else {
             $msg = ['status' => 4, 'info' => '同步失败', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
+     * 获取用户信息
+     * @author 贺强
+     * @time   2018-10-30 17:40:20
+     * @param  UserModel $u UserModel 实例
+     * @return string       返回用户信息 json 串
+     */
+    public function get_userinfo(UserModel $u)
+    {
+        if (empty($this->param['id'])) {
+            echo json_encode(['status' => 1, 'info' => '参数缺失']);exit;
+        }
+        $user = $u->getModel(['id' => $this->param['id']], 'id,nickname,`type`,avatar,contribution');
+        if ($user) {
+            $msg = ['status' => 0, 'info' => '获取成功', 'data' => $user];
+        } else {
+            $msg = ['status' => 4, 'info' => '获取失败', 'data' => null];
         }
         echo json_encode($msg);exit;
     }
