@@ -67,10 +67,6 @@ class Controller
         if (!empty($admin)) {
             $a    = new AdminModel();
             $user = $a->getModel(['id' => $admin['id']]);
-            if ($user['status'] !== 8) {
-                session('admin', null);
-                $this->error('该账号被禁用，请更换', url('/admin/login'));
-            }
             if ($admin['pwd'] !== $user['pwd']) {
                 session('admin', null);
                 $this->error('登录超时，请重新登录', url('/admin/login'));
@@ -98,7 +94,7 @@ class Controller
 
     /**
      * 判断登录用户是否有权限
-     * @Author 贺强
+     * @author 贺强
      * @date   2018-08-31
      * @param  string     $identity 操作/访问的方法
      */
@@ -126,29 +122,39 @@ class Controller
     }
 
     /**
-     * 根据条件获取用户
-     * @Author 贺强
-     * @date   2018-08-31
-     * @param  array      $where 条件
-     * @param  string     $field 要获取的字段
+     * URL 请求
+     * @author 贺强
+     * @time   2018-10-30 12:13:06
+     * @param  string  $url     请求地址
+     * @param  string  $post    POST 数据
+     * @param  boolean $is_json 是否为 json 参数
+     * @param  string  $charset 编码方式，默认utf8
+     * @return object           返回请求返回的数据
      */
-    protected function getUsers($where = [], $field = 'id,nickname')
+    public function curl($url, $post = '', $is_json = true, $charset = 'utf-8')
     {
-        $where['is_delete'] = 0;
-        $a                  = new AdminModel();
-        $list               = $a->getList($where, $field);
-        return $list;
-    }
-
-    /**
-     * 获取用户角色
-     */
-    protected function getRoles($where = null)
-    {
-        $where['is_delete'] = 0;
-        $r                  = new RoleModel();
-        $list               = $r->getList($where, 'id,`name`');
-        return $list;
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        if ($is_json) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json; charset=utf-8',
+                'Content-Length: ' . strlen($post),
+            )
+            );
+        }
+        if ($post) {
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
+        }
+        curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        $data = curl_exec($curl);
+        if (curl_errno($curl)) {
+            return curl_error($curl);
+        }
+        curl_close($curl);
+        return $data;
     }
 
     /**

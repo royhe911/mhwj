@@ -8,7 +8,7 @@ class Upload extends \think\Controller
 {
     /**
      * 图片上传
-     * @Author 贺强
+     * @author 贺强
      * @date   2018-08-20
      * @return string     返回上传后的图片 json 数据
      */
@@ -49,7 +49,7 @@ class Upload extends \think\Controller
 
     /**
      * 导出文件
-     * @Author 贺强
+     * @author 贺强
      * @date   2018-09-03
      * @param  string     $filename 要导出的文件名
      * @param  array      $titleArr excel 表头

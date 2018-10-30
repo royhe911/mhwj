@@ -34,6 +34,8 @@ class User extends \think\Controller
                 $item['type_txt'] = '玩家';
             } elseif ($item['type'] === 2) {
                 $item['type_txt'] = '陪玩师';
+            } else {
+                $item['type_txt'] = '';
             }
             if (!empty($item['addtime'])) {
                 $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
@@ -88,7 +90,7 @@ class User extends \think\Controller
             $user['addtime'] = date('Y-m-d H:i:s', $user['addtime']);
         }
         if (!empty($user['login_time'])) {
-            $user['login_time']=date('Y-m-d H:i:s',$user['login_time']);
+            $user['login_time'] = date('Y-m-d H:i:s', $user['login_time']);
         }
 
         return $this->fetch('detail', ['user' => $user]);

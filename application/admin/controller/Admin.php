@@ -5,6 +5,7 @@ use app\common\model\AdminModel;
 use app\common\model\LogModel;
 use app\common\model\MenuModel;
 use app\common\model\RoleAccessModel;
+use app\common\model\RoleModel;
 use think\Session;
 
 /**
@@ -176,11 +177,9 @@ class Admin extends \think\Controller
             if ($admin['role_id'] !== 1) {
                 $where_role = ['id' => $admin['role_id']];
             }
-            $roles     = $this->getRoles($where_role);
-            $salesman  = $this->getUsers(['role_id' => 2]);
-            $executive = $this->getUsers(['role_id' => 4]);
-            $time      = time();
-            return $this->fetch('add', ['roles' => $roles, 'salesman' => $salesman, 'executive' => $executive, 'time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time)]);
+            $roles = $this->getRoles();
+            $time  = time();
+            return $this->fetch('add', ['roles' => $roles, 'time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time)]);
         }
     }
 
@@ -286,11 +285,8 @@ class Admin extends \think\Controller
             if ($role_id != 1) {
                 $role_w = ['id' => ['<>', 1]];
             }
-            $roles     = $this->getRoles($role_w);
-            $salesman  = $this->getUsers(['role_id' => 2]);
-            $executive = $this->getUsers(['role_id' => 4]);
-            $time      = time();
-            return $this->fetch('edit', ['admin' => $user, 'role_id' => $admin['role_id'], 'roles' => $roles, 'executive' => $executive, 'salesman' => $salesman, 'time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time)]);
+            $time = time();
+            return $this->fetch('edit', ['admin' => $user, 'role_id' => $admin['role_id'], 'time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time)]);
         }
     }
 
@@ -336,6 +332,19 @@ class Admin extends \think\Controller
         $pages = ceil($count / $pagesize);
         $roles = $this->getRoles();
         return $this->fetch('list', ['list' => $list, 'roles' => $roles, 'keyword' => $keyword, 'type' => $type, 'pages' => $pages]);
+    }
+
+    /**
+     * 获取用户角色
+     * @author 贺强
+     * @time   2018-10-30 15:16:13
+     */
+    private function getRoles()
+    {
+        $where['is_delete'] = 0;
+        $r                  = new RoleModel();
+        $list               = $r->getList($where, 'id,`name`');
+        return $list;
     }
 
 }

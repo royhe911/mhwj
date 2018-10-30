@@ -37,5 +37,7 @@ return [
     /*--------   api 开始   --------*/
     '/api/carousel'    => 'api/Api/get_carousel', // 获取轮播轮播图
     '/api/admission'   => 'api/Api/user_admission', // 用户入驻
+    '/api/login'       => 'api/Api/user_login', // 获取OPENID
+    '/api/sync'        => 'api/Api/sync_userinfo', // 同步用户信息
     /*--------   api 结束  --------*/
 ];
