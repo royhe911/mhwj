@@ -14,8 +14,9 @@
     <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
     <style type="text/css">
         .form-control{width: 200px;}
-        .sj,.kf{display: none;}
         #preview{max-width: 120px;max-height: 120px;}
+        .para_id{width: 80px;}
+        .reduce,.plus{cursor: pointer;}
     </style>
 </head>
 <body class="gray-bg">
@@ -57,6 +58,29 @@
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
+                            <label class="col-sm-2 control-label">段位</label>
+                            <div class="col-sm-10">
+                                <table id="para">
+                                    {if(!empty($game.game_para))}
+                                    {foreach($game.game_para as $key=>$item)}
+                                    <tr>
+                                        <td><input type="text" class="form-control para_id" placeholder="段位" value="{$item.para_id}"></td>
+                                        <td><input type="text" class="form-control para_str" placeholder="段位描述" value="{$item.para_str}"></td>
+                                        <td><img src="/static/h+/img/{if($key===0)}plus{else/}reduce{/if}.png" class="{if($key===0)}plus{else/}reduce{/if}" data-id="{$item.id}"><input type="hidden" class="paraids" value="{$item.id}"></td>
+                                    </tr>
+                                    {/foreach}
+                                    {else/}
+                                    <tr>
+                                        <td><input type="text" class="form-control para_id" placeholder="段位"></td>
+                                        <td><input type="text" class="form-control para_str" placeholder="段位描述"></td>
+                                        <td><img src="/static/h+/img/plus.png" class="plus"><input type="hidden" class="paraids" value="0"></td>
+                                    </tr>
+                                    {/if}
+                                </table>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
                             <div class="col-sm-4 col-sm-offset-2">
                                 <input class="btn btn-primary" type="button" data-action="save" value="保存内容">
                                 <input class="btn btn-white" type="button" data-action="cancel" value="取消">
@@ -76,6 +100,18 @@
 <script type="text/javascript">
     $(function(){
         $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",});
+        $('.plus').click(function(){
+            var $str = '<tr>' + 
+                '<td><input type="text" class="form-control para_id" placeholder="段位"></td>' + 
+                '<td><input type="text" class="form-control para_str" placeholder="段位描述"></td>' + 
+                '<td><img src="/static/h+/img/reduce.png" class="reduce" data-id="0"><input type="hidden" class="paraids" value="0"></td></tr>';
+            $('#para').append($str);
+        });
+        var del_ids = [];
+        $('#para').on('click', '.reduce', function(){
+            del_ids.push($(this).data('id'));
+            $(this).parent().parent().remove()
+        });
         $('#cancel').click(function(){
             location.href = '/game/list';
         });
@@ -91,10 +127,30 @@
                     layer.msg('请上传游戏图片', {icon: 5, time: 1000});
                     return false
                 }
+                var paraids_arr = [], para_id_arr = [], para_str_arr = [];
+                $('.para_str').each(function(){
+                    if ($(this).val() != '') {
+                        para_str_arr.push($(this).val())
+                    }else{
+                        layer.msg('段位描述不能为空', {icon: 5, time: 1000});
+                        return false
+                    }
+                });
+                $('.para_id').each(function(){
+                    if ($(this).val() != '') {
+                        para_id_arr.push($(this).val())
+                    }else{
+                        layer.msg('游戏段位不能为空', {icon: 5, time: 1000});
+                        return false
+                    }
+                });
+                $('.paraids').each(function(){
+                    paraids_arr.push($(this).val())
+                });
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
                     url: '/game/edit',
-                    data: {'id': {$game.id}, 'name': name.val(), 'url': urll, 'sort': $('#sort').val()},
+                    data: {'id': {$game.id}, 'name': name.val(), 'url': urll, 'sort': $('#sort').val(), 'paraids_arr': paraids_arr, 'para_id_arr': para_id_arr, 'para_str_arr': para_str_arr, 'del_ids': del_ids},
                     success: function(data){
                         if (data.status == 0) {
                             layer.msg(data.info, {icon: 6, time: 1000}, function(){location.href = '/game/list'});

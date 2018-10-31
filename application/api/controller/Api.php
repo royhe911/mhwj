@@ -1,7 +1,9 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\GameModel;
 use app\common\model\NoticeModel;
+use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
 
 /**
@@ -167,6 +169,57 @@ class Api extends \think\Controller
             $msg = ['status' => 4, 'info' => '获取失败', 'data' => null];
         }
         echo json_encode($msg);exit;
+    }
+
+    /**
+     * 获取游戏列表
+     * @author 贺强
+     * @time   2018-10-31 12:00:48
+     * @param  GameModel $g GameModel 实例
+     */
+    public function get_games(GameModel $g)
+    {
+        $where = ['is_delete' => 0];
+        // 分页参数
+        $page     = 1;
+        $pagesize = 100;
+        if (!empty($this->param['page'])) {
+            $page = $this->param['page'];
+        }
+        if (!empty($this->param['pagesize'])) {
+            $pagesize = $this->param['pagesize'];
+        }
+        $list = $g->getList($where, 'id,`name`,url', "$page,$pagesize");
+        if ($list) {
+            foreach ($list as &$item) {
+                if (!empty($item['url'])) {
+                    $item['url'] = config('WEBSITE') . $item['url'];
+                }
+            }
+            $msg = ['status' => 0, 'info' => '获取成功', 'data' => $list];
+        } else {
+            $msg = ['status' => 4, 'info' => '暂无数据', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
+     * 添加游戏
+     * @author 贺强
+     * @time   2018-10-31 12:19:41
+     * @param  UserAttrModel $ua UserAttrModel 实例
+     */
+    public function add_game(UserAttrModel $ua)
+    {
+        if (empty($this->param['uid']) || empty($this->param['game_id'])) {
+            echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
+        }
+        $userAttr = $ua->getModel(['uid' => $this->param['uid'], 'game_id' => $this->param['game_id']]);
+        if ($userAttr) {
+            $res = $ua->modify($this->param, ['uid' => $this->param['uid'], 'game_id' => $this->param['game_id']]);
+        } else {
+            $res = $ua->add($this->param);
+        }
     }
 
 }
