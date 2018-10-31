@@ -189,7 +189,7 @@ class Api extends \think\Controller
         if (!empty($this->param['pagesize'])) {
             $pagesize = $this->param['pagesize'];
         }
-        $list = $g->getList($where, 'id,`name`,url', "$page,$pagesize");
+        $list = $g->getList($where, 'id,identify,`name`,url', "$page,$pagesize");
         if ($list) {
             foreach ($list as &$item) {
                 if (!empty($item['url'])) {
@@ -220,6 +220,29 @@ class Api extends \think\Controller
         } else {
             $res = $ua->add($this->param);
         }
+        if ($res) {
+            $msg = ['status' => 0, 'info' => '添加成功', 'data' => null];
+        } else {
+            $msg = ['status' => 4, 'info' => '添加失败', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
+     * 获取某游戏服务段位
+     * @author 贺强
+     * @time   2018-10-31 18:28:52
+     * @return array 返回该游戏服务段位
+     */
+    public function get_srv_para()
+    {
+        if (empty($this->param['identify'])) {
+            echo json_encode(['status' => 1, 'info' => '游戏标识不能为空', 'data' => null]);exit;
+        }
+        if (empty(config($this->param['identify']))) {
+            echo json_encode(['status' => 2, 'info' => '数据错误', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => config($this->param['identify'])]);exit;
     }
 
 }

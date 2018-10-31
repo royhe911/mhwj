@@ -30,6 +30,13 @@
                 <div class="ibox-content">
                     <form class="form-horizontal" onsubmit="return false">
                         <div class="form-group">
+                            <label class="col-sm-2 control-label">游戏标识</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="identify">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
                             <label class="col-sm-2 control-label">游戏名称</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="name">
@@ -106,7 +113,11 @@
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'save') {
-                var name = $('#name'), urll = $('#urll').val();
+                var identify = $('#identify'), name = $('#name'), urll = $('#urll').val();
+                if (identify.val() == '') {
+                    layer.msg('游戏标识不能为空', {icon: 5, time: 1000}, function(){identify.focus()});
+                    return false
+                }
                 if (name.val() == '') {
                     layer.msg('游戏名称不能为空', {icon: 5, time: 1000}, function(){name.focus()});
                     return false
@@ -135,7 +146,7 @@
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
                     url: '/game/add',
-                    data: {'name': name.val(), 'url': urll, 'sort': $('#sort').val(), 'para_id_arr': para_id_arr, 'para_str_arr': para_str_arr},
+                    data: {'identify': identify.val(), 'name': name.val(), 'url': urll, 'sort': $('#sort').val(), 'para_id_arr': para_id_arr, 'para_str_arr': para_str_arr},
                     success: function(data){
                         if (data.status == 0) {
                             // layer.msg(data.info, {icon: 6, time: 1000});

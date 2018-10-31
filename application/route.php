@@ -43,5 +43,6 @@ return [
     '/api/upload'      => 'admin/Upload/upload', // 上传文件
     '/api/games'       => 'api/Api/get_games', // 游戏列表
     '/api/addgame'     => 'api/Api/add_game', // 添加游戏
+    '/api/srvpara'     => 'api/Api/get_srv_para', // 获取服务段位
     /*--------   api 结束  --------*/
 ];

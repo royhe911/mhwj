@@ -22,6 +22,11 @@ class Game extends \think\Controller
         if ($this->request->isAjax()) {
             $param = $this->request->post();
             $data  = ['addtime' => time()];
+            if (empty($param['identify'])) {
+                return ['status' => 1, 'info' => '游戏标识不能为空'];
+            } else {
+                $data['identify'] = $param['identify'];
+            }
             if (empty($param['name'])) {
                 return ['status' => 2, 'info' => '游戏名称不能为空'];
             } else {
@@ -108,6 +113,11 @@ class Game extends \think\Controller
                 return ['status' => 1, 'info' => '非法参数'];
             } else {
                 $data['id'] = $param['id'];
+            }
+            if (empty($param['identify'])) {
+                return ['status' => 1, 'info' => '游戏标识不能为空'];
+            } else {
+                $data['identify'] = $param['identify'];
             }
             if (empty($param['name'])) {
                 return ['status' => 2, 'info' => '游戏名称不能为空'];
