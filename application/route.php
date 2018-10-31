@@ -13,7 +13,7 @@ return [
     '/'                => 'admin/Admin/index',
     '/login'           => 'admin/Admin/login', // 后台登录页
     '/admin'           => 'admin/Admin/index', // 后台首页
-    '/upload'          => 'admin/Upload/upload_img', // 上传文件
+    '/upload'          => 'admin/Upload/upload_img', // 上传图片
     '/admin/doLogin'   => 'admin/Admin/do_login', // 后台登录操作
     '/admin/index_v1'  => 'admin/Admin/index_v1', // 后台首页欢迎页
     '/admin/list'      => 'admin/Admin/lists', // 后台管理员列表
@@ -30,6 +30,7 @@ return [
     '/game/list'       => 'admin/Game/lists', // 游戏列表
     '/game/add'        => 'admin/Game/add', // 添加游戏
     '/game/edit'       => 'admin/Game/edit', // 修改游戏
+    '/game/editsort'   => 'admin/Game/editsort', // 修改游戏排序
     '/game/del'        => 'admin/Game/del', // 删除游戏
     '/user/list'       => 'admin/User/lists', // 用户列表
     '/user/detail'     => 'admin/User/detail', // 用户详情
@@ -40,5 +41,6 @@ return [
     '/api/login'       => 'api/Api/user_login', // 获取OPENID
     '/api/sync'        => 'api/Api/sync_userinfo', // 同步用户信息
     '/api/userinfo'    => 'api/Api/get_userinfo', // 获取用户信息
+    '/api/upload'      => 'admin/Upload/upload', // 上传文件
     /*--------   api 结束  --------*/
 ];

@@ -2,7 +2,6 @@
 namespace app\api\controller;
 
 use app\common\model\NoticeModel;
-use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
 
 /**

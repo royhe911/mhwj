@@ -48,6 +48,46 @@ class Upload extends \think\Controller
     }
 
     /**
+     * 上传文件
+     * @author 贺强
+     * @time   2018-10-31 09:37:34
+     * @return string 返回上传后路径
+     */
+    public function upload()
+    {
+        $root_path  = ROOT_PATH . 'public';
+        $file_types = ['mp3', 'jpg', 'jpeg', 'gif', 'png'];
+        $file       = $_FILES['Filedata'];
+        if (empty($file)) {
+            echo json_encode(['status' => 1, 'info' => '请选择上传文件']);exit;
+        }
+        $file     = (array) $file;
+        $fileinfo = pathinfo($file['name']);
+        $tmp_file = $file['tmp_name'];
+        $path     = $this->request->post('path');
+        if (empty($path)) {
+            $path = 'img';
+        }
+        $upload_dir = "/uploads/cli/$path/" . date('Y') . '/' . date('m') . '/' . date('d');
+        if (!is_dir($root_path . $upload_dir)) {
+            @mkdir($root_path . $upload_dir, 0755, true);
+        }
+        if (!in_array(strtolower($fileinfo['extension']), $file_types)) {
+            echo json_encode(['status' => 3, 'info' => '文件类型不合法']);exit;
+        }
+        $filename    = '/' . get_millisecond() . '.' . $fileinfo['extension'];
+        $target_file = $root_path . $upload_dir . $filename;
+        // 上传
+        $res = move_uploaded_file($tmp_file, $target_file);
+        if ($res) {
+            echo json_encode(['status' => 0, 'info' => '上传成功', 'path' => $upload_dir . $filename]);
+        } else {
+            echo json_encode(['status' => 4, 'info' => '上传失败']);
+        }
+        exit;
+    }
+
+    /**
      * 导出文件
      * @author 贺强
      * @date   2018-09-03

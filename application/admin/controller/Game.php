@@ -96,6 +96,27 @@ class Game extends \think\Controller
     }
 
     /**
+     * 修改游戏排序
+     * @author 贺强
+     * @time   2018-10-31 10:04:14
+     * @param  GameModel $g GameModel 实例
+     */
+    public function editsort(GameModel $g)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['id'])) {
+                return ['status' => 1, 'info' => '非法参数'];
+            }
+            $res = $g->modify($param, ['id' => $param['id']]);
+            if ($res === false) {
+                return ['status' => 2, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        }
+    }
+
+    /**
      * 游戏列表
      * @author 贺强
      * @time   2018-10-29 11:08:03
@@ -108,7 +129,7 @@ class Game extends \think\Controller
         // 分页参数
         $page     = intval($this->request->get('page', 1));
         $pagesize = intval($this->request->get('pagesize', config('PAGESIZE')));
-        $list     = $g->getList($where, true, "$page,$pagesize");
+        $list     = $g->getList($where, true, "$page,$pagesize", 'sort');
         foreach ($list as &$item) {
             if (!empty($item['url'])) {
                 //config('WEBSITE') .

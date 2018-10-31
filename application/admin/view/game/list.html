@@ -17,6 +17,7 @@
         .ttd{width: 250px;text-align: center;}
         .ttb{width: 80px;text-align: center;}
         .avatar{width: 64px;height: 64px;border-radius: 32px;}
+        .sort_i{width: 50px;display: none;}
     </style>
 </head>
 <body class="gray-bg">
@@ -41,7 +42,7 @@
                         <thead>
                         <tr>
                             <th><input type="checkbox" id="selAll"></th>
-                            <th>序号</th>
+                            <th style="width: 100px;">排序</th>
                             <th>名称</th>
                             <th>图片</th>
                             <th>添加时间</th>
@@ -52,7 +53,7 @@
                         {foreach $list as $k=>$item}
                         <tr class="gradeX">
                             <td><input type="checkbox" class="check" value="{$item.id}"></td>
-                            <td>{$k+1}</td>
+                            <td class="sort"><span class="sort_p">{$item.sort}</span><input type="text" class="sort_i" value="{$item.sort}" data-id="{$item.id}" data-sort="{$item.sort}"></td>
                             <td>{$item.name}</td>
                             <td><img src="{$item.url}" class="avatar" onerror="this.style.display='none'"></td>
                             <td>{$item.addtime}</td>
@@ -84,6 +85,18 @@
                 $('.check').prop('checked', false);
             }
         });
+        $('.sort').click(function(){
+            $(this).find('.sort_p').css('display', 'none');
+            $(this).find('.sort_i').css('display', 'block').focus().select();
+        });
+        $('.sort_i').blur(function(){
+            edit_sort($(this))
+        })
+        $('.sort_i').keypress(function(obj){
+            if (obj.keyCode == 13) {
+                edit_sort($(this))
+            }
+        })
         $('a[data-action]').click(function(){
             var $action = $(this).data('action'), $id = $(this).data('id');
             var $ids = '0', $type = '';
@@ -98,6 +111,29 @@
             }
             operation($ids, $action)
         });
+
+        function edit_sort($this) {
+            if ($this.val() == $this.data('sort')) {
+                $this.css('display', 'none');
+                $this.prev('.sort_p').css('display', 'block');
+            }else{
+                $id = $this.data('id'), $sort = $this.val();
+                $.ajax({
+                    type: 'post', dataType: 'json', cache: false,
+                    url: '/game/editsort',
+                    data: {'id': $id, 'sort': $sort},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.info, {icon: 5, time: 2000})
+                        }
+                    }
+                })
+            }
+        }
 
         function operation($ids, $type) {
             var $msg = '', $tip = '';
