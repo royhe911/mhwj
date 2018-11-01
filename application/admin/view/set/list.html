@@ -58,7 +58,7 @@
                             <td><img src="{$item.url}" class="avatar" onerror="this.style.display='none'"></td>
                             <td>{$item.addtime}</td>
                             <td>{$item.status_txt}</td>
-                            <td><a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a> | <a href="/admin/edit?id={$item.id}">编辑</a></td>
+                            <td><a href="/set/edit?id={$item.id}">编辑</a> | <a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a></td>
                         </tr>
                         {/foreach}
                         </tbody>
@@ -98,10 +98,10 @@
                     }
                 });
             }
-            operation($ids, $action)
+            del($ids, $action)
         });
 
-        function operation($ids, $type) {
+        function del($ids, $type) {
             var $msg = '', $tip = '';
             if ($type == 'del' || $type == 'delAll') {
                 $msg = '确实要删除吗？';
@@ -114,8 +114,8 @@
             layer.confirm($msg, {icon: 3}, function(){
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
-                    url: '/admin/operation',
-                    data:{'ids': $ids, 'type': $type},
+                    url: '/set/del',
+                    data:{'ids': $ids, 'action': $type},
                     success: function(data){
                         if (data.status == 0) {
                             layer.msg(data.info, {icon: 1, time: 1000}, function(){

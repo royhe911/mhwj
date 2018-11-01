@@ -44,10 +44,10 @@ class Set extends \think\Controller
      * @param  NoticeModel $n NoticeModel 实例
      * @return bool           返回操作结果
      */
-    public function operation(NoticeModel $n)
+    public function del(NoticeModel $n)
     {
         $ids = $this->request->post('ids');
-        if (!preg_match('/^\0[\,\d+]+$/', $ids)) {
+        if (!preg_match('/^0[\,\d+]+$/', $ids)) {
             return ['status' => 1, 'info' => '非法参数'];
         }
         $action = $this->request->post('action');
@@ -59,6 +59,32 @@ class Set extends \think\Controller
             return ['status' => 0, 'info' => '删除成功'];
         }
         return ['status' => 2, 'info' => '非法操作'];
+    }
+
+    /**
+     * 修改轮播图
+     * @author 贺强
+     * @time   2018-11-01 15:38:35
+     * @param  NoticeModel $n NoticeModel 实例
+     */
+    public function edit(NoticeModel $n)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['id']) || empty($param['name']) || empty($param['url'])) {
+                return ['status' => 1, 'info' => '参数缺失'];
+            }
+            $res = $n->modify($param, ['id' => $param['id']]);
+            if ($res === false) {
+                return ['status' => 4, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        } else {
+            $id     = $this->request->get('id');
+            $notice = $n->getModel(['id' => $id]);
+            $time   = time();
+            return $this->fetch('edit', ['notice' => $notice, 'time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time)]);
+        }
     }
 
     /**

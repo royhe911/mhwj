@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>添加轮播图</title>
+    <title>修改轮播图</title>
     <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
     <!-- Data Tables -->
@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
     <style type="text/css">
         .form-control{width: 200px;}
-        #preview{max-width: 120px;max-height: 120px;display: none;}
+        #preview{max-width: 120px;max-height: 120px;}
     </style>
 </head>
 <body class="gray-bg">
@@ -23,14 +23,14 @@
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>添加轮播图</h5>
+                    <h5>修改轮播图</h5>
                 </div>
                 <div class="ibox-content">
                     <form class="form-horizontal" onsubmit="return false">
                         <div class="form-group">
                             <label class="col-sm-2 control-label">轮播图名称</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" id="name">
+                                <input type="text" class="form-control" id="name" value="{$notice.name}">
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
@@ -42,8 +42,8 @@
                                         <td valign="top" width="120px"><input id="file_upload" name="file_upload" type="file"></td>
                                         <td valign="top"><input class="btn btn-primary" type="button" data-action="upload" value="上传"></td>
                                     </tr>
-                                    <tr><td colspan="2"><div id="progress"></div><input type="hidden" id="urll"></td></tr>
-                                    <tr><td colspan="2"><img id="preview" src=""></td></tr>
+                                    <tr><td colspan="2"><div id="progress"></div><input type="hidden" id="urll" value="{$notice.url}"></td></tr>
+                                    <tr><td colspan="2"><img id="preview" src="{$notice.url}"></td></tr>
                                 </table>
                             </div>
                         </div>
@@ -85,22 +85,13 @@
                 }
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
-                    url: '/set/add',
-                    data: {'name': name.val(), 'url': urll},
+                    url: '/set/edit',
+                    data: {'id': {$notice.id}, 'name': name.val(), 'url': urll},
                     success: function(data){
                         if (data.status == 0) {
-                            // layer.msg(data.info, {icon: 6, time: 1000});
-                            layer.confirm(data.info + '<br />是否继续添加？', {
-                                btn: ['是', '否'],
-                                shade: false,
-                                closeBtn: 0
-                            }, function(){
-                                location.reload()
-                            }, function(){
-                                location.href = '/set/list'
-                            })
+                            layer.msg(data.info, {icon: 6, time: 1000}, function(){location.href = '/set/list'})
                         }else{
-                            layer.msg(data.info, {icon: 5, time: 1000});
+                            layer.msg(data.info, {icon: 5, time: 1000})
                         }
                     }
                 })

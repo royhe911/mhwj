@@ -76,7 +76,7 @@
                             <td>{$item.logintime}</td>
                             <td>{$item.addtime}</td>
                             <td>{$item.status_txt}</td>
-                            <td>{if($item.username!='admin')}<a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a> | <a href="/admin/edit?id={$item.id}">编辑</a> | {if($item.status==8)}<a href="javascript:;" data-action="disable" data-id="{$item.id}">禁用</a>{elseif($item.status==6)}<a href="javascript:;" data-action="enable" data-id="{$item.id}">启用</a>{/if}{/if}</td>
+                            <td>{if($item.username!='admin')}<a href="/admin/edit?id={$item.id}">编辑</a> | {if($item.status==8)}<a href="javascript:;" data-action="disable" data-id="{$item.id}">禁用</a>{elseif($item.status==6)}<a href="javascript:;" data-action="enable" data-id="{$item.id}">启用</a>{/if} | <a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a>{/if}</td>
                         </tr>
                         {/foreach}
                         </tbody>

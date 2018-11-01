@@ -27,6 +27,8 @@ return [
     '/menu/power'      => 'admin/Menu/power', // 菜单权限管理
     '/set/list'        => 'admin/Set/lists', // 轮播图列表
     '/set/add'         => 'admin/Set/add', // 添加轮播图
+    '/set/del'         => 'admin/Set/del', // 添加轮播图
+    '/set/edit'        => 'admin/Set/edit', // 编辑轮播图
     '/game/list'       => 'admin/Game/lists', // 游戏列表
     '/game/add'        => 'admin/Game/add', // 添加游戏
     '/game/edit'       => 'admin/Game/edit', // 修改游戏
@@ -42,7 +44,7 @@ return [
     '/api/userinfo'    => 'api/Api/get_userinfo', // 获取用户信息
     '/api/upload'      => 'admin/Upload/upload', // 上传文件
     '/api/games'       => 'api/Api/get_games', // 游戏列表
-    '/api/gameconfig' => 'api/Api/get_game_config', // 技能水平
+    '/api/gameconfig'  => 'api/Api/get_game_config', // 技能水平
     '/api/addgame'     => 'api/Api/add_game', // 添加游戏
     '/api/examine'     => 'api/Api/user_examine', // 获取服务段位
     /*--------   api 结束  --------*/
