@@ -152,6 +152,47 @@ class Api extends \think\Controller
     }
 
     /**
+     * 用户升级审核
+     * @author 贺强
+     * @time   2018-11-01 14:31:17
+     * @param  UserModel $u UserModel 实例
+     */
+    public function user_examine(UserModel $u)
+    {
+        if (empty($this->param['id'])) {
+            echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
+        }
+        if (empty($this->param['avatar'])) {
+            echo json_encode(['status' => 2, 'info' => '头像不能为空', 'data' => null]);exit;
+        }
+        if (empty($this->param['nickname'])) {
+            echo json_encode(['status' => 3, 'info' => '昵称不能为空', 'data' => null]);exit;
+        }
+        if (empty($this->param['sex'])) {
+            echo json_encode(['status' => 4, 'info' => '性别不能为空', 'data' => null]);exit;
+        }
+        if (empty($this->param['birthday'])) {
+            echo json_encode(['status' => 5, 'info' => '生日不能为空', 'data' => null]);exit;
+        }
+        if (empty($this->param['introduce'])) {
+            echo json_encode(['status' => 6, 'info' => '简介不能为空', 'data' => null]);exit;
+        }
+        if (empty($this->param['tape'])) {
+            echo json_encode(['status' => 7, 'info' => '录音地址不能为空', 'data' => null]);exit;
+        }
+        $this->param['updatetime'] = time();
+        $this->param['status']     = 1;
+        // 修改信息
+        $res = $u->modify($this->param, ['id' => $this->param['id']]);
+        if ($res !== false) {
+            $msg = ['status' => 0, 'info' => '提交成功', 'data' => null];
+        } else {
+            $msg = ['status' => 4, 'info' => '提交失败', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
      * 获取用户信息
      * @author 贺强
      * @time   2018-10-30 17:40:20
@@ -242,8 +283,8 @@ class Api extends \think\Controller
             echo json_encode(['status' => 1, 'info' => '游戏ID不能为空', 'data' => null]);exit;
         }
         $game_id = $this->param['game_id'];
-        $where    = ['is_delete' => 0, 'id' => $game_id];
-        $game     = $g->getModel($where, 'identify,demo_url1,demo_url2');
+        $where   = ['is_delete' => 0, 'id' => $game_id];
+        $game    = $g->getModel($where, 'identify,demo_url1,demo_url2');
         if (!$game) {
             echo json_encode(['status' => 2, 'info' => '数据错误', 'data' => null]);exit;
         }

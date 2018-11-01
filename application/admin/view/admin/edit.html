@@ -14,8 +14,7 @@
     <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
     <style type="text/css">
         .form-control{width: 200px;}
-        .sj,.kf{display: none;}
-        #preview{max-width: 120px;max-height: 120px;display: none;}
+        #preview{max-width: 120px;max-height: 120px;}
     </style>
 </head>
 <body class="gray-bg">
@@ -67,38 +66,14 @@
                                 <input type="text" class="form-control" id="realname" value="{$admin.realname}">
                             </div>
                         </div>
-                        <div class="hr-line-dashed kf"{if($admin.role_id==5)} style="display: block;"{/if}></div>
-                        <div class="form-group kf"{if($admin.role_id==5)} style="display: block;"{/if}>
-                            <label class="col-sm-2 control-label">主管</label>
-                            <div class="col-sm-10">
-                                <select id="z_id" class="form-control">
-                                    <option value="0">…请选择业务员…</option>
-                                    {foreach $executive as $e}
-                                    <option value="{$e['id']}"{if($admin.z_id==$e.id)} selected="selected"{/if}>{$e['nickname']}</option>
-                                    {/foreach}
-                                </select>
-                            </div>
-                        </div>
                         <div class="hr-line-dashed"></div>
-                        <div class="form-group sj"{if($admin.role_id==3)} style="display: block;"{/if}>
-                            <label class="col-sm-2 control-label">昵称/商家名称</label>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">昵称</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="nickname" value="{$admin.nickname}">
                             </div>
                         </div>
-                        <div class="hr-line-dashed sj"{if($admin.role_id==3)} style="display: block;"{/if}></div>
-                        <div class="form-group sj"{if($admin.role_id==3)} style="display: block;"{/if}>
-                            <label class="col-sm-2 control-label">业务员</label>
-                            <div class="col-sm-10">
-                                <select id="s_id" class="form-control">
-                                    <option value="0">…请选择业务员…</option>
-                                    {foreach $salesman as $s}
-                                    <option value="{$s['id']}"{if($admin.s_id==$s.id)} selected="selected"{/if}>{$s.nickname}</option>
-                                    {/foreach}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed sj"{if($admin.role_id==3)} style="display: block;"{/if}></div>
+                        <div class="hr-line-dashed"></div>
                         <div class="form-group">
                             <label class="col-sm-2 control-label">头像</label>
                             <div class="col-sm-10">
@@ -121,13 +96,6 @@
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">旺旺号</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="wangwang" value="{$admin.wangwang}">
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
                             <label class="col-sm-2 control-label">手机</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="mobile" value="{$admin.mobile}">
@@ -135,37 +103,9 @@
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">QQ</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="qq" value="{$admin.qq}">
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">微信</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="wx" value="{$admin.wx}">
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">银行卡号</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="bank_card" value="{$admin.bank_card}">
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">持卡人姓名</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="bank_name" value="{$admin.bank_name}">
-                            </div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
                             <div class="col-sm-4 col-sm-offset-2">
                                 <input class="btn btn-primary" type="button" data-action="save" value="保存内容">
-                                {if($role_id==1)}<input class="btn btn-white" type="button" data-action="cancel" value="取消">{/if}
+                                {if($role_id=='admin')}<input class="btn btn-white" type="button" data-action="cancel" value="取消">{/if}
                             </div>
                         </div>
                     </form>
@@ -185,7 +125,7 @@
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'save') {
-                var username = $('#username'), pwd1 = $('#pwd1'), pwd2 = $('#pwd2'), role_id = $('#role_id').val(), realname = $('#realname'), nickname = $('#nickname'), s_id = $('#s_id').val(), avatar = $('#avatar').val();
+                var username = $('#username'), pwd1 = $('#pwd1'), pwd2 = $('#pwd2'), role_id = $('#role_id').val(), realname = $('#realname'), nickname = $('#nickname'), avatar = $('#avatar').val();
                 if (pwd1.val() != '' && pwd1.val() != pwd2.val()) {
                     layer.msg('再次输入的密码不一致', {icon: 5, time: 1000}, function(){pwd1.focus()});
                     return false
@@ -199,21 +139,13 @@
                     return false
                 }
                 if (nickname.val() == '') {
-                    layer.msg('昵称/商家名称不能为空', {icon: 5, time: 1000}, function(){nickname.focus()});
-                    return false
-                }
-                if (role_id == 5 && z_id <= 0) {
-                    layer.msg('请选择客服主管', {icon: 5, time: 1000});
-                    return false
-                }
-                if (role_id == 3 && s_id <= 0) {
-                    layer.msg('请选择业务员', {icon: 5, time: 1000});
+                    layer.msg('昵称不能为空', {icon: 5, time: 1000}, function(){nickname.focus()});
                     return false
                 }
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
                     url: '/admin/edit',
-                    data: {'id': {$admin['id']}, 'username': username.val(), 'pwd': pwd2.val(), 'role_id': role_id, 'realname': realname.val(), 'nickname': nickname.val(), 's_id': s_id, 'avatar': avatar, 'email': $('#email').val(), 'wangwang': $('#wangwang').val(), 'mobile': $('#mobile').val(), 'qq': $('#qq').val(), 'wx': $('#wx').val(), 'bank_card': $('#bank_card').val(), 'bank_name': $('#bank_name').val()},
+                    data: {'id': {$admin['id']}, 'username': username.val(), 'pwd': pwd2.val(), 'role_id': role_id, 'realname': realname.val(), 'nickname': nickname.val(), 's_id': s_id, 'avatar': avatar, 'email': $('#email').val(), 'mobile': $('#mobile').val()},
                     success: function(data){
                         if (data.status == 0) {
                             layer.msg(data.info, {icon: 6, time: 1000});

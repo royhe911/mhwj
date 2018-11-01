@@ -285,8 +285,9 @@ class Admin extends \think\Controller
             if ($role_id != 1) {
                 $role_w = ['id' => ['<>', 1]];
             }
-            $time = time();
-            return $this->fetch('edit', ['admin' => $user, 'role_id' => $admin['role_id'], 'time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time)]);
+            $roles = $this->getRoles();
+            $time  = time();
+            return $this->fetch('edit', ['admin' => $user, 'role_id' => $admin['role_id'], 'roles' => $roles, 'time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time)]);
         }
     }
 

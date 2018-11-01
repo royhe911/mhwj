@@ -44,6 +44,6 @@ return [
     '/api/games'       => 'api/Api/get_games', // 游戏列表
     '/api/gameconfig' => 'api/Api/get_game_config', // 技能水平
     '/api/addgame'     => 'api/Api/add_game', // 添加游戏
-    '/api/srvpara'     => 'api/Api/get_srv_para', // 获取服务段位
+    '/api/examine'     => 'api/Api/user_examine', // 获取服务段位
     /*--------   api 结束  --------*/
 ];
