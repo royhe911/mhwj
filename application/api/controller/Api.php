@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
 use app\common\model\NoticeModel;
 use app\common\model\UserAttrModel;
@@ -229,20 +230,42 @@ class Api extends \think\Controller
     }
 
     /**
-     * 获取某游戏服务段位
+     * 获取游戏技能
      * @author 贺强
-     * @time   2018-10-31 18:28:52
-     * @return array 返回该游戏服务段位
+     * @time   2018-11-01 09:31:43
+     * @param  GameModel       $g  GameModel 实例
+     * @param  GameConfigModel $gc GameConfigModel 实例
      */
-    public function get_srv_para()
+    public function get_game_config(GameModel $g, GameConfigModel $gc)
     {
-        if (empty($this->param['identify'])) {
-            echo json_encode(['status' => 1, 'info' => '游戏标识不能为空', 'data' => null]);exit;
+        if (empty($this->param['game_id'])) {
+            echo json_encode(['status' => 1, 'info' => '游戏ID不能为空', 'data' => null]);exit;
         }
-        if (empty(config($this->param['identify']))) {
+        $game_id = $this->param['game_id'];
+        $where    = ['is_delete' => 0, 'id' => $game_id];
+        $game     = $g->getModel($where, 'identify,demo_url1,demo_url2');
+        if (!$game) {
             echo json_encode(['status' => 2, 'info' => '数据错误', 'data' => null]);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => config($this->param['identify'])]);exit;
+        $where_c = ['game_id' => $game_id];
+        $list    = $gc->getList($where_c, 'game_id,para_id,para_str', null, 'para_id');
+        if ($list) {
+            $data['para']   = config($game['identify']);
+            $data['config'] = $list;
+            $demo_url1      = $game['demo_url1'];
+            if (strpos($demo_url1, 'http://') === false && strpos($demo_url1, 'https://') === false) {
+                $demo_url1 = config('WEBSITE') . $demo_url1;
+            }
+            $demo_url2 = $game['demo_url2'];
+            if (strpos($demo_url2, 'http://') === false && strpos($demo_url2, 'https://') === false) {
+                $demo_url2 = config('WEBSITE') . $demo_url2;
+            }
+            $data['demo_url'] = [$demo_url1, $demo_url2];
+            $msg              = ['status' => 0, 'info' => '获取成功', 'data' => $data];
+        } else {
+            $msg = ['status' => 4, 'info' => '数据错误', 'data' => null];
+        }
+        echo json_encode($msg);exit;
     }
 
 }
