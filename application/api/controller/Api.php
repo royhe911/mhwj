@@ -187,7 +187,7 @@ class Api extends \think\Controller
         if ($res !== false) {
             $msg = ['status' => 0, 'info' => '提交成功', 'data' => null];
         } else {
-            $msg = ['status' => 4, 'info' => '提交失败', 'data' => null];
+            $msg = ['status' => 44, 'info' => '提交失败', 'data' => null];
         }
         echo json_encode($msg);exit;
     }
@@ -256,16 +256,28 @@ class Api extends \think\Controller
         if (empty($this->param['uid']) || empty($this->param['game_id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
         }
+        if (empty($this->param['curr_para'])) {
+            echo json_encode(['status' => 2, 'info' => '当前段位不能为空', 'data' => null]);exit;
+        }
+        if (empty($this->param['play_para'])) {
+            echo json_encode(['status' => 3, 'info' => '陪玩段位不能为空', 'data' => null]);exit;
+        }
+        if (empty($this->param['play_type'])) {
+            echo json_encode(['status' => 4, 'info' => '陪玩类型不能为空', 'data' => null]);exit;
+        }
+        if (empty($this->param['level_url'])) {
+            echo json_encode(['status' => 5, 'info' => '水平截图不能为空', 'data' => null]);exit;
+        }
         $userAttr = $ua->getModel(['uid' => $this->param['uid'], 'game_id' => $this->param['game_id']]);
         if ($userAttr) {
             $res = $ua->modify($this->param, ['uid' => $this->param['uid'], 'game_id' => $this->param['game_id']]);
         } else {
             $res = $ua->add($this->param);
         }
-        if ($res) {
+        if ($res !== false) {
             $msg = ['status' => 0, 'info' => '添加成功', 'data' => null];
         } else {
-            $msg = ['status' => 4, 'info' => '添加失败', 'data' => null];
+            $msg = ['status' => 44, 'info' => '添加失败', 'data' => null];
         }
         echo json_encode($msg);exit;
     }
