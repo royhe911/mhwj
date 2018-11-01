@@ -42,6 +42,7 @@ return [
     '/api/userinfo'    => 'api/Api/get_userinfo', // 获取用户信息
     '/api/upload'      => 'admin/Upload/upload', // 上传文件
     '/api/games'       => 'api/Api/get_games', // 游戏列表
+    '/api/gameconfig' => 'api/Api/get_game_config', // 技能水平
     '/api/addgame'     => 'api/Api/add_game', // 添加游戏
     '/api/srvpara'     => 'api/Api/get_srv_para', // 获取服务段位
     /*--------   api 结束  --------*/

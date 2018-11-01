@@ -46,6 +46,7 @@
                             <th>标识</th>
                             <th>名称</th>
                             <th>图片</th>
+                            <th>例图</th>
                             <th>添加时间</th>
                             <th>操作</th>
                         </tr>
@@ -58,6 +59,7 @@
                             <td>{$item.identify}</td>
                             <td>{$item.name}</td>
                             <td><img src="{$item.url}" class="avatar" onerror="this.style.display='none'"></td>
+                            <td><a href="{$item.demo_url}" target="_blank"><img src="{$item.demo_url}" class="avatar" onerror="this.style.display='none'"></a></td>
                             <td>{$item.addtime}</td>
                             <td><a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a> | <a href="/game/edit?id={$item.id}">编辑</a></td>
                         </tr>

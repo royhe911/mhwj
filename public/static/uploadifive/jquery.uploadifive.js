@@ -59,7 +59,8 @@ Released under the UploadiFive Standard License <http://www.uploadify.com/upload
                     'truncateLength'  : 0,                  // The length to truncate the file names to
                     'uploadLimit'     : 0,                  // The maximum number of files you can upload
                     'uploadScript'    : 'uploadifive.php',  // The path to the upload script
-                    'width'           : 100                 // The width of the button
+                    'width'           : 100,                // The width of the button
+                    'previewID'       : 'preview'           // 预览控件ID
 
                     /*
                     // Events
@@ -121,7 +122,7 @@ Released under the UploadiFive Standard License <http://www.uploadify.com/upload
                     }
                     // Set the onchange event for the input
                     input.bind('change', function() {
-                        imgPreview(this);
+                        imgPreview(this, settings.previewID);
                         $data.queue.selected = 0;
                         $data.queue.replaced = 0;
                         $data.queue.errors   = 0;
@@ -873,7 +874,7 @@ Released under the UploadiFive Standard License <http://www.uploadify.com/upload
 
 })(jQuery);
 
-function imgPreview(fileDom){
+function imgPreview(fileDom, preview){
     //判断是否支持FileReader
     if (window.FileReader) {
         var reader = new FileReader();
@@ -891,7 +892,7 @@ function imgPreview(fileDom){
     //读取完成
     reader.onload = function(e) {
         //获取图片dom
-        $("#preview").css('display', 'block').attr('src', e.target.result);
+        $("#" + preview).css('display', 'block').attr('src', e.target.result);
     };
     reader.readAsDataURL(file);
 }
