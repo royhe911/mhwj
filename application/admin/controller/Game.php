@@ -25,6 +25,10 @@ class Game extends \think\Controller
             if (empty($param['identify'])) {
                 return ['status' => 1, 'info' => '游戏标识不能为空'];
             } else {
+                $count = $g->getCount(['identify' => $param['identify']]);
+                if ($count > 0) {
+                    return ['status' => 1, 'info' => '游戏标识已存在'];
+                }
                 $data['identify'] = $param['identify'];
             }
             if (empty($param['name'])) {
@@ -37,10 +41,15 @@ class Game extends \think\Controller
             } else {
                 $data['url'] = $param['url'];
             }
-            if (empty($param['demo_url'])) {
+            if (empty($param['demo_url1'])) {
                 return ['status' => 4, 'info' => '示例图片不能为空'];
             } else {
-                $data['demo_url'] = $param['demo_url'];
+                $data['demo_url1'] = $param['demo_url1'];
+            }
+            if (empty($param['demo_url2'])) {
+                return ['status' => 4, 'info' => '示例图片不能为空'];
+            } else {
+                $data['demo_url2'] = $param['demo_url2'];
             }
             if (empty($param['sort'])) {
                 return ['status' => 4, 'info' => '排序不能为空'];
@@ -122,6 +131,10 @@ class Game extends \think\Controller
             if (empty($param['identify'])) {
                 return ['status' => 1, 'info' => '游戏标识不能为空'];
             } else {
+                $count = $g->getCount(['id' => ['neq', $param['id']], 'identify' => $param['identify']]);
+                if ($count > 0) {
+                    return ['status' => 1, 'info' => '游戏标识已存在'];
+                }
                 $data['identify'] = $param['identify'];
             }
             if (empty($param['name'])) {
@@ -134,10 +147,15 @@ class Game extends \think\Controller
             } else {
                 $data['url'] = $param['url'];
             }
-            if (empty($param['demo_url'])) {
-                return ['status' => 3, 'info' => '游戏图片不能为空'];
+            if (empty($param['demo_url1'])) {
+                return ['status' => 3, 'info' => '例图不能为空'];
             } else {
-                $data['demo_url'] = $param['demo_url'];
+                $data['demo_url1'] = $param['demo_url1'];
+            }
+            if (empty($param['demo_url2'])) {
+                return ['status' => 3, 'info' => '例图不能为空'];
+            } else {
+                $data['demo_url2'] = $param['demo_url2'];
             }
             if (empty($param['para_id_arr'])) {
                 return ['status' => 4, 'info' => '游戏段位不能为空'];
