@@ -15,6 +15,7 @@
     <style type="text/css">
         .form-control{width: 200px;}
         #preview{max-width: 120px;max-height: 120px;display: none;}
+        .level_url{max-width: 80px;max-height: 80px;}
     </style>
 </head>
 <body class="gray-bg">
@@ -35,6 +36,37 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">用户类型</label>
                             <div class="col-sm-10">{$user.type_txt}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">状态</label>
+                            <div class="col-sm-10">{$user.status_txt}{if($user.status===1)} &nbsp; &nbsp; <a href="javascript:;" id="shhe">审核</a>{/if}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">游戏</label>
+                            <div class="col-sm-10">
+                                {if(!empty($user.attrs))}
+                                <table>
+                                    <tr>
+                                        <th style="width: 100px;">游戏名称</th>
+                                        <th style="width: 100px;">当前段位</th>
+                                        <th style="width: 100px;">陪玩段位</th>
+                                        <th style="width: 100px;">陪玩类型</th>
+                                        <th>水平截图</th>
+                                    </tr>
+                                    {foreach($user.attrs as $attr)}
+                                    <tr>
+                                        <td>{$attr.game_name}</td>
+                                        <td>{$attr.curr_para}</td>
+                                        <td>{$attr.play_para}</td>
+                                        <td>{$attr.play_type}</td>
+                                        <td><a href="{$attr.level_url}" target="_blank"><img class="level_url" src="{$attr.level_url}"></a></td>
+                                    </tr>
+                                    {/foreach}
+                                </table>
+                                {/if}
+                            </div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
@@ -90,11 +122,6 @@
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">状态</label>
-                            <div class="col-sm-10">{$user.status_txt}</div>
-                        </div>
-                        <div class="hr-line-dashed"></div>
-                        <div class="form-group">
                             <label class="col-sm-2 control-label">入驻时间</label>
                             <div class="col-sm-10">{$user.addtime}</div>
                         </div>
@@ -122,14 +149,55 @@
 </div>
 </body>
 <script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
 <script type="text/javascript">
     $(function(){
+        layer.config({extend: 'extend/layer.ext.js'});
+        $('#shhe').click(function(){
+            layer.confirm('陪玩师审核', {
+                btn: ['通过', '不通过', '取消'],
+                shade: false,
+                closeBtn: 0
+            }, function(){
+                auditor({$user.id}, 8)
+            }, function(){
+                layer.prompt({
+                    formType: 2,
+                    title: '请输入驳回原因'
+                }, function(v, i, e){
+                    layer.close(i);
+                    auditor({$user.id}, 4, v)
+                })
+            })
+        })
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'cancel') {
                 location.href = '/user/list';
             }
         });
+        function auditor($id, $status, $v) {
+            var $msg = '确实审核通过吗？';
+            if ($status == 4) {
+                $msg = '确实审核不通过吗？';
+            }
+            layer.confirm($msg, {icon: 3}, function(){
+                $.ajax({
+                    type: 'post', cache: false, dataType: 'json',
+                    url: '/user/auditor',
+                    data: {'id': $id, 'status': $status, 'reason': $v},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        }else{
+                            layer.msg(data.info, {icon: 5, time: 1000})
+                        }
+                    }
+                })
+            })
+        }
     });
 </script>
 </html>

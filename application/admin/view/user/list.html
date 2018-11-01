@@ -31,8 +31,16 @@
                             <td class="ttd">
                                 <select class="form-control" name="type">
                                     <option value="0">用户类型</option>
-                                    <option value="1">玩家</option>
-                                    <option value="2">陪玩师</option>
+                                    <option {if($param.type==1)}selected="selected" {/if}value="1">玩家</option>
+                                    <option {if($param.type==2)}selected="selected" {/if}value="2">陪玩师</option>
+                                </select>
+                            </td>
+                            <td class="ttd">
+                                <select name="status" class="form-control">
+                                    <option value="">用户状态</option>
+                                    <option {if($param.status==1)}selected="selected" {/if}value="1">待审核</option>
+                                    <option {if($param.status==4)}selected="selected" {/if}value="4">审核不通过</option>
+                                    <option {if($param.status==8)}selected="selected" {/if}value="8">已审核</option>
                                 </select>
                             </td>
                             <td class="ttb"><input type="submit" class="btn btn-sm btn-primary" value="搜索"></td>
@@ -51,6 +59,7 @@
                             <th>序号</th>
                             <th>用户类型</th>
                             <th>昵称</th>
+                            <th>状态</th>
                             <th>头像</th>
                             <th>手机号</th>
                             <th>性别</th>
@@ -67,6 +76,7 @@
                             <td>{$k+1}</td>
                             <td>{$item.type_txt}</td>
                             <td>{$item.nickname}</td>
+                            <td>{$item.status_txt}</td>
                             <td><img src="{$item.avatar}" class="avatar" onerror="this.style.display='none'"></td>
                             <td>{$item.mobile}</td>
                             <td>{$item.sex}</td>

@@ -36,6 +36,7 @@ return [
     '/game/del'        => 'admin/Game/del', // 删除游戏
     '/user/list'       => 'admin/User/lists', // 用户列表
     '/user/detail'     => 'admin/User/detail', // 用户详情
+    '/user/auditor'    => 'admin/User/auditor', // 审核用户
 
     /*--------   api 开始   --------*/
     '/api/carousel'    => 'api/Api/get_carousel', // 获取轮播轮播图
