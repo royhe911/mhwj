@@ -99,9 +99,15 @@ class Api extends \think\Controller
             echo json_encode(['status' => 1, 'info' => 'js_code 参数不能为空', 'data' => null]);exit;
         }
         $js_code = $this->param['js_code'];
-        $url     = "https://api.weixin.qq.com/sns/jscode2session?appid=wxe6f37de8e1e3225e&secret=357566bea005201ce062acaabd4a58e9&js_code={$js_code}&grant_type=authorization_code";
-        $data    = $this->curl($url);
-        $data    = json_decode($data, true);
+        $appid   = 'wxe6f37de8e1e3225e';
+        $secret  = '357566bea005201ce062acaabd4a58e9';
+        if (!empty($this->param['type']) && intval($this->param['type']) === 2) {
+            $appid  = 'wxecd6bfdba0623aa5';
+            $secret = '8ff39ccfde133942cd8933b240a79960';
+        }
+        $url  = "https://api.weixin.qq.com/sns/jscode2session?appid={$appid}&secret={$secret}&js_code={$js_code}&grant_type=authorization_code";
+        $data = $this->curl($url);
+        $data = json_decode($data, true);
         if (empty($data['openid'])) {
             echo json_encode(['status' => 2, 'info' => 'code 过期', 'data' => null]);exit;
         }
@@ -154,7 +160,7 @@ class Api extends \think\Controller
     }
 
     /**
-     * 用户升级审核
+     * 提交审核
      * @author 贺强
      * @time   2018-11-01 14:31:17
      * @param  UserModel $u UserModel 实例
@@ -163,6 +169,9 @@ class Api extends \think\Controller
     {
         if (empty($this->param['id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
+        }
+        if (empty($this->param['mobile'])) {
+            echo json_encode(['status' => 8, 'info' => '手机号不能为空', 'data' => null]);exit;
         }
         if (empty($this->param['avatar'])) {
             echo json_encode(['status' => 2, 'info' => '头像不能为空', 'data' => null]);exit;
@@ -285,6 +294,59 @@ class Api extends \think\Controller
     }
 
     /**
+     * 获取修改的游戏
+     * @author 贺强
+     * @time   2018-11-02 18:46:29
+     * @param  UserAttrModel $ua UserAttrModel 实例
+     */
+    public function edit_game(UserAttrModel $ua)
+    {
+        $id   = $this->param['id'];
+        $attr = $ua->getModel(['id' => $id], 'id,curr_para,play_para,play_type,level_url');
+        if ($attr) {
+            $msg = ['status' => 0, 'info' => '获取成功', 'data' => $attr];
+        } else {
+            $msg = ['status' => 4, 'info' => '数据错误', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
+     * 获取用户的技能列表
+     * @author 贺强
+     * @time   2018-11-02 18:21:32
+     * @param  UserAttrModel $ua UserAttrModel 实例
+     */
+    public function get_user_games(UserAttrModel $ua)
+    {
+        if (empty($this->param['uid'])) {
+            echo json_encode(['status' => 1, 'info' => '用户ID不能为空', 'data' => null]);exit;
+        }
+        $list = $ua->getList(['uid' => $this->param['uid']], 'game_id,curr_para,play_para,play_type,level_url');
+        if ($list) {
+            $g     = new GameModel();
+            $games = $g->getList(['is_delete' => 0], 'identify,`name`,url');
+            $games = array_column($games, null, 'id');
+            foreach ($list as &$item) {
+                if (!empty($games[$item['game_id']])) {
+                    $game              = $games[$item['game_id']];
+                    $item['game_name'] = $game['name'];
+                    $item['identify']  = $game['identify'];
+                    if (!empty($game['url'])) {
+                        $item['url'] = config('WEBSITE') . $game['url'];
+                    } else {
+                        $item['url'] = '';
+                    }
+                }
+            }
+            $msg = ['status' => 0, 'info' => '获取成功', 'data' => $list];
+        } else {
+            $msg = ['status' => 4, 'info' => '暂无技能', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
      * 获取游戏技能
      * @author 贺强
      * @time   2018-11-01 09:31:43
@@ -383,6 +445,28 @@ class Api extends \think\Controller
             $msg = ['status' => 4, 'info' => '反馈失败', 'data' => null];
         }
         echo json_encode($msg);exit;
+    }
+
+    /**
+     * 生成验证码
+     * @author 贺强
+     * @time   2018-11-02 16:52:16
+     * @return string 返回验证码
+     */
+    public function get_vericode()
+    {
+        $num = 6;
+        if (!empty($this->param['num'])) {
+            $num = intval($this->param['num']);
+        }
+        $vericode = get_random_str($num);
+        $url      = 'https://yun.tim.qq.com/v5/tlssmssvr/sendsms?sdkappid=xxxxx&random=xxxx';
+        $tel      = $this->param['tel'];
+        $data     = ['params' => [], 'sig' => '', 'tel' => $tel];
+        vendor('qcloudsms_php.src.SmsSingleSender');
+        $sms = new SmsSingleSender(config('SDKAPPID'), config('APPKEY'));
+        // $sms->sendWithParam('86',$tel,$templateId,[])
+        session('vericode', $vericode);
     }
 
 }

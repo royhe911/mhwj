@@ -154,7 +154,7 @@ class User extends \think\Controller
                 $content       = "恭喜你，审核已通过";
             } else {
                 $param['type'] = 1;
-                $content       = "审核不通过，原因：" . $param['reason'];
+                $content       = "审核未通过，原因：" . $param['reason'];
             }
             $res = $u->modify($param, ['id' => $param['id']]);
             if ($res) {
