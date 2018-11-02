@@ -321,4 +321,33 @@ class Api extends \think\Controller
         echo json_encode($msg);exit;
     }
 
+    /**
+     * 系统消息
+     * @author 贺强
+     * @time   2018-11-02 10:02:45
+     * @param  UserModel $u UserModel 实例
+     */
+    public function user_tip(UserModel $u)
+    {
+        if (empty($this->param['id'])) {
+            echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
+        }
+        $id = $this->param['id'];
+        if (!preg_match('/^\d+$/', $id)) {
+            echo json_encode(['status' => 2, 'info' => '非法参数', 'data' => null]);exit;
+        }
+        $user = $u->getModel(['id' => $id, 'is_tip' => 0], '`status`,reason');
+        if ($user) {
+            if ($user['status'] === 8) {
+                $msg = ['status' => 0, 'info' => config('TIP_SUCCESS'), 'data' => null];
+            } else {
+                $msg = ['status' => 0, 'info' => config('TIP_ERROR') . '，原因：' . $user['reason'], 'data' => null];
+            }
+            $u->modifyField('is_tip', 1, ['id' => $id]);
+            echo json_encode($msg);exit;
+        } else {
+            echo json_encode(['status' => 4, 'info' => '该用户没有未通知的消息', 'data' => null]);exit;
+        }
+    }
+
 }

@@ -25,9 +25,13 @@ class User extends \think\Controller
         $param = $this->request->post();
         if (!empty($param['type'])) {
             $where['type'] = $param['type'];
+        } else {
+            $param['type'] = 0;
         }
         if (!empty($param['status'])) {
             $where['status'] = $param['status'];
+        } else {
+            $param['status'] = 0;
         }
         // 分页参数
         $page     = intval($this->request->get('page', 1));
@@ -41,14 +45,14 @@ class User extends \think\Controller
             } else {
                 $item['type_txt'] = '';
             }
-            if ($item['status'] === 0) {
-                $item['status_txt'] = '正常';
+            if ($item['status'] === 8) {
+                $item['status_txt'] = '已审核';
             } elseif ($item['status'] === 1) {
                 $item['status_txt'] = '待审核';
             } elseif ($item['status'] === 4) {
                 $item['status_txt'] = '审核不通过';
             } else {
-                $item['status_txt'] = '';
+                $item['status_txt'] = '普通玩家';
             }
             if (!empty($item['addtime'])) {
                 $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);

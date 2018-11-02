@@ -48,5 +48,6 @@ return [
     '/api/gameconfig'  => 'api/Api/get_game_config', // 技能水平
     '/api/addgame'     => 'api/Api/add_game', // 添加游戏
     '/api/examine'     => 'api/Api/user_examine', // 获取服务段位
+    '/api/systip'      => 'api/Api/user_tip', // 系统消息
     /*--------   api 结束  --------*/
 ];
