@@ -51,5 +51,6 @@ return [
     '/api/systip'      => 'api/Api/user_tip', // 系统消息
     '/api/feedback'    => 'api/Api/user_feedback', //用户反馈
     '/api/usergames'   => 'api/Api/get_user_games', // 用户游戏列表
+    '/api/editgame'    => 'api/Api/edit_game', //获取修改的游戏
     /*--------   api 结束  --------*/
 ];
