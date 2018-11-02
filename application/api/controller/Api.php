@@ -4,6 +4,7 @@ namespace app\api\controller;
 use app\common\model\FeedbackModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
+use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
 use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
@@ -326,9 +327,9 @@ class Api extends \think\Controller
      * 系统消息
      * @author 贺强
      * @time   2018-11-02 10:02:45
-     * @param  UserModel $u UserModel 实例
+     * @param  MessageModel $u MessageModel 实例
      */
-    public function user_tip(UserModel $u)
+    public function user_tip(MessageModel $m)
     {
         if (empty($this->param['id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
@@ -337,18 +338,27 @@ class Api extends \think\Controller
         if (!preg_match('/^\d+$/', $id)) {
             echo json_encode(['status' => 2, 'info' => '非法参数', 'data' => null]);exit;
         }
-        $user = $u->getModel(['id' => $id, 'is_tip' => 0], '`status`,reason');
-        if ($user) {
-            if ($user['status'] === 8) {
-                $msg = ['status' => 0, 'info' => config('TIP_SUCCESS'), 'data' => null];
-            } else {
-                $msg = ['status' => 0, 'info' => config('TIP_ERROR') . '，原因：' . $user['reason'], 'data' => null];
-            }
-            $u->modifyField('is_tip', 1, ['id' => $id]);
-            echo json_encode($msg);exit;
-        } else {
-            echo json_encode(['status' => 4, 'info' => '该用户没有未通知的消息', 'data' => null]);exit;
+        // 分页参数
+        $page     = 1;
+        $pagesize = 100;
+        if (!empty($this->param['page'])) {
+            $page = $this->param['page'];
         }
+        if (!empty($this->param['pagesize'])) {
+            $pagesize = $this->param['pagesize'];
+        }
+        $list = $m->getList(['uid' => $id, 'type' => 1], 'title,content,addtime', "$page,$pagesize", 'addtime desc');
+        if ($list) {
+            foreach ($list as &$item) {
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+            }
+            $msg = ['status' => 0, 'info' => '获取成功', 'data' => $list];
+        } else {
+            $msg = ['status' => 4, 'info' => '该用户暂无消息', 'data' => null];
+        }
+        echo json_encode($msg);exit;
     }
 
     /**

@@ -2,6 +2,7 @@
 namespace app\admin\controller;
 
 use app\common\model\GameModel;
+use app\common\model\MessageModel;
 use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
 
@@ -150,14 +151,19 @@ class User extends \think\Controller
             }
             if (intval($param['status']) === 8) {
                 $param['type'] = 2;
+                $content       = "恭喜你，审核已通过";
             } else {
                 $param['type'] = 1;
+                $content       = "审核不通过，原因：" . $param['reason'];
             }
             $res = $u->modify($param, ['id' => $param['id']]);
-            if (!$res) {
-                return ['status' => 4, 'info' => '审核失败'];
+            if ($res) {
+                $m    = new MessageModel();
+                $data = ['type' => 1, 'uid' => $param['id'], 'title' => '系统消息', 'content' => $content, 'addtime' => time()];
+                $m->add($data);
+                return ['status' => 0, 'info' => '审核成功'];
             }
-            return ['status' => 0, 'info' => '审核成功'];
+            return ['status' => 4, 'info' => '审核失败'];
         }
     }
 }

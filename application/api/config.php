@@ -6,8 +6,6 @@ return [
     'APPID_ACCOMPANY'     => 'wxecd6bfdba0623aa5', // 陪玩端 appid
     'APPSECRET_ACCOMPANY' => '6478992f651e85bb966b8fd5db9c8771', // 小程序 appSecret
     'MD5_PARAM'           => 'douzhikeji',
-    'TIP_SUCCESS'         => '审核通过',
-    'TIP_ERROR'           => '审核不通过',
     'KG'                  => [
         ['para_id' => 5, 'para_str' => '全段位'],
         ['para_id' => 4, 'para_str' => '王者21星以下'],
