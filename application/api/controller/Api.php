@@ -304,6 +304,9 @@ class Api extends \think\Controller
         $id   = $this->param['id'];
         $attr = $ua->getModel(['id' => $id], 'id,curr_para,play_para,play_type,level_url');
         if ($attr) {
+            if (!empty($attr['level_url'])) {
+                $attr['level_url'] = config('WEBSITE') . $attr['level_url'];
+            }
             $msg = ['status' => 0, 'info' => '获取成功', 'data' => $attr];
         } else {
             $msg = ['status' => 4, 'info' => '数据错误', 'data' => null];
@@ -322,7 +325,7 @@ class Api extends \think\Controller
         if (empty($this->param['uid'])) {
             echo json_encode(['status' => 1, 'info' => '用户ID不能为空', 'data' => null]);exit;
         }
-        $list = $ua->getList(['uid' => $this->param['uid']], 'game_id,curr_para,play_para,play_type,level_url');
+        $list = $ua->getList(['uid' => $this->param['uid']], 'id,game_id,curr_para,play_para,play_type,level_url');
         if ($list) {
             $g     = new GameModel();
             $games = $g->getList(['is_delete' => 0], 'identify,`name`,url');
