@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\FeedbackModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
 use app\common\model\NoticeModel;
@@ -348,6 +349,30 @@ class Api extends \think\Controller
         } else {
             echo json_encode(['status' => 4, 'info' => '该用户没有未通知的消息', 'data' => null]);exit;
         }
+    }
+
+    /**
+     * 用户反馈
+     * @author 贺强
+     * @time   2018-11-02 11:17:09
+     * @param  FeedbackModel $f FeedbackModel 实例
+     */
+    public function user_feedback(FeedbackModel $f)
+    {
+        if (empty($this->param['uid'])) {
+            echo json_encode(['status' => 1, 'info' => '反馈用户ID不能为空', 'data' => null]);exit;
+        }$uid = $this->param['uid'];
+        if (empty(ltrim(rtrim($this->param['content'])))) {
+            echo json_encode(['status' => 2, 'info' => '反馈内容不能为空', 'data' => null]);exit;
+        }
+        $this->param['addtime'] = time();
+        $res                    = $f->add($this->param);
+        if ($res) {
+            $msg = ['status' => 0, 'info' => '反馈成功', 'data' => null];
+        } else {
+            $msg = ['status' => 4, 'info' => '反馈失败', 'data' => null];
+        }
+        echo json_encode($msg);exit;
     }
 
 }

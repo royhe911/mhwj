@@ -49,5 +49,6 @@ return [
     '/api/addgame'     => 'api/Api/add_game', // 添加游戏
     '/api/examine'     => 'api/Api/user_examine', // 获取服务段位
     '/api/systip'      => 'api/Api/user_tip', // 系统消息
+    '/api/feedback'    => 'api/Api/user_feedback', //用户反馈
     /*--------   api 结束  --------*/
 ];
