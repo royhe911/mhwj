@@ -122,10 +122,10 @@
                     }
                 });
             }
-            operation($ids, $action)
+            operate($ids, $action)
         });
 
-        function operation($ids, $type) {
+        function operate($ids, $type) {
             var $msg = '', $tip = '';
             if ($type == 'del' || $type == 'delAll') {
                 $msg = '确实要删除吗？';
@@ -144,7 +144,7 @@
             layer.confirm($msg, {icon: 3}, function(){
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
-                    url: '/admin/operation',
+                    url: '/admin/operate',
                     data:{'ids': $ids, 'type': $type},
                     success: function(data){
                         if (data.status == 0) {

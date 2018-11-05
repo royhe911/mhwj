@@ -189,7 +189,7 @@ class Admin extends \think\Controller
      * @time   2018-10-25 14:14:27
      * @param  AdminModel $a AdminModel 实例
      */
-    public function operation(AdminModel $a)
+    public function operate(AdminModel $a)
     {
         // 判断是否有权限访问或操作
         $admin = $this->is_valid(strtolower(basename(get_class())) . '_' . strtolower(__FUNCTION__));

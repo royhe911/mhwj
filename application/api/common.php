@@ -16,6 +16,23 @@ function get_random_str($num = 8)
 }
 
 /**
+ * 生成随机数字串
+ * @author 贺强
+ * @time   2018-11-05 15:14:37
+ * @param  integer $num 要生成数字串的长度
+ * @return string       返回生成的数字串
+ */
+function get_random_num($num = 6)
+{
+    $pattern = '9482135706';
+    $str     = '';
+    for ($i = 0; $i < $num; $i++) {
+        $str .= $pattern{mt_rand(0, 9)}; //生成 php 随机数
+    }
+    return $str;
+}
+
+/**
  * 把用户状态转换成文字
  * @param  integer $status 用户状态值
  * @return string          返回用户状态

@@ -9,6 +9,7 @@ use app\common\model\NoticeModel;
 use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
 use Qcloud\Sms\SmsSingleSender;
+use think\Session;
 
 /**
  * Api-控制器
@@ -197,6 +198,23 @@ class Api extends \think\Controller
         if (empty($this->param['mobile'])) {
             echo json_encode(['status' => 8, 'info' => '手机号不能为空', 'data' => null]);exit;
         }
+        $mobile = $this->param['mobile'];
+        if (empty($this->param['code'])) {
+            echo json_encode(['status' => 9, 'info' => '验证码不能为空', 'data' => null]);exit;
+        }
+        $code = $this->param['code'];
+        $msg  = [];
+        if (empty(session('v_' . $mobile))) {
+            $msg = ['status' => 2, 'info' => '验证码过期', 'data' => null];
+        } elseif (session('v_' . $mobile) !== $code) {
+            $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
+        } else {
+            session('v_' . $mobile, null);
+            $msg = ['status' => 0, 'info' => '验证成功', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
         if (empty($this->param['avatar'])) {
             echo json_encode(['status' => 2, 'info' => '头像不能为空', 'data' => null]);exit;
         }
@@ -349,7 +367,13 @@ class Api extends \think\Controller
         if (empty($this->param['uid'])) {
             echo json_encode(['status' => 1, 'info' => '用户ID不能为空', 'data' => null]);exit;
         }
-        $list = $ua->getList(['uid' => $this->param['uid']], 'id,game_id,curr_para,play_para,play_type,level_url');
+        $uid  = $this->param['uid'];
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $uid]);
+        if ($user['type'] !== 2 || $user['status'] !== 8) {
+            echo json_encode(['status' => 2, 'info' => '审核未通过', 'data' => null]);exit;
+        }
+        $list = $ua->getList(['uid' => $uid], 'id,game_id,curr_para,play_para,play_type,level_url');
         if ($list) {
             $g     = new GameModel();
             $games = $g->getList(['is_delete' => 0], 'id,identify,`name`,url');
@@ -486,27 +510,49 @@ class Api extends \think\Controller
      */
     public function get_vericode()
     {
-        if (empty($this->param['tel'])) {
+        if (empty($this->param['mobile'])) {
             echo json_encode(['status' => 1, 'info' => '手机号不能为空', 'data' => null]);exit;
         }
-        $num = 6;
+        $mobile = $this->param['mobile'];
+        session('v_' . $mobile, null);
+        $num = 4;
         if (!empty($this->param['num'])) {
             $num = intval($this->param['num']);
         }
-        $vericode   = get_random_str($num);
+        $vericode   = get_random_num($num);
         $sms        = new SmsSingleSender(config('SDKAPPID'), config('APPKEY'));
-        $tel        = $this->param['tel'];
         $templateId = 221888;
-        $param      = [];
-        $smsSign    = '斗汁科技';
-        $res        = $sms->sendWithParam('86', $tel, $templateId, $param, $smsSign, '', '');
+        $param      = [$vericode];
+        $smsSign    = '';
+        $res        = $sms->sendWithParam('86', $mobile, $templateId, $param, $smsSign, '', '');
         $res        = json_decode($res, true);
-        print_r($res);exit;
-        if ($res['status'] === 0) {
-            session('v_' . $tel, $vericode);
+        if ($res['result'] === 0) {
+            session('v_' . $mobile, $vericode);
             $msg = ['status' => 0, 'info' => '发送成功', 'data' => $vericode];
         } else {
             $msg = ['status' => 4, 'info' => '发送失败', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
+     * 检查验证码是否正确
+     * @author 贺强
+     * @time   2018-11-05 15:28:33
+     */
+    public function check_vericode()
+    {
+        if (empty($this->param['code']) || empty($this->param['mobile'])) {
+            echo json_encode(['status' => 1, 'info' => '非法参数', 'data' => null]);exit;
+        }
+        $mobile = $this->param['mobile'];
+        if (empty(session('v_' . $mobile))) {
+            $msg = ['status' => 2, 'info' => '验证码过期', 'data' => null];
+        } elseif (session('v_' . $mobile) !== $this->param['code']) {
+            $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
+        } else {
+            session('v_' . $mobile, null);
+            $msg = ['status' => 0, 'info' => '验证成功', 'data' => null];
         }
         echo json_encode($msg);exit;
     }

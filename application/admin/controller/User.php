@@ -166,4 +166,51 @@ class User extends \think\Controller
             return ['status' => 4, 'info' => '审核失败'];
         }
     }
+
+    /**
+     * 设置用户
+     * @author 贺强
+     * @time   2018-11-05 14:40:24
+     * @param  UserModel $u UserModel 实例
+     */
+    public function operate(UserModel $u)
+    {
+        $param = $this->request->post();
+        if (empty($param['type'])) {
+            return ['status' => 1, 'info' => '非法操作'];
+        }
+        if (empty($param['ids']) || !preg_match('/^0[\,\d+]+$/', $param['ids'])) {
+            return ['status' => 2, 'info' => '非法参数'];
+        }
+        switch ($param['type']) {
+            case 'del':
+                $field = 'is_delete';
+                $value = 1;
+                $msg   = '删除';
+                break;
+            case 'recommend':
+                $field = 'is_recommend';
+                $value = 1;
+                $msg   = '推荐';
+                break;
+            case 'unrecommend':
+                $field = 'is_recommend';
+                $value = 0;
+                $msg   = '取消推荐';
+                break;
+            default:
+                $field = '';
+                $value = '';
+                $msg   = '';
+                break;
+        }
+        if (empty($field) || $value === '') {
+            return ['status' => 3, 'info' => '非法操作'];
+        }
+        $res = $u->modifyField($field, $value, ['id' => ['in', $param['ids']]]);
+        if (!$res) {
+            return ['status' => 4, 'info' => $msg . '失败'];
+        }
+        return ['status' => 0, 'info' => $msg . '成功'];
+    }
 }
