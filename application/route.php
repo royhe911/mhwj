@@ -59,5 +59,6 @@ return [
     '/api/notice'     => 'api/Api/get_notice', // 获取公告
     '/api/vericode'   => 'api/Api/get_vericode', // 获取验证码
     '/api/checkcode'  => 'api/Api/check_vericode', // 检查验证码
+    '/api/addroom'    => 'api/Api/add_room', // 创建房间
     /*--------   api 结束  --------*/
 ];

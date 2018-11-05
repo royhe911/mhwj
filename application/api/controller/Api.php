@@ -6,6 +6,7 @@ use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
 use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
+use app\common\model\RoomModel;
 use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
 use Qcloud\Sms\SmsSingleSender;
@@ -553,6 +554,45 @@ class Api extends \think\Controller
         } else {
             session('v_' . $mobile, null);
             $msg = ['status' => 0, 'info' => '验证成功', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
+     * 创建房间
+     * @author 贺强
+     * @time   2018-11-05 16:51:21
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function add_room(RoomModel $r)
+    {
+        if (empty($this->param['uid'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
+        } elseif (empty($this->param['game_id'])) {
+            $msg = ['status' => 2, 'info' => '游戏ID不能为空', 'data' => null];
+        } elseif (empty($this->param['type'])) {
+            $msg = ['status' => 3, 'info' => '房间类型不能为空', 'data' => null];
+        } elseif (empty($this->param['region'])) {
+            $msg = ['status' => 4, 'info' => '房间所属大区不能为空', 'data' => null];
+        } elseif (empty($this->param) || intval($this->param['count']) < 2 || intval($this->param['count']) > 5) {
+            $msg = ['status' => 5, 'info' => '房间人数只能是2-5人', 'data' => null];
+        } else {
+            $u = new UserModel();
+            $user->$u->getModel(['id' => $this->param['uid']], 'type,status');
+            if (!$user) {
+                $msg = ['status' => 6, 'info' => '陪玩师不存在', 'data' => null];
+            } elseif ($user['type'] !== 2 || $user['status'] !== 8) {
+                $msg = ['status' => 7, 'info' => '无权创建', 'data' => null];
+            }
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $res = $r->add($this->param);
+        if ($res) {
+            $msg = ['status' => 0, 'info' => '创建成功', 'data' => null];
+        } else {
+            $msg = ['status' => 44, 'info' => '创建失败', 'data' => null];
         }
         echo json_encode($msg);exit;
     }
