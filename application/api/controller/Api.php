@@ -73,7 +73,7 @@ class Api extends \think\Controller
         if (!empty($this->param['count'])) {
             $count = $this->param['count'];
         }
-        $where = ['is_delete' => 0, 'status' => 0];
+        $where = ['is_delete' => 0, 'status' => 0, 'type' => 1];
         $list  = $n->getList($where, '`name`,`url`', "1,$count", "sort");
         if (!empty($list)) {
             foreach ($list as &$item) {
@@ -81,10 +81,33 @@ class Api extends \think\Controller
                     $item['url'] = config('WEBSITE') . $item['url'];
                 }
             }
-            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);
+            $msg = ['status' => 0, 'info' => '获取成功', 'data' => $list];
         } else {
-            echo json_encode(['status' => 4, 'info' => '暂无数据', 'data' => null]);
+            $msg = ['status' => 4, 'info' => '暂无数据', 'data' => null];
         }
+        echo json_encode($msg);exit;
+    }
+
+    /**
+     * 获取公告
+     * @author 贺强
+     * @time   2018-11-05 10:58:18
+     * @param  NoticeModel $n NoticeModel 实例
+     */
+    public function get_notice(NoticeModel $n)
+    {
+        $count = 10;
+        if (!empty($this->param['count'])) {
+            $count = $this->param['count'];
+        }
+        $where = ['is_delete' => 0, 'status' => 0, 'type' => 2];
+        $list  = $n->getList($where, '`name`,`content`', "1,$count", "sort");
+        if (!empty($list)) {
+            $msg = ['status' => 0, 'info' => '获取成功', 'data' => $list];
+        } else {
+            $msg = ['status' => 4, 'info' => '暂无数据', 'data' => null];
+        }
+        echo json_encode($msg);exit;
     }
 
     /**
@@ -463,6 +486,9 @@ class Api extends \think\Controller
      */
     public function get_vericode()
     {
+        if (empty($this->param['tel'])) {
+            echo json_encode(['status' => 1, 'info' => '手机号不能为空', 'data' => null]);exit;
+        }
         $num = 6;
         if (!empty($this->param['num'])) {
             $num = intval($this->param['num']);
@@ -476,7 +502,13 @@ class Api extends \think\Controller
         $res        = $sms->sendWithParam('86', $tel, $templateId, $param, $smsSign, '', '');
         $res        = json_decode($res, true);
         print_r($res);exit;
-        session('vericode', $vericode);
+        if ($res['status'] === 0) {
+            session('v_' . $tel, $vericode);
+            $msg = ['status' => 0, 'info' => '发送成功', 'data' => $vericode];
+        } else {
+            $msg = ['status' => 4, 'info' => '发送失败', 'data' => null];
+        }
+        echo json_encode($msg);exit;
     }
 
 }

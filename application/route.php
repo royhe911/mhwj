@@ -29,6 +29,9 @@ return [
     '/set/add'         => 'admin/Set/add', // 添加轮播图
     '/set/del'         => 'admin/Set/del', // 添加轮播图
     '/set/edit'        => 'admin/Set/edit', // 编辑轮播图
+    '/set/notices'     => 'admin/Set/notices', // 公告列表
+    '/set/addnotice'   => 'admin/Set/add_notice', // 添加公告
+    '/set/editnotice'  => 'admin/Set/edit_notice', // 修改公告
     '/game/list'       => 'admin/Game/lists', // 游戏列表
     '/game/add'        => 'admin/Game/add', // 添加游戏
     '/game/edit'       => 'admin/Game/edit', // 修改游戏
@@ -53,5 +56,6 @@ return [
     '/api/usergames'   => 'api/Api/get_user_games', // 用户游戏列表
     '/api/editgame'    => 'api/Api/edit_game', // 获取修改的游戏
     '/api/vericode'    => 'api/Api/get_vericode', // 获取验证码
+    '/api/notice'      => 'api/Api/get_notice', // 获取公告
     /*--------   api 结束  --------*/
 ];

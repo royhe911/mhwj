@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>添加轮播图</title>
+    <title>添加公告</title>
     <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
     <!-- Data Tables -->
@@ -14,7 +14,6 @@
     <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
     <style type="text/css">
         .form-control{width: 200px;}
-        #preview{max-width: 120px;max-height: 120px;display: none;}
     </style>
 </head>
 <body class="gray-bg">
@@ -23,28 +22,21 @@
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>添加轮播图</h5>
+                    <h5>添加公告</h5>
                 </div>
                 <div class="ibox-content">
                     <form class="form-horizontal" onsubmit="return false">
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">轮播图名称</label>
+                            <label class="col-sm-2 control-label">公告名称</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="name">
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">轮播图</label>
+                            <label class="col-sm-2 control-label">公告内容</label>
                             <div class="col-sm-10">
-                                <table width="100%">
-                                    <tr>
-                                        <td valign="top" width="120px"><input id="file_upload" name="file_upload" type="file"></td>
-                                        <td valign="top"><input class="btn btn-primary" type="button" data-action="upload" value="上传"></td>
-                                    </tr>
-                                    <tr><td colspan="2"><div id="progress"></div><input type="hidden" id="urll"></td></tr>
-                                    <tr><td colspan="2"><img id="preview" src=""></td></tr>
-                                </table>
+                                <textarea id="content" rows="10" cols="50"></textarea>
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
@@ -71,19 +63,23 @@
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'save') {
-                var name = $('#name'), urll = $('#urll').val();
+                var name = $('#name'), content = $('#content');
                 if (name.val() == '') {
-                    layer.msg('轮播图名称不能为空', {icon: 5, time: 1000}, function(){name.focus()});
+                    layer.msg('公告名称不能为空', {icon: 5, time: 1000}, function(){name.focus()});
                     return false
                 }
-                if (urll == '') {
-                    layer.msg('请上传轮播图', {icon: 5, time: 1000});
+                if (content.val() == '') {
+                    layer.msg('公告内容不能为空', {icon: 5, time: 1000}, function(){content.focus()});
+                    return false
+                }
+                if (content.val().length > 300) {
+                    layer.msg('内容不能超过300字', {icon: 5, time: 1000}, function(){content.focus()});
                     return false
                 }
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
-                    url: '/set/add',
-                    data: {'name': name.val(), 'url': urll},
+                    url: '/set/addnotice',
+                    data: {'name': name.val(), 'content': content.val()},
                     success: function(data){
                         if (data.status == 0) {
                             // layer.msg(data.info, {icon: 6, time: 1000});
@@ -94,7 +90,7 @@
                             }, function(){
                                 location.reload()
                             }, function(){
-                                location.href = '/set/list'
+                                location.href = '/set/notices'
                             })
                         }else{
                             layer.msg(data.info, {icon: 5, time: 1000});
@@ -102,28 +98,7 @@
                     }
                 })
             } else if ($action == 'cancel') {
-                location.href = '/set/list'
-            } else if ($action == 'upload') {
-                $('#file_upload').uploadifive('upload')
-            }
-        });
-        $('#file_upload').uploadifive({
-            'auto'             : false,
-            'buttonText'       : '选择图片',
-            'queueID'          : 'progress',
-            'fileTypeDesc'     : 'Image Files',
-            'fileTypeExts'     : '*.jpg;*.gif;*.png',
-            'multi'            : false,
-            'removeCompleted'  : true,
-            'formData'         : {
-                'timestamp' : '{$time}',
-                'token'     : '{$token}'
-            },
-            'uploadScript'     : '/upload',
-            'onUploadComplete' : function(file, data) {
-                // data = eval('(' + data + ')');
-                data = JSON.parse(data);
-                $('#urll').val(data.path);
+                location.href = '/set/notices'
             }
         });
     });

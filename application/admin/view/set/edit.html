@@ -68,9 +68,6 @@
 <script type="text/javascript">
     $(function(){
         $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",});
-        $('#cancel').click(function(){
-            location.href = '/set/list';
-        });
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'save') {
