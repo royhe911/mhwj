@@ -239,6 +239,9 @@ class Api extends \think\Controller
         // 修改信息
         $res = $u->modify($this->param, ['id' => $this->param['id']]);
         if ($res !== false) {
+            $data = ['type' => 1, 'uid' => $this->param['id'], 'title' => '系统消息', 'content' => '正在审核，请稍后查看', 'addtime' => time()];
+            $m    = new MessageModel();
+            $m->add($data);
             $msg = ['status' => 0, 'info' => '提交成功', 'data' => null];
         } else {
             $msg = ['status' => 44, 'info' => '提交失败', 'data' => null];

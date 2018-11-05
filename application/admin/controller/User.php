@@ -158,9 +158,14 @@ class User extends \think\Controller
             }
             $res = $u->modify($param, ['id' => $param['id']]);
             if ($res) {
-                $m    = new MessageModel();
-                $data = ['type' => 1, 'uid' => $param['id'], 'title' => '系统消息', 'content' => $content, 'addtime' => time()];
-                $m->add($data);
+                $m       = new MessageModel();
+                $message = $m->getModel(['type' => 1, 'uid' => $param['id']], true, 'addtime desc');
+                if ($message) {
+                    $m->modifyField('content', $content, ['id' => $message['id']]);
+                } else {
+                    $data = ['type' => 1, 'uid' => $param['id'], 'title' => '系统消息', 'content' => $content, 'addtime' => time()];
+                    $m->add($data);
+                }
                 return ['status' => 0, 'info' => '审核成功'];
             }
             return ['status' => 4, 'info' => '审核失败'];
