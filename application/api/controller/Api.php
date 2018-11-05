@@ -9,8 +9,9 @@ use app\common\model\NoticeModel;
 use app\common\model\RoomModel;
 use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
+use app\common\model\VericodeModel;
 use Qcloud\Sms\SmsSingleSender;
-use think\Session;
+use think\cookie;
 
 /**
  * Api-控制器
@@ -131,7 +132,7 @@ class Api extends \think\Controller
             $appid  = 'wxecd6bfdba0623aa5';
             $secret = '8ff39ccfde133942cd8933b240a79960';
         }
-        $url  = "https://api.weixin.qq.com/sns/jscode2session?appid={$appid}&secret={$secret}&js_code={$js_code}&grant_type=authorization_code";
+        $url  = "https://api.weixin.qq.com/sns/jscode2cookie?appid={$appid}&secret={$secret}&js_code={$js_code}&grant_type=authorization_code";
         $data = $this->curl($url);
         $data = json_decode($data, true);
         if (empty($data['openid'])) {
@@ -205,12 +206,12 @@ class Api extends \think\Controller
         }
         $code = $this->param['code'];
         $msg  = [];
-        if (empty(session('v_' . $mobile))) {
+        if (empty(cookie('v_' . $mobile))) {
             $msg = ['status' => 2, 'info' => '验证码过期', 'data' => null];
-        } elseif (session('v_' . $mobile) !== $code) {
+        } elseif (cookie('v_' . $mobile) !== $code) {
             $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
         } else {
-            session('v_' . $mobile, null);
+            cookie('v_' . $mobile, null);
             $msg = ['status' => 0, 'info' => '验证成功', 'data' => null];
         }
         if (!empty($msg)) {
@@ -518,8 +519,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 1, 'info' => '手机号不能为空', 'data' => null]);exit;
         }
         $mobile = $this->param['mobile'];
-        session('v_' . $mobile, null);
-        $num = 4;
+        $num    = 4;
         if (!empty($this->param['num'])) {
             $num = intval($this->param['num']);
         }
@@ -531,7 +531,9 @@ class Api extends \think\Controller
         $res        = $sms->sendWithParam('86', $mobile, $templateId, $param, $smsSign, '', '');
         $res        = json_decode($res, true);
         if ($res['result'] === 0) {
-            session('v_' . $mobile, $vericode);
+            cookie("v_$mobile", $vericode);
+            $v = new VericodeModel();
+            $v->add(['mobile' => "v_$mobile", 'vericode' => $vericode, 'addtime' => time()]);
             $msg = ['status' => 0, 'info' => '发送成功', 'data' => $vericode];
         } else {
             $msg = ['status' => 4, 'info' => '发送失败', 'data' => null];
@@ -544,18 +546,22 @@ class Api extends \think\Controller
      * @author 贺强
      * @time   2018-11-05 15:28:33
      */
-    public function check_vericode()
+    public function check_vericode(VericodeModel $v)
     {
         if (empty($this->param['code']) || empty($this->param['mobile'])) {
             echo json_encode(['status' => 1, 'info' => '非法参数', 'data' => null]);exit;
         }
         $mobile = $this->param['mobile'];
-        if (empty(session('v_' . $mobile))) {
+        $code   = $v->getModel(['mobile' => "v_$mobile"]);
+        if (empty($code)) {
+            $msg = ['status' => 1, 'info' => '无效手机号', 'data' => null];
+        } elseif (time() - $code['addtime'] > 300) {
+            $v->delByWhere(['mobile' => "v_$mobile"]);
             $msg = ['status' => 2, 'info' => '验证码过期', 'data' => null];
-        } elseif (session('v_' . $mobile) !== $this->param['code']) {
+        } elseif ($code["vericode"] !== $this->param['code']) {
             $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
         } else {
-            session('v_' . $mobile, null);
+            $v->delByWhere(['mobile' => "v_$mobile"]);
             $msg = ['status' => 0, 'info' => '验证成功', 'data' => null];
         }
         echo json_encode($msg);exit;

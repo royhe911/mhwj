@@ -154,7 +154,7 @@ class CommonModel extends Model
      * @param array|string $whereOr 查询 or 条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
      * @return array 返回查询结果(数组)，若不存在返回 null
      */
-    public function getModel($where = null, $field = true, $order = 'id', $whereOr = null)
+    public function getModel($where = null, $field = true, $order = '', $whereOr = null)
     {
         $model = Db::table($this->table)
             ->field($field)
