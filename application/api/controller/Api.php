@@ -144,7 +144,7 @@ class Api extends \think\Controller
             $data['count']      = $user['count'] + 1;
             $res                = $u->modify($data, ['id' => $user['id']]);
             if ($res) {
-                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $user['id']]];
+                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $user['id'], 'mobile' => $user['mobile']]];
             } else {
                 $msg = ['status' => 3, 'info' => '登录失败', 'data' => null];
             }
@@ -154,7 +154,7 @@ class Api extends \think\Controller
             $data['login_time'] = time();
             $id                 = $u->add($data);
             if ($id) {
-                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $id]];
+                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $id, 'mobile' => '']];
             } else {
                 $msg = ['status' => 4, 'info' => '登录失败', 'data' => null];
             }
