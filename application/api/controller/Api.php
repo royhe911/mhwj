@@ -8,6 +8,7 @@ use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
 use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
+use Qcloud\Sms\SmsSingleSender;
 
 /**
  * Api-控制器
@@ -328,7 +329,7 @@ class Api extends \think\Controller
         $list = $ua->getList(['uid' => $this->param['uid']], 'id,game_id,curr_para,play_para,play_type,level_url');
         if ($list) {
             $g     = new GameModel();
-            $games = $g->getList(['is_delete' => 0], 'identify,`name`,url');
+            $games = $g->getList(['is_delete' => 0], 'id,identify,`name`,url');
             $games = array_column($games, null, 'id');
             foreach ($list as &$item) {
                 if (!empty($games[$item['game_id']])) {
@@ -340,6 +341,10 @@ class Api extends \think\Controller
                     } else {
                         $item['url'] = '';
                     }
+                } else {
+                    $item['game_name'] = '';
+                    $item['identify']  = '';
+                    $item['url']       = '';
                 }
             }
             $msg = ['status' => 0, 'info' => '获取成功', 'data' => $list];
@@ -462,13 +467,15 @@ class Api extends \think\Controller
         if (!empty($this->param['num'])) {
             $num = intval($this->param['num']);
         }
-        $vericode = get_random_str($num);
-        $url      = 'https://yun.tim.qq.com/v5/tlssmssvr/sendsms?sdkappid=xxxxx&random=xxxx';
-        $tel      = $this->param['tel'];
-        $data     = ['params' => [], 'sig' => '', 'tel' => $tel];
-        vendor('qcloudsms_php.src.SmsSingleSender');
-        $sms = new SmsSingleSender(config('SDKAPPID'), config('APPKEY'));
-        // $sms->sendWithParam('86',$tel,$templateId,[])
+        $vericode   = get_random_str($num);
+        $sms        = new SmsSingleSender(config('SDKAPPID'), config('APPKEY'));
+        $tel        = $this->param['tel'];
+        $templateId = 221888;
+        $param      = [];
+        $smsSign    = '斗汁科技';
+        $res        = $sms->sendWithParam('86', $tel, $templateId, $param, $smsSign, '', '');
+        $res        = json_decode($res, true);
+        print_r($res);exit;
         session('vericode', $vericode);
     }
 

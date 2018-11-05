@@ -15,6 +15,7 @@
 define('APP_PATH', __DIR__ . '/../application/');
 // 开启自动生成
 define('APP_AUTO_BUILD', true);
+require __DIR__ . '/qcloudsms_php/src/index.php';
 // 加载框架引导文件
 require __DIR__ . '/../thinkphp/start.php';
 // $build = include APP_PATH.'build.php';
