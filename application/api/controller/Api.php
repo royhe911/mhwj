@@ -574,11 +574,11 @@ class Api extends \think\Controller
             $msg = ['status' => 3, 'info' => '房间类型不能为空', 'data' => null];
         } elseif (empty($this->param['region'])) {
             $msg = ['status' => 4, 'info' => '房间所属大区不能为空', 'data' => null];
-        } elseif (empty($this->param) || intval($this->param['count']) < 2 || intval($this->param['count']) > 5) {
+        } elseif (empty($this->param['count']) || intval($this->param['count']) < 2 || intval($this->param['count']) > 5) {
             $msg = ['status' => 5, 'info' => '房间人数只能是2-5人', 'data' => null];
         } else {
-            $u = new UserModel();
-            $user->$u->getModel(['id' => $this->param['uid']], 'type,status');
+            $u    = new UserModel();
+            $user = $u->getModel(['id' => $this->param['uid']], 'type,status');
             if (!$user) {
                 $msg = ['status' => 6, 'info' => '陪玩师不存在', 'data' => null];
             } elseif ($user['type'] !== 2 || $user['status'] !== 8) {
