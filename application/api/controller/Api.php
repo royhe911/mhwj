@@ -11,7 +11,6 @@ use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
 use app\common\model\VericodeModel;
 use Qcloud\Sms\SmsSingleSender;
-use think\cookie;
 
 /**
  * Api-控制器
@@ -204,14 +203,16 @@ class Api extends \think\Controller
         if (empty($this->param['code'])) {
             echo json_encode(['status' => 9, 'info' => '验证码不能为空', 'data' => null]);exit;
         }
-        $code = $this->param['code'];
-        $msg  = [];
-        if (empty(cookie('v_' . $mobile))) {
-            $msg = ['status' => 2, 'info' => '验证码过期', 'data' => null];
-        } elseif (cookie('v_' . $mobile) !== $code) {
+        $code  = $this->param['code'];
+        $msg   = [];
+        $v     = new VericodeModel();
+        $vcode = $v->getModel(['mobile' => "v_$mobile"]);
+        if (empty($vcode)) {
+            $msg = ['status' => 2, 'info' => '无效手机号', 'data' => null];
+        } elseif ($vcode['vericode'] !== $code) {
             $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
         } else {
-            cookie('v_' . $mobile, null);
+            $v->delByWhere(['mobile' => "v_$mobile"]);
             $msg = ['status' => 0, 'info' => '验证成功', 'data' => null];
         }
         if (!empty($msg)) {
@@ -531,7 +532,6 @@ class Api extends \think\Controller
         $res        = $sms->sendWithParam('86', $mobile, $templateId, $param, $smsSign, '', '');
         $res        = json_decode($res, true);
         if ($res['result'] === 0) {
-            cookie("v_$mobile", $vericode);
             $v = new VericodeModel();
             $v->add(['mobile' => "v_$mobile", 'vericode' => $vericode, 'addtime' => time()]);
             $msg = ['status' => 0, 'info' => '发送成功', 'data' => $vericode];
