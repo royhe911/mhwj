@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房间列表</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/dataTables/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/paging/paging.css">
+    <style type="text/css">
+        .form-control{width: 220px;}
+        .ttd{width: 250px;text-align: center;}
+        .ttb{width: 80px;text-align: center;}
+        .avatar{width: 64px;height: 64px;border-radius: 32px;}
+        .sort_i{width: 50px;display: none;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form action="/admin/lists" method="post">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td><a href="javascript:;" data-type="multi" data-action="disable">禁用所选</a> &nbsp; <a href="javascript:;" data-type="multi" data-action="relieve">解禁所选</a>
+                            </td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    </table>
+                    </form>
+                </div>
+                <div class="ibox-content">
+                    <table class="table table-striped table-bordered table-hover dataTables-example">
+                        <thead>
+                        <tr>
+                            <th style="width: 40px;"><input type="checkbox" id="selAll"></th>
+                            <th>房主</th>
+                            <th>名称</th>
+                            <th>游戏</th>
+                            <th>房间类型</th>
+                            <th>游戏大区</th>
+                            <th>人数</th>
+                            <th>状态</th>
+                            <th>添加时间</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {foreach $list as $k=>$item}
+                        <tr class="gradeX">
+                            <td><input type="checkbox" class="check" value="{$item.id}"></td>
+                            <td>{$item.nickname}</td>
+                            <td>{$item.name}</td>
+                            <td>{$item.game_name}</td>
+                            <td>{$item.type}</td>
+                            <td>{$item.region}</td>
+                            <td>{$item.count}</td>
+                            <td>{$item.status_txt}</td>
+                            <td>{$item.addtime}</td>
+                            <td>{if($item.status===44)}<a href="javascript:;" data-type="single" data-action="relieve" data-id="{$item.id}">解禁</a>{else/}<a href="javascript:;" data-type="single" data-action="disable" data-id="{$item.id}">禁用</a>{/if}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                        <footer>
+                            <tr>
+                                <td colspan="100"><div class="dataTables_paginate paging_simple_numbers paging_page">{$pages}</div></td>
+                            </tr>
+                        </footer>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript" src="/static/paging/paging-min.js"></script>
+<script>
+    $(function () {
+        $('#selAll').click(function(){
+            if ($(this).is(':checked')) {
+                $('.check').prop('checked', true);
+            }else{
+                $('.check').prop('checked', false);
+            }
+        });
+        $('a[data-action]').click(function(){
+            var $action = $(this).data('action');
+            var $type = $(this).data('type');
+            var $ids = '0';
+            if($type == 'single'){
+                $ids = '0,' + $(this).data('id');
+            } else if ($type == 'multi') {
+                $('.check').each(function(){
+                    if ($(this).is(':checked')) {
+                        $ids += (',' + $(this).val())
+                    }
+                });
+            }
+            operate($ids, $action)
+        });
+
+        function edit_sort($this) {
+            if ($this.val() == $this.data('sort')) {
+                $this.css('display', 'none');
+                $this.prev('.sort_p').css('display', 'block');
+            }else{
+                $id = $this.data('id'), $sort = $this.val();
+                $.ajax({
+                    type: 'post', dataType: 'json', cache: false,
+                    url: '/game/editsort',
+                    data: {'id': $id, 'sort': $sort},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.info, {icon: 5, time: 2000})
+                        }
+                    }
+                })
+            }
+        }
+
+        function operate($ids, $type) {
+            var $msg = '', $tip = '';
+            if ($type == 'disable') {
+                $msg = '确实要禁用吗？';
+                $tip = '禁用'
+            }else if ($type == 'relieve') {
+                $msg = '确实要解禁吗？';
+                $tip = '解禁';
+            }
+            if ($ids == '0') {
+                layer.msg('请选择要' + $tip + '的项');
+                return false
+            }
+            layer.confirm($msg, {icon: 3}, function(){
+                $.ajax({
+                    type: 'post', cache: false, dataType: 'json',
+                    url: '/room/operate',
+                    data:{'ids': $ids, 'type': $type},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        }else{
+                            layer.msg(data.info, {icon: 5})
+                        }
+                    }
+                })
+            })
+        }
+    });
+</script>
+</html>

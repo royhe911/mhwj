@@ -212,8 +212,8 @@ class Api extends \think\Controller
         } elseif ($vcode['vericode'] !== $code) {
             $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
         } else {
+            unset($this->param['code']);
             $v->delByWhere(['mobile' => "v_$mobile"]);
-            $msg = ['status' => 0, 'info' => '验证成功', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -576,7 +576,11 @@ class Api extends \think\Controller
      */
     public function add_room(RoomModel $r)
     {
-        if (empty($this->param['uid'])) {
+        if (empty($this->param['name'])) {
+            $msg = ['status' => 8, 'info' => '房间名称不能为空', 'data' => null];
+        } elseif (strlen($this->param['name']) > 24) {
+            $msg = ['status' => 9, 'info' => '名称过长', 'data' => null];
+        } elseif (empty($this->param['uid'])) {
             $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
         } elseif (empty($this->param['game_id'])) {
             $msg = ['status' => 2, 'info' => '游戏ID不能为空', 'data' => null];
@@ -595,6 +599,7 @@ class Api extends \think\Controller
                 $msg = ['status' => 7, 'info' => '无权创建', 'data' => null];
             }
         }
+        $this->param['addtime'] = time();
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }

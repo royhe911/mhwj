@@ -41,6 +41,8 @@ return [
     '/user/detail'    => 'admin/User/detail', // 用户详情
     '/user/auditor'   => 'admin/User/auditor', // 审核用户
     '/user/operate'   => 'admin/User/operate', // 设置用户
+    '/room/list'      => 'admin/Room/lists', // 房间列表
+    '/room/operate'   => 'admin/Room/operate', // 设置房间
 
     /*--------   api 开始   --------*/
     '/api/carousel'   => 'api/Api/get_carousel', // 获取轮播轮播图
