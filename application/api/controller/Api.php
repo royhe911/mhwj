@@ -318,9 +318,6 @@ class Api extends \think\Controller
         if (empty($this->param['curr_para'])) {
             echo json_encode(['status' => 2, 'info' => '当前段位不能为空', 'data' => null]);exit;
         }
-        if (empty($this->param['play_para'])) {
-            echo json_encode(['status' => 3, 'info' => '陪玩段位不能为空', 'data' => null]);exit;
-        }
         if (empty($this->param['play_type'])) {
             echo json_encode(['status' => 4, 'info' => '陪玩类型不能为空', 'data' => null]);exit;
         }
@@ -586,17 +583,35 @@ class Api extends \think\Controller
             $msg = ['status' => 2, 'info' => '游戏ID不能为空', 'data' => null];
         } elseif (empty($this->param['type'])) {
             $msg = ['status' => 3, 'info' => '房间类型不能为空', 'data' => null];
+        } elseif (intval($this->param['type']) === 1) {
+            if (empty($this->param['para_min'])) {
+                $msg = ['status' => 12, 'info' => '最低服务段位不能为空', 'data' => null];
+            } elseif (empty($this->param['para_max'])) {
+                $msg = ['status' => 13, 'info' => '最高服务段位不能为空', 'data' => null];
+            }
         } elseif (empty($this->param['region'])) {
             $msg = ['status' => 4, 'info' => '房间所属大区不能为空', 'data' => null];
         } elseif (empty($this->param['count']) || intval($this->param['count']) < 2 || intval($this->param['count']) > 5) {
             $msg = ['status' => 5, 'info' => '房间人数只能是2-5人', 'data' => null];
+        } elseif (empty($this->param['price'])) {
+            $msg = ['status' => 14, 'info' => '每局价格不能为空', 'data' => null];
+        } elseif (empty($this->param['num']) || intval($this->param['num']) < 1 || intval($this->param['num']) > 5) {
+            $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
             $u    = new UserModel();
-            $user = $u->getModel(['id' => $this->param['uid']], 'type,status');
+            $user = $u->getModel(['id' => $this->param['uid']], 'type,`status`,');
             if (!$user) {
                 $msg = ['status' => 6, 'info' => '陪玩师不存在', 'data' => null];
             } elseif ($user['type'] !== 2 || $user['status'] !== 8) {
                 $msg = ['status' => 7, 'info' => '无权创建', 'data' => null];
+            } else {
+                $ua       = new UserAttrModel();
+                $userAttr = $ua->getModel(['uid' => $this->param['uid'], 'game_id' => $this->param['game_id']], 'curr_para,play_type');
+                if (!$userAttr) {
+                    $msg = ['status' => 10, 'info' => '您不能陪玩此游戏', 'data' => null];
+                } elseif ($userAttr['play_type'] === 2 || $userAttr['curr_para'] < $this->param['para_max'] || $this->param['para_max'] < $this->param['para_min']) {
+                    $msg = ['status' => 11, 'info' => '您的等级不够陪玩的等级', 'data' => null];
+                }
             }
         }
         $this->param['addtime'] = time();
