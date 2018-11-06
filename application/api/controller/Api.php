@@ -149,7 +149,7 @@ class Api extends \think\Controller
                 $msg = ['status' => 3, 'info' => '登录失败', 'data' => null];
             }
         } else {
-            $data['type']       = 1;
+            $data['type']       = $this->param['type'];
             $data['addtime']    = time();
             $data['login_time'] = time();
             $id                 = $u->add($data);
@@ -519,8 +519,10 @@ class Api extends \think\Controller
         if (empty($this->param['mobile'])) {
             echo json_encode(['status' => 1, 'info' => '手机号不能为空', 'data' => null]);exit;
         }
+        $v      = new VericodeModel();
         $mobile = $this->param['mobile'];
-        $num    = 4;
+        $v->delByWhere(['mobile' => "v_$mobile"]);
+        $num = 4;
         if (!empty($this->param['num'])) {
             $num = intval($this->param['num']);
         }
@@ -532,7 +534,6 @@ class Api extends \think\Controller
         $res        = $sms->sendWithParam('86', $mobile, $templateId, $param, $smsSign, '', '');
         $res        = json_decode($res, true);
         if ($res['result'] === 0) {
-            $v = new VericodeModel();
             $v->add(['mobile' => "v_$mobile", 'vericode' => $vericode, 'addtime' => time()]);
             $msg = ['status' => 0, 'info' => '发送成功', 'data' => $vericode];
         } else {
