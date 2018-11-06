@@ -583,12 +583,10 @@ class Api extends \think\Controller
             $msg = ['status' => 2, 'info' => '游戏ID不能为空', 'data' => null];
         } elseif (empty($this->param['type'])) {
             $msg = ['status' => 3, 'info' => '房间类型不能为空', 'data' => null];
-        } elseif (intval($this->param['type']) === 1) {
-            if (empty($this->param['para_min'])) {
-                $msg = ['status' => 12, 'info' => '最低服务段位不能为空', 'data' => null];
-            } elseif (empty($this->param['para_max'])) {
-                $msg = ['status' => 13, 'info' => '最高服务段位不能为空', 'data' => null];
-            }
+        } elseif (intval($this->param['type']) === 1 && empty($this->param['para_min'])) {
+            $msg = ['status' => 12, 'info' => '最低服务段位不能为空', 'data' => null];
+        } elseif (intval($this->param['type']) === 1 && empty($this->param['para_max'])) {
+            $msg = ['status' => 13, 'info' => '最高服务段位不能为空', 'data' => null];
         } elseif (empty($this->param['region'])) {
             $msg = ['status' => 4, 'info' => '房间所属大区不能为空', 'data' => null];
         } elseif (empty($this->param['count']) || intval($this->param['count']) < 2 || intval($this->param['count']) > 5) {
@@ -599,7 +597,7 @@ class Api extends \think\Controller
             $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
             $u    = new UserModel();
-            $user = $u->getModel(['id' => $this->param['uid']], 'type,`status`,');
+            $user = $u->getModel(['id' => $this->param['uid']], 'type,`status`');
             if (!$user) {
                 $msg = ['status' => 6, 'info' => '陪玩师不存在', 'data' => null];
             } elseif ($user['type'] !== 2 || $user['status'] !== 8) {
