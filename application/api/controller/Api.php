@@ -279,6 +279,37 @@ class Api extends \think\Controller
     }
 
     /**
+     * 获取玩家列表
+     * @author 贺强
+     * @time   alt+t
+     * @param  UserModel $u [description]
+     * @return [type]       [description]
+     */
+    public function get_user_list(UserModel $u)
+    {
+        $param = $this->param;
+        $where = ['is_delete' => 0];
+        if (!empty($param['type'])) {
+            $where['type'] = $param['type'];
+        }
+        // 分页参数
+        $page     = 1;
+        $pagesize = 10;
+        $param    = $this->param;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $u->getList($where, true, "$page,$pagesize");
+        foreach ($list as &$item) {
+            # code...
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
      * 获取游戏列表
      * @author 贺强
      * @time   2018-10-31 12:00:48
@@ -667,9 +698,15 @@ class Api extends \think\Controller
         }
         $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count', "$page,$pagesize");
         if ($list) {
-            $u     = new UserModel();
-            $users = $u->getList(['is_delete' => 0, 'type' => 2], 'id,nickname,avatar');
-            $users = array_column($users, null, 'id');
+            $u      = new UserModel();
+            $users  = $u->getList(['is_delete' => 0, 'type' => 2], 'id,nickname,avatar');
+            $users  = array_column($users, null, 'id');
+            $gc     = new GameConfigModel();
+            $gclist = $gc->getList(null, 'game_id,para_id,para_str');
+            $gcarr  = [];
+            foreach ($gclist as $gci) {
+                $gcarr[$gci['game_id']][$gci['para_id']] = $gci['para_str'];
+            }
             foreach ($list as &$item) {
                 if (!empty($users[$item['uid']])) {
                     $item['nickname'] = $users[$item['uid']]['nickname'];
@@ -677,6 +714,16 @@ class Api extends \think\Controller
                 } else {
                     $item['nickname'] = '';
                     $item['avatar']   = '';
+                }
+                if (!empty($gcarr[$item['game_id']]) && !empty($gcarr[$item['game_id']][$item['para_min']])) {
+                    $item['para_min_str'] = $gcarr[$item['game_id']][$item['para_min']];
+                } else {
+                    $item['para_min_str'] = '';
+                }
+                if (!empty($gcarr[$item['game_id']]) && !empty($gcarr[$item['game_id']][$item['para_max']])) {
+                    $item['para_max_str'] = $gcarr[$item['game_id']][$item['para_max']];
+                } else {
+                    $item['para_max_str'] = '';
                 }
             }
         }

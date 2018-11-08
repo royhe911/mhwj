@@ -63,5 +63,6 @@ return [
     '/api/checkcode'  => 'api/Api/check_vericode', // 检查验证码
     '/api/addroom'    => 'api/Api/add_room', // 创建房间
     '/api/roomlist'   => 'api/Api/get_room_list', // 房间列表
+    '/api/userlist'   => 'api/Api/get_user_list', // 用户列表
     /*--------   api 结束  --------*/
 ];
