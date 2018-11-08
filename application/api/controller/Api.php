@@ -698,11 +698,19 @@ class Api extends \think\Controller
         }
         $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count', "$page,$pagesize");
         if ($list) {
-            $u      = new UserModel();
-            $users  = $u->getList(['is_delete' => 0, 'type' => 2], 'id,nickname,avatar');
-            $users  = array_column($users, null, 'id');
+            $uids     = array_column($list, 'uid');
+            $game_ids = array_column($list, 'game_id');
+            $u        = new UserModel();
+            $users    = $u->getList(['is_delete' => 0, 'id' => ['in', $uids], 'type' => 2], 'id,nickname,avatar');
+            $users    = array_column($users, null, 'id');
+            $ua       = new UserAttrModel();
+            $attrs    = $ua->getList(['uid' => ['in', $uids]], 'uid,game_id,winning');
+            $attr_arr = [];
+            foreach ($attrs as $attr) {
+                $attr_arr[$attr['uid']][$attr['game_id']] = $attr['winning'];
+            }
             $gc     = new GameConfigModel();
-            $gclist = $gc->getList(null, 'game_id,para_id,para_str');
+            $gclist = $gc->getList(['game_id' => ['in', $game_ids]], 'game_id,para_id,para_str');
             $gcarr  = [];
             foreach ($gclist as $gci) {
                 $gcarr[$gci['game_id']][$gci['para_id']] = $gci['para_str'];
@@ -724,6 +732,11 @@ class Api extends \think\Controller
                     $item['para_max_str'] = $gcarr[$item['game_id']][$item['para_max']];
                 } else {
                     $item['para_max_str'] = '';
+                }
+                if (!empty($attr_arr[$item['uid']]) && !empty($attr_arr[$item['uid']][$item['game_id']])) {
+                    $item['winning'] = $attr_arr[$item['uid']][$item['game_id']];
+                } else {
+                    $item['winning'] = 0;
                 }
             }
         }
