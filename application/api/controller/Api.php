@@ -8,6 +8,7 @@ use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
 use app\common\model\RoomModel;
 use app\common\model\UserAttrModel;
+use app\common\model\UserLoginLogModel;
 use app\common\model\UserModel;
 use app\common\model\VericodeModel;
 use Qcloud\Sms\SmsSingleSender;
@@ -147,6 +148,13 @@ class Api extends \think\Controller
             $data['count']      = $user['count'] + 1;
             $res                = $u->modify($data, ['id' => $user['id']]);
             if ($res) {
+                if (!empty($param['log_data'])) {
+                    $ull              = new UserLoginLogModel();
+                    $ld               = $param['login_data'];
+                    $ld['uid']        = $user['id'];
+                    $ld['login_time'] = time();
+                    $ull->add($ld);
+                }
                 $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $user['id'], 'mobile' => $user['mobile']]];
             } else {
                 $msg = ['status' => 3, 'info' => '登录失败', 'data' => null];
