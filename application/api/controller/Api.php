@@ -134,7 +134,7 @@ class Api extends \think\Controller
             $appid  = 'wxecd6bfdba0623aa5';
             $secret = '8ff39ccfde133942cd8933b240a79960';
         }
-        $url  = "https://api.weixin.qq.com/sns/jscode2cookie?appid={$appid}&secret={$secret}&js_code={$js_code}&grant_type=authorization_code";
+        $url  = "https://api.weixin.qq.com/sns/jscode2session?appid={$appid}&secret={$secret}&js_code={$js_code}&grant_type=authorization_code";
         $data = $this->curl($url);
         $data = json_decode($data, true);
         if (empty($data['openid'])) {
