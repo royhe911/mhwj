@@ -704,7 +704,7 @@ class Api extends \think\Controller
             $users    = $u->getList(['is_delete' => 0, 'id' => ['in', $uids], 'type' => 2], 'id,nickname,avatar');
             $users    = array_column($users, null, 'id');
             $ua       = new UserAttrModel();
-            $attrs    = $ua->getList(['uid' => ['in', $uids]], 'uid,game_id,winning');
+            $attrs    = $ua->getList(['uid' => ['in', $uids], 'game_id' => ['in', $game_ids]], 'uid,game_id,winning');
             $attr_arr = [];
             foreach ($attrs as $attr) {
                 $attr_arr[$attr['uid']][$attr['game_id']] = $attr['winning'];
