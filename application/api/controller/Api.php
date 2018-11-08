@@ -72,8 +72,9 @@ class Api extends \think\Controller
     public function get_carousel(NoticeModel $n)
     {
         $count = 3;
-        if (!empty($this->param['count'])) {
-            $count = $this->param['count'];
+        $param = $this->param;
+        if (!empty($param['count'])) {
+            $count = $param['count'];
         }
         $where = ['is_delete' => 0, 'status' => 0, 'type' => 1];
         $list  = $n->getList($where, '`name`,`url`', "1,$count", "sort");
@@ -99,8 +100,9 @@ class Api extends \think\Controller
     public function get_notice(NoticeModel $n)
     {
         $count = 10;
-        if (!empty($this->param['count'])) {
-            $count = $this->param['count'];
+        $param = $this->param;
+        if (!empty($param['count'])) {
+            $count = $param['count'];
         }
         $where = ['is_delete' => 0, 'status' => 0, 'type' => 2];
         $list  = $n->getList($where, '`name`,`content`', "1,$count", "sort");
@@ -121,13 +123,14 @@ class Api extends \think\Controller
      */
     public function user_login(UserModel $u)
     {
-        if (empty($this->param['js_code'])) {
+        $param = $this->param;
+        if (empty($param['js_code'])) {
             echo json_encode(['status' => 1, 'info' => 'js_code 参数不能为空', 'data' => null]);exit;
         }
-        $js_code = $this->param['js_code'];
+        $js_code = $param['js_code'];
         $appid   = 'wxe6f37de8e1e3225e';
         $secret  = '357566bea005201ce062acaabd4a58e9';
-        if (!empty($this->param['type']) && intval($this->param['type']) === 2) {
+        if (!empty($param['type']) && intval($param['type']) === 2) {
             $appid  = 'wxecd6bfdba0623aa5';
             $secret = '8ff39ccfde133942cd8933b240a79960';
         }
@@ -149,7 +152,7 @@ class Api extends \think\Controller
                 $msg = ['status' => 3, 'info' => '登录失败', 'data' => null];
             }
         } else {
-            $data['type']       = $this->param['type'];
+            $data['type']       = $param['type'];
             $data['addtime']    = time();
             $data['login_time'] = time();
             $id                 = $u->add($data);
@@ -171,12 +174,13 @@ class Api extends \think\Controller
      */
     public function sync_userinfo(UserModel $u)
     {
-        if (empty($this->param['id'])) {
+        $param = $this->param;
+        if (empty($param['id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
         }
-        $this->param['updatetime'] = time();
+        $param['updatetime'] = time();
         // 修改信息
-        $res = $u->modify($this->param, ['id' => $this->param['id']]);
+        $res = $u->modify($param, ['id' => $param['id']]);
         if ($res !== false) {
             $msg = ['status' => 0, 'info' => '同步成功', 'data' => null];
         } else {
@@ -193,17 +197,18 @@ class Api extends \think\Controller
      */
     public function user_examine(UserModel $u)
     {
-        if (empty($this->param['id'])) {
+        $param = $this->param;
+        if (empty($param['id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
         }
-        if (empty($this->param['mobile'])) {
+        if (empty($param['mobile'])) {
             echo json_encode(['status' => 8, 'info' => '手机号不能为空', 'data' => null]);exit;
         }
-        $mobile = $this->param['mobile'];
-        if (empty($this->param['code'])) {
+        $mobile = $param['mobile'];
+        if (empty($param['code'])) {
             echo json_encode(['status' => 9, 'info' => '验证码不能为空', 'data' => null]);exit;
         }
-        $code  = $this->param['code'];
+        $code  = $param['code'];
         $msg   = [];
         $v     = new VericodeModel();
         $vcode = $v->getModel(['mobile' => "v_$mobile"]);
@@ -212,36 +217,36 @@ class Api extends \think\Controller
         } elseif ($vcode['vericode'] !== $code) {
             $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
         } else {
-            unset($this->param['code']);
+            unset($param['code']);
             $v->delByWhere(['mobile' => "v_$mobile"]);
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        if (empty($this->param['avatar'])) {
+        if (empty($param['avatar'])) {
             echo json_encode(['status' => 2, 'info' => '头像不能为空', 'data' => null]);exit;
         }
-        if (empty($this->param['nickname'])) {
+        if (empty($param['nickname'])) {
             echo json_encode(['status' => 3, 'info' => '昵称不能为空', 'data' => null]);exit;
         }
-        if (empty($this->param['sex'])) {
+        if (empty($param['sex'])) {
             echo json_encode(['status' => 4, 'info' => '性别不能为空', 'data' => null]);exit;
         }
-        if (empty($this->param['birthday'])) {
+        if (empty($param['birthday'])) {
             echo json_encode(['status' => 5, 'info' => '生日不能为空', 'data' => null]);exit;
         }
-        if (empty($this->param['introduce'])) {
+        if (empty($param['introduce'])) {
             echo json_encode(['status' => 6, 'info' => '简介不能为空', 'data' => null]);exit;
         }
-        if (empty($this->param['tape'])) {
+        if (empty($param['tape'])) {
             echo json_encode(['status' => 7, 'info' => '录音地址不能为空', 'data' => null]);exit;
         }
-        $this->param['updatetime'] = time();
-        $this->param['status']     = 1;
+        $param['updatetime'] = time();
+        $param['status']     = 1;
         // 修改信息
-        $res = $u->modify($this->param, ['id' => $this->param['id']]);
+        $res = $u->modify($param, ['id' => $param['id']]);
         if ($res !== false) {
-            $data = ['type' => 1, 'uid' => $this->param['id'], 'title' => '系统消息', 'content' => '正在审核，请稍后查看', 'addtime' => time()];
+            $data = ['type' => 1, 'uid' => $param['id'], 'title' => '系统消息', 'content' => '正在审核，请稍后查看', 'addtime' => time()];
             $m    = new MessageModel();
             $m->add($data);
             $msg = ['status' => 0, 'info' => '提交成功', 'data' => null];
@@ -260,10 +265,11 @@ class Api extends \think\Controller
      */
     public function get_userinfo(UserModel $u)
     {
-        if (empty($this->param['id'])) {
+        $param = $this->param;
+        if (empty($param['id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失']);exit;
         }
-        $user = $u->getModel(['id' => $this->param['id']], 'id,nickname,`type`,avatar,contribution');
+        $user = $u->getModel(['id' => $param['id']], 'id,nickname,`type`,avatar,contribution');
         if ($user) {
             $msg = ['status' => 0, 'info' => '获取成功', 'data' => $user];
         } else {
@@ -284,11 +290,12 @@ class Api extends \think\Controller
         // 分页参数
         $page     = 1;
         $pagesize = 100;
-        if (!empty($this->param['page'])) {
-            $page = $this->param['page'];
+        $param    = $this->param;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
         }
-        if (!empty($this->param['pagesize'])) {
-            $pagesize = $this->param['pagesize'];
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
         }
         $list = $g->getList($where, 'id,identify,`name`,url', "$page,$pagesize");
         if ($list) {
@@ -312,23 +319,24 @@ class Api extends \think\Controller
      */
     public function add_game(UserAttrModel $ua)
     {
-        if (empty($this->param['uid']) || empty($this->param['game_id'])) {
+        $param = $this->param;
+        if (empty($param['uid']) || empty($param['game_id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
         }
-        if (empty($this->param['curr_para'])) {
+        if (empty($param['curr_para'])) {
             echo json_encode(['status' => 2, 'info' => '当前段位不能为空', 'data' => null]);exit;
         }
-        if (empty($this->param['play_type'])) {
+        if (empty($param['play_type'])) {
             echo json_encode(['status' => 4, 'info' => '陪玩类型不能为空', 'data' => null]);exit;
         }
-        if (empty($this->param['level_url'])) {
+        if (empty($param['level_url'])) {
             echo json_encode(['status' => 5, 'info' => '水平截图不能为空', 'data' => null]);exit;
         }
-        $userAttr = $ua->getModel(['uid' => $this->param['uid'], 'game_id' => $this->param['game_id']]);
+        $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']]);
         if ($userAttr) {
-            $res = $ua->modify($this->param, ['uid' => $this->param['uid'], 'game_id' => $this->param['game_id']]);
+            $res = $ua->modify($param, ['uid' => $param['uid'], 'game_id' => $param['game_id']]);
         } else {
-            $res = $ua->add($this->param);
+            $res = $ua->add($param);
         }
         if ($res !== false) {
             $msg = ['status' => 0, 'info' => '添加成功', 'data' => null];
@@ -367,10 +375,11 @@ class Api extends \think\Controller
      */
     public function get_user_games(UserAttrModel $ua)
     {
-        if (empty($this->param['uid'])) {
+        $param = $this->param;
+        if (empty($param['uid'])) {
             echo json_encode(['status' => 1, 'info' => '用户ID不能为空', 'data' => null]);exit;
         }
-        $uid  = $this->param['uid'];
+        $uid  = $param['uid'];
         $u    = new UserModel();
         $user = $u->getModel(['id' => $uid]);
         if ($user['type'] !== 2 || $user['status'] !== 8) {
@@ -413,10 +422,11 @@ class Api extends \think\Controller
      */
     public function get_game_config(GameModel $g, GameConfigModel $gc)
     {
-        if (empty($this->param['game_id'])) {
+        $param = $this->param;
+        if (empty($param['game_id'])) {
             echo json_encode(['status' => 1, 'info' => '游戏ID不能为空', 'data' => null]);exit;
         }
-        $game_id = $this->param['game_id'];
+        $game_id = $param['game_id'];
         $where   = ['is_delete' => 0, 'id' => $game_id];
         $game    = $g->getModel($where, 'identify,demo_url1,demo_url2');
         if (!$game) {
@@ -451,21 +461,22 @@ class Api extends \think\Controller
      */
     public function user_tip(MessageModel $m)
     {
-        if (empty($this->param['id'])) {
+        $param = $this->param;
+        if (empty($param['id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
         }
-        $id = $this->param['id'];
+        $id = $param['id'];
         if (!preg_match('/^\d+$/', $id)) {
             echo json_encode(['status' => 2, 'info' => '非法参数', 'data' => null]);exit;
         }
         // 分页参数
         $page     = 1;
         $pagesize = 100;
-        if (!empty($this->param['page'])) {
-            $page = $this->param['page'];
+        if (!empty($param['page'])) {
+            $page = $param['page'];
         }
-        if (!empty($this->param['pagesize'])) {
-            $pagesize = $this->param['pagesize'];
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
         }
         $list = $m->getList(['uid' => $id, 'type' => 1], 'title,content,addtime', "$page,$pagesize", 'addtime desc');
         if ($list) {
@@ -489,14 +500,15 @@ class Api extends \think\Controller
      */
     public function user_feedback(FeedbackModel $f)
     {
-        if (empty($this->param['uid'])) {
+        $param = $this->param;
+        if (empty($param['uid'])) {
             echo json_encode(['status' => 1, 'info' => '反馈用户ID不能为空', 'data' => null]);exit;
-        }$uid = $this->param['uid'];
-        if (empty(ltrim(rtrim($this->param['content'])))) {
+        }
+        if (empty(ltrim(rtrim($param['content'])))) {
             echo json_encode(['status' => 2, 'info' => '反馈内容不能为空', 'data' => null]);exit;
         }
-        $this->param['addtime'] = time();
-        $res                    = $f->add($this->param);
+        $param['addtime'] = time();
+        $res              = $f->add($param);
         if ($res) {
             $msg = ['status' => 0, 'info' => '反馈成功', 'data' => null];
         } else {
@@ -513,15 +525,16 @@ class Api extends \think\Controller
      */
     public function get_vericode()
     {
-        if (empty($this->param['mobile'])) {
+        $param = $this->param;
+        if (empty($param['mobile'])) {
             echo json_encode(['status' => 1, 'info' => '手机号不能为空', 'data' => null]);exit;
         }
         $v      = new VericodeModel();
-        $mobile = $this->param['mobile'];
+        $mobile = $param['mobile'];
         $v->delByWhere(['mobile' => "v_$mobile"]);
         $num = 4;
-        if (!empty($this->param['num'])) {
-            $num = intval($this->param['num']);
+        if (!empty($param['num'])) {
+            $num = intval($param['num']);
         }
         $vericode   = get_random_num($num);
         $sms        = new SmsSingleSender(config('SDKAPPID'), config('APPKEY'));
@@ -546,17 +559,18 @@ class Api extends \think\Controller
      */
     public function check_vericode(VericodeModel $v)
     {
-        if (empty($this->param['code']) || empty($this->param['mobile'])) {
+        $param = $this->param;
+        if (empty($param['code']) || empty($param['mobile'])) {
             echo json_encode(['status' => 1, 'info' => '非法参数', 'data' => null]);exit;
         }
-        $mobile = $this->param['mobile'];
+        $mobile = $param['mobile'];
         $code   = $v->getModel(['mobile' => "v_$mobile"]);
         if (empty($code)) {
             $msg = ['status' => 1, 'info' => '无效手机号', 'data' => null];
         } elseif (time() - $code['addtime'] > 300) {
             $v->delByWhere(['mobile' => "v_$mobile"]);
             $msg = ['status' => 2, 'info' => '验证码过期', 'data' => null];
-        } elseif ($code["vericode"] !== $this->param['code']) {
+        } elseif ($code["vericode"] !== $param['code']) {
             $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
         } else {
             $v->delByWhere(['mobile' => "v_$mobile"]);
@@ -573,56 +587,100 @@ class Api extends \think\Controller
      */
     public function add_room(RoomModel $r)
     {
-        if (empty($this->param['name'])) {
+        $param = $this->param;
+        if (empty($param['name'])) {
             $msg = ['status' => 8, 'info' => '房间名称不能为空', 'data' => null];
-        } elseif (strlen($this->param['name']) > 24) {
+        } elseif (strlen($param['name']) > 24) {
             $msg = ['status' => 9, 'info' => '名称过长', 'data' => null];
-        } elseif (empty($this->param['uid'])) {
+        } elseif (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
-        } elseif (empty($this->param['game_id'])) {
+        } elseif (empty($param['game_id'])) {
             $msg = ['status' => 2, 'info' => '游戏ID不能为空', 'data' => null];
-        } elseif (empty($this->param['type'])) {
+        } elseif (empty($param['type'])) {
             $msg = ['status' => 3, 'info' => '房间类型不能为空', 'data' => null];
-        } elseif (intval($this->param['type']) === 1 && empty($this->param['para_min'])) {
+        } elseif (intval($param['type']) === 1 && empty($param['para_min'])) {
             $msg = ['status' => 12, 'info' => '最低服务段位不能为空', 'data' => null];
-        } elseif (intval($this->param['type']) === 1 && empty($this->param['para_max'])) {
+        } elseif (intval($param['type']) === 1 && empty($param['para_max'])) {
             $msg = ['status' => 13, 'info' => '最高服务段位不能为空', 'data' => null];
-        } elseif (empty($this->param['region'])) {
+        } elseif (empty($param['region'])) {
             $msg = ['status' => 4, 'info' => '房间所属大区不能为空', 'data' => null];
-        } elseif (empty($this->param['count']) || intval($this->param['count']) < 2 || intval($this->param['count']) > 5) {
+        } elseif (empty($param['count']) || intval($param['count']) < 2 || intval($param['count']) > 5) {
             $msg = ['status' => 5, 'info' => '房间人数只能是2-5人', 'data' => null];
-        } elseif (empty($this->param['price'])) {
+        } elseif (empty($param['price'])) {
             $msg = ['status' => 14, 'info' => '每局价格不能为空', 'data' => null];
-        } elseif (empty($this->param['num']) || intval($this->param['num']) < 1 || intval($this->param['num']) > 5) {
+        } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5) {
             $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
             $u    = new UserModel();
-            $user = $u->getModel(['id' => $this->param['uid']], 'type,`status`');
+            $user = $u->getModel(['id' => $param['uid']], 'type,`status`');
             if (!$user) {
                 $msg = ['status' => 6, 'info' => '陪玩师不存在', 'data' => null];
             } elseif ($user['type'] !== 2 || $user['status'] !== 8) {
                 $msg = ['status' => 7, 'info' => '无权创建', 'data' => null];
             } else {
                 $ua       = new UserAttrModel();
-                $userAttr = $ua->getModel(['uid' => $this->param['uid'], 'game_id' => $this->param['game_id']], 'curr_para,play_type');
+                $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']], 'curr_para,play_type');
                 if (!$userAttr) {
                     $msg = ['status' => 10, 'info' => '您不能陪玩此游戏', 'data' => null];
-                } elseif ($userAttr['play_type'] === 2 || $userAttr['curr_para'] < $this->param['para_max'] || $this->param['para_max'] < $this->param['para_min']) {
+                } elseif ($userAttr['play_type'] === 2 || $userAttr['curr_para'] < $param['para_max'] || $param['para_max'] < $param['para_min']) {
                     $msg = ['status' => 11, 'info' => '您的等级不够陪玩的等级', 'data' => null];
                 }
             }
         }
-        $this->param['addtime'] = time();
+        $param['addtime'] = time();
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $res = $r->add($this->param);
+        $res = $r->add($param);
         if ($res) {
             $msg = ['status' => 0, 'info' => '创建成功', 'data' => null];
         } else {
             $msg = ['status' => 44, 'info' => '创建失败', 'data' => null];
         }
         echo json_encode($msg);exit;
+    }
+
+    /**
+     * 获取房间列表
+     * @author 贺强
+     * @time   2018-11-08 11:59:20
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function get_room_list(RoomModel $r)
+    {
+        $param = $this->param;
+        $where = ['is_delete' => 0];
+        if (!empty($param['game_id'])) {
+            $where['game_id'] = $param['game_id'];
+        }
+        if (!empty($param['region'])) {
+            $where['region'] = $param['region'];
+        }
+        // 分页参数
+        $page     = 1;
+        $pagesize = 10;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count', "$page,$pagesize");
+        if ($list) {
+            $u     = new UserModel();
+            $users = $u->getList(['is_delete' => 0, 'type' => 2], 'id,nickname,avatar');
+            $users = array_column($users, null, 'id');
+            foreach ($list as &$item) {
+                if (!empty($users[$item['uid']])) {
+                    $item['nickname'] = $users[$item['uid']]['nickname'];
+                    $item['avatar']   = $users[$item['uid']]['avatar'];
+                } else {
+                    $item['nickname'] = '';
+                    $item['avatar']   = '';
+                }
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
 }

@@ -56,16 +56,18 @@ class Room extends \think\Controller
             $game_ids = array_column($list, 'game_id');
             $u        = new UserModel();
             $users    = $u->getList(['id' => ['in', $uids]], 'id,nickname');
+            $users    = array_column($users, 'nickname', 'id');
             $g        = new GameModel();
             $games    = $g->getList(['id' => ['in', $game_ids]], 'id,name');
+            $games    = array_column($games, 'name', 'id');
             foreach ($list as &$item) {
                 if (!empty($users[$item['uid']])) {
-                    $item['nickname'] = $users[$item['uid']]['nickname'];
+                    $item['nickname'] = $users[$item['uid']];
                 } else {
                     $item['nickname'] = '';
                 }
                 if (!empty($games[$item['game_id']])) {
-                    $item['game_name'] = $games[$item['game_id']]['name'];
+                    $item['game_name'] = $games[$item['game_id']];
                 } else {
                     $item['game_name'] = '';
                 }
