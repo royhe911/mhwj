@@ -64,5 +64,6 @@ return [
     '/api/addroom'    => 'api/Api/add_room', // 创建房间
     '/api/roomlist'   => 'api/Api/get_room_list', // 房间列表
     '/api/userlist'   => 'api/Api/get_user_list', // 用户列表
+    '/api/inroom'     => 'api/Api/come_in_room', // 进入房间
     /*--------   api 结束  --------*/
 ];

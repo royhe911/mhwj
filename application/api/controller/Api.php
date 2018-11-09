@@ -751,4 +751,28 @@ class Api extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
+    /**
+     * 进入房间
+     * @author 贺强
+     * @time   2018-11-09 10:27:20
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function come_in_room(RoomModel $r)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 2, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $res = $r->in_room($param['room_id'], $param['uid']);
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '进入房间失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '进入房间成功', 'data' => null]);exit;
+    }
+
 }
