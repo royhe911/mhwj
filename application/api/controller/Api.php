@@ -837,6 +837,8 @@ class Api extends \think\Controller
             $msg = '进入房间失败';
             if ($res === 3) {
                 $msg = '房间人数已满';
+            } elseif ($res === 4) {
+                $msg = '房间不存在';
             }
             echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
         }
