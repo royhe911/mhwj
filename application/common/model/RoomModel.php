@@ -18,12 +18,6 @@ class RoomModel extends CommonModel
     /**
      * 进入房间
      * @author 贺强
-     * @time   2018-11-09 09:36:08
-     * @param  RoomUserModel $ru RoomUserModel 实例
-     */
-    /**
-     * 进入房间
-     * @author 贺强
      * @time   2018-11-09 10:25:04
      * @param  int  $room_id 进入的房间ID
      * @param  int  $uid     进入用户ID
