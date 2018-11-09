@@ -770,7 +770,11 @@ class Api extends \think\Controller
         }
         $res = $r->in_room($param['room_id'], $param['uid']);
         if ($res !== true) {
-            echo json_encode(['status' => $res, 'info' => '进入房间失败', 'data' => null]);exit;
+            $msg = '进入房间失败';
+            if ($res === 9) {
+                $msg = '不能重复进入';
+            }
+            echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '进入房间成功', 'data' => null]);exit;
     }

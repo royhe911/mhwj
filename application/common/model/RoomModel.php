@@ -31,27 +31,36 @@ class RoomModel extends CommonModel
      */
     public function in_room($room_id, $uid)
     {
-        Db::startTrans();
-        $sql  = "select id,in_count,count from m_room where id=$room_id for update";
-        $data = Db::query($sql);
-        $data = $data[0];
-        if ($data['in_count'] < $data['count']) {
-            $in_data = ['room_id' => $room_id, 'uid' => $uid, 'addtime' => time()];
-            $ru      = new RoomUserModel();
-            $res     = $ru->add($in_data);
-            if (!$res) {
-                Db::rollback();
-                return 1;
-            }
-            $res = $this->modifyField('in_count', $data['in_count'] + 1, ['id' => $room_id])
-            if (!$res) {
-                Db::rollback();
-                return 2;
-            }
-            Db::commit();
-            return true;
+        $ru       = new RoomUserModel();
+        $roomuser = $ru->getCount(['room_id' => $room_id, 'uid' => $uid]);
+        if ($roomuser) {
+            return 9;
         }
-        Db::rollback();
-        return 3;
+        Db::startTrans();
+        try {
+            $sql  = "select id,in_count,count from m_room where id=$room_id for update";
+            $data = Db::query($sql);
+            $data = $data[0];
+            if ($data['in_count'] < $data['count']) {
+                $in_data = ['room_id' => $room_id, 'uid' => $uid, 'addtime' => time()];
+                $res     = $ru->add($in_data);
+                if (!$res) {
+                    Db::rollback();
+                    return 1;
+                }
+                $res = $this->modifyField('in_count', $data['in_count'] + 1, ['id' => $room_id]);
+                if (!$res) {
+                    Db::rollback();
+                    return 2;
+                }
+                Db::commit();
+                return true;
+            }
+            Db::rollback();
+            return 3;
+        } catch (\Exception $e) {
+            Db::rollback();
+            return 44;
+        }
     }
 }
