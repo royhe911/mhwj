@@ -767,6 +767,23 @@ class Api extends \think\Controller
         }
         $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count');
         if ($room) {
+            $g    = new GameModel();
+            $game = $g->getModel(['id' => $room['game_id']], 'name');
+            if ($game) {
+                $room['game_name'] = $game['name'];
+            } else {
+                $room['game_name'] = '';
+            }
+            if ($room['type'] === 1) {
+                $room['type'] = '实力上分';
+            } else {
+                $room['type'] = '娱乐陪玩';
+            }
+            if ($room['region'] === 1) {
+                $room['region'] = 'QQ';
+            } elseif ($room['region'] === 2) {
+                $room['region'] = '微信';
+            }
             $gc     = new GameConfigModel();
             $gclist = $gc->getList(['game_id' => $room['game_id'], 'para_id' => ['in', [$room['para_min'], $room['para_max']]]], 'para_id,para_str');
             foreach ($gclist as $gci) {
@@ -787,7 +804,7 @@ class Api extends \think\Controller
                 if ($user['id'] === $room['uid']) {
                     $members['master'] = $user;
                 } else {
-                    $members['members'][] = $user;
+                    $members['users'][] = $user;
                 }
             }
             $room['members'] = $members;
