@@ -16,6 +16,47 @@ class RoomModel extends CommonModel
     }
 
     /**
+     * 关闭/打开位置
+     * @author 贺强
+     * @time   2018-11-09 17:14:44
+     * @param  int  $room_id 房间ID
+     * @param  int  $type    操作类型，1关闭 2打开
+     * @return boll          返回是否关闭成功
+     */
+    public function set_seat($room_id, $type = 1)
+    {
+        Db::startTrans();
+        try {
+            $sql  = "select id,in_count,count from m_room where id=$room_id for update";
+            $data = Db::query($sql);
+            if (!$data) {
+                Db::rollback();
+                return 4;
+            }
+            $data = $data[0];
+            if ($type === 1 && $data['count'] === 2) {
+                return 2;
+            } elseif ($type === 2 && $data['count'] === 5) {
+                return 3;
+            }
+            if ($type === 1) {
+                $res = $this->decrement('count', ['id' => $room_id]);
+            } else {
+                $res = $this->increment('count', ['id' => $room_id]);
+            }
+            if (!$res) {
+                Db::rollback();
+                return 1;
+            }
+            Db::commit();
+            return true;
+        } catch (\Exception $e) {
+            Db::rollback();
+            return 44;
+        }
+    }
+
+    /**
      * 进入房间
      * @author 贺强
      * @time   2018-11-09 10:25:04
@@ -35,6 +76,7 @@ class RoomModel extends CommonModel
             $sql  = "select id,in_count,count from m_room where id=$room_id for update";
             $data = Db::query($sql);
             if (!$data) {
+                Db::rollback();
                 return 4;
             }
             $data = $data[0];

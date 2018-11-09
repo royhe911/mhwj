@@ -869,4 +869,39 @@ class Api extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '退出成功', 'data' => null]);exit;
     }
 
+    /**
+     * 关闭/打开位置
+     * @author 贺强
+     * @time   2018-11-09 17:17:01
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function set_seat(RoomModel $r)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 10, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 20, 'info' => '操作类型不能为空', 'data' => null];
+        } elseif (intval($param['type']) !== 1 && intval($param['type']) !== 2) {
+            $msg = ['status' => 30, 'info' => '非法操作', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $res = $r->set_seat($param['room_id'], $param['type']);
+        if ($res !== true) {
+            $msg = '操作失败';
+            switch ($res) {
+                case 2:
+                    $msg = '至少要留两个位置';
+                    break;
+                case 3:
+                    $msg = '最多只能有5个位置';
+                    break;
+            }
+            echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '操作成功', 'data' => null]);exit;
+    }
+
 }

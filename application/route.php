@@ -67,5 +67,6 @@ return [
     '/api/userlist'   => 'api/Api/get_user_list', // 用户列表
     '/api/inroom'     => 'api/Api/come_in_room', // 进入房间
     '/api/quitroom'   => 'api/Api/quit_room', // 退出房间
+    '/api/setseat'    => 'api/Api/set_seat', // 关闭位置
     /*--------   api 结束  --------*/
 ];
