@@ -825,9 +825,9 @@ class Api extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['room_id'])) {
-            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+            $msg = ['status' => 10, 'info' => '房间ID不能为空', 'data' => null];
         } elseif (empty($param['uid'])) {
-            $msg = ['status' => 2, 'info' => '用户ID不能为空', 'data' => null];
+            $msg = ['status' => 20, 'info' => '用户ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -843,6 +843,30 @@ class Api extends \think\Controller
             echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '进入房间成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 退出房间
+     * @author 贺强
+     * @time   2018-11-09 16:52:45
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function quit_room(RoomModel $r)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 10, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 20, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $res = $r->quit_room($param['room_id'], $param['uid']);
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '退出失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '退出成功', 'data' => null]);exit;
     }
 
 }

@@ -61,4 +61,35 @@ class RoomModel extends CommonModel
             return 44;
         }
     }
+
+    /**
+     * 退出房间
+     * @author 贺强
+     * @time   2018-11-09 16:51:36
+     * @param  int  $room_id 房间ID
+     * @param  int  $uid     用户ID
+     * @return bool          返回是否退出成功
+     */
+    public function quit_room($room_id, $uid)
+    {
+        Db::startTrans();
+        try {
+            $ru  = new RoomUserModel();
+            $res = $ru->delByWhere(['room_id' => $room_id, 'uid' => $uid]);
+            if (!$res) {
+                Db::rollback();
+                return 1;
+            }
+            $res = $this->decrement('in_count', ['id' => $room_id]);
+            if (!$res) {
+                Db::rollback();
+                return 2;
+            }
+            Db::commit();
+            return true;
+        } catch (\Exception $e) {
+            Db::rollback();
+            return 44;
+        }
+    }
 }
