@@ -43,6 +43,7 @@ class RoomModel extends CommonModel
                     return 1;
                 }
                 $res = $this->modifyField('in_count', $data['in_count'] + 1, ['id' => $room_id]);
+                // var_dump($res);exit;
                 if (!$res) {
                     Db::rollback();
                     return 2;

@@ -92,7 +92,7 @@ class CommonModel extends Model
     {
         $num = Db::table($this->table)
             ->where($where)
-        // ->fetchSql(true)
+            // ->fetchSql(true)
             ->setField($field, $value);
         // $num = db($this->table)->where($where)->setField($field, $value);
         return $num;
@@ -161,7 +161,7 @@ class CommonModel extends Model
             ->order($order)
             ->where($where)
             ->whereOr($whereOr)
-            // ->fetchSql(true)
+        // ->fetchSql(true)
             ->find();
         // $model = db($this->table)->where($where)->find();
         return $model;
