@@ -28,7 +28,7 @@ class RoomModel extends CommonModel
         $ru       = new RoomUserModel();
         $roomuser = $ru->getCount(['room_id' => $room_id, 'uid' => $uid]);
         if ($roomuser) {
-            return 9;
+            return true;
         }
         Db::startTrans();
         try {
