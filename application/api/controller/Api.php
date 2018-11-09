@@ -765,7 +765,7 @@ class Api extends \think\Controller
         if (empty($param['room_id'])) {
             echo json_encode(['status' => 1, 'info' => '房间ID不能为空', 'data' => null]);exit;
         }
-        $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count');
+        $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count');
         if ($room) {
             $g    = new GameModel();
             $game = $g->getModel(['id' => $room['game_id']], 'name');
@@ -835,8 +835,8 @@ class Api extends \think\Controller
         $res = $r->in_room($param['room_id'], $param['uid']);
         if ($res !== true) {
             $msg = '进入房间失败';
-            if ($res === 9) {
-                $msg = '不能重复进入';
+            if ($res === 3) {
+                $msg = '房间人数已满';
             }
             echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
         }
