@@ -7,6 +7,7 @@ use app\common\model\GameModel;
 use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
 use app\common\model\RoomModel;
+use app\common\model\RoomUserModel;
 use app\common\model\UserAttrModel;
 use app\common\model\UserLoginLogModel;
 use app\common\model\UserModel;
@@ -666,7 +667,8 @@ class Api extends \think\Controller
                 }
             }
         }
-        $param['addtime'] = time();
+        $param['in_count'] = 1;
+        $param['addtime']  = time();
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
@@ -749,6 +751,51 @@ class Api extends \think\Controller
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 获取房间信息
+     * @author 贺强
+     * @time   2018-11-09 10:59:17
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function get_room_info(RoomModel $r, RoomUserModel $ru)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            echo json_encode(['status' => 1, 'info' => '房间ID不能为空', 'data' => null]);exit;
+        }
+        $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count');
+        if ($room) {
+            $gc     = new GameConfigModel();
+            $gclist = $gc->getList(['game_id' => $room['game_id'], 'para_id' => ['in', [$room['para_min'], $room['para_max']]]], 'para_id,para_str');
+            foreach ($gclist as $gci) {
+                if ($room['para_min'] === $gci['para_id']) {
+                    $room['para_min_str'] = $gci['para_str'];
+                } elseif ($room['para_max'] === $gci['para_id']) {
+                    $room['para_max_str'] = $gci['para_str'];
+                }
+            }
+            $roomuser = $ru->getList(['room_id' => $param['room_id']]);
+            $uids     = array_column($roomuser, 'uid');
+            array_push($uids, $room['uid']);
+            // var_dump($uids);exit;
+            $u       = new UserModel();
+            $users   = $u->getList(['id' => ['in', $uids]], 'id,nickname,avatar');
+            $members = [];
+            foreach ($users as $user) {
+                if ($user['id'] === $room['uid']) {
+                    $members['master'] = $user;
+                } else {
+                    $members['members'][] = $user;
+                }
+            }
+            $room['members'] = $members;
+            $msg             = ['status' => 0, 'info' => '获取成功', 'data' => $room];
+        } else {
+            $msg = ['status' => 4, 'info' => '房间不存在', 'data' => null];
+        }
+        echo json_encode($msg);exit;
     }
 
     /**
