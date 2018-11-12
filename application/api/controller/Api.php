@@ -678,7 +678,7 @@ class Api extends \think\Controller
         }
         $res = $r->add($param);
         if ($res) {
-            $msg = ['status' => 0, 'info' => '创建成功', 'data' => null];
+            $msg = ['status' => 0, 'info' => '创建成功', 'data' => ['id' => $res, 'count' => $param['count'], 'in_count' => 1]];
         } else {
             $msg = ['status' => 44, 'info' => '创建失败', 'data' => null];
         }
