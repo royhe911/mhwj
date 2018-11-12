@@ -31,7 +31,7 @@ $serv->on('open', function ($server, $req) {
 $serv->on('message', function ($server, $frame) {
     $msg = json_decode($frame->data, true);
     $str = json_encode($frame);
-    // file_put_contents('/www/wwwroot/wwwdragontangcom/swoole.log', $str);
+    file_put_contents('/www/wwwroot/wwwdragontangcom/swoole.log', $str);
     if ($msg['type'] === 'login') {
         $path        = '/root/swoole-src/users/' . date('Ymd') . $msg['roomid'].'.log';
         $content_arr = ['roomid' => $msg['roomid'], 'users' => []];

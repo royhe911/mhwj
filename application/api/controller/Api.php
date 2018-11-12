@@ -893,7 +893,7 @@ class Api extends \think\Controller
         }
         $count = $r->getCount(['id' => $param['room_id'], 'uid' => $param['uid']]);
         if (!$count) {
-            echo json_encode(['status' => 3, 'info' => '您不是房主，无权关闭']);exit;
+            echo json_encode(['status' => 3, 'info' => '您不是房主，无权关闭', 'data' => null]);exit;
         }
         $count = $ru->getCount(['room_id' => $param['room_id']]);
         if ($count) {
