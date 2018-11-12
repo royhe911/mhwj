@@ -73,13 +73,16 @@ class RoomModel extends CommonModel
         }
         Db::startTrans();
         try {
-            $sql  = "select id,in_count,count from m_room where id=$room_id for update";
+            $sql  = "select id,uid,in_count,count from m_room where id=$room_id for update";
             $data = Db::query($sql);
             if (!$data) {
                 Db::rollback();
                 return 4;
             }
-            $data = $data[0];
+            $data     = $data[0];
+            if ($uid === $data['uid']) {
+                return true;
+            }
             if ($data['in_count'] < $data['count']) {
                 $in_data = ['room_id' => $room_id, 'uid' => $uid, 'addtime' => time()];
                 $res     = $ru->add($in_data);

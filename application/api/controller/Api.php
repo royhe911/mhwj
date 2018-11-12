@@ -874,6 +874,39 @@ class Api extends \think\Controller
     }
 
     /**
+     * 关闭房间
+     * @author 贺强
+     * @time   2018-11-12 10:02:20
+     * @param  RoomModel     $r  RoomModel 实例
+     * @param  RoomUserModel $ru RoomUserModel 实例
+     */
+    public function close_room(RoomModel $r, RoomUserModel $ru)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 2, 'info' => '房主ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $count = $r->getCount(['id' => $param['room_id'], 'uid' => $param['uid']]);
+        if (!$count) {
+            echo json_encode(['status' => 3, 'info' => '您不是房主，无权关闭']);exit;
+        }
+        $count = $ru->getCount(['room_id' => $param['room_id']]);
+        if ($count) {
+            echo json_encode(['status' => 4, 'info' => '房间里有其他玩家，不能关闭']);exit;
+        }
+        $res = $r->delById($param['room_id']);
+        if (!$res) {
+            echo json_encode(['status' => 44, 'info' => '关闭失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '关闭成功', 'data' => null]);exit;
+    }
+
+    /**
      * 关闭/打开位置
      * @author 贺强
      * @time   2018-11-09 17:17:01
