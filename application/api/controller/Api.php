@@ -809,13 +809,16 @@ class Api extends \think\Controller
             $uids     = array_column($roomuser, 'uid');
             array_push($uids, $room['uid']);
             // var_dump($uids);exit;
-            $u       = new UserModel();
-            $users   = $u->getList(['id' => ['in', $uids]], 'id,nickname,avatar');
-            $members = [];
+            $u        = new UserModel();
+            $users    = $u->getList(['id' => ['in', $uids]], 'id,nickname,avatar');
+            $members  = [];
+            $ustatus  = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status');
+            $ustatarr = array_column($ustatus, 'status', 'uid');
             foreach ($users as $user) {
                 if ($user['id'] === $room['uid']) {
                     $members['master'] = $user;
                 } else {
+                    $user['status']     = $ustatarr[$user['id']];
                     $members['users'][] = $user;
                 }
             }

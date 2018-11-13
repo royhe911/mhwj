@@ -11,10 +11,11 @@ $serv->set(array(
     'log_file'                 => __DIR__ . '/log/webs_swoole.log',
     'heartbeat_check_interval' => 60,
     'heartbeat_idle_time'      => 600,
-    'ssl_cert_file'            => '/root/swoole-src/examples/ssl/ssl.crt',
-    #'ssl_cert_file'            => '/usr/local/src/swoole/ca/server/server.crt',
+    'ssl_cert_file'            => '/root/swoole-src/tests/include/api/swoole_http_server/localhost-ssl/server.pem',
+    // 'ssl_cert_file'            => '/root/swoole-src/examples/ssl/ssl.crt',
+    // 'ssl_cert_file'            => '/usr/local/src/swoole/ca/server/server.crt',
     'ssl_key_file'             => '/root/swoole-src/examples/ssl/ssl.key',
-    #'ssl_key_file'             => '/usr/local/src/swoole/ca/server/server.key',
+    // 'ssl_key_file'             => '/usr/local/src/swoole/ca/server/server.key',
 ));
 
 $serv->on('connect', function ($serv, $fd) {
