@@ -1022,7 +1022,7 @@ class Api extends \think\Controller
             $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
         } elseif (empty($param['uid'])) {
             $msg = ['status' => 2, 'info' => '用户ID不能为空', 'data' => null];
-        } elseif (empty($param['status'])) {
+        } elseif ($param['status'] === null) {
             $msg = ['status' => 3, 'info' => '设置状态不能为空', 'data' => null];
         }
         if (!empty($msg)) {
