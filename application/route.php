@@ -71,5 +71,9 @@ return [
     '/api/setseat'    => 'api/Api/set_seat', // 关闭位置
     '/api/addchat'    => 'api/Api/add_chat', // 添加聊天记录
     '/api/chatlog'    => 'api/Api/get_chat_log', // 聊天记录
+    '/api/ready'      => 'api/Api/user_ready', // 玩家准备
     /*--------   api 结束  --------*/
+    /*--------   支付 api 开始  --------*/
+    '/api/pay/prepay' => 'api/Pay/prepay', // 预支付
+    /*--------   支付 api 结束  --------*/
 ];

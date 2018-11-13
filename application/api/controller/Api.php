@@ -1009,4 +1009,30 @@ class Api extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
+    /**
+     * 玩家准备
+     * @author 贺强
+     * @time   2018-11-13 15:56:05
+     * @param  RoomUserModel $ru RoomUserModel 实例
+     */
+    public function user_ready(RoomUserModel $ru)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 2, 'info' => '用户ID不能为空', 'data' => null];
+        } elseif (empty($param['status'])) {
+            $msg = ['status' => 3, 'info' => '设置状态不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $res = $ru->modify($param, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+        if ($res === false) {
+            echo json_encode(['status' => 44, 'info' => '操作失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '操作成功', 'data' => null]);exit;
+    }
+
 }

@@ -108,3 +108,52 @@ function get_client_ip()
     }
     return $realip;
 }
+
+/**
+ * 数组转 xml
+ * @author 贺强
+ * @time   2018-11-13 15:03:03
+ * @param  array  $arr 被转换的数组
+ * @return string      返回转换后的 xml 字符串
+ */
+function array2xml($arr)
+{
+    $xml = "<xml>";
+    foreach ($arr as $key => $val) {
+        $xml .= "<$key>$val</$key>";
+    }
+    $xml .= "</xml>";
+}
+
+/**
+ * xml 转换为数组
+ * @author 贺强
+ * @time   2018-11-13 15:12:04
+ * @param  string $xml 被转换的 xml
+ * @return array       返回转换后的数组
+ */
+function xml2array($xml)
+{
+    $targetArr = [];
+    $xmlObj    = simplexml_load_string($xml);
+    $minArr    = (array) $xmlObj;
+    foreach ($minArr as $key => $value) {
+        if (is_string($value)) {
+            $targetArr[$key] = $value;
+        }
+        if (is_object($value)) {
+            $targetArr[$key] = xml2array($value->asXML());
+        }
+        if (is_array($value)) {
+            foreach ($value as $zkey => $zvalue) {
+                if (is_numeric($zkey)) {
+                    $targetArr[$key][] = xml2array($zvalue->asXML());
+                }
+                if (is_string($zkey)) {
+                    $targetArr[$key][$zkey] = xml2array($zvalue->asXML());
+                }
+            }
+        }
+    }
+    return $targetArr;
+}
