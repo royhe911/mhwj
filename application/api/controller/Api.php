@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use app\common\model\ChatModel;
+use app\common\model\ChatUserModel;
 use app\common\model\FeedbackModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
@@ -768,7 +769,13 @@ class Api extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['room_id'])) {
-            echo json_encode(['status' => 1, 'info' => '房间ID不能为空', 'data' => null]);exit;
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        }
+        if (empty($param['uid'])) {
+            $msg = ['status' => 2, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
         }
         $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count');
         if ($room) {
@@ -813,6 +820,9 @@ class Api extends \think\Controller
                 }
             }
             $room['members'] = $members;
+            $c               = new ChatModel();
+            $list            = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $param['room_id'], 'c.uid' => $param['uid']], ['a.uid', 'a.avatar', 'a.content']);
+            $room['chatlog'] = $list;
             $msg             = ['status' => 0, 'info' => '获取成功', 'data' => $room];
         } else {
             $msg = ['status' => 4, 'info' => '房间不存在', 'data' => null];
@@ -904,6 +914,10 @@ class Api extends \think\Controller
         if (!$res) {
             echo json_encode(['status' => 44, 'info' => '关闭失败', 'data' => null]);exit;
         }
+        $c = new ChatModel();
+        $c->delByWhere(['room_id' => $param['room_id']]);
+        $cu = new ChatUserModel();
+        $cu->delByWhere(['room_id' => $param['room_id']]);
         echo json_encode(['status' => 0, 'info' => '关闭成功', 'data' => null]);exit;
     }
 
@@ -969,6 +983,30 @@ class Api extends \think\Controller
             echo json_encode(['status' => $res, 'info' => '添加失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '添加成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 获取聊天记录
+     * @author 贺强
+     * @time   2018-11-13 12:13:21
+     * @param  ChatModel $c ChatModel 实例
+     */
+    public function get_chat_log(ChatModel $c)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 2, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $list = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $param['room_id'], 'c.uid' => $param['uid']], ['a.uid', 'a.avatar', 'a.content']);
+        if (!$list) {
+            echo json_encode(['status' => 4, 'info' => '获取失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
 }

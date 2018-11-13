@@ -79,7 +79,7 @@ class RoomModel extends CommonModel
                 Db::rollback();
                 return 4;
             }
-            $data     = $data[0];
+            $data = $data[0];
             if ($uid === $data['uid']) {
                 return true;
             }
@@ -130,6 +130,8 @@ class RoomModel extends CommonModel
                 Db::rollback();
                 return 2;
             }
+            $cu = new ChatUserModel();
+            $cu->delByWhere(['room_id' => $room_id, 'uid' => $uid]);
             Db::commit();
             return true;
         } catch (\Exception $e) {

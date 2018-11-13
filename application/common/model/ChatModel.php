@@ -30,15 +30,13 @@ class ChatModel extends CommonModel
                 return 10;
             }
             $r        = new RoomUserModel();
-            $uid_list = $r->getList(['room_id' => $data['room_id']], 'uid');
+            $uid_list = $r->getList(['room_id' => $data['room_id']], 'uid,room_id');
             if (!empty($uid_list)) {
-                $uids = array_column($uid_list, 'uid');
-                $dcu  = [];
-                foreach ($uids as $uid) {
-                    $dcu[] = ['uid' => $uid, 'chat_id' => $res];
+                foreach ($uid_list as &$uid) {
+                    $uid['chat_id'] = $res;
                 }
                 $cu  = new ChatUserModel();
-                $res = $cu->addArr($dcu);
+                $res = $cu->addArr($uid_list);
                 if (!$res) {
                     Db::rollback();
                     return 20;
