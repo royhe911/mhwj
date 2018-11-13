@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>WebSocket测试</title> 
+<script type="text/javascript" src="jquery.min.js"> 
+</script>
+</head>
+<body>
+<h2>WebSocket Test</h2> 
+昵称：<input type="text" id="name" size="5" value="游客"/> <input type="text" id="content"> 
+<button onclick="speak_to_all()">发送</button>
+<br/><br/>
+<textarea id="message" style="overflow-x:hidden" rows="10" cols="50"></textarea> 
+<div id="output"></div>
+</body> 
+<script type="text/javascript"> 
+var wsUri ="ws://45.40.254.72:3999/"; 
+var output; 
+function init() { 
+output = document.getElementById("output"); 
+testWebSocket();
+}
+function testWebSocket() { 
+websocket = new WebSocket(wsUri); 
+websocket.onopen = function(evt) { 
+onOpen(evt) 
+};
+websocket.onclose = function(evt) { 
+onClose(evt) 
+};
+websocket.onmessage = function(evt) {
+onMessage(evt) 
+};
+websocket.onerror = function(evt) { 
+onError(evt) 
+};
+}
+function get_speak_msg(){
+var name=document.getElementById("name").value;
+var speak=document.getElementById("content").value;
+var json_msg='{"name":"'+name+'","speak":\"'+speak+'"}';
+return json_msg;
+}
+function pack_msg(type,msg){
+return '{"type":"'+type+'","roomid":"1","msg":'+msg+'}';
+}
+function onOpen(evt) {
+// append_speak("已经联通服务器.........");
+speak_msg=get_speak_msg();
+send_msg=pack_msg("login",speak_msg);
+doSend(send_msg);
+}
+function onClose(evt) { 
+append_speak("俺老孙去也！");
+} 
+function onMessage(evt) {
+append_speak(evt.data);
+}
+function onError(evt) {
+alert(evt.data);
+}
+function doSend(message) { 
+websocket.send(message);
+}
+function append_speak(new_msg){
+    $new_msg = $.parseJSON(new_msg)
+    var str = '';
+    var $msg = $.parseJSON($new_msg.type);
+    console.log($msg)
+    if ($msg.type == 'login') {
+        str = $msg.msg.name+' 来了'
+    }else{
+        str = $msg.msg.name+" 说：\n"+$msg.msg.speak
+    }
+document.getElementById("message").value=document.getElementById("message").value+str+"\n";
+document.getElementById('message').scrollTop = document.getElementById('message').scrollHeight;
+}
+function speak_to_all(){
+send_msg=pack_msg("speak",get_speak_msg());
+if(document.getElementById("content").value==""){
+return;
+}
+doSend(send_msg);
+document.getElementById("content").value="";
+}
+init();
+</script>
+</html>

@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\ChatModel;
 use app\common\model\FeedbackModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
@@ -939,6 +940,34 @@ class Api extends \think\Controller
             echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '操作成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 添加聊天记录
+     * @author 贺强
+     * @time   2018-11-13 11:21:45
+     * @param  ChatModel     $c  ChatModel 实例
+     */
+    public function add_chat(ChatModel $c)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 2, 'info' => '说话用户ID不能为空', 'data' => null];
+        } elseif (empty($param['avatar'])) {
+            $msg = ['status' => 3, 'info' => '说话用户头像不能为空', 'data' => null];
+        } elseif (empty($param['content'])) {
+            $msg = ['status' => 4, 'info' => '聊天内容不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $res = $c->add_chat($param);
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '添加失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '添加成功', 'data' => null]);exit;
     }
 
 }

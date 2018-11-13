@@ -69,5 +69,6 @@ return [
     '/api/quitroom'   => 'api/Api/quit_room', // 退出房间
     '/api/closeroom'  => 'api/Api/close_room', // 关闭房间
     '/api/setseat'    => 'api/Api/set_seat', // 关闭位置
+    '/api/addchat'    => 'api/Api/add_chat', // 添加聊天记录
     /*--------   api 结束  --------*/
 ];

@@ -1,0 +1,54 @@
+<?php
+namespace app\common\model;
+
+use think\Db;
+
+/**
+ * ChatModel类
+ * @author 贺强
+ * @time   2018-11-13 11:18:28
+ */
+class ChatModel extends CommonModel
+{
+    public function __construct()
+    {
+        $this->table = 'm_chat';
+    }
+
+    /**
+     * 添加聊天记录
+     * @author 贺强
+     * @time   2018-11-13 11:38:50
+     */
+    public function add_chat($data)
+    {
+        Db::startTrans();
+        try {
+            $res = $this->add($data);
+            if (!$res) {
+                Db::rollback();
+                return 10;
+            }
+            $r        = new RoomUserModel();
+            $uid_list = $r->getList(['room_id' => $data['room_id']], 'uid');
+            if (!empty($uid_list)) {
+                $uids = array_column($uid_list, 'uid');
+                $dcu  = [];
+                foreach ($uids as $uid) {
+                    $dcu[] = ['uid' => $uid, 'chat_id' => $res];
+                }
+                $cu  = new ChatUserModel();
+                $res = $cu->addArr($dcu);
+                if (!$res) {
+                    Db::rollback();
+                    return 20;
+                }
+            }
+            Db::commit();
+            return true;
+        } catch (\Exception $e) {
+            Db::rollback();
+            return 44;
+        }
+    }
+}
