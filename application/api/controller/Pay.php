@@ -60,7 +60,7 @@ class Pay extends \think\Controller
         $ru   = new RoomUserModel();
         $c    = new CouponModel();
         $data = [];
-        $user = $u->getModel(['id' => $param['uid']], 'avatar');
+        $user = $u->getModel(['id' => $param['uid']], ['avatar', 'nickname']);
         if (!$user) {
             echo json_encode(['status' => 3, 'info' => '玩家不存在', 'data' => null]);exit;
         }
@@ -72,17 +72,21 @@ class Pay extends \think\Controller
         if (!$rus) {
             echo json_encode(['status' => 7, 'info' => '该用户未进入房间', 'data' => null]);exit;
         }
-        $cus = $c->getList(['uid' => $param['uid'], 'status' => 0], ['type', 'money', 'over_time']);
-        if ($cus) {
-            foreach ($cus as &$cs) {
-                if (!empty($cs['over_time'])) {
-                    $cs['over_time'] = date('Y-m-d H:i:s', $cs['over_time']);
+        if ($rus['total_money'] >= 35) {
+            $cus = $c->getModel(['uid' => $param['uid'], 'status' => 0], ['type', 'money', 'over_time']);
+            if ($cus) {
+                if (!empty($cus['over_time'])) {
+                    $cus['over_time'] = date('Y-m-d H:i:s', $cus['over_time']);
                 }
+                $data['last_money'] = $rus['total_money'] - $cus['money'];
+                $data['coupon']     = $cus;
             }
-            $data['coupon'] = $cus;
-        } else {
-            $data['count'] = null;
         }
+        if (empty($data['coupon'])) {
+            $data['coupon']     = null;
+            $data['last_money'] = $cus['total_money'];
+        }
+        $data['nickname']    = $user['nickname'];
         $data['avatar']      = $user['avatar'];
         $data['name']        = $room['name'];
         $data['type']        = $room['type'];
@@ -141,6 +145,11 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $r    = new RoomModel();
+        $room = $r->getModel(['id' => $param['room_id']]);
+        if ($room) {
+
+        }
         $mo     = new MasterOrderModel();
         $morder = $mo->getModel(['room_id' => $param['room_id']], 'id');
         if ($morder) {
@@ -153,6 +162,18 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 4, 'info' => '下单失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => null]);exit;
+    }
+
+    public function get_user_order(UserOrderModel $uo)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '玩家ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $list = $uo->getList(['']);
     }
 
     /**
