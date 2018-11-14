@@ -653,7 +653,7 @@ class Api extends \think\Controller
         } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5) {
             $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
-            $param['total_money'] = floatval($param['price']) * intval($param['num']) * intval($param['count']);
+            $param['total_money'] = floatval($param['price']) * intval($param['num']) * (intval($param['count']) - 1);
             $count                = $r->getCount(['is_delete' => 0, 'uid' => $param['uid']]);
             if ($count) {
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
