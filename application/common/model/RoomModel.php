@@ -120,17 +120,22 @@ class RoomModel extends CommonModel
         Db::startTrans();
         try {
             $ru  = new RoomUserModel();
+            // 删除退出房间的玩家
             $res = $ru->delByWhere(['room_id' => $room_id, 'uid' => $uid]);
             if (!$res) {
                 Db::rollback();
                 return 1;
             }
+            // 一旦有人退出，其它人取消准备
+            $ru->modifyField('status', 0, ['room_id' => $room_id]);
+            // 退出后房间已进入的人数减 1
             $res = $this->decrement('in_count', ['id' => $room_id]);
             if (!$res) {
                 Db::rollback();
                 return 2;
             }
             $cu = new ChatUserModel();
+            // 删除退出房间玩家的聊天信息
             $cu->delByWhere(['room_id' => $room_id, 'uid' => $uid]);
             Db::commit();
             return true;

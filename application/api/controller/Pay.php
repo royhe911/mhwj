@@ -1,6 +1,10 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\MasterOrderModel;
+use app\common\model\RoomModel;
+use app\common\model\UserOrderModel;
+
 /**
  * Pay-控制器
  * @author 贺强
@@ -80,6 +84,71 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 3, 'info' => $res['return_msg'], 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '操作成功', 'data' => $res]);exit;
+    }
+
+    /**
+     * 添加房主订单
+     * @author 贺强
+     * @time   2018-11-13 19:12:25
+     * @param  MasterOrderModel $mo MasterOrderModel 实例
+     */
+    public function add_master_order(MasterOrderModel $mo)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
+        } elseif (empty($param['room_id'])) {
+            $msg = ['status' => 2, 'info' => '房间ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $r    = new RoomModel();
+        $room = $r->getModel(['id' => $param['room_id']], ['price', 'num', 'count']);
+        if ($room) {
+            $order_money          = $room['price'] * $room['num'] * $room['count'];
+            $param['order_money'] = $order_money;
+        }
+        $param['order_num'] = get_millisecond();
+        $param['addtime']   = time();
+        $res                = $mo->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 4, 'info' => '下单失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 添加玩家订单
+     * @author 贺强
+     * @time   2018-11-13 19:13:18
+     * @param  UserOrderModel $uo UserOrderModel 实例
+     */
+    public function add_user_order(UserOrderModel $uo)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '玩家ID不能为空', 'data' => null];
+        } elseif (empty($param['room_id'])) {
+            $msg = ['status' => 2, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['order_money'])) {
+            $msg = ['status' => 3, 'info' => '订单金额不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $mo     = new MasterOrderModel();
+        $morder = $mo->getModel(['room_id' => $param['room_id']], 'id');
+        if ($morder) {
+            $param['morder_id'] = $morder['id'];
+        }
+        $param['order_num'] = get_millisecond();
+        $param['addtime']   = time();
+        $res                = $uo->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 4, 'info' => '下单失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => null]);exit;
     }
 
     /**

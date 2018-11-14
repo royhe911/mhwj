@@ -74,6 +74,8 @@ return [
     '/api/ready'      => 'api/Api/user_ready', // 玩家准备
     /*--------   api 结束  --------*/
     /*--------   支付 api 开始  --------*/
+    '/api/pay/morder' => 'api/Pay/add_master_order', // 房主下单
+    '/api/pay/uorder' => 'api/Pay/add_user_order', // 玩家下单
     '/api/pay/prepay' => 'api/Pay/prepay', // 预支付
     /*--------   支付 api 结束  --------*/
 ];

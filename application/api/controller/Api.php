@@ -653,7 +653,8 @@ class Api extends \think\Controller
         } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5) {
             $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
-            $count = $r->getCount(['is_delete' => 0, 'uid' => $param['uid']]);
+            $param['total_money'] = floatval($param['price']) * intval($param['num']) * intval($param['count']);
+            $count                = $r->getCount(['is_delete' => 0, 'uid' => $param['uid']]);
             if ($count) {
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
             }
@@ -795,6 +796,9 @@ class Api extends \think\Controller
                 $room['region'] = 'QQ';
             } elseif ($room['region'] === 2) {
                 $room['region'] = '微信';
+            }
+            if ($room['uid'] != $param['uid']) {
+                $room['total_money'] /= $room['count'];
             }
             $gc     = new GameConfigModel();
             $gclist = $gc->getList(['game_id' => $room['game_id'], 'para_id' => ['in', [$room['para_min'], $room['para_max']]]], 'para_id,para_str');
