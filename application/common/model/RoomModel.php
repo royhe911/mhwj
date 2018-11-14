@@ -73,6 +73,7 @@ class RoomModel extends CommonModel
         }
         Db::startTrans();
         try {
+            // 进入房间锁定房间信息以免两个人同时进入
             $sql  = "select id,uid,in_count,count from m_room where id=$room_id for update";
             $data = Db::query($sql);
             if (!$data) {
@@ -85,11 +86,13 @@ class RoomModel extends CommonModel
             }
             if ($data['in_count'] < $data['count']) {
                 $in_data = ['room_id' => $room_id, 'uid' => $uid, 'addtime' => time()];
+                // 添加进入房间信息
                 $res     = $ru->add($in_data);
                 if (!$res) {
                     Db::rollback();
                     return 1;
                 }
+                // 进入房间成功后房间已进入的人数加 1
                 $res = $this->modifyField('in_count', $data['in_count'] + 1, ['id' => $room_id]);
                 // var_dump($res);exit;
                 if (!$res) {

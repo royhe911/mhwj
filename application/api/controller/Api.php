@@ -822,7 +822,15 @@ class Api extends \think\Controller
                 if ($user['id'] === $room['uid']) {
                     $members['master'] = $user;
                 } else {
-                    $user['status']     = $ustatarr[$user['id']];
+                    $status         = $ustatarr[$user['id']];
+                    $user['status'] = $status;
+                    if ($status === 0) {
+                        $user['status_txt'] = '未准备';
+                    } elseif ($status === 1) {
+                        $user['status_txt'] = '已准备';
+                    } elseif ($status === 6) {
+                        $user['status_txt'] = '已支付';
+                    }
                     $members['users'][] = $user;
                 }
             }
