@@ -836,7 +836,7 @@ class Api extends \think\Controller
                         $user['status_txt'] = $status_txt;
                         if ($user['id'] === $param['uid']) {
                             $room['total_money'] = $usta['total_money'];
-                            $room['status']      = $status;
+                            $room['status']      = $usta['status'];
                             $room['status_txt']  = $status_txt;
                         }
                     }
