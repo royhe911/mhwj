@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use app\common\model\CouponModel;
+use app\common\model\GameModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
@@ -84,7 +85,7 @@ class Pay extends \think\Controller
         }
         if (empty($data['coupon'])) {
             $data['coupon']     = null;
-            $data['last_money'] = $cus['total_money'];
+            $data['last_money'] = $rus['total_money'];
         }
         $data['nickname']    = $user['nickname'];
         $data['avatar']      = $user['avatar'];
@@ -148,7 +149,8 @@ class Pay extends \think\Controller
         $r    = new RoomModel();
         $room = $r->getModel(['id' => $param['room_id']]);
         if ($room) {
-
+            $param['game_id']   = $room['game_id'];
+            $param['play_type'] = $room['type'];
         }
         $mo     = new MasterOrderModel();
         $morder = $mo->getModel(['room_id' => $param['room_id']], 'id');
@@ -164,6 +166,12 @@ class Pay extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => null]);exit;
     }
 
+    /**
+     * 获取玩家订单
+     * @author 贺强
+     * @time   2018-11-14 17:08:03
+     * @param  UserOrderModel $uo UserOrderModel 实例
+     */
     public function get_user_order(UserOrderModel $uo)
     {
         $param = $this->param;
@@ -173,7 +181,54 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $list = $uo->getList(['']);
+        // 分页参数
+        $page     = 1;
+        $pagesize = 10;
+        $param    = $this->param;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $uo->getList(['uid' => $param['uid']], ['game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
+        if ($list) {
+            $u     = new UserModel();
+            $user  = $u->getModel(['id' => $param['uid']]);
+            $g     = new GameModel();
+            $games = $g->getList(['is_delete' => 0], ['id', 'name']);
+            $games = array_column($games, 'name', 'id');
+            foreach ($list as &$item) {
+                $item['nickname'] = $user['nickname'];
+                $item['avatar']   = $user['avatar'];
+                if (!empty($games[$item['game_id']])) {
+                    $item['gamename'] = $games[$item['game_id']];
+                } else {
+                    $item['gamename'] = '';
+                }
+                if ($item['play_type'] === 1) {
+                    $item['play_type'] = '实力上分';
+                } else {
+                    $item['play_type'] = '娱乐陪玩';
+                }
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                switch ($item['status']) {
+                    case 0:
+                        $item['status_txt'] = '未支付';
+                        break;
+                    case 6:
+                        $item['status_txt'] = '已支付';
+                        break;
+                    case 10:
+                        $item['status_txt'] = '已完成';
+                        break;
+                }
+            }
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+        }
+        echo json_encode(['status' => 4, 'info' => '暂无订单', 'data' => null]);exit;
     }
 
     /**
