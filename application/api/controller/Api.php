@@ -797,9 +797,9 @@ class Api extends \think\Controller
             } elseif ($room['region'] === 2) {
                 $room['region'] = '微信';
             }
-            if ($room['uid'] != $param['uid']) {
-                $room['total_money'] /= $room['count'];
-            }
+            // if ($room['uid'] != $param['uid']) {
+            //     $room['total_money'] /= $room['count'];
+            // }
             $gc     = new GameConfigModel();
             $gclist = $gc->getList(['game_id' => $room['game_id'], 'para_id' => ['in', [$room['para_min'], $room['para_max']]]], 'para_id,para_str');
             foreach ($gclist as $gci) {
@@ -816,25 +816,29 @@ class Api extends \think\Controller
             $u        = new UserModel();
             $users    = $u->getList(['id' => ['in', $uids]], 'id,nickname,avatar');
             $members  = [];
-            $ustatus  = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status');
-            $ustatarr = array_column($ustatus, 'status', 'uid');
+            $ustatus  = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status,total_money');
+            $ustatarr = array_column($ustatus, null, 'uid');
             foreach ($users as $user) {
                 if ($user['id'] === $room['uid']) {
                     $members['master'] = $user;
                 } else {
-                    $status         = $ustatarr[$user['id']];
-                    $user['status'] = $status;
-                    if ($status === 0) {
-                        $status_txt = '未准备';
-                    } elseif ($status === 1) {
-                        $status_txt = '已准备';
-                    } elseif ($status === 6) {
-                        $status_txt = '已支付';
-                    }
-                    $user['status_txt'] = $status_txt;
-                    if ($user['id'] === $param['uid']) {
-                        $room['status']     = $status;
-                        $room['status_txt'] = $status_txt;
+                    $usta = $ustatarr[$user['id']];
+                    if (!empty($usta)) {
+                        $user['status'] = $usta['status'];
+                        $status_txt     = '';
+                        if ($usta['status'] === 0) {
+                            $status_txt = '未准备';
+                        } elseif ($usta['status'] === 1) {
+                            $status_txt = '已准备';
+                        } elseif ($usta['status'] === 6) {
+                            $status_txt = '已支付';
+                        }
+                        $user['status_txt'] = $status_txt;
+                        if ($user['id'] === $param['uid']) {
+                            $room['total_money'] = $usta['total_money'];
+                            $room['status']      = $status;
+                            $room['status_txt']  = $status_txt;
+                        }
                     }
                     $members['users'][] = $user;
                 }

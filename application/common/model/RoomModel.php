@@ -74,7 +74,7 @@ class RoomModel extends CommonModel
         Db::startTrans();
         try {
             // 进入房间锁定房间信息以免两个人同时进入
-            $sql  = "select id,uid,in_count,count from m_room where id=$room_id for update";
+            $sql  = "select id,uid,price,num,in_count,count from m_room where id=$room_id for update";
             $data = Db::query($sql);
             if (!$data) {
                 Db::rollback();
@@ -85,9 +85,9 @@ class RoomModel extends CommonModel
                 return true;
             }
             if ($data['in_count'] < $data['count']) {
-                $in_data = ['room_id' => $room_id, 'uid' => $uid, 'addtime' => time()];
+                $in_data = ['room_id' => $room_id, 'uid' => $uid, 'addtime' => time(), 'price' => $data['price'], 'num' => $data['num'], 'total_money' => $data['price'] * $data['num']];
                 // 添加进入房间信息
-                $res     = $ru->add($in_data);
+                $res = $ru->add($in_data);
                 if (!$res) {
                     Db::rollback();
                     return 1;
@@ -122,7 +122,7 @@ class RoomModel extends CommonModel
     {
         Db::startTrans();
         try {
-            $ru  = new RoomUserModel();
+            $ru = new RoomUserModel();
             // 删除退出房间的玩家
             $res = $ru->delByWhere(['room_id' => $room_id, 'uid' => $uid]);
             if (!$res) {

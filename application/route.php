@@ -76,6 +76,7 @@ return [
     /*--------   支付 api 开始  --------*/
     '/api/pay/morder' => 'api/Pay/add_master_order', // 房主下单
     '/api/pay/uorder' => 'api/Pay/add_user_order', // 玩家下单
+    '/api/pay/preodr' => 'api/Pay/preorder', // 预下单
     '/api/pay/prepay' => 'api/Pay/prepay', // 预支付
     /*--------   支付 api 结束  --------*/
 ];
