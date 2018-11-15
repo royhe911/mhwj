@@ -257,20 +257,15 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $uorder = $uo->getModel(['order_num' => $param['order_num']]);
-        if (!$uorder) {
-            echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
-        }
-        $mo     = new MasterOrderModel();
-        $morder = $mo->getModel(['id' => $uorder['morder_id']]);
-        $mdat   = ['complete_money' => $morder['complete_money'] + $uorder['order_money'], 'complete_time' => time()];
-        $res    = $mo->increment('', ['id' => $uorder['morder_id']]);
         if (intval($param['status']) === 6) {
             $param['pay_time'] = time();
         }
-        $res = $uo->modifyField('status', $param['status'], ['order_num' => $param['order_num']]);
-        if (!$res) {
-            echo json_encode(['status' => 4, 'info' => '修改失败', 'data' => null]);exit;
+        $res = $uo->modify_order($param);
+        if ($res === 33) {
+            echo json_encode(['status' => 33, 'info' => '服务器忙，请稍后再试', 'data' => null]);exit;
+        }
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '修改失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
     }
@@ -284,7 +279,9 @@ class Pay extends \think\Controller
     public function personal_preorder(PersonalOrderModel $po)
     {
         $param = $this->param;
-        if (empty($param['game_id'])) {
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '下单人不能为空', 'data' => null];
+        } elseif (empty($param['game_id'])) {
             $msg = ['status' => 1, 'info' => '游戏ID不能为空', 'data' => null];
         } elseif (empty($param['region'])) {
             $msg = ['status' => 2, 'info' => '游戏大区不能为空', 'data' => null];
@@ -306,6 +303,34 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 44, 'info' => '下单失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => ['order_num' => $order_num]]);exit;
+    }
+
+    /**
+     * 订制下单支付
+     * @author 贺强
+     * @time   2018-11-15 16:20:59
+     * @param  PersonalOrderModel $po PersonalOrderModel 实例
+     */
+    public function wx_pay(PersonalOrderModel $po)
+    {
+        $param = $this->param;
+        if (empty($param['order_num'])) {
+            echo json_encode(['status' => 1, 'info' => '订单号不能为空', 'data' => null]);exit;
+        }
+        $porder = $po->getModel(['order_num' => $param['order_num']]);
+        if (!$porder) {
+            echo json_encode(['status' => 1, 'info' => '订单不存在', 'data' => null]);exit;
+        }
+        // 调用微信支付接口进行支付
+        // 
+        // 
+        // 支付成功后更改订单
+        $state = true;
+        if (!$state) {
+            echo json_encode(['status' => 4, 'info' => '支付失败', 'data' => null]);exit;
+        }
+        $res = $po->modifyField('status', 6, ['order_num' => $param['order_num']]);
+        echo json_encode(['status' => 0, 'info' => '支付成功', 'data' => null]);exit;
     }
 
     /**

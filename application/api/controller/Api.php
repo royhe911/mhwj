@@ -1054,6 +1054,7 @@ class Api extends \think\Controller
         } elseif ($param['status'] === null) {
             $msg = ['status' => 3, 'info' => '设置状态不能为空', 'data' => null];
         }
+        $param['ready_time'] = time();
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }

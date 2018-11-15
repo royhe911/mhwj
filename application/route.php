@@ -81,5 +81,6 @@ return [
     '/api/pay/odrsta' => 'api/Pay/modify_order', // 订单状态
     '/api/pay/ppord'  => 'api/Pay/personal_preorder', // 订制下单
     '/api/pay/prepay' => 'api/Pay/prepay', // 预支付
+    '/api/pay/wxpay'  => 'api/Pay/wx_pay', // 订制支付
     /*--------   支付 api 结束  --------*/
 ];
