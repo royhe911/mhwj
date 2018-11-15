@@ -1,5 +1,5 @@
 <?php
-namespace app\admin\controller;
+namespace app\api\controller;
 
 use app\common\model\PersonRoomModel;
 
