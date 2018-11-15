@@ -34,14 +34,16 @@ class RoomModel extends CommonModel
                 return 4;
             }
             $data = $data[0];
-            if ($type === 1 && $data['count'] === 2) {
-                return 2;
-            } elseif ($type === 2 && $data['count'] === 5) {
-                return 3;
-            }
             if ($type === 1) {
+                if ($data['count'] === 2) {
+                    return 2;
+                }
                 $res = $this->decrement('count', ['id' => $room_id]);
-            } else {
+            }
+            if ($type === 2) {
+                if ($data['count'] === 5) {
+                    return 3;
+                }
                 $res = $this->increment('count', ['id' => $room_id]);
             }
             if (!$res) {

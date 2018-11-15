@@ -79,6 +79,7 @@ return [
     '/api/pay/preodr' => 'api/Pay/preorder', // 预下单
     '/api/pay/uodrs'  => 'api/Pay/get_user_order', // 玩家订单
     '/api/pay/odrsta' => 'api/Pay/modify_order', // 订单状态
+    '/api/pay/ppord'  => 'api/Pay/personal_preorder', // 订制下单
     '/api/pay/prepay' => 'api/Pay/prepay', // 预支付
     /*--------   支付 api 结束  --------*/
 ];

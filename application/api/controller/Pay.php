@@ -4,6 +4,7 @@ namespace app\api\controller;
 use app\common\model\CouponModel;
 use app\common\model\GameModel;
 use app\common\model\MasterOrderModel;
+use app\common\model\PersonalOrderModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
 use app\common\model\UserModel;
@@ -256,6 +257,14 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $uorder = $uo->getModel(['order_num' => $param['order_num']]);
+        if (!$uorder) {
+            echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
+        }
+        $mo     = new MasterOrderModel();
+        $morder = $mo->getModel(['id' => $uorder['morder_id']]);
+        $mdat   = ['complete_money' => $morder['complete_money'] + $uorder['order_money'], 'complete_time' => time()];
+        $res    = $mo->increment('', ['id' => $uorder['morder_id']]);
         if (intval($param['status']) === 6) {
             $param['pay_time'] = time();
         }
@@ -264,6 +273,39 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 4, 'info' => '修改失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 订制下单
+     * @author 贺强
+     * @time   2018-11-15 15:23:27
+     * @param  PersonalOrderModel $po PersonalOrderModel 实例
+     */
+    public function personal_preorder(PersonalOrderModel $po)
+    {
+        $param = $this->param;
+        if (empty($param['game_id'])) {
+            $msg = ['status' => 1, 'info' => '游戏ID不能为空', 'data' => null];
+        } elseif (empty($param['region'])) {
+            $msg = ['status' => 2, 'info' => '游戏大区不能为空', 'data' => null];
+        } elseif (empty($param['para_id'])) {
+            $msg = ['status' => 3, 'info' => '游戏段位不能为空', 'data' => null];
+        } elseif (empty($param['price'])) {
+            $msg = ['status' => 4, 'info' => '每局价格不能为空', 'data' => null];
+        } elseif (empty($param['num'])) {
+            $msg = ['status' => 5, 'info' => '游戏局数不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $order_num            = get_millisecond();
+        $param['order_num']   = $order_num;
+        $param['total_money'] = $param['price'] * $param['num'];
+        $res                  = $po->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 44, 'info' => '下单失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => ['order_num' => $order_num]]);exit;
     }
 
     /**
