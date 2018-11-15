@@ -352,6 +352,7 @@ class Pay extends \think\Controller
             }
         }
         $porder['last_money'] = $last_money;
+        $po->modifyField('total_money', $last_money, ['order_num' => $param['order_num']]);
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $porder]);exit;
     }
 
@@ -383,6 +384,12 @@ class Pay extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '支付成功', 'data' => null]);exit;
     }
 
+    /**
+     * 获取任务订单
+     * @author 贺强
+     * @time   2018-11-15 19:06:20
+     * @param  PersonalOrderModel $po PersonalOrderModel 实例
+     */
     public function person_task(PersonalOrderModel $po)
     {
         $param = $this->param;
@@ -397,17 +404,39 @@ class Pay extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $list = $po->getList(['status' => 6], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'price', 'num', 'type', 'total_money']);
-        if ($list) {
-            $g      = new GameModel();
-            $games  = $g->getList(['is_delete' => 0], ['id', 'name']);
-            $games  = array_column($games, 'name', 'id');
-            $gc     = new GameConfigModel();
-            $gconfs = $gc->getList(null, ['para_id', 'para_str']);
-            $gconfs = array_column($gconfs, 'para_str', 'para_id');
-            foreach ($list as &$item) {
-                
+        if (!$list) {
+            echo json_encode(['status' => 44, 'info' => '暂无任务', 'data' => null]);exit;
+        }
+        $g      = new GameModel();
+        $games  = $g->getList(['is_delete' => 0], ['id', 'name']);
+        $games  = array_column($games, 'name', 'id');
+        $gc     = new GameConfigModel();
+        $gconfs = $gc->getList(null, ['game_id', 'para_id', 'para_str']);
+        $gc_arr = [];
+        foreach ($gconfs as $gco) {
+            $gc_arr[$gco['game_id']][$gco['para_id']] = $gco['para_str'];
+        }
+        foreach ($list as &$item) {
+            if (!empty($games[$item['game_id']])) {
+                $item['gamename'] = $games[$item['game_id']];
+            } else {
+                $item['gamename'] = '';
+            }
+            if (!empty($gc_arr[$item['game_id']]) && !empty($gc_arr[$item['game_id']][$item['para_id']])) {
+                $item['para_str'] = $gc_arr[$item['game_id']][$item['para_id']];
+            } else {
+                $item['para_str'] = '';
+            }
+            if ($item['type'] === 1) {
+                $item['type'] = '普通订单';
+            }
+            if ($item['region'] === 1) {
+                $item['region'] = 'QQ';
+            } else {
+                $item['region'] = '微信';
             }
         }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**

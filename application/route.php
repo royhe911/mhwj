@@ -83,5 +83,6 @@ return [
     '/api/pay/prepay' => 'api/Pay/prepay', // 预支付
     '/api/pay/wxpay'  => 'api/Pay/person_pay', // 订制支付
     '/api/pay/popay'  => 'api/Pay/person_ord_pay', // 订制预支付
+    '/api/pay/tasks'  => 'api/Pay/person_task', // 任务订单
     /*--------   支付 api 结束  --------*/
 ];
