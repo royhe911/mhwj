@@ -76,13 +76,14 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 7, 'info' => '该用户未进入房间', 'data' => null]);exit;
         }
         if ($rus['total_money'] >= config('UPPERMONEY')) {
-            $cus = $c->getModel(['uid' => $param['uid'], 'status' => 0], ['type', 'money', 'over_time']);
+            $cus = $c->getModel(['uid' => $param['uid'], 'status' => 0], ['id', 'type', 'money', 'over_time']);
             if ($cus) {
                 if (!empty($cus['over_time'])) {
                     $cus['over_time'] = date('Y-m-d H:i:s', $cus['over_time']);
                 }
                 $data['last_money'] = $rus['total_money'] - $cus['money'];
                 $data['coupon']     = $cus;
+                $c->modifyField('status', 6, ['id' => $cus['id']]);
             }
         }
         if (empty($data['coupon'])) {
@@ -299,6 +300,7 @@ class Pay extends \think\Controller
         $order_num            = get_millisecond();
         $param['order_num']   = $order_num;
         $param['total_money'] = $param['price'] * $param['num'];
+        $param['addtime']     = time();
         $res                  = $po->add($param);
         if (!$res) {
             echo json_encode(['status' => 44, 'info' => '下单失败', 'data' => null]);exit;
@@ -307,7 +309,7 @@ class Pay extends \think\Controller
     }
 
     /**
-     * 订制订单支付
+     * 订制订单预支付
      * @author 贺强
      * @time   2018-11-15 16:46:23
      * @param  PersonalOrderModel $po PersonalOrderModel实例
@@ -318,12 +320,15 @@ class Pay extends \think\Controller
         if (empty($param['order_num'])) {
             echo json_encode(['status' => 1, 'info' => '订单号不能为空', 'data' => null]);exit;
         }
-        $porder = $po->getModel(['order_num' => $param['order_num']], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'num', 'price', 'addtime']);
+        $porder = $po->getModel(['order_num' => $param['order_num']], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'num', 'price', 'type', 'addtime', 'total_money']);
         if (!$porder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
         }
         if (time() > $porder['addtime'] + 300) {
             echo json_encode(['status' => 5, 'info' => '订单已过期', 'data' => null]);exit;
+        }
+        if ($porder['type'] === 1) {
+            $porder['type'] = '普通订单';
         }
         $g    = new GameModel();
         $game = $g->getModel(['id' => $porder['game_id']], ['name']);
@@ -337,14 +342,16 @@ class Pay extends \think\Controller
         if ($gameconf) {
             $porder['para_str'] = $gameconf['para_str'];
         }
-        $total_money = $last_money = $porder['price'] * $porder['num'];
-        if ($total_money > config('UPPERMONEY')) {
+        $last_money = $porder['total_money'];
+        if ($porder['total_money'] > config('UPPERMONEY')) {
             $c   = new CouponModel();
-            $cus = $c->getModel(['uid' => $porder['uid'], 'status' => 0], ['money']);
+            $cus = $c->getModel(['uid' => $porder['uid'], 'status' => 0], ['id', 'money']);
             if ($cus) {
                 $last_money -= $cus['money'];
+                $c->modifyField('status', 6, ['id' => $cus['id']]);
             }
         }
+        $porder['last_money'] = $last_money;
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $porder]);exit;
     }
 
@@ -354,7 +361,7 @@ class Pay extends \think\Controller
      * @time   2018-11-15 16:20:59
      * @param  PersonalOrderModel $po PersonalOrderModel 实例
      */
-    public function wx_pay(PersonalOrderModel $po)
+    public function person_pay(PersonalOrderModel $po)
     {
         $param = $this->param;
         if (empty($param['order_num'])) {
@@ -374,6 +381,33 @@ class Pay extends \think\Controller
         }
         $res = $po->modifyField('status', 6, ['order_num' => $param['order_num']]);
         echo json_encode(['status' => 0, 'info' => '支付成功', 'data' => null]);exit;
+    }
+
+    public function person_task(PersonalOrderModel $po)
+    {
+        $param = $this->param;
+        // 分页参数
+        $page     = 1;
+        $pagesize = 10;
+        $param    = $this->param;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $po->getList(['status' => 6], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'price', 'num', 'type', 'total_money']);
+        if ($list) {
+            $g      = new GameModel();
+            $games  = $g->getList(['is_delete' => 0], ['id', 'name']);
+            $games  = array_column($games, 'name', 'id');
+            $gc     = new GameConfigModel();
+            $gconfs = $gc->getList(null, ['para_id', 'para_str']);
+            $gconfs = array_column($gconfs, 'para_str', 'para_id');
+            foreach ($list as &$item) {
+                
+            }
+        }
     }
 
     /**
