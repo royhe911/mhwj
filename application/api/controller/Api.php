@@ -470,16 +470,19 @@ class Api extends \think\Controller
         }
         $game_id = $param['game_id'];
         $where   = ['is_delete' => 0, 'id' => $game_id];
-        $game    = $g->getModel($where, 'identify,demo_url1,demo_url2');
+        $game    = $g->getModel($where, 'identify,url,demo_url1,demo_url2');
         if (!$game) {
             echo json_encode(['status' => 2, 'info' => '数据错误', 'data' => null]);exit;
         }
         $where_c = ['game_id' => $game_id];
         $list    = $gc->getList($where_c, 'game_id,para_id,para_str,price', null, 'para_id');
         if ($list) {
-            $data['para']   = config($game['identify']);
-            $data['config'] = $list;
-            $demo_url1      = $game['demo_url1'];
+            $url = $game['url'];
+            if (strpos($url, 'http://') === false && strpos($url, 'https://') === false) {
+                $url = config('WEBSITE') . $url;
+            }
+            $data['url'] = $url;
+            $demo_url1   = $game['demo_url1'];
             if (strpos($demo_url1, 'http://') === false && strpos($demo_url1, 'https://') === false) {
                 $demo_url1 = config('WEBSITE') . $demo_url1;
             }
@@ -488,6 +491,8 @@ class Api extends \think\Controller
                 $demo_url2 = config('WEBSITE') . $demo_url2;
             }
             $data['demo_url'] = [$demo_url1, $demo_url2];
+            $data['para']     = config($game['identify']);
+            $data['config']   = $list;
             $msg              = ['status' => 0, 'info' => '获取成功', 'data' => $data];
         } else {
             $msg = ['status' => 4, 'info' => '数据错误', 'data' => null];

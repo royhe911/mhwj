@@ -199,7 +199,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $uo->getList($where, ['game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
+        $list = $uo->getList($where, ['order_num', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
         if ($list) {
             $u     = new UserModel();
             $user  = $u->getModel(['id' => $param['uid']]);
@@ -239,9 +239,31 @@ class Pay extends \think\Controller
         echo json_encode(['status' => 4, 'info' => '暂无订单', 'data' => null]);exit;
     }
 
-    public function FunctionName($value = '')
+    /**
+     * 修改玩家订单
+     * @author 贺强
+     * @time   2018-11-15 12:09:28
+     * @param  UserOrderModel $uo UserOrderModel实例
+     */
+    public function modify_order(UserOrderModel $uo)
     {
-        # code...
+        $param = $this->param;
+        if (empty($param['order_num'])) {
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'data' => null];
+        } elseif (empty($param['status'])) {
+            $msg = ['status' => 2, 'info' => '订单状态不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        if (intval($param['status']) === 6) {
+            $param['pay_time'] = time();
+        }
+        $res = $uo->modifyField('status', $param['status'], ['order_num' => $param['order_num']]);
+        if (!$res) {
+            echo json_encode(['status' => 4, 'info' => '修改失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
     }
 
     /**
