@@ -475,7 +475,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 2, 'info' => '数据错误', 'data' => null]);exit;
         }
         $where_c = ['game_id' => $game_id];
-        $list    = $gc->getList($where_c, 'game_id,para_id,para_str', null, 'para_id');
+        $list    = $gc->getList($where_c, 'game_id,para_id,para_str,price', null, 'para_id');
         if ($list) {
             $data['para']   = config($game['identify']);
             $data['config'] = $list;

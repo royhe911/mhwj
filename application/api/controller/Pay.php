@@ -143,6 +143,10 @@ class Pay extends \think\Controller
         } elseif (empty($param['order_money'])) {
             $msg = ['status' => 3, 'info' => '订单金额不能为空', 'data' => null];
         }
+        $count = $uo->getCount(['uid' => $param['uid'], 'room_id' => $param['room_id'], 'status' => ['<>', 3]]);
+        if ($count) {
+            echo json_encode(['status' => 5, 'info' => '不能重复下单', 'data' => null]);exit;
+        }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
@@ -181,6 +185,10 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $where = ['uid' => $param['uid'], 'status' => ['<>', 3]];
+        if (!empty($param['status']) && $param['status'] != 'all') {
+            $where['status'] = $param['status'];
+        }
         // 分页参数
         $page     = 1;
         $pagesize = 10;
@@ -191,7 +199,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $uo->getList(['uid' => $param['uid']], ['game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
+        $list = $uo->getList($where, ['game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
         if ($list) {
             $u     = new UserModel();
             $user  = $u->getModel(['id' => $param['uid']]);
@@ -215,7 +223,7 @@ class Pay extends \think\Controller
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                 }
                 switch ($item['status']) {
-                    case 0:
+                    case 1:
                         $item['status_txt'] = '未支付';
                         break;
                     case 6:
@@ -229,6 +237,11 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
         }
         echo json_encode(['status' => 4, 'info' => '暂无订单', 'data' => null]);exit;
+    }
+
+    public function FunctionName($value = '')
+    {
+        # code...
     }
 
     /**
