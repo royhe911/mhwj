@@ -404,7 +404,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $po->getList(['status' => 6], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'price', 'num', 'type', 'total_money'], "$page,$pagesize");
+        $list = $po->getList(['status' => 6], ['id', 'uid', 'order_num', 'game_id', 'region', 'para_id', 'price', 'num', 'type', 'total_money'], "$page,$pagesize");
         if (!$list) {
             echo json_encode(['status' => 44, 'info' => '暂无任务', 'data' => null]);exit;
         }
@@ -460,9 +460,9 @@ class Pay extends \think\Controller
             echo json_encode($msg);exit;
         }
         $pmcount = $pmo->getCount(['order_id' => $param['order_id']]);
-        if ($pmcount) {
-            echo json_encode(['status' => 1, 'info' => '订单已被抢', 'data' => null]);exit;
-        }
+        // if ($pmcount) {
+        //     echo json_encode(['status' => 1, 'info' => '订单已被抢', 'data' => null]);exit;
+        // }
         $param['addtime'] = time();
         $res              = $pmo->robbing_order($param);
         $msg              = ['status' => $res, 'data' => null];
