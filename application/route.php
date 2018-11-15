@@ -84,5 +84,6 @@ return [
     '/api/pay/wxpay'  => 'api/Pay/person_pay', // 订制支付
     '/api/pay/popay'  => 'api/Pay/person_ord_pay', // 订制预支付
     '/api/pay/tasks'  => 'api/Pay/person_task', // 任务订单
+    '/api/pay/robb'   => 'api/Pay/robbing', // 陪玩师抢单
     /*--------   支付 api 结束  --------*/
 ];

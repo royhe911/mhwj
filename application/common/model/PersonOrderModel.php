@@ -6,7 +6,7 @@ namespace app\common\model;
  * @author 贺强
  * @time   2018-11-15 15:19:18
  */
-class PersonalOrderModel extends CommonModel
+class PersonOrderModel extends CommonModel
 {
     public function __construct()
     {

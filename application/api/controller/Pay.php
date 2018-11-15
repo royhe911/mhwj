@@ -5,7 +5,8 @@ use app\common\model\CouponModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
 use app\common\model\MasterOrderModel;
-use app\common\model\PersonalOrderModel;
+use app\common\model\PersonMasterOrderModel;
+use app\common\model\PersonOrderModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
 use app\common\model\UserModel;
@@ -276,9 +277,9 @@ class Pay extends \think\Controller
      * 订制下单
      * @author 贺强
      * @time   2018-11-15 15:23:27
-     * @param  PersonalOrderModel $po PersonalOrderModel 实例
+     * @param  PersonOrderModel $po PersonOrderModel 实例
      */
-    public function personal_preorder(PersonalOrderModel $po)
+    public function personal_preorder(PersonOrderModel $po)
     {
         $param = $this->param;
         if (empty($param['uid'])) {
@@ -312,9 +313,9 @@ class Pay extends \think\Controller
      * 订制订单预支付
      * @author 贺强
      * @time   2018-11-15 16:46:23
-     * @param  PersonalOrderModel $po PersonalOrderModel实例
+     * @param  PersonOrderModel $po PersonOrderModel实例
      */
-    public function person_ord_pay(PersonalOrderModel $po)
+    public function person_ord_pay(PersonOrderModel $po)
     {
         $param = $this->param;
         if (empty($param['order_num'])) {
@@ -360,9 +361,9 @@ class Pay extends \think\Controller
      * 订制下单支付
      * @author 贺强
      * @time   2018-11-15 16:20:59
-     * @param  PersonalOrderModel $po PersonalOrderModel 实例
+     * @param  PersonOrderModel $po PersonOrderModel 实例
      */
-    public function person_pay(PersonalOrderModel $po)
+    public function person_pay(PersonOrderModel $po)
     {
         $param = $this->param;
         if (empty($param['order_num'])) {
@@ -381,16 +382,16 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 4, 'info' => '支付失败', 'data' => null]);exit;
         }
         $res = $po->modifyField('status', 6, ['order_num' => $param['order_num']]);
-        echo json_encode(['status' => 0, 'info' => '支付成功', 'data' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '支付成功', 'data' => ['order_id' => $porder['id']]]);exit;
     }
 
     /**
      * 获取任务订单
      * @author 贺强
      * @time   2018-11-15 19:06:20
-     * @param  PersonalOrderModel $po PersonalOrderModel 实例
+     * @param  PersonOrderModel $po PersonOrderModel 实例
      */
-    public function person_task(PersonalOrderModel $po)
+    public function person_task(PersonOrderModel $po)
     {
         $param = $this->param;
         // 分页参数
@@ -403,7 +404,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $po->getList(['status' => 6], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'price', 'num', 'type', 'total_money']);
+        $list = $po->getList(['status' => 6], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'price', 'num', 'type', 'total_money'], "$page,$pagesize");
         if (!$list) {
             echo json_encode(['status' => 44, 'info' => '暂无任务', 'data' => null]);exit;
         }
@@ -437,6 +438,43 @@ class Pay extends \think\Controller
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 陪玩师抢单
+     * @author 贺强
+     * @time   2018-11-15 20:53:39
+     * @param  PersonMasterOrderModel $pmo PersonMasterOrderModel 实例
+     */
+    public function robbing(PersonMasterOrderModel $pmo)
+    {
+        $param = $this->param;
+        if (empty($param['master_id'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '玩家ID不能为空', 'data' => null];
+        } elseif (empty($param['order_id'])) {
+            $msg = ['status' => 5, 'info' => '订单ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $pmcount = $pmo->getCount(['order_id' => $param['order_id']]);
+        if ($pmcount) {
+            echo json_encode(['status' => 1, 'info' => '订单已被抢', 'data' => null]);exit;
+        }
+        $param['addtime'] = time();
+        $res              = $pmo->robbing_order($param);
+        $msg              = ['status' => $res, 'data' => null];
+        if ($res === 1) {
+            $msg['info'] = '订单已被抢';
+        } elseif ($res === 2) {
+            $msg['info'] = '抢单失败';
+        }
+        if ($msg['status'] === true) {
+            $msg = ['status' => 0, 'info' => '抢单成功', 'data' => ['order_id' => $param['order_id']]];
+        }
+        echo json_encode($msg);exit;
     }
 
     /**
