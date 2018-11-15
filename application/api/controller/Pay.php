@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use app\common\model\CouponModel;
+use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\PersonalOrderModel;
@@ -74,7 +75,7 @@ class Pay extends \think\Controller
         if (!$rus) {
             echo json_encode(['status' => 7, 'info' => '该用户未进入房间', 'data' => null]);exit;
         }
-        if ($rus['total_money'] >= 35) {
+        if ($rus['total_money'] >= config('UPPERMONEY')) {
             $cus = $c->getModel(['uid' => $param['uid'], 'status' => 0], ['type', 'money', 'over_time']);
             if ($cus) {
                 if (!empty($cus['over_time'])) {
@@ -306,6 +307,48 @@ class Pay extends \think\Controller
     }
 
     /**
+     * 订制订单支付
+     * @author 贺强
+     * @time   2018-11-15 16:46:23
+     * @param  PersonalOrderModel $po PersonalOrderModel实例
+     */
+    public function person_ord_pay(PersonalOrderModel $po)
+    {
+        $param = $this->param;
+        if (empty($param['order_num'])) {
+            echo json_encode(['status' => 1, 'info' => '订单号不能为空', 'data' => null]);exit;
+        }
+        $porder = $po->getModel(['order_num' => $param['order_num']], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'num', 'price', 'addtime']);
+        if (!$porder) {
+            echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
+        }
+        if (time() > $porder['addtime'] + 300) {
+            echo json_encode(['status' => 5, 'info' => '订单已过期', 'data' => null]);exit;
+        }
+        $g    = new GameModel();
+        $game = $g->getModel(['id' => $porder['game_id']], ['name']);
+        if ($game) {
+            $porder['gamename'] = $game['name'];
+        } else {
+            $porder['gamename'] = '';
+        }
+        $gc       = new GameConfigModel();
+        $gameconf = $gc->getModel(['game_id' => $porder['game_id'], 'para_id' => $porder['para_id']], ['para_str']);
+        if ($gameconf) {
+            $porder['para_str'] = $gameconf['para_str'];
+        }
+        $total_money = $last_money = $porder['price'] * $porder['num'];
+        if ($total_money > config('UPPERMONEY')) {
+            $c   = new CouponModel();
+            $cus = $c->getModel(['uid' => $porder['uid'], 'status' => 0], ['money']);
+            if ($cus) {
+                $last_money -= $cus['money'];
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $porder]);exit;
+    }
+
+    /**
      * 订制下单支付
      * @author 贺强
      * @time   2018-11-15 16:20:59
@@ -322,8 +365,8 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 1, 'info' => '订单不存在', 'data' => null]);exit;
         }
         // 调用微信支付接口进行支付
-        // 
-        // 
+        //
+        //
         // 支付成功后更改订单
         $state = true;
         if (!$state) {

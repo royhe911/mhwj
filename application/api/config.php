@@ -9,6 +9,7 @@ return [
     'SDKAPPID'            => '1400158369',
     'APPKEY'              => 'de4357e1435d09cb5880a2e1d4a22273', // 发短信用的 App 凭证
     'PRE_KEY'             => 'TGHw56CZFy8xvwb8gAXhUYWcueWVuUdc', // 平台设置的密钥key
+    'UPPERMONEY'          => 35, // 订单可使用优惠卷上限
     'KG'                  => [
         ['para_id' => 5, 'para_str' => '全段位'],
         ['para_id' => 4, 'para_str' => '王者21星以下'],
