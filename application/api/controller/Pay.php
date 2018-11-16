@@ -507,8 +507,13 @@ class Pay extends \think\Controller
             $msg['info'] = '订单已取消';
         }
         if ($msg['status'] === true) {
-            $pr = new PersonRoomModel();
-            $pr->add($param);
+            $pr    = new PersonRoomModel();
+            $count = $pr->getCount(['order_id' => $param['order_id']]);
+            if (!$count) {
+                $pr->add($param);
+            } else {
+                $pr->modify($param, ['order_id' => $param['order_id']]);
+            }
             $msg = ['status' => 0, 'info' => '抢单成功', 'data' => ['order_id' => $param['order_id']]];
         }
         echo json_encode($msg);exit;
