@@ -89,5 +89,7 @@ return [
     /*--------   订制 api 开始  --------*/
     '/api/person/inroom'  => 'api/Person/come_in_room', // 进入私聊房间
     '/api/person/addchat' => 'api/Person/add_chat', // 添加私聊
+    '/api/person/rooms'   => 'api/Person/get_person_room', // 获取私聊房间
+    '/api/pay/cancelord'  => 'api/Pay/cancel_order', // 取消订单
     /*--------   订制 api 结束  --------*/
 ];

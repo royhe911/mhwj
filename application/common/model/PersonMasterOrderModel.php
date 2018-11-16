@@ -32,7 +32,10 @@ class PersonMasterOrderModel extends CommonModel
                 return 1;
             }
             $porder = $porder[0];
-            $res    = $this->add($data);
+            if ($porder['status'] === 3) {
+                return 2;
+            }
+            $res = $this->add($data);
             if (!$res) {
                 Db::rollback();
                 return 4;

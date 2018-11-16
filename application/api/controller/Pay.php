@@ -358,6 +358,40 @@ class Pay extends \think\Controller
     }
 
     /**
+     * 玩家取消订单
+     * @author 贺强
+     * @time   2018-11-16 16:22:07
+     * @param  PersonOrderModel $po PersonOrderModel 实例
+     */
+    public function cancel_order(PersonOrderModel $po)
+    {
+        $param = $this->param;
+        if (empty($param['order_id'])) {
+            $msg = ['status' => 1, 'info' => '订单ID不能为空', 'date' => null];
+        }
+        if (empty($param['uid'])) {
+            $msg = ['status' => 2, 'info' => '下单人ID不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $count = $po->getCount(['id' => $param['order_id'], 'uid' => $param['uid']]);
+        if (!$count) {
+            echo json_encode(['status' => 4, 'info' => '非法操作', 'date' => null]);exit;
+        }
+        $pmo   = new PersonMasterOrderModel();
+        $count = $pmo->getCount(['order_id' => $param['order_id']]);
+        if ($count) {
+            echo json_encode(['status' => 3, 'info' => '订单已被抢不能取消', 'date' => null]);exit;
+        }
+        $res = $po->modifyField('status', 3, ['id' => $param['order_id']]);
+        if (!$res) {
+            echo json_encode(['status' => 5, 'info' => '取消失败', 'date' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '取消成功', 'date' => null]);exit;
+    }
+
+    /**
      * 订制下单支付
      * @author 贺强
      * @time   2018-11-15 16:20:59
@@ -460,16 +494,16 @@ class Pay extends \think\Controller
             echo json_encode($msg);exit;
         }
         $pmcount = $pmo->getCount(['order_id' => $param['order_id']]);
-        // if ($pmcount) {
-        //     echo json_encode(['status' => 1, 'info' => '订单已被抢', 'data' => null]);exit;
-        // }
+        if ($pmcount) {
+            echo json_encode(['status' => 1, 'info' => '订单已被抢', 'data' => null]);exit;
+        }
         $param['addtime'] = time();
         $res              = $pmo->robbing_order($param);
         $msg              = ['status' => $res, 'data' => null];
         if ($res === 1) {
             $msg['info'] = '订单已被抢';
         } elseif ($res === 2) {
-            $msg['info'] = '抢单失败';
+            $msg['info'] = '订单已取消';
         }
         if ($msg['status'] === true) {
             $msg = ['status' => 0, 'info' => '抢单成功', 'data' => ['order_id' => $param['order_id']]];

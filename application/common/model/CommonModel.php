@@ -10,6 +10,8 @@ class CommonModel extends Model
 
     /**
      * 添加一条数据
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array $data 要添加的数据 形如：['name'=>'think', 'sex'=>'男', ……]
      * @return int 返回添加成功后的 ID
      */
@@ -24,6 +26,8 @@ class CommonModel extends Model
 
     /**
      * 添加多条数据
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array $data 要添加的数据 形如：[['name'=>'think', 'sex'=>'男', ……], ['name'=>'think', 'sex'=>'男', ……], ……]
      * @return int 返回添加成功的条数
      */
@@ -37,7 +41,9 @@ class CommonModel extends Model
     }
 
     /**
-     * 根据主键 ID 删除数据
+     * 根据主键 ID 
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array $id 要删除的数据的 ID 形如：[1, 2, 3, ……]
      * @return int 返回影响数据的条数，没有删除返回 0
      */
@@ -52,6 +58,8 @@ class CommonModel extends Model
 
     /**
      * 根据条件删除数据
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array|string $where 要删除数据的条件 形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
      * @return int 返回影响数据的条数，没有删除返回 0
      */
@@ -67,6 +75,8 @@ class CommonModel extends Model
 
     /**
      * 根据条件修改数据
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array $data 要修改的数据 形如：['login_time'  => ['exp','now()'], 'name' => 'thinkphp', ……]
      * @param array|string $where 修改条件 形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认更新所有
      * @return int 返回影响数据的条数，没修改任何数据返回 0
@@ -83,6 +93,8 @@ class CommonModel extends Model
 
     /**
      * 根据条件更新某个字段的值
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param string $field 要更新的字段
      * @param string $value 要更新的字段的值
      * @param array|string $where 更新条件 形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认更新所有
@@ -99,6 +111,8 @@ class CommonModel extends Model
     }
 
     /**
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * 根据条件自增一个字段的值，可以延迟更新
      * @param string $field 要自增的字段
      * @param array|string $where 自增条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认更新所有
@@ -118,6 +132,8 @@ class CommonModel extends Model
 
     /**
      * 根据条件自减一个字段的值，可以延迟更新
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param string $field 要自减的字段
      * @param array $where 自减条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认更新所有
      * @param int $value 要自减的值，默认为 1
@@ -136,6 +152,8 @@ class CommonModel extends Model
 
     /**
      * 根据条件获取总数量
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array|string $where 查询条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
      * @param string $group 对结果集进行分组，只能使用一个字符串，即字段名
      * @return int 返回总数量
@@ -148,6 +166,8 @@ class CommonModel extends Model
 
     /**
      * 根据条件查询一条数据
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array|string $where 查询条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
      * @param array|string $field 要查询的字段，形如：['id', 'name', ……]或者'id, name, ……'，默认显式的获取数据表的所有字段列表
      * @param array|string $order 按某(些)字段排序，形如：['order','id'=>'desc']或者'order, id desc'，默认按数据库中原顺序
@@ -169,6 +189,8 @@ class CommonModel extends Model
 
     /**
      * 根据条件查询数据集
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array|string $where 查询条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
      * @param array|string $field 要查询的字段，形如：['id', 'name', ……]或者'id, name, ……'，默认显式的获取数据表的所有字段列表
      * @param string $page 分页查询，形如：'1, 10'，其中字符串中第一个数字表示第几页，第二个数字表示每页多少条
@@ -177,7 +199,7 @@ class CommonModel extends Model
      * @param string $having 用于配合group方法完成从分组的结果中筛选(通常是聚合条件)数据，比如：'count(name)>0'
      * @return array 返回查询结果(数组)，若不存在返回 null
      */
-    public function getList($where = null, $field = true, $page = null, $order = 'id', $group = null, $having = null)
+    public function getList($where = null, $field = true, $page = null, $order = '', $group = null, $having = null)
     {
         $list = Db::table($this->table)
             ->field($field)
@@ -193,6 +215,8 @@ class CommonModel extends Model
 
     /**
      * 根据条件查询数据集
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array|string $where 查询条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
      * @param array|string $field 要查询的字段，形如：['id', 'name', ……]或者'id, name, ……'，默认显式的获取数据表的所有字段列表
      * @param string $limit 分页查询，形如：'1, 10'，其中字符串中第一个数字表示从第几条开始，第二个数字表示查询多少条
@@ -217,6 +241,8 @@ class CommonModel extends Model
 
     /**
      * 联系查询总数
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array $join 联表查询，形如：[['think_card c','a.card_id=c.id'], ……]
      * @where array|string $where 查询条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
      * @param string $alias 用于设置当前数据表的别名，默认别名为 a
@@ -234,6 +260,8 @@ class CommonModel extends Model
 
     /**
      * 联表查询
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
      * @param array $join 联表查询，形如：[['think_card c','a.card_id=c.id'], ……]
      * @param array|string $where 查询条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
      * @param array|string $field 要查询的字段，形如：['id', 'name', ……]或者'id, name, ……'，默认显式的获取数据表的所有字段列表
@@ -256,11 +284,13 @@ class CommonModel extends Model
 
     /**
      * UNION 查询
-     * @param array $union 联合的 SQL 语句，形如：['SELECT name FROM table1','SELECT name FROM table2']，每个union方法相当于一个独立的SELECT语句
-     * @param array|string $where 查询条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
-     * @param array|string $field 要查询的字段，形如：['id', 'name', ……]或者'id, name, ……'，默认显式的获取数据表的所有字段列表
-     * @param boolean $is_all 是否是 UNION ALL 操作
-     * @param string $alias 用于设置当前数据表的别名，默认别名为 a
+     * @author 贺强
+     * @time   2016-11-16 15:57:17
+     * @param  array   $union  联合的 SQL 语句，形如：['SELECT name FROM table1','SELECT name FROM table2']，每个union方法相当于一个独立的SELECT语句
+     * @param  array|string  $where  查询条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
+     * @param  array|string $field  要查询的字段，形如：['id', 'name', ……]或者'id, name, ……'，默认显式的获取数据表的所有字段列表
+     * @param  boolean $is_all 是否是 UNION ALL 操作
+     * @param  string  $alias  用于设置当前数据表的别名，默认别名为 a
      * @return array 返回查询结果(数组)，若不存在返回 null
      */
     public function getUnionList($union, $where = null, $field = true, $is_all = false, $alias = 'a')
@@ -273,5 +303,17 @@ class CommonModel extends Model
         // ->fetchSql(true)
             ->select();
         return $list;
+    }
+
+    /**
+     * 执行原生 SQL 查询
+     * @author 贺强
+     * @time   2016-11-16 15:55:46
+     * @param  string $sql 要执行的 SQL 语句
+     * @return array       返回查询结果
+     */
+    public function query($sql)
+    {
+        return Db::query($sql);
     }
 }

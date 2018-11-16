@@ -10,6 +10,6 @@ class PersonOrderModel extends CommonModel
 {
     public function __construct()
     {
-        $this->table = 'm_personal_order';
+        $this->table = 'm_person_order';
     }
 }
