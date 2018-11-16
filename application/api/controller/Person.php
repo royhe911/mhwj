@@ -145,8 +145,10 @@ class Person extends \think\Controller
             echo json_encode(['status' => 4, 'info' => '暂无聊天房间', 'data' => null]);exit;
         }
         $order_ids = array_column($list, 'order_id');
-        $pc        = new PersonChatModel();
-        $chatlog   = $pc->getList(['order_id' => ['in', $order_ids]], ['order_id', 'nickname', 'avatar', 'content', 'addtime'], null, 'addtime desc', 'order_id');
+        // 查询私聊最新记录
+        $pc  = new PersonChatModel();
+        $sql = 'select * from (select order_id,nickname,avatar,content,addtime from m_person_chat order by addtime desc) t group by t.order_id';
+        $chatlog = $pc->query($sql);
         foreach ($chatlog as &$chat) {
             if (!empty($chat['addtime'])) {
                 $chat['addtime'] = date('Y-m-d H:i:s', $chat['addtime']);
