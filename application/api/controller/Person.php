@@ -3,6 +3,7 @@ namespace app\api\controller;
 
 use app\common\model\PersonChatModel;
 use app\common\model\PersonRoomModel;
+use app\common\model\UserModel;
 
 /**
  * Person-控制器
@@ -54,17 +55,35 @@ class Person extends \think\Controller
         $room    = $pr->getModel(['order_id' => $param['order_id']]);
         $chatlog = null;
         if ($room) {
-            $res  = $pr->modify($param, ['order_id' => $param['order_id']]);
-            $pc   = new PersonChatModel();
-            $list = $pc->getList(['order_id' => $param['order_id']], ['avatar', 'content']);
+            $res     = $pr->modify($param, ['order_id' => $param['order_id']]);
+            $pc      = new PersonChatModel();
+            $chatlog = $pc->getList(['order_id' => $param['order_id']], ['avatar', 'content']);
         } else {
             $param['addtime'] = time();
             $res              = $pr->add($param);
         }
+        $members = null;
+        $person  = $pr->getModel(['order_id' => $param['order_id']]);
+        $u       = new UserModel();
+        $users   = $u->getList(['id' => ['in', "{$person['uid']},{$person['master_id']}"]], ['id', 'nickname', 'avatar']);
+        foreach ($users as $user) {
+            if ($user['id'] === $person['master_id']) {
+                $members['master'] = $user;
+            }
+            if ($user['id'] === $person['uid']) {
+                $members['users'] = $user;
+            }
+        }
+        if (empty($members['master'])) {
+            $members['master'] = null;
+        }
+        if (empty($members['users'])) {
+            $members['users'] = null;
+        }
         if ($res !== false) {
-            $msg = ['status' => 0, 'info' => '进入房间成功', 'data' => null];
+            $msg = ['status' => 4, 'info' => '进入房间成功', 'data' => ['members' => $members, 'chatlog' => $chatlog]];
         } else {
-            $msg = ['status' => 4, 'info' => '进入房间失败', 'data' => $chatlog];
+            $msg = ['status' => 4, 'info' => '进入房间失败', 'data' => null];
         }
         echo json_encode($msg);exit;
     }

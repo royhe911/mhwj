@@ -818,9 +818,10 @@ class Api extends \think\Controller
             $uids     = array_column($roomuser, 'uid');
             array_push($uids, $room['uid']);
             // var_dump($uids);exit;
-            $u        = new UserModel();
-            $users    = $u->getList(['id' => ['in', $uids]], 'id,nickname,avatar');
-            $members  = [];
+            $u       = new UserModel();
+            $users   = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $members = [];
+            // 获取房间里玩家的状态
             $ustatus  = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status,total_money');
             $ustatarr = array_column($ustatus, null, 'uid');
             foreach ($users as $user) {
