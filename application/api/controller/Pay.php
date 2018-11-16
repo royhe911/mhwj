@@ -7,6 +7,7 @@ use app\common\model\GameModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\PersonMasterOrderModel;
 use app\common\model\PersonOrderModel;
+use app\common\model\PersonRoomModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
 use app\common\model\UserModel;
@@ -506,6 +507,8 @@ class Pay extends \think\Controller
             $msg['info'] = '订单已取消';
         }
         if ($msg['status'] === true) {
+            $pr = new PersonRoomModel();
+            $pr->add($param);
             $msg = ['status' => 0, 'info' => '抢单成功', 'data' => ['order_id' => $param['order_id']]];
         }
         echo json_encode($msg);exit;
