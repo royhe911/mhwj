@@ -5,6 +5,7 @@ use app\common\model\ConsumeModel;
 use app\common\model\CouponModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
+use app\common\model\MasterMoneyLogModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\PersonMasterOrderModel;
 use app\common\model\PersonOrderModel;
@@ -762,19 +763,68 @@ class Pay extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $list = $c->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize");
-        if ($list) {
-            $u    = new UserModel();
-            $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar']);
-            foreach ($list as &$item) {
-                $item['nickname'] = $user['nickname'];
-                $item['avatar']   = $user['avatar'];
-                if (!empty($item['addtime'])) {
-                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
-                }
-            }
-            echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+        if (!$list) {
+            echo json_encode(['status' => 4, 'info' => '暂无消费记录', 'date' => null]);exit;
         }
-        echo json_encode(['status' => 4, 'info' => '暂无消费记录', 'date' => null]);exit;
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar']);
+        foreach ($list as &$item) {
+            $item['nickname'] = $user['nickname'];
+            $item['avatar']   = $user['avatar'];
+            if (!empty($item['addtime'])) {
+                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+    }
+
+    /**
+     * 陪玩师提现记录
+     * @author 贺强
+     * @time   2018-11-18 15:47:48
+     * @param  MasterMoneyLogModel $mml MasterMoneyLogModel 实例
+     */
+    public function get_money_log(MasterMoneyLogModel $mml)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $where = ['uid' => $param['uid']];
+        if (!empty($param['addtime'])) {
+            $begin = date('Y-m-01', strtotime($param['addtime']));
+        } else {
+            $begin = date('Y-m-01');
+        }
+        // 取每月第一天和最后一天的数据
+        $where['addtime'] = ['between', [strtotime($begin), strtotime(date('Y-m-d', strtotime("$begin +1 month -1 d")))]];
+        // 分页参数
+        $page     = 1;
+        $pagesize = 10;
+        $param    = $this->param;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $mml->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize");
+        if (!$list) {
+            echo json_encode(['status' => 4, 'info' => '暂无订单', 'date' => null]);exit;
+        }
+        $u    = new UserModel();
+        $user = $u->getList(['id' => $param['uid']], ['nickname', 'avatar']);
+        foreach ($list as &$item) {
+            $item['nickname'] = $user['nickname'];
+            $item['avatar']   = $user['avatar'];
+            if (!empty($item['addtime'])) {
+                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
     }
 
 }
