@@ -644,6 +644,10 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $where = ['type' => ['<>', 3], 'uid' => $param['uid']];
+        if (!empty($param['status'])) {
+            $where['status'] = $param['status'];
+        }
         // 分页参数
         $page     = 1;
         $pagesize = 10;
@@ -654,9 +658,9 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $po->getList(['type' => ['<>', 3], 'uid' => $param['uid']], true, "$page,$pagesize");
+        $list = $po->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
         if ($list) {
-            $uids  = array_column($list, 'uid');
+            $uids = array_column($list, 'uid');
             $u     = new UserModel();
             $users = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
             $users = array_column($users, 'nickname', 'id');
@@ -673,6 +677,11 @@ class Pay extends \think\Controller
                     $item['gamename'] = $games[$item['game_id']];
                 } else {
                     $item['gamename'] = '';
+                }
+                if ($item['play_type'] === 1) {
+                    $item['play_type'] = '实力上分';
+                } else {
+                    $item['play_type'] = '娱乐陪玩';
                 }
                 if (!empty($item['addtime'])) {
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
