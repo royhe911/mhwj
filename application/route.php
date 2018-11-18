@@ -85,6 +85,7 @@ return [
     '/api/pay/popay'      => 'api/Pay/person_ord_pay', // 订制预支付
     '/api/pay/tasks'      => 'api/Pay/person_task', // 任务订单
     '/api/pay/robb'       => 'api/Pay/robbing', // 陪玩师抢单
+    '/api/pay/porder'     => 'api/Pay/get_person_order', // 获取玩家订制订单
     /*--------   支付 api 结束  --------*/
     /*--------   订制 api 开始  --------*/
     '/api/person/inroom'  => 'api/Person/come_in_room', // 进入私聊房间

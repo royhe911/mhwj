@@ -520,6 +520,62 @@ class Pay extends \think\Controller
     }
 
     /**
+     * 获取订制订单列表
+     * @author 贺强
+     * @time   2018-11-18 09:53:02
+     * @param  PersonOrderModel $po PersonOrderModel 实例
+     */
+    public function get_person_order(PersonOrderModel $po)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '玩家ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        // 分页参数
+        $page     = 1;
+        $pagesize = 10;
+        $param    = $this->param;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $po->getList(['type' => ['<>', 3], 'uid' => $param['uid']], true, "$page,$pagesize");
+        if ($list) {
+            $uids  = array_column($list, 'uid');
+            $u     = new UserModel();
+            $users = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
+            $users = array_column($users, 'nickname', 'id');
+            $g     = new GameModel();
+            $games = $g->getList(['is_delete' => 0], ['id', 'name']);
+            $games = array_column($games, 'name', 'id');
+            foreach ($list as &$item) {
+                if (!empty($users[$item['uid']])) {
+                    $item['nickname'] = $users[$item['uid']];
+                } else {
+                    $item['nickname'] = '';
+                }
+                if (!empty($games[$item['game_id']])) {
+                    $item['gamename'] = $games[$item['game_id']];
+                } else {
+                    $item['gamename'] = '';
+                }
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+            }
+            $msg = ['status' => 0, 'info' => '获取成功', 'date' => $list];
+        } else {
+            $msg = ['status' => 30, 'info' => '暂无订单', 'date' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
      * 预支付请求接口
      * @author 贺强
      * @time   2018-11-13 15:32:06
