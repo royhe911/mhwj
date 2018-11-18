@@ -47,7 +47,6 @@ class Pay extends \think\Controller
      * 预下单接口
      * @author 贺强
      * @time   2018-11-14 12:12:23
-     * @param  CouponModel $c CouponModel 实例
      */
     public function preorder()
     {
@@ -571,6 +570,40 @@ class Pay extends \think\Controller
             $msg = ['status' => 0, 'info' => '获取成功', 'date' => $list];
         } else {
             $msg = ['status' => 30, 'info' => '暂无订单', 'date' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
+     * 获取玩家优惠卷
+     * @author 贺强
+     * @time   2018-11-18 11:43:09
+     * @param  CouponModel $c CouponModel 实例
+     */
+    public function get_user_coupon(CouponModel $c)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $list = $c->getList(['uid' => $param['uid']], ['money', 'over_time', 'type']);
+        if ($list) {
+            foreach ($list as &$item) {
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                if ($item['type'] === 1) {
+                    $item['desc'] = '满' . config('UPPERMONEY') . '减5';
+                } else {
+                    $item['desc'] = '';
+                }
+            }
+            $msg = ['status' => 0, 'info' => '获取成功', 'date' => $list];
+        } else {
+            $msg = ['status' => 40, 'info' => '暂无优惠卷', 'date' => null];
         }
         echo json_encode($msg);exit;
     }
