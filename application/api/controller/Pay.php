@@ -816,7 +816,7 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 4, 'info' => '暂无订单', 'date' => null]);exit;
         }
         $u    = new UserModel();
-        $user = $u->getList(['id' => $param['uid']], ['nickname', 'avatar']);
+        $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar']);
         foreach ($list as &$item) {
             $item['nickname'] = $user['nickname'];
             $item['avatar']   = $user['avatar'];
