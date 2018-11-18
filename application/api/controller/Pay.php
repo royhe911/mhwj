@@ -592,11 +592,11 @@ class Pay extends \think\Controller
         $list = $c->getList(['uid' => $param['uid']], ['money', 'over_time', 'type']);
         if ($list) {
             foreach ($list as &$item) {
-                if (!empty($item['addtime'])) {
-                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                if (!empty($item['over_time'])) {
+                    $item['over_time'] = date('Y-m-d H:i:s', $item['over_time']);
                 }
                 if ($item['type'] === 1) {
-                    $item['desc'] = '满' . config('UPPERMONEY') . '减5';
+                    $item['desc'] = '满' . config('UPPERMONEY') . '减' . $item['money'];
                 } else {
                     $item['desc'] = '';
                 }
