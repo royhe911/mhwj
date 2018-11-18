@@ -90,6 +90,8 @@ return [
     '/api/pay/coupons'    => 'api/Pay/get_user_coupon', // 获取玩家优惠卷
     '/api/pay/consume'    => 'api/Pay/get_consume_log', // 获取玩家消费记录
     '/api/pay/moneylog'   => 'api/Pay/get_money_log', // 提现记录
+    '/api/pay/masterord'  => 'api/Pay/get_master_order', // 陪玩师房间订单
+    '/api/pay/masterpord' => 'api/Pay/get_master_pord', // 陪玩师打制订单
     /*--------   支付 api 结束  --------*/
     /*--------   订制 api 开始  --------*/
     '/api/person/inroom'  => 'api/Person/come_in_room', // 进入私聊房间

@@ -188,10 +188,12 @@ class Pay extends \think\Controller
             echo json_encode($msg);exit;
         }
         $r    = new RoomModel();
-        $room = $r->getModel(['id' => $param['room_id']], ['price', 'num', 'count']);
+        $room = $r->getModel(['id' => $param['room_id']], ['price', 'num', 'count', 'type', 'game_id']);
         if ($room) {
             $order_money          = $room['price'] * $room['num'] * $room['count'];
             $param['order_money'] = $order_money;
+            $param['play_type']   = $room['type'];
+            $param['game_id']     = $room['game_id'];
         }
         $param['order_num'] = get_millisecond();
         $param['addtime']   = time();
@@ -226,7 +228,7 @@ class Pay extends \think\Controller
             echo json_encode($msg);exit;
         }
         $r    = new RoomModel();
-        $room = $r->getModel(['id' => $param['room_id']]);
+        $room = $r->getModel(['id' => $param['room_id']], ['game_id', 'play_type']);
         if ($room) {
             $param['game_id']   = $room['game_id'];
             $param['play_type'] = $room['type'];
@@ -631,6 +633,135 @@ class Pay extends \think\Controller
     }
 
     /**
+     * 获取陪玩师房间订单
+     * @author 贺强
+     * @time   2018-11-18 16:48:21
+     * @param  MasterOrderModel $mo MasterOrderModel 实例
+     */
+    public function get_master_order(MasterOrderModel $mo)
+    {
+        $param = $this->param;
+        if (empty($param['master_id'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $where = ['uid' => $param['master_id']];
+        if (!empty($param['status'])) {
+            $where['status'] = $param['status'];
+        }
+        // 分页参数
+        $page     = 1;
+        $pagesize = 10;
+        $param    = $this->param;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $mo->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
+        if (!$list) {
+            echo json_encode(['status' => 40, 'info' => '暂无订单', 'date' => null]);exit;
+        }
+        $uids  = array_column($list, 'uid');
+        $u     = new UserModel();
+        $users = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
+        $users = array_column($users, 'nickname', 'id');
+        $g     = new GameModel();
+        $games = $g->getList(['is_delete' => 0], ['id', 'name']);
+        $games = array_column($games, 'name', 'id');
+        foreach ($list as &$item) {
+            if (!empty($users[$item['uid']])) {
+                $item['nickname'] = $users[$item['uid']];
+            } else {
+                $item['nickname'] = '';
+            }
+            if (!empty($games[$item['game_id']])) {
+                $item['gamename'] = $games[$item['game_id']];
+            } else {
+                $item['gamename'] = '';
+            }
+            if ($item['play_type'] === 1) {
+                $item['play_type'] = '实力上分';
+            } else {
+                $item['play_type'] = '娱乐陪玩';
+            }
+            if (!empty($item['addtime'])) {
+                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+    }
+
+    /**
+     * 获取陪玩师订制订单
+     * @author 贺强
+     * @time   2018-11-18 17:12:12
+     * @param  PersonMasterOrderModel $pmo PersonMasterOrderModel 实例
+     * @param  PersonOrderModel       $po  PersonOrderModel 实例
+     */
+    public function get_master_pord(PersonMasterOrderModel $pmo)
+    {
+        $param = $this->param;
+        if (empty($param['master_id'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $where = ['a.uid' => $param['master_id']];
+        if (!empty($param['status'])) {
+            $where['po.status'] = $param['status'];
+        }
+        // 分页参数
+        $page     = 1;
+        $pagesize = 10;
+        $param    = $this->param;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $pmo->getJoinList([['m_person_order po', ['a.order_id=po.id']]], $where, ['master_id', 'order_num', 'a.uid', 'game_id', 'play_type', 'order_money', 'a.addtime', 'po.status'], "$page,$pagesize");
+        if (!$list) {
+            echo json_encode(['status' => 3, 'info' => '暂无接单', 'date' => null]);exit;
+        }
+        $uids   = array_column($list, 'uid');
+        $u      = new UserModel();
+        $master = $u->getModel(['id' => $param['master_id']]);
+        $users  = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
+        $users  = array_column($users, 'nickname', 'id');
+        $g      = new GameModel();
+        $games  = $g->getList(['is_delete' => 0], ['id', 'name']);
+        $games  = array_column($games, 'name', 'id');
+        foreach ($list as &$item) {
+            $item['master_nickname'] = $master['nickname'];
+            if (!empty($users[$item['uid']])) {
+                $item['nickname'] = $users[$item['uid']];
+            } else {
+                $item['nickname'] = '';
+            }
+            if (!empty($games[$item['game_id']])) {
+                $item['gamename'] = $games[$item['game_id']];
+            } else {
+                $item['gamename'] = '';
+            }
+            if ($item['play_type'] === 1) {
+                $item['play_type'] = '实力上分';
+            } else {
+                $item['play_type'] = '娱乐陪玩';
+            }
+            if (!empty($item['addtime'])) {
+                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+    }
+
+    /**
      * 获取订制订单列表
      * @author 贺强
      * @time   2018-11-18 09:53:02
@@ -639,13 +770,13 @@ class Pay extends \think\Controller
     public function get_person_order(PersonOrderModel $po)
     {
         $param = $this->param;
-        if (empty($param['uid'])) {
+        if (empty($param['master_id'])) {
             $msg = ['status' => 1, 'info' => '玩家ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $where = ['type' => ['<>', 3], 'uid' => $param['uid']];
+        $where = ['type' => ['<>', 3], 'uid' => $param['master_id']];
         if (!empty($param['status'])) {
             $where['status'] = $param['status'];
         }
@@ -816,7 +947,7 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 4, 'info' => '暂无订单', 'date' => null]);exit;
         }
         $u    = new UserModel();
-        $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar']);
+        $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'money']);
         foreach ($list as &$item) {
             $item['nickname'] = $user['nickname'];
             $item['avatar']   = $user['avatar'];
@@ -824,7 +955,7 @@ class Pay extends \think\Controller
                 $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
             }
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => ['money' => $user['money'], 'log' => $list]]);exit;
     }
 
 }
