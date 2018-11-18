@@ -78,10 +78,11 @@ return [
     '/api/pay/uorder'     => 'api/Pay/add_user_order', // 玩家下单
     '/api/pay/preodr'     => 'api/Pay/preorder', // 预下单
     '/api/pay/uodrs'      => 'api/Pay/get_user_order', // 玩家订单
+    '/api/pay/userpay'    => 'api/Pay/person_pay', // 房间支付
     '/api/pay/odrsta'     => 'api/Pay/modify_order', // 订单状态
     '/api/pay/ppord'      => 'api/Pay/personal_preorder', // 订制下单
     '/api/pay/prepay'     => 'api/Pay/prepay', // 预支付
-    '/api/pay/wxpay'      => 'api/Pay/person_pay', // 订制支付
+    '/api/pay/personpay'  => 'api/Pay/person_pay', // 订制支付
     '/api/pay/popay'      => 'api/Pay/person_ord_pay', // 订制预支付
     '/api/pay/tasks'      => 'api/Pay/person_task', // 任务订单
     '/api/pay/robb'       => 'api/Pay/robbing', // 陪玩师抢单

@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\ConsumeModel;
 use app\common\model\CouponModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
@@ -41,6 +42,75 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 100, 'info' => '非法参数', 'data' => null]);exit;
         }
         $this->param = $param;
+    }
+
+    /**
+     * 预支付请求接口
+     * @author 贺强
+     * @time   2018-11-13 15:32:06
+     */
+    public function prepay()
+    {
+        $param = $this->param;
+        $url   = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
+        if (empty($param['openid'])) {
+            $msg = ['status' => 1, 'info' => 'openid 不能为空', 'data' => null];
+        } elseif (empty($param['body'])) {
+            $msg = ['status' => 2, 'info' => '商品描述不能为空', 'data' => null];
+        } elseif (empty($param['out_trade_no'])) {
+            $msg = ['status' => 3, 'info' => '订单号不能为空', 'data' => null];
+        } elseif (empty($param['total_fee'])) {
+            $msg = ['status' => 4, 'info' => '订单总金额不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        // 统一下单参数构造
+        $nonce_str    = get_random_num(15);
+        $unifiedorder = array(
+            'appid'            => config('APPID_PLAYER'),
+            'body'             => $param['body'],
+            'mch_id'           => config('PAY_MCHID'),
+            'nonce_str'        => $nonce_str,
+            'notify_url'       => 'https://' . config('WEBSITE') . '/api/pay/notify',
+            'openid'           => $param['openid'],
+            'out_trade_no'     => $param['out_trade_no'],
+            'spbill_create_ip' => get_client_ip(),
+            'total_fee'        => $param['total_fee'],
+            'trade_type'       => 'JSAPI',
+        );
+        $unifiedorder['sign'] = $this->make_sign($unifiedorder);
+        $xmldata              = array2xml($unifiedorder);
+        $res                  = $this->curl($url, $xmldata, false);
+        if (!$res) {
+            echo json_encode(['status' => 1, 'info' => '无法连接服务器', 'data' => null]);exit;
+        }
+        $res = xml2array($res);
+        if (strval($res['result_code']) == 'FAIL') {
+            echo json_encode(['status' => 2, 'info' => $res['err_code_des'], 'data' => null]);exit;
+        }
+        if (strval($res['return_code']) == 'FAIL') {
+            echo json_encode(['status' => 3, 'info' => $res['return_msg'], 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '操作成功', 'data' => $res]);exit;
+    }
+
+    /**
+     * 生成签名
+     * @author 贺强
+     * @time   2018-11-13 10:17:56
+     * @param  array  $arr 生成签名的数组
+     * @return string      返回生成的签名
+     */
+    private function make_sign($arr)
+    {
+        $stringA = '';
+        foreach ($arr as $key => $val) {
+            $stringA .= "{$key}={$val}&";
+        }
+        $stringA .= ('key=' . config('PRE_KEY'));
+        $sign = strtoupper(md5($stringA));
+        return $sign;
     }
 
     /**
@@ -391,6 +461,39 @@ class Pay extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '取消成功', 'date' => null]);exit;
     }
 
+    public function user_pay(UserOrderModel $uo)
+    {
+        $param = $this->param;
+        if (empty($param['order_num'])) {
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uorder = $uo->getModel(['order_num' => $param['order_num']]);
+        if (!$uorder) {
+            echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+        }
+        // 调用微信支付接口进行支付
+        //
+        //
+        // 支付成功后更改订单
+        $state = true;
+        if (!$state) {
+            echo json_encode(['status' => 4, 'info' => '支付失败', 'data' => null]);exit;
+        }
+        $contribution = $uorder['total_money'] * 100;
+        $u            = new UserModel();
+        if ($contribution > 0) {
+            $u->increment('contribution', ['id' => $uorder['uid']], $controller);
+        }
+        $data = ['uid' => $uorder['uid'], 'type' => 1, 'money' => $uorder['total_money'], 'addtime' => time()];
+        $c    = new ConsumeModel();
+        $c->add($data);
+        $res = $uo->modifyField('status', 6, ['order_num' => $param['order_num']]);
+        echo json_encode(['status' => 0, 'info' => '支付成功', 'data' => ['order_id' => $uorder['id']]]);exit;
+    }
+
     /**
      * 订制下单支付
      * @author 贺强
@@ -415,6 +518,14 @@ class Pay extends \think\Controller
         if (!$state) {
             echo json_encode(['status' => 4, 'info' => '支付失败', 'data' => null]);exit;
         }
+        $contribution = $porder['total_money'] * 100;
+        $u            = new UserModel();
+        if ($contribution > 0) {
+            $u->increment('contribution', ['id' => $porder['uid']], $controller);
+        }
+        $data = ['uid' => $porder['uid'], 'type' => 1, 'money' => $porder['total_money'], 'addtime' => time()];
+        $c    = new ConsumeModel();
+        $c->add($data);
         $res = $po->modifyField('status', 6, ['order_num' => $param['order_num']]);
         echo json_encode(['status' => 0, 'info' => '支付成功', 'data' => ['order_id' => $porder['id']]]);exit;
     }
@@ -609,71 +720,14 @@ class Pay extends \think\Controller
     }
 
     /**
-     * 预支付请求接口
+     * 获取玩家消费记录
      * @author 贺强
-     * @time   2018-11-13 15:32:06
+     * @time   2018-11-18 12:04:08
+     * @param  ConsumeModel $c ConsumeModel 实例
      */
-    public function prepay()
+    public function get_consume_log(ConsumeModel $c)
     {
         $param = $this->param;
-        $url   = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
-        if (empty($param['openid'])) {
-            $msg = ['status' => 1, 'info' => 'openid 不能为空', 'data' => null];
-        } elseif (empty($param['body'])) {
-            $msg = ['status' => 2, 'info' => '商品描述不能为空', 'data' => null];
-        } elseif (empty($param['out_trade_no'])) {
-            $msg = ['status' => 3, 'info' => '订单号不能为空', 'data' => null];
-        } elseif (empty($param['total_fee'])) {
-            $msg = ['status' => 4, 'info' => '订单总金额不能为空', 'data' => null];
-        }
-        if (!empty($msg)) {
-            echo json_encode($msg);exit;
-        }
-        // 统一下单参数构造
-        $nonce_str    = get_random_num(15);
-        $unifiedorder = array(
-            'appid'            => config('APPID_PLAYER'),
-            'body'             => $param['body'],
-            'mch_id'           => config('PAY_MCHID'),
-            'nonce_str'        => $nonce_str,
-            'notify_url'       => 'https://' . config('WEBSITE') . '/api/pay/notify',
-            'openid'           => $param['openid'],
-            'out_trade_no'     => $param['out_trade_no'],
-            'spbill_create_ip' => get_client_ip(),
-            'total_fee'        => $param['total_fee'],
-            'trade_type'       => 'JSAPI',
-        );
-        $unifiedorder['sign'] = $this->make_sign($unifiedorder);
-        $xmldata              = array2xml($unifiedorder);
-        $res                  = $this->curl($url, $xmldata, false);
-        if (!$res) {
-            echo json_encode(['status' => 1, 'info' => '无法连接服务器', 'data' => null]);exit;
-        }
-        $res = xml2array($res);
-        if (strval($res['result_code']) == 'FAIL') {
-            echo json_encode(['status' => 2, 'info' => $res['err_code_des'], 'data' => null]);exit;
-        }
-        if (strval($res['return_code']) == 'FAIL') {
-            echo json_encode(['status' => 3, 'info' => $res['return_msg'], 'data' => null]);exit;
-        }
-        echo json_encode(['status' => 0, 'info' => '操作成功', 'data' => $res]);exit;
     }
 
-    /**
-     * 生成签名
-     * @author 贺强
-     * @time   2018-11-13 10:17:56
-     * @param  array  $arr 生成签名的数组
-     * @return string      返回生成的签名
-     */
-    private function make_sign($arr)
-    {
-        $stringA = '';
-        foreach ($arr as $key => $val) {
-            $stringA .= "{$key}={$val}&";
-        }
-        $stringA .= ('key=' . config('PRE_KEY'));
-        $sign = strtoupper(md5($stringA));
-        return $sign;
-    }
 }
