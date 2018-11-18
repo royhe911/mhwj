@@ -660,7 +660,7 @@ class Pay extends \think\Controller
         }
         $list = $po->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
         if ($list) {
-            $uids = array_column($list, 'uid');
+            $uids  = array_column($list, 'uid');
             $u     = new UserModel();
             $users = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
             $users = array_column($users, 'nickname', 'id');
@@ -737,6 +737,44 @@ class Pay extends \think\Controller
     public function get_consume_log(ConsumeModel $c)
     {
         $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $where = ['uid' => $param['uid']];
+        if (!empty($param['addtime'])) {
+            $begin = date('Y-m-01', strtotime($param['addtime']));
+        } else {
+            $begin = date('Y-m-01');
+        }
+        // 取每月第一天和最后一天的数据
+        $where['addtime'] = ['between', [strtotime($begin), strtotime(date('Y-m-d', strtotime("$begin +1 month -1 d")))]];
+        // 分页参数
+        $page     = 1;
+        $pagesize = 10;
+        $param    = $this->param;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $c->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize");
+        if ($list) {
+            $u    = new UserModel();
+            $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar']);
+            foreach ($list as &$item) {
+                $item['nickname'] = $user['nickname'];
+                $item['avatar']   = $user['avatar'];
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+            }
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+        }
+        echo json_encode(['status' => 4, 'info' => '暂无消费记录', 'date' => null]);exit;
     }
 
 }
