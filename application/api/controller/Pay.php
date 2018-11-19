@@ -841,15 +841,25 @@ class Pay extends \think\Controller
     public function get_pord_info(PersonOrderModel $po)
     {
         $param = $this->param;
-        if (empty($param['order_id'])) {
-            $msg = ['status' => 1, 'info' => '订单ID不能为空', 'date' => null];
+        if (empty($param['order_num'])) {
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'date' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $porder = $po->getModel(['id' => $param['order_id']]);
+        $porder = $po->getModel(['order_num' => $param['order_num']]);
         if (!$porder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+        }
+        $pmo                     = new PersonMasterOrderModel();
+        $pmorder                 = $pmo->getModel(['order_id' => $porder['id']]);
+        $porder['master_avatar'] = '';
+        if ($pmorder) {
+            $u    = new UserModel();
+            $user = $u->getModel(['id' => $pmorder['master_id']], ['avatar']);
+            if ($user) {
+                $porder['master_avatar'] = $user['avatar'];
+            }
         }
         $g    = new GameModel();
         $game = $g->getModel(['id' => $porder['game_id']], ['name']);
@@ -878,13 +888,13 @@ class Pay extends \think\Controller
     public function get_uord_info(UserOrderModel $uo)
     {
         $param = $this->param;
-        if (empty($param['order_id'])) {
-            $msg = ['status' => 1, 'info' => '订单ID不能为空', 'date' => null];
+        if (empty($param['order_num'])) {
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'date' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $uorder = $uo->getModel(['id' => $param['order_id']]);
+        $uorder = $uo->getModel(['order_num' => $param['order_num']]);
         if (!$uorder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
         }
@@ -892,6 +902,15 @@ class Pay extends \think\Controller
         $game = $g->getModel(['id' => $uorder['game_id']], ['name']);
         if ($game) {
             $uorder['gamename'] = $game['name'];
+        } else {
+            $uorder['gamename'] = '';
+        }
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $uorder['morder_id']], ['avatar']);
+        if ($user) {
+            $uorder['master_avatar'] = $user['avatar'];
+        } else {
+            $uorder['master_avatar'] = '';
         }
         if ($uorder['region'] === 1) {
             $uorder['region'] = 'QQ';
@@ -915,15 +934,22 @@ class Pay extends \think\Controller
     public function get_mord_info(MasterOrderModel $mo)
     {
         $param = $this->param;
-        if (empty($param['order_id'])) {
-            $msg = ['status' => 1, 'info' => '订单ID不能为空', 'date' => null];
+        if (empty($param['order_num'])) {
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'date' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $morder = $mo->getModel(['id' => $param['order_id']]);
+        $morder = $mo->getModel(['order_num' => $param['order_num']]);
         if (!$morder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+        }
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $morder['uid']], ['avatar']);
+        if ($user) {
+            $morder['master_avatar'] = $user['avatar'];
+        } else {
+            $morder['master_avatar'] = '';
         }
         $g    = new GameModel();
         $game = $g->getModel(['id' => $morder['game_id']], ['name']);
