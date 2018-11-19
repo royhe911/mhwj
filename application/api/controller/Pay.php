@@ -494,7 +494,7 @@ class Pay extends \think\Controller
         $contribution = $uorder['order_money'] * 100;
         $u            = new UserModel();
         if ($contribution > 0) {
-            $u->increment('contribution', ['id' => $uorder['uid']], $controller);
+            $u->increment('contribution', ['id' => $uorder['uid']], $contribution);
         }
         $data = ['uid' => $uorder['uid'], 'type' => 1, 'money' => $uorder['order_money'], 'addtime' => time()];
         $c    = new ConsumeModel();
@@ -530,7 +530,7 @@ class Pay extends \think\Controller
         $contribution = $porder['order_money'] * 100;
         $u            = new UserModel();
         if ($contribution > 0) {
-            $u->increment('contribution', ['id' => $porder['uid']], $controller);
+            $u->increment('contribution', ['id' => $porder['uid']], $contribution);
         }
         $data = ['uid' => $porder['uid'], 'type' => 1, 'money' => $porder['order_money'], 'addtime' => time()];
         $c    = new ConsumeModel();

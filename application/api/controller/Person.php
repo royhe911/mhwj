@@ -157,7 +157,7 @@ class Person extends \think\Controller
         $chatlog = array_column($chatlog, null, 'order_id');
         $u       = new UserModel();
         foreach ($list as &$item) {
-            if ($chatlog[$item['order_id']]) {
+            if (!empty($chatlog[$item['order_id']])) {
                 $item = $chatlog[$item['order_id']];
             } else {
                 $user = $u->getModel(['id' => $param['id']], ['nickname', 'avatar']);
