@@ -183,17 +183,23 @@ class Pay extends \think\Controller
             $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
         } elseif (empty($param['room_id'])) {
             $msg = ['status' => 2, 'info' => '房间ID不能为空', 'data' => null];
+        } else {
+            $morder = $mo->getCount(['uid' => $param['uid'], 'room_id' => $param['room_id']]);
+            if ($morder) {
+                $msg = ['status' => 3, 'info' => '不能重复下单', 'date' => null];
+            }
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $r    = new RoomModel();
-        $room = $r->getModel(['id' => $param['room_id']], ['price', 'num', 'count', 'type', 'game_id']);
+        $room = $r->getModel(['id' => $param['room_id']], ['price', 'num', 'count', 'type', 'game_id', 'region']);
         if ($room) {
             $order_money          = $room['price'] * $room['num'] * $room['count'];
             $param['order_money'] = $order_money;
             $param['play_type']   = $room['type'];
             $param['game_id']     = $room['game_id'];
+            $param['region']      = $room['region'];
         }
         $param['order_num'] = get_millisecond();
         $param['addtime']   = time();
@@ -373,7 +379,7 @@ class Pay extends \think\Controller
         }
         $order_num            = get_millisecond();
         $param['order_num']   = $order_num;
-        $param['total_money'] = $param['price'] * $param['num'];
+        $param['order_money'] = $param['price'] * $param['num'];
         $param['addtime']     = time();
         $res                  = $po->add($param);
         if (!$res) {
@@ -394,7 +400,7 @@ class Pay extends \think\Controller
         if (empty($param['order_num'])) {
             echo json_encode(['status' => 1, 'info' => '订单号不能为空', 'data' => null]);exit;
         }
-        $porder = $po->getModel(['order_num' => $param['order_num']], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'num', 'price', 'type', 'addtime', 'total_money']);
+        $porder = $po->getModel(['order_num' => $param['order_num']], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'num', 'price', 'type', 'addtime', 'order_money']);
         if (!$porder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
         }
@@ -416,8 +422,8 @@ class Pay extends \think\Controller
         if ($gameconf) {
             $porder['para_str'] = $gameconf['para_str'];
         }
-        $last_money = $porder['total_money'];
-        if ($porder['total_money'] > config('UPPERMONEY')) {
+        $last_money = $porder['order_money'];
+        if ($porder['order_money'] > config('UPPERMONEY')) {
             $c   = new CouponModel();
             $cus = $c->getModel(['uid' => $porder['uid'], 'status' => 0], ['id', 'money']);
             if ($cus) {
@@ -426,7 +432,7 @@ class Pay extends \think\Controller
             }
         }
         $porder['last_money'] = $last_money;
-        $po->modifyField('total_money', $last_money, ['order_num' => $param['order_num']]);
+        $po->modifyField('order_money', $last_money, ['order_num' => $param['order_num']]);
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $porder]);exit;
     }
 
@@ -485,12 +491,12 @@ class Pay extends \think\Controller
         if (!$state) {
             echo json_encode(['status' => 4, 'info' => '支付失败', 'data' => null]);exit;
         }
-        $contribution = $uorder['total_money'] * 100;
+        $contribution = $uorder['order_money'] * 100;
         $u            = new UserModel();
         if ($contribution > 0) {
             $u->increment('contribution', ['id' => $uorder['uid']], $controller);
         }
-        $data = ['uid' => $uorder['uid'], 'type' => 1, 'money' => $uorder['total_money'], 'addtime' => time()];
+        $data = ['uid' => $uorder['uid'], 'type' => 1, 'money' => $uorder['order_money'], 'addtime' => time()];
         $c    = new ConsumeModel();
         $c->add($data);
         $res = $uo->modifyField('status', 6, ['order_num' => $param['order_num']]);
@@ -521,12 +527,12 @@ class Pay extends \think\Controller
         if (!$state) {
             echo json_encode(['status' => 4, 'info' => '支付失败', 'data' => null]);exit;
         }
-        $contribution = $porder['total_money'] * 100;
+        $contribution = $porder['order_money'] * 100;
         $u            = new UserModel();
         if ($contribution > 0) {
             $u->increment('contribution', ['id' => $porder['uid']], $controller);
         }
-        $data = ['uid' => $porder['uid'], 'type' => 1, 'money' => $porder['total_money'], 'addtime' => time()];
+        $data = ['uid' => $porder['uid'], 'type' => 1, 'money' => $porder['order_money'], 'addtime' => time()];
         $c    = new ConsumeModel();
         $c->add($data);
         $res = $po->modifyField('status', 6, ['order_num' => $param['order_num']]);
@@ -552,7 +558,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $po->getList(['status' => 6], ['id', 'uid', 'order_num', 'game_id', 'region', 'para_id', 'price', 'num', 'type', 'total_money'], "$page,$pagesize");
+        $list = $po->getList(['status' => 6], ['id', 'uid', 'order_num', 'game_id', 'region', 'para_id', 'price', 'num', 'type', 'order_money'], "$page,$pagesize");
         if (!$list) {
             echo json_encode(['status' => 44, 'info' => '暂无任务', 'data' => null]);exit;
         }
@@ -711,7 +717,7 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $where = ['a.uid' => $param['master_id']];
+        $where = ['a.master_id' => $param['master_id']];
         if (!empty($param['status'])) {
             $where['po.status'] = $param['status'];
         }
@@ -770,13 +776,13 @@ class Pay extends \think\Controller
     public function get_person_order(PersonOrderModel $po)
     {
         $param = $this->param;
-        if (empty($param['master_id'])) {
+        if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '玩家ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $where = ['type' => ['<>', 3], 'uid' => $param['master_id']];
+        $where = ['type' => ['<>', 3], 'uid' => $param['uid']];
         if (!empty($param['status'])) {
             $where['status'] = $param['status'];
         }
@@ -824,6 +830,117 @@ class Pay extends \think\Controller
             $msg = ['status' => 30, 'info' => '暂无订单', 'date' => null];
         }
         echo json_encode($msg);exit;
+    }
+
+    /**
+     * 订制订单详情
+     * @author 贺强
+     * @time   2018-11-19 10:34:50
+     * @param  PersonOrderModel $po PersonOrderModel 实例
+     */
+    public function get_pord_info(PersonOrderModel $po)
+    {
+        $param = $this->param;
+        if (empty($param['order_id'])) {
+            $msg = ['status' => 1, 'info' => '订单ID不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $porder = $po->getModel(['id' => $param['order_id']]);
+        if (!$porder) {
+            echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+        }
+        $g    = new GameModel();
+        $game = $g->getModel(['id' => $porder['game_id']], ['name']);
+        if ($game) {
+            $porder['gamename'] = $game['name'];
+        }
+        if ($porder['region'] === 1) {
+            $porder['region'] = 'QQ';
+        } else {
+            $porder['region'] = '微信';
+        }
+        if ($porder['play_type'] === 1) {
+            $porder['play_type'] = '实力上分';
+        } else {
+            $porder['play_type'] = '娱乐陪玩';
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $porder]);exit;
+    }
+
+    /**
+     * 获取玩家房间订单详情
+     * @author 贺强
+     * @time   2018-11-19 10:46:02
+     * @param  UserOrderModel $u UserOrderModel 实例
+     */
+    public function get_uord_info(UserOrderModel $uo)
+    {
+        $param = $this->param;
+        if (empty($param['order_id'])) {
+            $msg = ['status' => 1, 'info' => '订单ID不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uorder = $uo->getModel(['id' => $param['order_id']]);
+        if (!$uorder) {
+            echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+        }
+        $g    = new GameModel();
+        $game = $g->getModel(['id' => $uorder['game_id']], ['name']);
+        if ($game) {
+            $uorder['gamename'] = $game['name'];
+        }
+        if ($uorder['region'] === 1) {
+            $uorder['region'] = 'QQ';
+        } else {
+            $uorder['region'] = '微信';
+        }
+        if ($uorder['play_type'] === 1) {
+            $uorder['play_type'] = '实力上分';
+        } else {
+            $uorder['play_type'] = '娱乐陪玩';
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $uorder]);exit;
+    }
+
+    /**
+     * 获取陪玩师房间订单详情
+     * @author 贺强
+     * @time   2018-11-19 10:58:26
+     * @param  MasterOrderModel $mo MasterOrderModel 实例
+     */
+    public function get_mord_info(MasterOrderModel $mo)
+    {
+        $param = $this->param;
+        if (empty($param['order_id'])) {
+            $msg = ['status' => 1, 'info' => '订单ID不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $morder = $mo->getModel(['id' => $param['order_id']]);
+        if (!$morder) {
+            echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+        }
+        $g    = new GameModel();
+        $game = $g->getModel(['id' => $morder['game_id']], ['name']);
+        if ($game) {
+            $morder['gamename'] = $game['name'];
+        }
+        if ($morder['region'] === 1) {
+            $morder['region'] = 'QQ';
+        } else {
+            $morder['region'] = '微信';
+        }
+        if ($morder['play_type'] === 1) {
+            $morder['play_type'] = '实力上分';
+        } else {
+            $morder['play_type'] = '娱乐陪玩';
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $morder]);exit;
     }
 
     /**

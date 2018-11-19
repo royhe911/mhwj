@@ -30,7 +30,7 @@ class UserOrderModel extends CommonModel
                 DB::rollback();
                 return 10;
             }
-            $sql    = "select * from m_master_order where id={$data['morder_id']} for update";
+            $sql    = "select * from m_master_order where id={$uorder['morder_id']} for update";
             $morder = Db::query($sql);
             if (!$morder) {
                 Db::rollback();

@@ -79,7 +79,7 @@ return [
     '/api/pay/preodr'     => 'api/Pay/preorder', // 预下单
     '/api/pay/uodrs'      => 'api/Pay/get_user_order', // 玩家订单
     '/api/pay/userpay'    => 'api/Pay/person_pay', // 房间支付
-    '/api/pay/odrsta'     => 'api/Pay/modify_order', // 订单状态
+    '/api/pay/odrsta'     => 'api/Pay/modify_order', // 修改订单状态
     '/api/pay/ppord'      => 'api/Pay/personal_preorder', // 订制下单
     '/api/pay/prepay'     => 'api/Pay/prepay', // 预支付
     '/api/pay/personpay'  => 'api/Pay/person_pay', // 订制支付
@@ -92,6 +92,9 @@ return [
     '/api/pay/moneylog'   => 'api/Pay/get_money_log', // 提现记录
     '/api/pay/masterord'  => 'api/Pay/get_master_order', // 陪玩师房间订单
     '/api/pay/masterpord' => 'api/Pay/get_master_pord', // 陪玩师打制订单
+    '/api/pay/pordinfo'   => 'api/Pay/get_pord_info', // 订制订单详情
+    '/api/pay/uordinfo'   => 'api/Pay/get_uord_info', // 房间玩家订单详情
+    '/api/pay/mordinfo'   => 'api/Pay/get_mord_info', // 房间陪玩师订单详情
     /*--------   支付 api 结束  --------*/
     /*--------   订制 api 开始  --------*/
     '/api/person/inroom'  => 'api/Person/come_in_room', // 进入私聊房间
