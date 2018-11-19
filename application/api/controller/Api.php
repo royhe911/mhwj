@@ -907,6 +907,14 @@ class Api extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        // 房主踢人参数
+        if (!empty($param['is_kicking']) && intval($param['is_kicking']) === 1) {
+            $ru   = new RoomUserModel();
+            $rusr = $ru->getModel(['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+            if (!empty($rusr) && $rusr['status'] !== 0) {
+                echo json_encode(['status' => 22, 'info' => '该用户已准备，不能踢', 'date' => null]);exit;
+            }
+        }
         $res = $r->quit_room($param['room_id'], $param['uid']);
         if ($res !== true) {
             echo json_encode(['status' => $res, 'info' => '退出失败', 'data' => null]);exit;
