@@ -102,4 +102,6 @@ return [
     '/api/person/rooms'   => 'api/Person/get_person_room', // 获取私聊房间
     '/api/pay/cancelord'  => 'api/Pay/cancel_order', // 取消订单
     /*--------   订制 api 结束  --------*/
+
+    '/crontab/test'=>'common/'
 ];

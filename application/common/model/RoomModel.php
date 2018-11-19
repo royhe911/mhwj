@@ -34,6 +34,7 @@ class RoomModel extends CommonModel
                 return 4;
             }
             $data = $data[0];
+            $type = intval($type);
             if ($type === 1) {
                 if ($data['count'] === 2) {
                     return 2;
