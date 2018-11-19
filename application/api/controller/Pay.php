@@ -929,6 +929,8 @@ class Pay extends \think\Controller
         $game = $g->getModel(['id' => $morder['game_id']], ['name']);
         if ($game) {
             $morder['gamename'] = $game['name'];
+        } else {
+            $morder['gamename'] = '';
         }
         if ($morder['region'] === 1) {
             $morder['region'] = 'QQ';
