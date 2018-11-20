@@ -861,6 +861,30 @@ class Api extends \think\Controller
     }
 
     /**
+     * 修改房间状态
+     * @author 贺强
+     * @time   2018-11-20 09:40:58
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function modify_room_status(RoomModel $r)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'date' => null];
+        } elseif (empty($param['status'])) {
+            $msg = ['status' => 3, 'info' => '要修改状态不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $res = $r->modifyField('status', intval($param['status']), ['id' => $param['room_id']]);
+        if ($res !== false) {
+            echo json_encode(['status' => 40, 'info' => '修改失败', 'date' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '修改成功', 'date' => null]);exit;
+    }
+
+    /**
      * 进入房间
      * @author 贺强
      * @time   2018-11-09 10:27:20
@@ -1072,6 +1096,23 @@ class Api extends \think\Controller
             echo json_encode(['status' => 44, 'info' => '操作失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '操作成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 获取玩家土豪榜
+     * @author 贺强
+     * @time   2018-11-20 10:18:04
+     * @param  UserModel $u UserModel 实例
+     */
+    public function get_rich_list(UserModel $u)
+    {
+        $param    = $this->param;
+        $where    = ['is_delete' => 0, 'type' => 1];
+        $order    = ['contribution' => 'desc'];
+        $page     = 1;
+        $pagesize = 10;
+        $list     = $u->getList($where, ['id,nickname,avatar'], "$page,$pagesize", $order);
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
     }
 
 }

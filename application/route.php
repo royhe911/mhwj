@@ -64,6 +64,7 @@ return [
     '/api/addroom'        => 'api/Api/add_room', // 创建房间
     '/api/roomlist'       => 'api/Api/get_room_list', // 房间列表
     '/api/roominfo'       => 'api/Api/get_room_info', // 房间信息
+    '/api/roomsta'        => 'api/Api/modify_room_status', // 修改房间状态
     '/api/userlist'       => 'api/Api/get_user_list', // 用户列表
     '/api/inroom'         => 'api/Api/come_in_room', // 进入房间
     '/api/quitroom'       => 'api/Api/quit_room', // 退出房间
@@ -72,6 +73,7 @@ return [
     '/api/addchat'        => 'api/Api/add_chat', // 添加聊天记录
     '/api/chatlog'        => 'api/Api/get_chat_log', // 聊天记录
     '/api/ready'          => 'api/Api/user_ready', // 玩家准备
+    '/api/richlist'       => 'api/Api/get_rich_list', // 土豪榜
     /*--------   api 结束  --------*/
     /*--------   支付 api 开始  --------*/
     '/api/pay/morder'     => 'api/Pay/add_master_order', // 房主下单
@@ -103,5 +105,5 @@ return [
     '/api/pay/cancelord'  => 'api/Pay/cancel_order', // 取消订单
     /*--------   订制 api 结束  --------*/
 
-    '/crontab/test'=>'common/'
+    '/crontab/test'       => 'common/Order/',
 ];
