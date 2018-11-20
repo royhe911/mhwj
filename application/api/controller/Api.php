@@ -660,7 +660,7 @@ class Api extends \think\Controller
             $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
             $param['total_money'] = floatval($param['price']) * intval($param['num']) * (intval($param['count']) - 1);
-            $count                = $r->getCount(['is_delete' => 0, 'uid' => $param['uid']]);
+            $count                = $r->getCount(['is_delete' => 0, 'uid' => $param['uid'], 'status' => ['<>', 10]]);
             if ($count) {
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
             }
@@ -672,10 +672,10 @@ class Api extends \think\Controller
                 $msg = ['status' => 7, 'info' => '无权创建', 'data' => null];
             } else {
                 $ua       = new UserAttrModel();
-                $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']], 'curr_para,play_type');
+                $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']], ['curr_para', 'play_type']);
                 if (!$userAttr) {
                     $msg = ['status' => 10, 'info' => '您不能陪玩此游戏', 'data' => null];
-                } elseif ($userAttr['play_type'] === 2 || $userAttr['curr_para'] < $param['para_max'] || $param['para_max'] < $param['para_min']) {
+                } elseif ($userAttr['play_type'] === 1 && ($userAttr['curr_para'] > $param['para_max'] || $userAttr['curr_para'] < $param['para_min'])) {
                     $msg = ['status' => 11, 'info' => '您的等级不够陪玩的等级', 'data' => null];
                 }
             }
