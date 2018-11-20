@@ -234,7 +234,7 @@ class Pay extends \think\Controller
             echo json_encode($msg);exit;
         }
         $r    = new RoomModel();
-        $room = $r->getModel(['id' => $param['room_id']], ['game_id', 'play_type']);
+        $room = $r->getModel(['id' => $param['room_id']], ['game_id', 'type']);
         if ($room) {
             $param['game_id']   = $room['game_id'];
             $param['play_type'] = $room['type'];
@@ -470,6 +470,12 @@ class Pay extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '取消成功', 'date' => null]);exit;
     }
 
+    /**
+     * 房间订单支付
+     * @author 贺强
+     * @time   2018-11-20 16:57:50
+     * @param  UserOrderModel $uo UserOrderModel 实例
+     */
     public function user_pay(UserOrderModel $uo)
     {
         $param = $this->param;
@@ -903,6 +909,12 @@ class Pay extends \think\Controller
         if (!$uorder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
         }
+        if (!empty($uorder['addtime'])) {
+            $uorder['addtime'] = date('Y-m-d H:i:s', $uorder['addtime']);
+        }
+        if (!empty($uorder['pay_time'])) {
+            $uorder['pay_time'] = date('Y-m-d H:i:s', $uorder['pay_time']);
+        }
         $g    = new GameModel();
         $game = $g->getModel(['id' => $uorder['game_id']], ['name']);
         if ($game) {
@@ -950,6 +962,12 @@ class Pay extends \think\Controller
         $morder = $mo->getModel(['order_num' => $param['order_num']]);
         if (!$morder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+        }
+        if (!empty($morder['addtime'])) {
+            $morder['addtime'] = date('Y-m-d H:i:s', $morder['addtime']);
+        }
+        if (!empty($morder['complete_time'])) {
+            $morder['complete_time'] = date('Y-m-d H:i:s', $morder['complete_time']);
         }
         $u    = new UserModel();
         $user = $u->getModel(['id' => $morder['uid']], ['avatar', 'nickname']);
