@@ -226,12 +226,18 @@ class Pay extends \think\Controller
         } elseif (empty($param['order_money'])) {
             $msg = ['status' => 3, 'info' => '订单金额不能为空', 'data' => null];
         }
-        $count = $uo->getCount(['uid' => $param['uid'], 'room_id' => $param['room_id'], 'status' => ['<>', 3]]);
-        if ($count) {
-            echo json_encode(['status' => 5, 'info' => '不能重复下单', 'data' => null]);exit;
-        }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
+        }
+        $po = new PersonOrderModel();
+        // 查询该玩家是否已下了订制订单
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['<>', 10]]);
+        if ($count) {
+            echo json_encode(['status' => 9, 'info' => '您已下了订制订单', 'date' => null]);exit;
+        }
+        $count = $uo->getCount(['uid' => $param['uid'], 'room_id' => $param['room_id'], 'status' => ['<>', 3], 'status' => ['<>', 10]]);
+        if ($count) {
+            echo json_encode(['status' => 5, 'info' => '不能重复下单', 'data' => null]);exit;
         }
         $r    = new RoomModel();
         $room = $r->getModel(['id' => $param['room_id']], ['game_id', 'type']);
@@ -252,8 +258,7 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 4, 'info' => '下单失败', 'data' => null]);exit;
         }
         $ru = new RoomUserModel();
-        $ru->modif
-        Field('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+        $ru->modifyField('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => null]);exit;
     }
 
@@ -271,12 +276,6 @@ class Pay extends \think\Controller
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
-        }
-        $po = new PersonOrderModel();
-        // 查询该玩家是否已下了订制订单
-        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['<>', 10]]);
-        if ($count) {
-            echo json_encode(['status' => 9, 'info' => '您已下了订制订单', 'date' => null]);exit;
         }
         $where = ['uid' => $param['uid'], 'status' => ['<>', 3]];
         if (!empty($param['status']) && $param['status'] != 'all') {
