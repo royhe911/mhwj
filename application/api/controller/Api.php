@@ -1100,6 +1100,34 @@ class Api extends \think\Controller
     }
 
     /**
+     * 玩家评论陪玩师
+     * @author 贺强
+     * @time   2018-11-20 14:09:35
+     * @param  UserEvaluateModel $ue UserEvaluateModel 实例
+     */
+    public function user_comment(UserEvaluateModel $ue)
+    {
+        $param = $this->param;
+        if (empty($param['master_id'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'date' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '玩家ID不能为空', 'date' => null];
+        } elseif (empty($param['content'])) {
+            $msg = ['status' => 5, 'info' => '评论内容不能为空', 'date' => null];
+        } elseif (empty($param['score'])) {
+            $msg = ['status' => 7, 'info' => '评价分数不能为空', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $res = $ue->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 40, 'info' => '评论失败', 'date' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '评论成功', 'date' => null]);exit;
+    }
+
+    /**
      * 获取玩家土豪榜
      * @author 贺强
      * @time   2018-11-20 10:18:04
@@ -1143,8 +1171,8 @@ class Api extends \think\Controller
         }
         $uids  = array_column($list, 'uid');
         $u     = new UserModel();
-        $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
-        $users = array_column($users, null, 'id');
+        $users = $u->getList(['id' => ['in', $uids]], ['id master_id', 'nickname', 'avatar']);
+        $users = array_column($users, null, 'master_id');
         foreach ($list as &$item) {
             if (!empty($users[$item['uid']])) {
                 $item = $users[$item['uid']];

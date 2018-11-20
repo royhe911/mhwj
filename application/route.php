@@ -76,6 +76,7 @@ return [
     '/api/richlist'       => 'api/Api/get_rich_list', // 土豪榜
     '/api/effilist'       => 'api/Api/get_effi_list', // 效率榜
     '/api/praiselist'     => 'api/Api/get_praise_list', // 好评榜
+    '/api/comment'        => 'api/Api/user_comment', // 玩家评论陪玩师
     /*--------   api 结束  --------*/
     /*--------   支付 api 开始  --------*/
     '/api/pay/morder'     => 'api/Pay/add_master_order', // 房主下单
