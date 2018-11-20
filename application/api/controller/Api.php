@@ -11,6 +11,7 @@ use app\common\model\NoticeModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
 use app\common\model\UserAttrModel;
+use app\common\model\UserEvaluateModel;
 use app\common\model\UserLoginLogModel;
 use app\common\model\UserModel;
 use app\common\model\VericodeModel;
@@ -1140,13 +1141,51 @@ class Api extends \think\Controller
         if (!$list) {
             echo json_encode(['status' => 4, 'info' => '暂无数据', 'date' => null]);exit;
         }
-        $uids = array_column($list, 'uid');
+        $uids  = array_column($list, 'uid');
         $u     = new UserModel();
         $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
         $users = array_column($users, null, 'id');
         foreach ($list as &$item) {
             if (!empty($users[$item['uid']])) {
                 $item = $users[$item['uid']];
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+    }
+
+    /**
+     * 获取陪玩师好评榜
+     * @author 贺强
+     * @time   2018-11-20 12:23:09
+     * @param  UserEvaluateModel $ue UserEvaluateModel 实例
+     */
+    public function get_praise_list(UserEvaluateModel $ue)
+    {
+        $param    = $this->param;
+        $page     = 1;
+        $pagesize = 10;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $ue->getList([], ['master_id', 'avg(score) score'], "$page,$pagesize", ['score' => 'desc'], 'master_id');
+        if (!$list) {
+            echo json_encode(['status' => 4, 'info' => '暂无数据', 'date' => null]);exit;
+        }
+        $uids  = array_column($list, 'master_id');
+        $u     = new UserModel();
+        $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+        $users = array_column($users, null, 'id');
+        foreach ($list as &$item) {
+            $item['score'] = rtrim($item['score'], '0');
+            $item['score'] = rtrim($item['score'], '.');
+            if (!empty($users[$item['master_id']])) {
+                $master = $users[$item['master_id']];
+                // 取得陪玩师昵称和头像
+                $item['nickname'] = $master['nickname'];
+                $item['avatar']   = $master['avatar'];
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;

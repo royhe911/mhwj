@@ -41,7 +41,7 @@ class CommonModel extends Model
     }
 
     /**
-     * 根据主键 ID 
+     * 根据主键 ID
      * @author 贺强
      * @time   2016-11-16 15:57:17
      * @param array $id 要删除的数据的 ID 形如：[1, 2, 3, ……]
@@ -104,7 +104,7 @@ class CommonModel extends Model
     {
         $num = Db::table($this->table)
             ->where($where)
-            // ->fetchSql(true)
+        // ->fetchSql(true)
             ->setField($field, $value);
         // $num = db($this->table)->where($where)->setField($field, $value);
         return $num;
@@ -195,7 +195,7 @@ class CommonModel extends Model
      * @param array|string $field 要查询的字段，形如：['id', 'name', ……]或者'id, name, ……'，默认显式的获取数据表的所有字段列表
      * @param string $page 分页查询，形如：'1, 10'，其中字符串中第一个数字表示第几页，第二个数字表示每页多少条
      * @param array|string $order 按某(些)字段排序，形如：['order','id'=>'desc']或者'order, id desc'，默认按数据库中原顺序
-     * @param string $group 对结果集进行分组，只能使用一个字符串，即字段名
+     * @param string $group 对结果集进行分组，多个字段以半角逗号隔开
      * @param string $having 用于配合group方法完成从分组的结果中筛选(通常是聚合条件)数据，比如：'count(name)>0'
      * @return array 返回查询结果(数组)，若不存在返回 null
      */
