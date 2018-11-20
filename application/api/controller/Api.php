@@ -1042,7 +1042,7 @@ class Api extends \think\Controller
         }
         $param['addtime'] = time();
         $res              = $c->add_chat($param);
-        if ($res !== true) {
+        if (!$res) {
             echo json_encode(['status' => $res, 'info' => '添加失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '添加成功', 'data' => null]);exit;

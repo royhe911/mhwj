@@ -84,7 +84,7 @@ class RoomModel extends CommonModel
                 return 4;
             }
             $data = $data[0];
-            if ($uid === $data['uid']) {
+            if (intval($uid) === intval($data['uid'])) {
                 return true;
             }
             if ($data['in_count'] < $data['count']) {
