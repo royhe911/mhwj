@@ -1112,6 +1112,43 @@ class Api extends \think\Controller
         $page     = 1;
         $pagesize = 10;
         $list     = $u->getList($where, ['id,nickname,avatar'], "$page,$pagesize", $order);
+        if (!$list) {
+            echo json_encode(['status' => 4, 'info' => '暂无数据', 'date' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+    }
+
+    /**
+     * 获取陪玩师效率榜
+     * @author 贺强
+     * @time   2018-11-20 10:55:53
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function get_effi_list(RoomModel $r)
+    {
+        $param    = $this->param;
+        $where    = ['status' => 10];
+        $page     = 1;
+        $pagesize = 10;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $r->getList($where, ['uid', 'count(*) c'], "$page,$pagesize", ['c' => 'desc'], 'uid');
+        if (!$list) {
+            echo json_encode(['status' => 4, 'info' => '暂无数据', 'date' => null]);exit;
+        }
+        $uids = array_column($list, 'uid');
+        $u     = new UserModel();
+        $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+        $users = array_column($users, null, 'id');
+        foreach ($list as &$item) {
+            if (!empty($users[$item['uid']])) {
+                $item = $users[$item['uid']];
+            }
+        }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
     }
 
