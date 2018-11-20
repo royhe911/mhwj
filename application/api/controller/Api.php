@@ -710,6 +710,9 @@ class Api extends \think\Controller
         if (!empty($param['region'])) {
             $where['region'] = $param['region'];
         }
+        if (!empty($param['type'])) {
+            $where['type'] = $param['type'];
+        }
         // 分页参数
         $page     = 1;
         $pagesize = 10;
