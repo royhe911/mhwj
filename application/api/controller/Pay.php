@@ -851,14 +851,19 @@ class Pay extends \think\Controller
         if (!$porder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
         }
-        $pmo                     = new PersonMasterOrderModel();
-        $pmorder                 = $pmo->getModel(['order_id' => $porder['id']]);
-        $porder['master_avatar'] = '';
+        if (!empty($porder['addtime'])) {
+            $porder['addtime'] = date('Y-m-d H:i:s', $porder['addtime']);
+        }
+        $pmo                       = new PersonMasterOrderModel();
+        $pmorder                   = $pmo->getModel(['order_id' => $porder['id']]);
+        $porder['master_avatar']   = '';
+        $porder['master_nickname'] = '';
         if ($pmorder) {
             $u    = new UserModel();
-            $user = $u->getModel(['id' => $pmorder['master_id']], ['avatar']);
+            $user = $u->getModel(['id' => $pmorder['master_id']], ['avatar', 'nickname']);
             if ($user) {
-                $porder['master_avatar'] = $user['avatar'];
+                $porder['master_avatar']   = $user['avatar'];
+                $porder['master_nickname'] = $user['nickname'];
             }
         }
         $g    = new GameModel();
@@ -906,11 +911,13 @@ class Pay extends \think\Controller
             $uorder['gamename'] = '';
         }
         $u    = new UserModel();
-        $user = $u->getModel(['id' => $uorder['morder_id']], ['avatar']);
+        $user = $u->getModel(['id' => $uorder['morder_id']], ['avatar', 'nickname']);
         if ($user) {
-            $uorder['master_avatar'] = $user['avatar'];
+            $uorder['master_avatar']   = $user['avatar'];
+            $uorder['master_nickname'] = $user['nickname'];
         } else {
-            $uorder['master_avatar'] = '';
+            $uorder['master_avatar']   = '';
+            $uorder['master_nickname'] = '';
         }
         if ($uorder['region'] === 1) {
             $uorder['region'] = 'QQ';
@@ -945,11 +952,13 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
         }
         $u    = new UserModel();
-        $user = $u->getModel(['id' => $morder['uid']], ['avatar']);
+        $user = $u->getModel(['id' => $morder['uid']], ['avatar', 'nickname']);
         if ($user) {
-            $morder['master_avatar'] = $user['avatar'];
+            $morder['master_avatar']   = $user['avatar'];
+            $morder['master_nickname'] = $user['nickname'];
         } else {
-            $morder['master_avatar'] = '';
+            $morder['master_avatar']   = '';
+            $morder['master_nickname'] = '';
         }
         $g    = new GameModel();
         $game = $g->getModel(['id' => $morder['game_id']], ['name']);

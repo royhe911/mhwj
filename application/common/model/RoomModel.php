@@ -126,6 +126,20 @@ class RoomModel extends CommonModel
         Db::startTrans();
         try {
             $ru = new RoomUserModel();
+            // 查询退出房间玩家信息
+            $roomuser = $ru->getModel(['room_id' => $room_id, 'uid' => $uid]);
+            if ($roomuser['status'] === 6) {
+                $mo  = new MasterOrderModel();
+                $res = $mo->decrement('complete_money', ['room_id' => $room_id], $roomuser['total_money']);
+                if (!$res) {
+                    Db::rollback();
+                    return 3;
+                }
+                // 发起退款
+                //
+                //
+                // 发起退款
+            }
             // 删除退出房间的玩家
             $res = $ru->delByWhere(['room_id' => $room_id, 'uid' => $uid]);
             if (!$res) {
