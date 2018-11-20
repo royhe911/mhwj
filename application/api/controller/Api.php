@@ -340,7 +340,7 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $g->getList($where, 'id,identify,`name`,url', "$page,$pagesize");
+        $list = $g->getList($where, 'id,identify,`name`,url', "$page,$pagesize", 'sort');
         if ($list) {
             foreach ($list as &$item) {
                 if (!empty($item['url'])) {

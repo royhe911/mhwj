@@ -125,6 +125,10 @@ class RoomModel extends CommonModel
     {
         Db::startTrans();
         try {
+            $count = $this->getCount(['id' => $room_id, 'status' => 8]);
+            if ($count) {
+                return 4;
+            }
             $ru = new RoomUserModel();
             // 查询退出房间玩家信息
             $roomuser = $ru->getModel(['room_id' => $room_id, 'uid' => $uid]);

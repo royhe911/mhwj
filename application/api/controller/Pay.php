@@ -252,7 +252,8 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 4, 'info' => '下单失败', 'data' => null]);exit;
         }
         $ru = new RoomUserModel();
-        $ru->modifyField('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+        $ru->modif
+        Field('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => null]);exit;
     }
 
@@ -271,6 +272,12 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $po = new PersonOrderModel();
+        // 查询该玩家是否已下了订制订单
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['<>', 10]]);
+        if ($count) {
+            echo json_encode(['status' => 9, 'info' => '您已下了订制订单', 'date' => null]);exit;
+        }
         $where = ['uid' => $param['uid'], 'status' => ['<>', 3]];
         if (!empty($param['status']) && $param['status'] != 'all') {
             $where['status'] = $param['status'];
@@ -285,7 +292,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $uo->getList($where, ['order_num', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
+        $list = $uo->getList($where, ['order_num', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize", 'addtime desc');
         if ($list) {
             $u     = new UserModel();
             $user  = $u->getModel(['id' => $param['uid']]);
@@ -379,6 +386,12 @@ class Pay extends \think\Controller
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
+        }
+        $ru = new RoomUserModel();
+        // 查询譔下单人是否已在房间里
+        $count = $ru->getCount(['uid' => $param['uid'], 'status' => ['<>', 10]]);
+        if ($count) {
+            echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'date' => null]);exit;
         }
         $order_num            = get_millisecond();
         $param['order_num']   = $order_num;
@@ -805,7 +818,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $po->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
+        $list = $po->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize", 'addtime desc');
         if ($list) {
             $uids  = array_column($list, 'uid');
             $u     = new UserModel();
