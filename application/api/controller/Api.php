@@ -808,8 +808,11 @@ class Api extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count');
+        $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,status');
         if ($room) {
+            if ($room['status'] === 10) {
+                echo json_encode(['status' => 3, 'info' => '游戏已完成', 'date' => null]);exit;
+            }
             $g    = new GameModel();
             $game = $g->getModel(['id' => $room['game_id']], ['name', 'url']);
             if ($game) {
