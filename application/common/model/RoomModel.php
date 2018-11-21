@@ -27,8 +27,9 @@ class RoomModel extends CommonModel
     {
         Db::startTrans();
         try {
-            $sql  = "select id,in_count,count from m_room where id=$room_id for update";
-            $data = Db::query($sql);
+            $where = "id=$room_id";
+            $sql   = "select id,price,total_money,in_count,count from m_room where {$where} for update";
+            $data  = Db::query($sql);
             if (!$data) {
                 Db::rollback();
                 return 4;
@@ -39,14 +40,15 @@ class RoomModel extends CommonModel
                 if ($data['count'] === 2) {
                     return 2;
                 }
-                $res = $this->decrement('count', ['id' => $room_id]);
+                $dida = ['count' => $data['count'] - 1, 'total_money' => $data['total_money'] - $data['price']];
             }
             if ($type === 2) {
                 if ($data['count'] === 5) {
                     return 3;
                 }
-                $res = $this->increment('count', ['id' => $room_id]);
+                $dida = ['count' => $data['count'] + 1, 'total_money' => $data['total_money'] + $data['price']];
             }
+            $res = $this->modify($dida, $where);
             if (!$res) {
                 Db::rollback();
                 return 1;
