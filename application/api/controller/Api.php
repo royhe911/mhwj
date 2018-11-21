@@ -789,7 +789,7 @@ class Api extends \think\Controller
     public function get_room_info(RoomModel $r, RoomUserModel $ru)
     {
         $param = $this->param;
-        if (!empty($param['share']) && intval($param['share']) === 1) {
+        if (!empty($param['share']) && intval($param['is_share']) === 1) {
             $state = $this->come_in_room(true);
             if ($state !== true) {
                 echo json_encode(['status' => 7, 'info' => '进入房间失败', 'date' => null]);exit;
