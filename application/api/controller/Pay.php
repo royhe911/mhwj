@@ -352,11 +352,8 @@ class Pay extends \think\Controller
         if (intval($param['status']) === 6) {
             $param['pay_time'] = time();
         }
-        $res = $uo->modify_order($param);
-        if ($res === 33) {
-            echo json_encode(['status' => 33, 'info' => '服务器忙，请稍后再试', 'data' => null]);exit;
-        }
-        if ($res !== true) {
+        $res = $uo->modify($param, ['order_num' => $param['order_num']]);
+        if (!$res) {
             echo json_encode(['status' => $res, 'info' => '修改失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;

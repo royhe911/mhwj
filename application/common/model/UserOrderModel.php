@@ -70,17 +70,30 @@ class UserOrderModel extends CommonModel
     {
         Db::startTrans();
         try {
-            $mo  = new MasterOrderModel();
-            $res = $mo->increment('complete_money', $uorder['order_money'], ['room_id' => $uorder['room_id']]);
+            $mo     = new MasterOrderModel();
+            $morder = $mo->getModel(['room_id' => $uorder['room_id']]);
+            $mdat   = ['complete_money' => $morder['complete_money'] + $uorder['order_money'], 'complete_time' => time()];
+            $cmy    = floatval($mdat['complete_money']);
+            $omy    = floatval($morder['order_money']);
+            if ($omy === $cmy) {
+                $mdat['status'] = 6;
+                $r              = new RoomModel();
+                $r->modifyField('status', 8, ['id' => $uorder['room_id']]);
+            }
+            // 修改陪玩师订单完成金额和状态
+            $res = $mo->modify($mdat, ['id' => $morder['id']]);
+            if (!$res) {
+                Db::rollback();
+                return 9;
+            }
+            // 修改玩家房间状态
+            $ru  = new RoomUserModel();
+            $res = $ru->modifyField('status', 6, ['uid' => $uorder['uid'], 'room_id' => $uorder['room_id']]);
             if (!$res) {
                 Db::rollback();
                 return 10;
             }
-            $morder = $mo->getModel(['room_id' => $uorder['room_id']]);
-            if ($morder['order_money'] === $morder['complete_money']) {
-                $r = new RoomModel();
-                $r->modifyField('status', 8, ['id' => $uorder['room_id']]);
-            }
+            // 更新玩家贡献值
             $contribution = $uorder['order_money'] * 100;
             $u            = new UserModel();
             if ($contribution > 0) {
@@ -93,7 +106,8 @@ class UserOrderModel extends CommonModel
                 Db::rollback();
                 return 20;
             }
-            $res = $uo->modifyField('status', 6, ['order_num' => $param['order_num']]);
+            $uo  = new UserOrderModel();
+            $res = $uo->modifyField('status', 6, ['order_num' => $uorder['order_num']]);
             if (!$res) {
                 Db::rollback();
                 return 30;
