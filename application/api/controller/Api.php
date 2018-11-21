@@ -7,6 +7,7 @@ use app\common\model\CouponModel;
 use app\common\model\FeedbackModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
+use app\common\model\MasterOrderModel;
 use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
 use app\common\model\RoomModel;

@@ -83,7 +83,7 @@ return [
     '/api/pay/uorder'     => 'api/Pay/add_user_order', // 玩家下单
     '/api/pay/preodr'     => 'api/Pay/preorder', // 预下单
     '/api/pay/uodrs'      => 'api/Pay/get_user_order', // 玩家订单
-    '/api/pay/userpay'    => 'api/Pay/person_pay', // 房间支付
+    '/api/pay/userpay'    => 'api/Pay/user_pay', // 房间支付
     '/api/pay/odrsta'     => 'api/Pay/modify_order', // 修改订单状态
     '/api/pay/ppord'      => 'api/Pay/personal_preorder', // 订制下单
     '/api/pay/prepay'     => 'api/Pay/prepay', // 预支付
