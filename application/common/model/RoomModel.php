@@ -88,13 +88,16 @@ class RoomModel extends CommonModel
         Db::startTrans();
         try {
             // 进入房间锁定房间信息以免两个人同时进入
-            $sql  = "select id,uid,price,num,in_count,count from m_room where id=$room_id for update";
+            $sql  = "select id,uid,price,num,in_count,count,status from m_room where id=$room_id for update";
             $data = Db::query($sql);
             if (!$data) {
                 Db::rollback();
                 return 4;
             }
             $data = $data[0];
+            if ($data['status'] === 10) {
+                return 10;
+            }
             if (intval($uid) === intval($data['uid'])) {
                 return true;
             }
