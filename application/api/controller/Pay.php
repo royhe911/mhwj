@@ -147,7 +147,7 @@ class Pay extends \think\Controller
         if (!$rus) {
             echo json_encode(['status' => 7, 'info' => '该用户未进入房间', 'data' => null]);exit;
         }
-        if ($rus['total_money'] >= config('UPPERMONEY')) {
+        if ($rus['total_money'] >= config('LOWERMONEY')) {
             $cus = $c->getModel(['uid' => $param['uid'], 'status' => 0], ['id', 'type', 'money', 'over_time']);
             if ($cus) {
                 if (!empty($cus['over_time'])) {
@@ -438,7 +438,7 @@ class Pay extends \think\Controller
             $porder['para_str'] = $gameconf['para_str'];
         }
         $last_money = $porder['order_money'];
-        if ($porder['order_money'] > config('UPPERMONEY')) {
+        if ($porder['order_money'] > config('LOWERMONEY')) {
             $c   = new CouponModel();
             $cus = $c->getModel(['uid' => $porder['uid'], 'status' => 0], ['id', 'money']);
             if ($cus) {
@@ -1035,7 +1035,7 @@ class Pay extends \think\Controller
                     $item['over_time'] = date('Y-m-d H:i:s', $item['over_time']);
                 }
                 if ($item['type'] === 1) {
-                    $item['desc'] = '满' . config('UPPERMONEY') . '减' . $item['money'];
+                    $item['desc'] = '满' . config('LOWERMONEY') . '减' . $item['money'];
                 } else {
                     $item['desc'] = '';
                 }

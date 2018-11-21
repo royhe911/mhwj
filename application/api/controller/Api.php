@@ -12,6 +12,7 @@ use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
 use app\common\model\UserAttrModel;
 use app\common\model\UserEvaluateModel;
+use app\common\model\UserInviteModel;
 use app\common\model\UserLoginLogModel;
 use app\common\model\UserModel;
 use app\common\model\VericodeModel;
@@ -169,6 +170,9 @@ class Api extends \think\Controller
             $data['login_time'] = time();
             $id                 = $u->add($data);
             if ($id) {
+                $cdata = ['uid' => $id, 'type' => 1, 'money' => 5, 'over_time' => time() + config('COUPONTERM') * 20 * 3600, 'addtime' => time()];
+                $c     = new CouponModel();
+                $c->add($cdata);
                 $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $id, 'mobile' => '']];
             } else {
                 $msg = ['status' => 4, 'info' => '登录失败', 'data' => null];
@@ -608,7 +612,7 @@ class Api extends \think\Controller
     public function check_vericode(VericodeModel $v)
     {
         $param = $this->param;
-        if (empty($param['code']) || empty($param['mobile'])) {
+        if (empty($param['code']) || empty($param['mobile']) || empty($param['uid'])) {
             echo json_encode(['status' => 1, 'info' => '非法参数', 'data' => null]);exit;
         }
         $mobile = $param['mobile'];
@@ -623,6 +627,13 @@ class Api extends \think\Controller
         } else {
             $v->delByWhere(['mobile' => "v_$mobile"]);
             $msg = ['status' => 0, 'info' => '验证成功', 'data' => null];
+        }
+        $u   = new UserModel();
+        $res = $u->modifyField('mobile', $mobile, ['id' => $param['uid']]);
+        if (!empty($param['invite_uid']) && !$res) {
+            $uidata = ['uid' => $param['invite_uid'], 'invited_uid' => $param['uid'], 'addtime' => time()];
+            $ui     = new UserInviteModel();
+            $ui->add($uidata);
         }
         echo json_encode($msg);exit;
     }
@@ -675,7 +686,7 @@ class Api extends \think\Controller
                 $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']], ['curr_para', 'play_type']);
                 if (!$userAttr) {
                     $msg = ['status' => 10, 'info' => '您不能陪玩此游戏', 'data' => null];
-                } elseif ($userAttr['play_type'] === 1 && ($userAttr['curr_para'] > $param['para_max'] || $userAttr['curr_para'] < $param['para_min'])) {
+                } elseif ($userAttr['play_type'] === 1 && $userAttr['curr_para'] < $param['para_min']) {
                     $msg = ['status' => 11, 'info' => '您的等级不够陪玩的等级', 'data' => null];
                 }
             }
@@ -790,11 +801,13 @@ class Api extends \think\Controller
         $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count');
         if ($room) {
             $g    = new GameModel();
-            $game = $g->getModel(['id' => $room['game_id']], 'name');
+            $game = $g->getModel(['id' => $room['game_id']], ['name', 'url']);
             if ($game) {
                 $room['game_name'] = $game['name'];
+                $room['game_url']=$game['url'];
             } else {
                 $room['game_name'] = '';
+                $room['game_url']='';
             }
             if ($room['type'] === 1) {
                 $room['type'] = '实力上分';
