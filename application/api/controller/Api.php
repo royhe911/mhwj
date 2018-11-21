@@ -699,6 +699,9 @@ class Api extends \think\Controller
         }
         $res = $r->add($param);
         if ($res) {
+            $mo   = new MasterOrderModel();
+            $mord = ['uid' => $param['uid'], 'room_id' => $res, 'order_money' => $param['total_money'], 'play_type' => $param['type'], 'game_id' => $param['game_id'], 'region' => $param['region'], 'order_num' => get_millisecond(), 'addtime' => time()];
+            $mo->add($mord);
             $msg = ['status' => 0, 'info' => '创建成功', 'data' => ['id' => $res, 'count' => $param['count'], 'in_count' => 1]];
         } else {
             $msg = ['status' => 44, 'info' => '创建失败', 'data' => null];

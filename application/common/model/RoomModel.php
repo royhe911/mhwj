@@ -36,19 +36,22 @@ class RoomModel extends CommonModel
             }
             $data = $data[0];
             $type = intval($type);
+            $mo   = new MasterOrderModel();
             if ($type === 1) {
+                $total_money = $data['total_money'] - $data['price'];
                 if ($data['count'] === 2) {
                     return 2;
                 }
-                $dida = ['count' => $data['count'] - 1, 'total_money' => $data['total_money'] - $data['price']];
+                $dida = ['count' => $data['count'] - 1, 'total_money' => $total_money];
             }
             if ($type === 2) {
+                $total_money = $data['total_money'] + $data['price'];
                 if ($data['count'] === 5) {
                     return 3;
                 }
                 $ru = new RoomUserModel();
                 $ru->modifyField('status', 0, ['room_id' => $room_id]);
-                $dida = ['count' => $data['count'] + 1, 'total_money' => $data['total_money'] + $data['price']];
+                $dida = ['count' => $data['count'] + 1, 'total_money' => $total_money];
             }
             $res = $this->modify($dida, $where);
             if (!$res) {

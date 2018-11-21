@@ -174,10 +174,10 @@ class Pay extends \think\Controller
      * 添加房主订单
      * @author 贺强
      * @time   2018-11-13 19:12:25
-     * @param  MasterOrderModel $mo MasterOrderModel 实例
      */
-    public function add_master_order(MasterOrderModel $mo)
+    public function add_master_order()
     {
+        $mo    = new MasterOrderModel();
         $param = $this->param;
         if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
