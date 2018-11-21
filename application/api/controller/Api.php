@@ -718,7 +718,7 @@ class Api extends \think\Controller
     public function get_room_list(RoomModel $r)
     {
         $param = $this->param;
-        $where = ['is_delete' => 0];
+        $where = ['is_delete' => 0, 'status' => ['in', '0,1,5,8']];
         if (!empty($param['game_id'])) {
             $where['game_id'] = $param['game_id'];
         }

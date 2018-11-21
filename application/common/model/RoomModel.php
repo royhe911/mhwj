@@ -28,13 +28,16 @@ class RoomModel extends CommonModel
         Db::startTrans();
         try {
             $where = "id=$room_id";
-            $sql   = "select id,price,total_money,in_count,count from m_room where {$where} for update";
+            $sql   = "select id,price,total_money,in_count,count,status from m_room where {$where} for update";
             $data  = Db::query($sql);
             if (!$data) {
                 Db::rollback();
                 return 4;
             }
             $data = $data[0];
+            if ($data['status'] === 10) {
+                return 10;
+            }
             $type = intval($type);
             $mo   = new MasterOrderModel();
             if ($type === 1) {
@@ -53,6 +56,7 @@ class RoomModel extends CommonModel
                 $ru->modifyField('status', 0, ['room_id' => $room_id]);
                 $dida = ['count' => $data['count'] + 1, 'total_money' => $total_money];
             }
+            $mo->modifyField('order_money', $total_money, ['room_id' => $room_id]);
             $res = $this->modify($dida, $where);
             if (!$res) {
                 Db::rollback();
