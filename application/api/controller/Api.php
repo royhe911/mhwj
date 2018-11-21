@@ -3,6 +3,7 @@ namespace app\api\controller;
 
 use app\common\model\ChatModel;
 use app\common\model\ChatUserModel;
+use app\common\model\CouponModel;
 use app\common\model\FeedbackModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
@@ -630,7 +631,7 @@ class Api extends \think\Controller
         }
         $u   = new UserModel();
         $res = $u->modifyField('mobile', $mobile, ['id' => $param['uid']]);
-        if (!empty($param['invite_uid']) && !$res) {
+        if (!empty($param['invite_uid']) && $res) {
             $uidata = ['uid' => $param['invite_uid'], 'invited_uid' => $param['uid'], 'addtime' => time()];
             $ui     = new UserInviteModel();
             $ui->add($uidata);
@@ -867,7 +868,7 @@ class Api extends \think\Controller
                             $status_txt = '已支付';
                         }
                         $user['status_txt'] = $status_txt;
-                        if ($user['id'] === $param['uid']) {
+                        if ($user['id'] === intval($param['uid'])) {
                             $room['total_money'] = $usta['total_money'];
                             $room['status']      = $usta['status'];
                             $room['status_txt']  = $status_txt;
