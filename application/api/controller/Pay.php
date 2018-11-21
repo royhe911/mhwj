@@ -252,13 +252,13 @@ class Pay extends \think\Controller
         }
         $param['order_num'] = get_millisecond();
         $param['addtime']   = time();
-        $param['status']    = 6;
+        // $param['status']    = 6;
         $res                = $uo->add($param);
         if (!$res) {
             echo json_encode(['status' => 4, 'info' => '下单失败', 'data' => null]);exit;
         }
-        $ru = new RoomUserModel();
-        $ru->modifyField('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+        // $ru = new RoomUserModel();
+        // $ru->modifyField('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => null]);exit;
     }
 
