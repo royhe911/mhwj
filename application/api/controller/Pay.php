@@ -512,15 +512,10 @@ class Pay extends \think\Controller
         if (!$state) {
             echo json_encode(['status' => 4, 'info' => '支付失败', 'data' => null]);exit;
         }
-        $contribution = $uorder['order_money'] * 100;
-        $u            = new UserModel();
-        if ($contribution > 0) {
-            $u->increment('contribution', ['id' => $uorder['uid']], $contribution);
+        $res = $uo->pay_money($uorder);
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '支付失败', 'date' => null]);exit;
         }
-        $data = ['uid' => $uorder['uid'], 'type' => 1, 'money' => $uorder['order_money'], 'addtime' => time()];
-        $c    = new ConsumeModel();
-        $c->add($data);
-        $res = $uo->modifyField('status', 6, ['order_num' => $param['order_num']]);
         echo json_encode(['status' => 0, 'info' => '支付成功', 'data' => ['order_id' => $uorder['id']]]);exit;
     }
 

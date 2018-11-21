@@ -59,4 +59,45 @@ class UserOrderModel extends CommonModel
             return 40;
         }
     }
+
+    /**
+     * 玩家房间订单支付
+     * @author 贺强
+     * @time   2018-11-21 16:18:33
+     * @param  model  $uorder 玩家订单实例
+     */
+    public function pay_money($uorder)
+    {
+        Db::startTrans();
+        try {
+            $mo  = new MasterOrderModel();
+            $res = $mo->increment('complete_money', $uorder['order_money'], ['room_id' => $uorder['room_id']]);
+            if (!$res) {
+                Db::rollback();
+                return 10;
+            }
+            $contribution = $uorder['order_money'] * 100;
+            $u            = new UserModel();
+            if ($contribution > 0) {
+                $u->increment('contribution', ['id' => $uorder['uid']], $contribution);
+            }
+            $data = ['uid' => $uorder['uid'], 'type' => 1, 'money' => $uorder['order_money'], 'addtime' => time()];
+            $c    = new ConsumeModel();
+            $res  = $c->add($data);
+            if (!$res) {
+                Db::rollback();
+                return 20;
+            }
+            $res = $uo->modifyField('status', 6, ['order_num' => $param['order_num']]);
+            if (!$res) {
+                Db::rollback();
+                return 30;
+            }
+            Db::commit();
+            return true;
+        } catch (\Exception $e) {
+            Db::rollback();
+            return 44;
+        }
+    }
 }
