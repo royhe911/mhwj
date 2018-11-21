@@ -46,6 +46,8 @@ class RoomModel extends CommonModel
                 if ($data['count'] === 5) {
                     return 3;
                 }
+                $ru = new RoomUserModel();
+                $ru->modifyField('status', 0, ['room_id' => $room_id]);
                 $dida = ['count' => $data['count'] + 1, 'total_money' => $data['total_money'] + $data['price']];
             }
             $res = $this->modify($dida, $where);
