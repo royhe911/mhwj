@@ -76,6 +76,11 @@ class UserOrderModel extends CommonModel
                 Db::rollback();
                 return 10;
             }
+            $morder = $mo->getModel(['room_id' => $uorder['room_id']]);
+            if ($morder['order_money'] === $morder['complete_money']) {
+                $r = new RoomModel();
+                $r->modifyField('status', 8, ['id' => $uorder['room_id']]);
+            }
             $contribution = $uorder['order_money'] * 100;
             $u            = new UserModel();
             if ($contribution > 0) {
