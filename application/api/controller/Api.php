@@ -803,11 +803,15 @@ class Api extends \think\Controller
             $g    = new GameModel();
             $game = $g->getModel(['id' => $room['game_id']], ['name', 'url']);
             if ($game) {
+                $gameurl = $game['url'];
+                if (strpos($gameurl, 'http://') === false && strpos($gameurl, 'https://') === false) {
+                    $gameurl = config('WEBSITE') . $gameurl;
+                }
                 $room['game_name'] = $game['name'];
-                $room['game_url']=$game['url'];
+                $room['game_url']  = $gameurl;
             } else {
                 $room['game_name'] = '';
-                $room['game_url']='';
+                $room['game_url']  = '';
             }
             if ($room['type'] === 1) {
                 $room['type'] = '实力上分';
