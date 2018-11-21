@@ -789,6 +789,12 @@ class Api extends \think\Controller
     public function get_room_info(RoomModel $r, RoomUserModel $ru)
     {
         $param = $this->param;
+        if (!empty($param['share']) && intval($param['share']) === 1) {
+            $state = $this->come_in_room(true);
+            if ($state !== true) {
+                echo json_encode(['status' => 7, 'info' => '进入房间失败', 'date' => null]);exit;
+            }
+        }
         if (empty($param['room_id'])) {
             $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
         }
@@ -909,10 +915,11 @@ class Api extends \think\Controller
      * 进入房间
      * @author 贺强
      * @time   2018-11-09 10:27:20
-     * @param  RoomModel $r RoomModel 实例
+     * @param  bool $is_share 是否是分享进入
      */
-    public function come_in_room(RoomModel $r)
+    public function come_in_room($is_share = false)
     {
+        $r     = new RoomModel();
         $param = $this->param;
         if (empty($param['room_id'])) {
             $msg = ['status' => 10, 'info' => '房间ID不能为空', 'data' => null];
@@ -923,6 +930,9 @@ class Api extends \think\Controller
             echo json_encode($msg);exit;
         }
         $res = $r->in_room($param['room_id'], $param['uid']);
+        if ($is_share) {
+            return $res;
+        }
         if ($res !== true) {
             $msg = '进入房间失败';
             if ($res === 3) {
