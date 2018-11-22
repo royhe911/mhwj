@@ -237,9 +237,9 @@ class Pay extends \think\Controller
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已下了订制订单', 'date' => null]);exit;
         }
-        $count = $uo->getCount(['uid' => $param['uid'], 'room_id' => $param['room_id'], 'status' => ['<>', 3], 'status' => ['<>', 10]]);
+        $uorder = $uo->getModel(['uid' => $param['uid'], 'room_id' => $param['room_id'], 'status' => ['<>', 3], 'status' => ['<>', 10]], ['order_num']);
         if ($count) {
-            echo json_encode(['status' => 0, 'info' => '重复下单成功', 'data' => null]);exit;
+            echo json_encode(['status' => 0, 'info' => '重复下单成功', 'data' => ['order_num'=>$uorder['order_num']]]);exit;
         }
         $r    = new RoomModel();
         $room = $r->getModel(['id' => $param['room_id']], ['game_id', 'type']);
