@@ -89,7 +89,7 @@ class UserOrderModel extends CommonModel
             // 修改玩家房间状态
             $ru  = new RoomUserModel();
             $res = $ru->modifyField('status', 6, ['uid' => $uorder['uid'], 'room_id' => $uorder['room_id']]);
-            if (!$res) {
+            if ($res === false) {
                 Db::rollback();
                 return 10;
             }
@@ -107,7 +107,7 @@ class UserOrderModel extends CommonModel
                 return 20;
             }
             $uo  = new UserOrderModel();
-            $res = $uo->modifyField('status', 6, ['order_num' => $uorder['order_num']]);
+            $res = $uo->modify(['status' => 6, 'pay_time' => time()], ['order_num' => $uorder['order_num']]);
             if (!$res) {
                 Db::rollback();
                 return 30;

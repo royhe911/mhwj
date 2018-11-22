@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单详情</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/iCheck/custom.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
+    <style type="text/css">
+        .form-control{width: 200px;}
+        #preview{max-width: 120px;max-height: 120px;display: none;}
+        .level_url{max-width: 80px;max-height: 80px;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>订单详情</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal" onsubmit="return false">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">陪玩师昵称</label>
+                            <div class="col-sm-10">{$order.master_nickname}</div>
+                        </div>
+                        <div class="hr-line-dashed kf"></div>
+                        <div class="form-group kf">
+                            <label class="col-sm-2 control-label">陪玩师电话</label>
+                            <div class="col-sm-10">{$order.master_mobile}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <input class="btn btn-white" type="button" data-action="cancel" value="返回"> &nbsp; <input class="btn btn-sm btn-primary" type="button" data-action="complete" value="完成">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $('input[data-action]').click(function(){
+            $action = $(this).data('action');
+            if ($action == 'cancel') {
+                location.href = '/order/morders';
+            }else if ($action == 'complete') {
+                layer.confirm('确实要完成吗？', {icon: 3}, function(){
+                    $.ajax({
+                        type: 'post', dataType: 'json', cache: false,
+                        url: '/order/complete',
+                        data: {'type': 3, 'id': {$order.id}, 'status': 10},
+                        success: function($msg){
+                            if ($msg.status == 0) {
+                                layer.msg($msg.info, {icon: 1, time: 1000})
+                            }else{
+                                layer.msg($msg.info, {icon: 5, time: 1000})
+                            }
+                        }
+                    })
+                })
+            }
+        });
+    });
+</script>
+</html>

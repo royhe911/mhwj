@@ -43,6 +43,13 @@ return [
     '/user/operate'       => 'admin/User/operate', // 设置用户
     '/room/list'          => 'admin/Room/lists', // 房间列表
     '/room/operate'       => 'admin/Room/operate', // 设置房间
+    '/order/uorders'      => 'admin/Order/uorders', // 房间订单
+    '/order/udetail'      => 'admin/Order/udetail', // 房间订单详情
+    '/order/porders'      => 'admin/Order/porders', // 房间订单
+    '/order/pdetail'      => 'admin/Order/pdetail', // 房间订单详情
+    '/order/morders'      => 'admin/Order/morders', // 房间订单
+    '/order/mdetail'      => 'admin/Order/mdetail', // 房间订单详情
+    '/order/complete'     => 'admin/Order/complete', // 完成订单
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图
