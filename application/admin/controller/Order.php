@@ -303,7 +303,7 @@ class Order extends \think\Controller
         $id    = $this->request->get('id');
         $order = $mo->getModel(['id' => $id]);
         if ($order) {
-            $u    = new UserModel();
+            $u      = new UserModel();
             $master = $u->getModel(['id' => $order['uid']]);
             if ($master) {
                 $order['master_nickname'] = $master['nickname'];
@@ -331,6 +331,8 @@ class Order extends \think\Controller
             $model = new UserOrderModel();
         } elseif ($type === 2) {
             $model = new PersonOrderModel();
+        } elseif ($type === 3) {
+            $model = new MasterOrderModel();
         }
         $res = $model->modifyField('status', $param['status'], ['id' => $param['id']]);
         if ($res !== false) {

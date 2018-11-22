@@ -797,10 +797,10 @@ class Api extends \think\Controller
     public function get_room_info(RoomModel $r, RoomUserModel $ru)
     {
         $param = $this->param;
-        if (!empty($param['share']) && intval($param['is_share']) === 1) {
+        if (!empty($param['is_share']) && intval($param['is_share']) === 1) {
             $state = $this->come_in_room(true);
             if ($state !== true) {
-                echo json_encode(['status' => 7, 'info' => '进入房间失败', 'date' => null]);exit;
+                echo json_encode(['status' => $state, 'info' => '进入房间失败', 'date' => null]);exit;
             }
         }
         if (empty($param['room_id'])) {
@@ -919,8 +919,12 @@ class Api extends \think\Controller
         if ($res === false) {
             echo json_encode(['status' => 40, 'info' => '修改失败', 'date' => null]);exit;
         }
-        $ru = new RoomUserModel();
-        $ru->modifyField('status', 4, ['room_id' => $param['room_id']]);
+        $mo = new MasterOrderModel();
+        $mo->modifyField('status', $param['status'], ['room_id' => $param['room_id']]);
+        if (intval($param['status']) === 5) {
+            $ru = new RoomUserModel();
+            $ru->modifyField('status', 5, ['room_id' => $param['room_id']]);
+        }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'date' => null]);exit;
     }
 

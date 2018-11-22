@@ -367,6 +367,15 @@ class Pay extends \think\Controller
         if (intval($param['status']) === 6) {
             $param['pay_time'] = time();
         }
+        if ($type === 1) {
+            if (intval($param['status']) === 6 || intval($param['status']) === 10) {
+                $uorder = $uo->getModel(['order_num' => $param['order_num']], ['room_id']);
+                if ($uorder) {
+                    $ru = new RoomUserModel();
+                    $ru->modifyField('status', $param['status'], ['room_id' => $uorder['room_id']])
+                }
+            }
+        }
         $res = $uo->modify($param, ['order_num' => $param['order_num']]);
         if (!$res) {
             echo json_encode(['status' => $res, 'info' => '修改失败', 'data' => null]);exit;
