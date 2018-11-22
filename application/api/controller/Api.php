@@ -729,6 +729,9 @@ class Api extends \think\Controller
         if (!empty($param['type'])) {
             $where['type'] = $param['type'];
         }
+        if (isset($param['status'])) {
+            $where['status'] = intval($param['status']);
+        }
         // 分页参数
         $page     = 1;
         $pagesize = 10;
@@ -738,7 +741,7 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count', "$page,$pagesize");
+        $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,status', "$page,$pagesize");
         if ($list) {
             $uids     = array_column($list, 'uid');
             $game_ids = array_column($list, 'game_id');
