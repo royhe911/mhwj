@@ -239,7 +239,7 @@ class Pay extends \think\Controller
         }
         $uorder = $uo->getModel(['uid' => $param['uid'], 'room_id' => $param['room_id'], 'status' => ['<>', 3], 'status' => ['<>', 10]], ['order_num']);
         if ($count) {
-            echo json_encode(['status' => 0, 'info' => '重复下单成功', 'data' => ['order_num'=>$uorder['order_num']]]);exit;
+            echo json_encode(['status' => 0, 'info' => '重复下单成功', 'data' => ['order_num' => $uorder['order_num']]]);exit;
         }
         $r    = new RoomModel();
         $room = $r->getModel(['id' => $param['room_id']], ['game_id', 'type']);
@@ -404,6 +404,10 @@ class Pay extends \think\Controller
         $count = $ru->getCount(['uid' => $param['uid'], 'status' => ['<>', 10]]);
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'date' => null]);exit;
+        }
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['<>', 10]]);
+        if ($count) {
+            echo json_encode(['status' => 11, 'info' => '您有订单未完成', 'date' => null]);exit;
         }
         $order_num            = get_millisecond();
         $param['order_num']   = $order_num;
