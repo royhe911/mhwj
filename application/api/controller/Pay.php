@@ -349,6 +349,14 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        // 订单类型，1玩家订单  2订制订单
+        $type = 1;
+        if (!empty($param['type'])) {
+            $type = intval($param['type']);
+        }
+        if ($type === 2) {
+            $uo = new PersonOrderModel();
+        }
         if (intval($param['status']) === 6) {
             $param['pay_time'] = time();
         }

@@ -96,7 +96,7 @@ return [
     '/api/pay/consume'    => 'api/Pay/get_consume_log', // 获取玩家消费记录
     '/api/pay/moneylog'   => 'api/Pay/get_money_log', // 提现记录
     '/api/pay/masterord'  => 'api/Pay/get_master_order', // 陪玩师房间订单
-    '/api/pay/masterpord' => 'api/Pay/get_master_pord', // 陪玩师打制订单
+    '/api/pay/masterpord' => 'api/Pay/get_master_pord', // 陪玩师订制订单
     '/api/pay/pordinfo'   => 'api/Pay/get_pord_info', // 订制订单详情
     '/api/pay/uordinfo'   => 'api/Pay/get_uord_info', // 房间玩家订单详情
     '/api/pay/mordinfo'   => 'api/Pay/get_mord_info', // 房间陪玩师订单详情
