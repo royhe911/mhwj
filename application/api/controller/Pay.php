@@ -361,6 +361,7 @@ class Pay extends \think\Controller
         if (!empty($param['type'])) {
             $type = intval($param['type']);
         }
+        unset($param['type']);
         if ($type === 2) {
             $uo = new PersonOrderModel();
         }

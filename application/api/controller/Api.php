@@ -919,6 +919,8 @@ class Api extends \think\Controller
         if ($res === false) {
             echo json_encode(['status' => 40, 'info' => '修改失败', 'date' => null]);exit;
         }
+        $ru = new RoomUserModel();
+        $ru->modifyField('status', 4, ['room_id' => $param['room_id']]);
         echo json_encode(['status' => 0, 'info' => '修改成功', 'date' => null]);exit;
     }
 
