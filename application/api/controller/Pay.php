@@ -334,9 +334,8 @@ class Pay extends \think\Controller
                         break;
                 }
             }
-            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
         }
-        echo json_encode(['status' => 4, 'info' => '暂无订单', 'data' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**
@@ -592,10 +591,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $po->getList(['status' => 6], ['id', 'uid', 'order_num', 'game_id', 'region', 'para_id', 'price', 'num', 'type', 'order_money'], "$page,$pagesize");
-        if (!$list) {
-            echo json_encode(['status' => 44, 'info' => '暂无任务', 'data' => null]);exit;
-        }
+        $list   = $po->getList(['status' => 6], ['id', 'uid', 'order_num', 'game_id', 'region', 'para_id', 'price', 'num', 'type', 'order_money'], "$page,$pagesize");
         $g      = new GameModel();
         $games  = $g->getList(['is_delete' => 0], ['id', 'name']);
         $games  = array_column($games, 'name', 'id');
@@ -702,34 +698,33 @@ class Pay extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $list = $mo->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
-        if (!$list) {
-            echo json_encode(['status' => 40, 'info' => '暂无订单', 'date' => null]);exit;
-        }
-        $uids  = array_column($list, 'uid');
-        $u     = new UserModel();
-        $users = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
-        $users = array_column($users, 'nickname', 'id');
-        $g     = new GameModel();
-        $games = $g->getList(['is_delete' => 0], ['id', 'name']);
-        $games = array_column($games, 'name', 'id');
-        foreach ($list as &$item) {
-            if (!empty($users[$item['uid']])) {
-                $item['nickname'] = $users[$item['uid']];
-            } else {
-                $item['nickname'] = '';
-            }
-            if (!empty($games[$item['game_id']])) {
-                $item['gamename'] = $games[$item['game_id']];
-            } else {
-                $item['gamename'] = '';
-            }
-            if ($item['play_type'] === 1) {
-                $item['play_type'] = '实力上分';
-            } else {
-                $item['play_type'] = '娱乐陪玩';
-            }
-            if (!empty($item['addtime'])) {
-                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+        if ($list) {
+            $uids  = array_column($list, 'uid');
+            $u     = new UserModel();
+            $users = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
+            $users = array_column($users, 'nickname', 'id');
+            $g     = new GameModel();
+            $games = $g->getList(['is_delete' => 0], ['id', 'name']);
+            $games = array_column($games, 'name', 'id');
+            foreach ($list as &$item) {
+                if (!empty($users[$item['uid']])) {
+                    $item['nickname'] = $users[$item['uid']];
+                } else {
+                    $item['nickname'] = '';
+                }
+                if (!empty($games[$item['game_id']])) {
+                    $item['gamename'] = $games[$item['game_id']];
+                } else {
+                    $item['gamename'] = '';
+                }
+                if ($item['play_type'] === 1) {
+                    $item['play_type'] = '实力上分';
+                } else {
+                    $item['play_type'] = '娱乐陪玩';
+                }
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
@@ -766,36 +761,35 @@ class Pay extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $list = $pmo->getJoinList([['m_person_order po', ['a.order_id=po.id']]], $where, ['master_id', 'order_num', 'a.uid', 'game_id', 'play_type', 'order_money', 'a.addtime', 'po.status'], "$page,$pagesize");
-        if (!$list) {
-            echo json_encode(['status' => 3, 'info' => '暂无接单', 'date' => null]);exit;
-        }
-        $uids   = array_column($list, 'uid');
-        $u      = new UserModel();
-        $master = $u->getModel(['id' => $param['master_id']]);
-        $users  = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
-        $users  = array_column($users, 'nickname', 'id');
-        $g      = new GameModel();
-        $games  = $g->getList(['is_delete' => 0], ['id', 'name']);
-        $games  = array_column($games, 'name', 'id');
-        foreach ($list as &$item) {
-            $item['master_nickname'] = $master['nickname'];
-            if (!empty($users[$item['uid']])) {
-                $item['nickname'] = $users[$item['uid']];
-            } else {
-                $item['nickname'] = '';
-            }
-            if (!empty($games[$item['game_id']])) {
-                $item['gamename'] = $games[$item['game_id']];
-            } else {
-                $item['gamename'] = '';
-            }
-            if ($item['play_type'] === 1) {
-                $item['play_type'] = '实力上分';
-            } else {
-                $item['play_type'] = '娱乐陪玩';
-            }
-            if (!empty($item['addtime'])) {
-                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+        if ($list) {
+            $uids   = array_column($list, 'uid');
+            $u      = new UserModel();
+            $master = $u->getModel(['id' => $param['master_id']]);
+            $users  = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
+            $users  = array_column($users, 'nickname', 'id');
+            $g      = new GameModel();
+            $games  = $g->getList(['is_delete' => 0], ['id', 'name']);
+            $games  = array_column($games, 'name', 'id');
+            foreach ($list as &$item) {
+                $item['master_nickname'] = $master['nickname'];
+                if (!empty($users[$item['uid']])) {
+                    $item['nickname'] = $users[$item['uid']];
+                } else {
+                    $item['nickname'] = '';
+                }
+                if (!empty($games[$item['game_id']])) {
+                    $item['gamename'] = $games[$item['game_id']];
+                } else {
+                    $item['gamename'] = '';
+                }
+                if ($item['play_type'] === 1) {
+                    $item['play_type'] = '实力上分';
+                } else {
+                    $item['play_type'] = '娱乐陪玩';
+                }
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
@@ -859,10 +853,8 @@ class Pay extends \think\Controller
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                 }
             }
-            $msg = ['status' => 0, 'info' => '获取成功', 'date' => $list];
-        } else {
-            $msg = ['status' => 30, 'info' => '暂无订单', 'date' => null];
         }
+        $msg = ['status' => 0, 'info' => '获取成功', 'date' => $list];
         echo json_encode($msg);exit;
     }
 
@@ -1080,10 +1072,8 @@ class Pay extends \think\Controller
                     $item['desc'] = '';
                 }
             }
-            $msg = ['status' => 0, 'info' => '获取成功', 'date' => $list];
-        } else {
-            $msg = ['status' => 40, 'info' => '暂无优惠卷', 'date' => null];
         }
+        $msg = ['status' => 0, 'info' => '获取成功', 'date' => $list];
         echo json_encode($msg);exit;
     }
 
@@ -1121,16 +1111,15 @@ class Pay extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $list = $c->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize");
-        if (!$list) {
-            echo json_encode(['status' => 4, 'info' => '暂无消费记录', 'date' => null]);exit;
-        }
-        $u    = new UserModel();
-        $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar']);
-        foreach ($list as &$item) {
-            $item['nickname'] = $user['nickname'];
-            $item['avatar']   = $user['avatar'];
-            if (!empty($item['addtime'])) {
-                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+        if ($list) {
+            $u    = new UserModel();
+            $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar']);
+            foreach ($list as &$item) {
+                $item['nickname'] = $user['nickname'];
+                $item['avatar']   = $user['avatar'];
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
@@ -1170,16 +1159,15 @@ class Pay extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $list = $mml->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize");
-        if (!$list) {
-            echo json_encode(['status' => 4, 'info' => '暂无订单', 'date' => null]);exit;
-        }
-        $u    = new UserModel();
-        $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'money']);
-        foreach ($list as &$item) {
-            $item['nickname'] = $user['nickname'];
-            $item['avatar']   = $user['avatar'];
-            if (!empty($item['addtime'])) {
-                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+        if ($list) {
+            $u    = new UserModel();
+            $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'money']);
+            foreach ($list as &$item) {
+                $item['nickname'] = $user['nickname'];
+                $item['avatar']   = $user['avatar'];
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => ['money' => $user['money'], 'log' => $list]]);exit;
