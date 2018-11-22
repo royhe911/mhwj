@@ -264,7 +264,7 @@ class Pay extends \think\Controller
         $invite = $ui->getModel(['is_delete' => 0, 'invited_uid' => $param['uid']]);
         if ($invite) {
             $odata = ['uid' => $invite['uid'], 'type' => 1, 'money' => 5, 'over_time' => config('COUPONTERM') * 24 * 3666, 'addtime' => time()];
-            $c     = new CouonModel();
+            $c     = new CouponModel();
             $c->add($odata);
         }
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => ['order_num' => $order_num]]);exit;

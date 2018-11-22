@@ -20,7 +20,7 @@ class Coupon extends Command
      */
     protected function configure()
     {
-        $this->setName('coupon')->setDescription('优惠卷定时任务');
+        $this->setName('coupon')->setDescription('here is the remark');
     }
 
     /**
@@ -35,7 +35,7 @@ class Coupon extends Command
         if ($list) {
             $ids = '0';
             foreach ($list as $item) {
-                $ids .= ",{$item['id']}"
+                $ids .= ",{$item['id']}";
             }
             if ($ids !== '0') {
                 $c->modifyField('status', 3, ['id' => ['in', $ids]]);
