@@ -10,5 +10,6 @@
 // +----------------------------------------------------------------------
 
 return [
-    'app\common\crontab\Test'
+    'app\common\crontab\Test',
+    'app\common\crontab\Coupon',
 ];

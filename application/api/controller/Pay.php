@@ -13,6 +13,7 @@ use app\common\model\PersonRoomModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
 use app\common\model\UserEvaluateModel;
+use app\common\model\UserInviteModel;
 use app\common\model\UserModel;
 use app\common\model\UserOrderModel;
 
@@ -238,7 +239,7 @@ class Pay extends \think\Controller
         }
         $count = $uo->getCount(['uid' => $param['uid'], 'room_id' => $param['room_id'], 'status' => ['<>', 3], 'status' => ['<>', 10]]);
         if ($count) {
-            echo json_encode(['status' => 5, 'info' => '不能重复下单', 'data' => null]);exit;
+            echo json_encode(['status' => 0, 'info' => '重复下单成功', 'data' => null]);exit;
         }
         $r    = new RoomModel();
         $room = $r->getModel(['id' => $param['room_id']], ['game_id', 'type']);
@@ -259,8 +260,13 @@ class Pay extends \think\Controller
         if (!$res) {
             echo json_encode(['status' => 4, 'info' => '下单失败', 'data' => null]);exit;
         }
-        // $ru = new RoomUserModel();
-        // $ru->modifyField('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+        $ui     = new UserInviteModel();
+        $invite = $ui->getModel(['is_delete' => 0, 'invited_uid' => $param['uid']]);
+        if ($invite) {
+            $odata = ['uid' => $invite['uid'], 'type' => 1, 'money' => 5, 'over_time' => config('COUPONTERM') * 24 * 3666, 'addtime' => time()];
+            $c     = new CouonModel();
+            $c->add($odata);
+        }
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => ['order_num' => $order_num]]);exit;
     }
 
