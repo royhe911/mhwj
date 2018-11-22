@@ -1150,6 +1150,10 @@ class Api extends \think\Controller
             $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'date' => null];
         } elseif (empty($param['uid'])) {
             $msg = ['status' => 3, 'info' => '玩家ID不能为空', 'date' => null];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 2, 'info' => '订单类型不能为空', 'date' => null];
+        } elseif (empty($param['order_id'])) {
+            $msg = ['status' => 4, 'info' => '订单ID不能为空', 'date' => null];
         } elseif (empty($param['content'])) {
             $msg = ['status' => 5, 'info' => '评论内容不能为空', 'date' => null];
         } elseif (empty($param['score'])) {

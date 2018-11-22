@@ -12,6 +12,7 @@ use app\common\model\PersonOrderModel;
 use app\common\model\PersonRoomModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
+use app\common\model\UserEvaluateModel;
 use app\common\model\UserModel;
 use app\common\model\UserOrderModel;
 
@@ -349,7 +350,7 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        // 订单类型，1玩家订单  2订制订单
+        // 订单类型，1房间订单  2订制订单
         $type = 1;
         if (!empty($param['type'])) {
             $type = intval($param['type']);
@@ -876,14 +877,17 @@ class Pay extends \think\Controller
         if (!empty($porder['addtime'])) {
             $porder['addtime'] = date('Y-m-d H:i:s', $porder['addtime']);
         }
-        $pmo                       = new PersonMasterOrderModel();
-        $pmorder                   = $pmo->getModel(['order_id' => $porder['id']]);
+        $u       = new UserModel();
+        $pmo     = new PersonMasterOrderModel();
+        $pmorder = $pmo->getModel(['order_id' => $porder['id']]);
+        // 属性赋值
         $porder['master_avatar']   = '';
         $porder['master_nickname'] = '';
+        $porder['master_id']       = 0;
         if ($pmorder) {
-            $u    = new UserModel();
             $user = $u->getModel(['id' => $pmorder['master_id']], ['avatar', 'nickname']);
             if ($user) {
+                $porder['master_id']       = $pmorder['master_id'];
                 $porder['master_avatar']   = $user['avatar'];
                 $porder['master_nickname'] = $user['nickname'];
             }
@@ -903,6 +907,15 @@ class Pay extends \think\Controller
         } else {
             $porder['play_type'] = '娱乐陪玩';
         }
+        $ue      = new UserEvaluateModel();
+        $comment = $ue->getModel(['type' => 2, 'order_id' => $porder['id']], ['uid', 'content', 'score']);
+        if ($comment) {
+            $user = $u->getModel(['id' => $comment['uid']], ['avatar', 'nickname']);
+            // 属性赋值
+            $comment['user_nickname'] = $user['nickname'];
+            $comment['user_avatar']   = $user['avatar'];
+        }
+        $porder['comment'] = $comment;
         echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $porder]);exit;
     }
 
@@ -938,8 +951,14 @@ class Pay extends \think\Controller
         } else {
             $uorder['gamename'] = '';
         }
+        $uid  = 0;
+        $r    = new RoomModel();
+        $room = $r->getModel(['id' => $uorder['room_id']], ['uid']);
+        if ($room) {
+            $uid = $room['uid'];
+        }
         $u    = new UserModel();
-        $user = $u->getModel(['id' => $uorder['morder_id']], ['avatar', 'nickname']);
+        $user = $u->getModel(['id' => $uid], ['avatar', 'nickname']);
         if ($user) {
             $uorder['master_avatar']   = $user['avatar'];
             $uorder['master_nickname'] = $user['nickname'];
@@ -957,6 +976,15 @@ class Pay extends \think\Controller
         } else {
             $uorder['play_type'] = '娱乐陪玩';
         }
+        $ue      = new UserEvaluateModel();
+        $comment = $ue->getModel(['type' => 1, 'order_id' => $uorder['id']], ['uid', 'content', 'score']);
+        if ($comment) {
+            $user = $u->getModel(['id' => $comment['uid']], ['avatar', 'nickname']);
+            // 属性赋值
+            $comment['user_nickname'] = $user['nickname'];
+            $comment['user_avatar']   = $user['avatar'];
+        }
+        $uorder['comment'] = $comment;
         echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $uorder]);exit;
     }
 
