@@ -28,7 +28,7 @@ class RoomModel extends CommonModel
         Db::startTrans();
         try {
             $where = "id=$room_id";
-            $sql   = "select id,price,total_money,in_count,count,master_count,status from m_room where {$where} for update";
+            $sql   = "select id,price,num,total_money,in_count,count,master_count,status from m_room where {$where} for update";
             $data  = Db::query($sql);
             if (!$data) {
                 Db::rollback();
@@ -41,14 +41,14 @@ class RoomModel extends CommonModel
             $type = intval($type);
             $mo   = new MasterOrderModel();
             if ($type === 1) {
-                $total_money = $data['total_money'] - $data['price'];
+                $total_money = $data['total_money'] - $data['num'] * $data['price'];
                 if (5 - $data['master_count'] === 1) {
                     return 2;
                 }
                 $dida = ['count' => $data['count'] - 1, 'total_money' => $total_money];
             }
             if ($type === 2) {
-                $total_money = $data['total_money'] + $data['price'];
+                $total_money = $data['total_money'] + $data['num'] * $data['price'];
                 if ($data['count'] + $data['master_count'] === 5) {
                     return 3;
                 }
