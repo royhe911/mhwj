@@ -726,17 +726,22 @@ class Api extends \think\Controller
     {
         $param = $this->param;
         $where = ['is_delete' => 0, 'status' => ['in', '0,1,5,8']];
+        $where = 'is_delete=0 and status in (0,1,5,8) and in_master_count=master_count';
         if (!empty($param['game_id'])) {
-            $where['game_id'] = $param['game_id'];
+            $where .= " and game_id={$param['game_id']}";
+            // $where['game_id'] = $param['game_id'];
         }
         if (!empty($param['region'])) {
-            $where['region'] = $param['region'];
+            $where .= " and region={$param['region']}";
+            // $where['region'] = $param['region'];
         }
         if (!empty($param['type'])) {
-            $where['type'] = $param['type'];
+            $where .= " and `type`={$param['type']}";
+            // $where['type'] = $param['type'];
         }
         if (isset($param['status'])) {
-            $where['status'] = intval($param['status']);
+            $where .= " and `status`={$param['status']}";
+            // $where['status'] = $param['status'];
         }
         // 分页参数
         $page     = 1;
