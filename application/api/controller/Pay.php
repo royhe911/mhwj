@@ -776,14 +776,13 @@ class Pay extends \think\Controller
         // 分页参数
         $page     = 1;
         $pagesize = 10;
-        $param    = $this->param;
         if (!empty($param['page'])) {
             $page = $param['page'];
         }
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $pmo->getJoinList([['m_person_order po', ['a.order_id=po.id']]], $where, ['master_id', 'order_num', 'a.uid', 'game_id', 'play_type', 'order_money', 'a.addtime', 'po.status'], "$page,$pagesize", 'addtime desc');
+        $list = $pmo->getJoinList([['m_person_order po', ['a.order_id=po.id']]], $where, ['master_id', 'order_num', 'a.uid', 'game_id', 'play_type', 'order_money', 'a.addtime', 'po.status'], "$page,$pagesize");
         if ($list) {
             $uids   = array_column($list, 'uid');
             $u      = new UserModel();
