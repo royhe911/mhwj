@@ -927,8 +927,8 @@ class Api extends \think\Controller
                 echo json_encode(['status' => 6, 'info' => '还有玩家未准备，不能开始', 'date' => null]);exit;
             }
         }
-        if ($status===8&&$room['status']!==6) {
-            echo json_encode(['status' => 6, 'info' => '还有玩家未支付，不能开车', 'date' => null]);exit;
+        if ($status === 8 && $room['status'] !== 6) {
+            echo json_encode(['status' => 7, 'info' => '还有玩家未支付，不能开车', 'date' => null]);exit;
         }
         $res = $r->modifyField('status', $status, ['id' => $param['room_id']]);
         if ($res === false) {
