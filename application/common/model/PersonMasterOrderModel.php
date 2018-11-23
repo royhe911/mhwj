@@ -40,6 +40,12 @@ class PersonMasterOrderModel extends CommonModel
                 Db::rollback();
                 return 4;
             }
+            $po  = new PersonOrderModel();
+            $res = $po->modifyField('status', 7, ['id' => $porder['id']]);
+            if (!$res) {
+                Db::rollback();
+                return 6;
+            }
             Db::commit();
             return true;
         } catch (\Exception $e) {
