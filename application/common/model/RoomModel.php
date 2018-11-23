@@ -143,6 +143,7 @@ class RoomModel extends CommonModel
             if ($count) {
                 return 4;
             }
+            $this->modifyField('status', 5, ['id' => $room_id, 'status' => 6]);
             $ru = new RoomUserModel();
             // 查询退出房间玩家信息
             $roomuser = $ru->getModel(['room_id' => $room_id, 'uid' => $uid]);

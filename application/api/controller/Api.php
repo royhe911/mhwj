@@ -812,9 +812,9 @@ class Api extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,status');
+        $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,status room_status');
         if ($room) {
-            if ($room['status'] === 10) {
+            if ($room['room_status'] === 10) {
                 echo json_encode(['status' => 3, 'info' => '游戏已完成', 'date' => null]);exit;
             }
             $g    = new GameModel();
@@ -926,6 +926,9 @@ class Api extends \think\Controller
             if ($count) {
                 echo json_encode(['status' => 6, 'info' => '还有玩家未准备，不能开始', 'date' => null]);exit;
             }
+        }
+        if ($status===8&&$room['status']!==6) {
+            echo json_encode(['status' => 6, 'info' => '还有玩家未支付，不能开车', 'date' => null]);exit;
         }
         $res = $r->modifyField('status', $status, ['id' => $param['room_id']]);
         if ($res === false) {

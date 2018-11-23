@@ -78,7 +78,7 @@ class UserOrderModel extends CommonModel
             if ($omy === $cmy) {
                 $mdat['status'] = 6;
                 $r              = new RoomModel();
-                $r->modifyField('status', 8, ['id' => $uorder['room_id']]);
+                $r->modifyField('status', 6, ['id' => $uorder['room_id']]);
             }
             // 修改陪玩师订单完成金额和状态
             $res = $mo->modify($mdat, ['id' => $morder['id']]);
