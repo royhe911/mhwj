@@ -947,14 +947,35 @@ class Api extends \think\Controller
                 echo json_encode(['status' => 6, 'info' => '还有玩家未准备，不能开始', 'date' => null]);exit;
             }
         }
-        if ($status === 8 && $room['status'] !== 6) {
-            echo json_encode(['status' => 7, 'info' => '还有玩家未支付，不能开车', 'date' => null]);exit;
+        $mo = new MasterOrderModel();
+        if ($status === 8) {
+            if ($room['status'] !== 6) {
+                echo json_encode(['status' => 7, 'info' => '还有玩家未支付，不能开车', 'date' => null]);exit;
+            }
+            $morder = $mo->getModel(['room_id' => $param['room_id']]);
+            $rm     = new RoomMasterModel();
+            $ms     = $rm->getList(['room_id' => $param['room_id']], ['uid']);
+            if (!empty($ms)) {
+                $mids = array_column($ms, 'uid');
+                $mny  = $morder['order_money'] / (count($mids) + 1);
+                $mo->modifyField('order_money', $mny, ['id' => $morder['id']]);
+                unset($morder['id']);
+                $mdat = [];
+                foreach ($mids as $md) {
+                    $morder['order_num'] = get_millisecond() . $md;
+                    $morder['uid']       = $md;
+                    // 订单金额和完成金额
+                    $morder['order_money']    = $mny;
+                    $morder['complete_money'] = 0;
+                    $mdat[]                   = $morder;
+                }
+                $mo->addArr($mdat);
+            }
         }
         $res = $r->modifyField('status', $status, ['id' => $param['room_id']]);
         if ($res === false) {
             echo json_encode(['status' => 40, 'info' => '修改失败', 'date' => null]);exit;
         }
-        $mo = new MasterOrderModel();
         $mo->modifyField('status', $status, ['room_id' => $param['room_id']]);
         if ($status === 5) {
             $ru->modifyField('status', 5, ['room_id' => $param['room_id']]);

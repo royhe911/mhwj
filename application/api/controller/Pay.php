@@ -716,7 +716,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $mo->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize");
+        $list = $mo->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize", 'addtime desc');
         if ($list) {
             $uids  = array_column($list, 'uid');
             $u     = new UserModel();
@@ -783,7 +783,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $pmo->getJoinList([['m_person_order po', ['a.order_id=po.id']]], $where, ['master_id', 'order_num', 'a.uid', 'game_id', 'play_type', 'order_money', 'a.addtime', 'po.status'], "$page,$pagesize");
+        $list = $pmo->getJoinList([['m_person_order po', ['a.order_id=po.id']]], $where, ['master_id', 'order_num', 'a.uid', 'game_id', 'play_type', 'order_money', 'a.addtime', 'po.status'], "$page,$pagesize", 'addtime desc');
         if ($list) {
             $uids   = array_column($list, 'uid');
             $u      = new UserModel();
@@ -1033,6 +1033,13 @@ class Pay extends \think\Controller
         $morder = $mo->getModel(['order_num' => $param['order_num']]);
         if (!$morder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+        }
+        $r      = new RoomModel();
+        $room   = $r->getModel(['id' => $morder['room_id']]);
+        if ($room['uid'] === $morder['uid']) {
+            $morder['can_complete'] = 1;
+        } else {
+            $morder['can_complete'] = 0;
         }
         if (!empty($morder['addtime'])) {
             $morder['addtime'] = date('Y-m-d H:i:s', $morder['addtime']);
