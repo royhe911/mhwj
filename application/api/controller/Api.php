@@ -967,14 +967,18 @@ class Api extends \think\Controller
     {
         $r     = new RoomModel();
         $param = $this->param;
+        $res   = true;
         if (empty($param['room_id'])) {
+            $res = 10;
             $msg = ['status' => 10, 'info' => '房间ID不能为空', 'data' => null];
         } elseif (empty($param['uid'])) {
+            $res = 20;
             $msg = ['status' => 20, 'info' => '用户ID不能为空', 'data' => null];
         } elseif (empty($param['type'])) {
+            $res = 30;
             $msg = ['status' => 30, 'info' => '用户类型不能为空', 'date' => null];
         }
-        if (!empty($msg)) {
+        if (!empty($msg) && !$is_share) {
             echo json_encode($msg);exit;
         }
         $res = $r->in_room($param);
