@@ -667,6 +667,10 @@ class Api extends \think\Controller
             $msg = ['status' => 4, 'info' => '房间所属大区不能为空', 'data' => null];
         } elseif (empty($param['count']) || intval($param['count']) < 2 || intval($param['count']) > 5) {
             $msg = ['status' => 5, 'info' => '房间人数只能是2-5人', 'data' => null];
+        } elseif (empty($param['master_count'])) {
+            $msg = ['status' => 6, 'info' => '陪玩师人数不能为空', 'date' => null];
+        } elseif (intval($param['master_count']) > 4) {
+            $msg = ['status' => 7, 'info' => '陪玩师人数过多', 'date' => null];
         } elseif (empty($param['price'])) {
             $msg = ['status' => 14, 'info' => '每局价格不能为空', 'data' => null];
         } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5) {
@@ -916,7 +920,7 @@ class Api extends \think\Controller
             echo json_encode($msg);exit;
         }
         $room = $r->getModel(['id' => $param['room_id']]);
-        if ($room['status'] >= 5) {
+        if ($room['status'] === 5) {
             echo json_encode(['status' => 7, 'info' => '不能重复开始', 'date' => null]);exit;
         }
         $status = intval($param['status']);
@@ -956,11 +960,13 @@ class Api extends \think\Controller
             $msg = ['status' => 10, 'info' => '房间ID不能为空', 'data' => null];
         } elseif (empty($param['uid'])) {
             $msg = ['status' => 20, 'info' => '用户ID不能为空', 'data' => null];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 30, 'info' => '用户类型不能为空', 'date' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $res = $r->in_room($param['room_id'], $param['uid']);
+        $res = $r->in_room($param);
         if ($is_share) {
             return $res;
         }
@@ -1069,7 +1075,7 @@ class Api extends \think\Controller
             $msg = '操作失败';
             switch ($res) {
                 case 2:
-                    $msg = '至少要留两个位置';
+                    $msg = '至少要留一个玩家位置';
                     break;
                 case 3:
                     $msg = '最多只能有5个位置';

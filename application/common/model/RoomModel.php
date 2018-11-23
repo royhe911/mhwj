@@ -28,7 +28,7 @@ class RoomModel extends CommonModel
         Db::startTrans();
         try {
             $where = "id=$room_id";
-            $sql   = "select id,price,total_money,in_count,count,status from m_room where {$where} for update";
+            $sql   = "select id,price,total_money,in_count,count,master_count,status from m_room where {$where} for update";
             $data  = Db::query($sql);
             if (!$data) {
                 Db::rollback();
@@ -42,14 +42,14 @@ class RoomModel extends CommonModel
             $mo   = new MasterOrderModel();
             if ($type === 1) {
                 $total_money = $data['total_money'] - $data['price'];
-                if ($data['count'] === 2) {
+                if (5 - $data['master_count'] === 1) {
                     return 2;
                 }
                 $dida = ['count' => $data['count'] - 1, 'total_money' => $total_money];
             }
             if ($type === 2) {
                 $total_money = $data['total_money'] + $data['price'];
-                if ($data['count'] === 5) {
+                if ($data['count'] + $data['master_count'] === 5) {
                     return 3;
                 }
                 $ru = new RoomUserModel();
@@ -74,55 +74,80 @@ class RoomModel extends CommonModel
      * 进入房间
      * @author 贺强
      * @time   2018-11-09 10:25:04
-     * @param  int  $room_id 进入的房间ID
-     * @param  int  $uid     进入用户ID
-     * @return bool          是否进入成功
+     * @param  array $param 进入的房间用户数据
+     * @return bool         是否进入成功
      */
-    public function in_room($room_id, $uid)
+    public function in_room($param)
     {
-        $ru       = new RoomUserModel();
-        $roomuser = $ru->getCount(['room_id' => $room_id, 'uid' => $uid]);
-        if ($roomuser) {
-            return true;
-        }
         Db::startTrans();
         try {
             // 进入房间锁定房间信息以免两个人同时进入
-            $sql  = "select id,uid,price,num,in_count,count,status from m_room where id=$room_id for update";
+            $sql  = "select id,uid,price,num,in_count,count,in_master_count,master_count,status from m_room where id={$param['room_id']} for update";
             $data = Db::query($sql);
             if (!$data) {
                 Db::rollback();
                 return 4;
             }
             $data = $data[0];
+            if (intval($param['uid']) === $data['uid']) {
+                return true;
+            }
             if ($data['status'] === 10) {
-                return 10;
+                return 11;
             }
-            if (intval($uid) === intval($data['uid'])) {
-                return true;
-            }
-            if ($data['in_count'] < $data['count']) {
-                $in_data = ['room_id' => $room_id, 'uid' => $uid, 'addtime' => time(), 'price' => $data['price'], 'num' => $data['num'], 'total_money' => $data['price'] * $data['num']];
-                // 添加进入房间信息
-                $res = $ru->add($in_data);
-                if (!$res) {
-                    Db::rollback();
-                    return 1;
+            if (intval($param['type']) === 1) {
+                $ru    = new RoomUserModel();
+                $count = $ru->getCount(['room_id' => $data['id'], 'uid' => $param['uid']]);
+                if ($count) {
+                    return true;
                 }
-                // 进入房间成功后房间已进入的人数加 1
-                $res = $this->modifyField('in_count', $data['in_count'] + 1, ['id' => $room_id]);
-                // var_dump($res);exit;
-                if (!$res) {
-                    Db::rollback();
-                    return 2;
+                if ($data['in_count'] < $data['count']) {
+                    $in_data = ['room_id' => $data['id'], 'uid' => $param['uid'], 'addtime' => time(), 'price' => $data['price'], 'num' => $data['num'], 'total_money' => $data['price'] * $data['num']];
+                    // 添加进入房间信息
+                    $res = $ru->add($in_data);
+                    if (!$res) {
+                        Db::rollback();
+                        return 1;
+                    }
+                    // 进入房间成功后房间已进入的人数加 1
+                    $res = $this->modifyField('in_count', $data['in_count'] + 1, ['id' => $data['id']]);
+                    // var_dump($res);exit;
+                    if (!$res) {
+                        Db::rollback();
+                        return 2;
+                    }
+                    Db::commit();
+                    return true;
                 }
-                Db::commit();
-                return true;
+            } elseif (intval($param['type']) === 2) {
+                $mu    = new RoomMasterModel();
+                $count = $mu->getCount(['room_id' => $data['id'], 'uid' => $param['uid']]);
+                if ($count) {
+                    return true;
+                }
+                if ($data['in_master_count'] < $data['master_count']) {
+                    $in_data = ['room_id' => $data['id'], 'uid' => $param['uid'], 'addtime' => time()];
+                    $res     = $mu->add($in_data);
+                    if (!$res) {
+                        Db::rollback();
+                        return 2;
+                    }
+                    // 进入房间成功后房间已进入的人数加 1
+                    $res = $this->modifyField('in_master_count', $data['in_master_count'] + 1, ['id' => $data['id']]);
+                    // var_dump($res);exit;
+                    if (!$res) {
+                        Db::rollback();
+                        return 2;
+                    }
+                    Db::commit();
+                    return true;
+                }
             }
             Db::rollback();
             return 3;
         } catch (\Exception $e) {
             Db::rollback();
+            var_dump($e->getMessage());
             return 44;
         }
     }
@@ -146,10 +171,10 @@ class RoomModel extends CommonModel
             $this->modifyField('status', 5, ['id' => $room_id, 'status' => 6]);
             $ru = new RoomUserModel();
             // 查询退出房间玩家信息
-            $roomuser = $ru->getModel(['room_id' => $room_id, 'uid' => $uid]);
-            if ($roomuser['status'] === 6) {
+            $user = $ru->getModel(['room_id' => $room_id, 'uid' => $uid]);
+            if ($user['status'] === 6) {
                 $mo  = new MasterOrderModel();
-                $res = $mo->decrement('complete_money', ['room_id' => $room_id], $roomuser['total_money']);
+                $res = $mo->decrement('complete_money', ['room_id' => $room_id], $user['total_money']);
                 if (!$res) {
                     Db::rollback();
                     return 3;
