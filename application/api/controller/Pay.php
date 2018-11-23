@@ -363,6 +363,16 @@ class Pay extends \think\Controller
         unset($param['type']);
         if ($type === 2) {
             $uo = new PersonOrderModel();
+            if (intval($param['status']) === 10) {
+                $uord = $uo->getModel(['order_num' => $param['order_num']]);
+                if ($uord) {
+                    $pmo   = new PersonMasterOrderModel();
+                    $pmord = $pmo->getCount(['order_id' => $uord['id']]);
+                    if (!$pmord) {
+                        echo json_encode(['status' => 5, 'info' => '订单没有被接，不能完成', 'date' => null]);exit;
+                    }
+                }
+            }
         }
         if (intval($param['status']) === 6) {
             $param['pay_time'] = time();
@@ -372,7 +382,7 @@ class Pay extends \think\Controller
                 $uorder = $uo->getModel(['order_num' => $param['order_num']], ['room_id']);
                 if ($uorder) {
                     $ru = new RoomUserModel();
-                    $ru->modifyField('status', $param['status'], ['room_id' => $uorder['room_id']])
+                    $ru->modifyField('status', $param['status'], ['room_id' => $uorder['room_id']]);
                 }
             }
         }

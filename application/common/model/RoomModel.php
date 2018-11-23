@@ -35,7 +35,7 @@ class RoomModel extends CommonModel
                 return 4;
             }
             $data = $data[0];
-            if ($data['status'] === 10) {
+            if ($data['status'] === 10 || $data['status'] === 8 || $data['status'] === 5) {
                 return 10;
             }
             $type = intval($type);
@@ -165,7 +165,7 @@ class RoomModel extends CommonModel
                 return 1;
             }
             // 一旦有人退出，其它人取消准备
-            $ru->modifyField('status', 0, ['room_id' => $room_id]);
+            $ru->modifyField('status', 0, ['room_id' => $room_id, 'status' => ['<>', 6]]);
             // 退出后房间已进入的人数减 1
             $res = $this->decrement('in_count', ['id' => $room_id]);
             if (!$res) {

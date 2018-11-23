@@ -915,14 +915,25 @@ class Api extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $res = $r->modifyField('status', intval($param['status']), ['id' => $param['room_id']]);
+        $room = $r->getModel(['id' => $param['room_id']]);
+        if ($room['status'] >= 5) {
+            echo json_encode(['status' => 7, 'info' => '不能重复开始', 'date' => null]);exit;
+        }
+        $status = intval($param['status']);
+        $ru     = new RoomUserModel();
+        if ($status === 5) {
+            $count = $ru->getCount(['room_id' => $param['room_id'], 'status' => 0]);
+            if ($count) {
+                echo json_encode(['status' => 6, 'info' => '还有玩家未准备，不能开始', 'date' => null]);exit;
+            }
+        }
+        $res = $r->modifyField('status', $status, ['id' => $param['room_id']]);
         if ($res === false) {
             echo json_encode(['status' => 40, 'info' => '修改失败', 'date' => null]);exit;
         }
         $mo = new MasterOrderModel();
-        $mo->modifyField('status', $param['status'], ['room_id' => $param['room_id']]);
-        if (intval($param['status']) === 5) {
-            $ru = new RoomUserModel();
+        $mo->modifyField('status', $status, ['room_id' => $param['room_id']]);
+        if ($status === 5) {
             $ru->modifyField('status', 5, ['room_id' => $param['room_id']]);
         }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'date' => null]);exit;
