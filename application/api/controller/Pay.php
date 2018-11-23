@@ -720,16 +720,20 @@ class Pay extends \think\Controller
         if ($list) {
             $uids  = array_column($list, 'uid');
             $u     = new UserModel();
-            $users = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
-            $users = array_column($users, 'nickname', 'id');
+            $users = $u->getList(['type' => 2, 'id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
             $g     = new GameModel();
             $games = $g->getList(['is_delete' => 0], ['id', 'name']);
             $games = array_column($games, 'name', 'id');
             foreach ($list as &$item) {
                 if (!empty($users[$item['uid']])) {
-                    $item['nickname'] = $users[$item['uid']];
+                    $user = $users[$item['uid']];
+                    // 属性赋值
+                    $item['nickname'] = $user['nickname'];
+                    $item['avatar']   = $user['avatar'];
                 } else {
                     $item['nickname'] = '';
+                    $item['avatar']   = '';
                 }
                 if (!empty($games[$item['game_id']])) {
                     $item['gamename'] = $games[$item['game_id']];
@@ -791,6 +795,7 @@ class Pay extends \think\Controller
             $games  = array_column($games, 'name', 'id');
             foreach ($list as &$item) {
                 $item['master_nickname'] = $master['nickname'];
+                $item['master_avatar']   = $master['avatar'];
                 if (!empty($users[$item['uid']])) {
                     $item['nickname'] = $users[$item['uid']];
                 } else {
