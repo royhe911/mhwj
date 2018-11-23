@@ -10,6 +10,7 @@ use app\common\model\GameModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
+use app\common\model\RoomMasterModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
 use app\common\model\UserAttrModel;
@@ -671,12 +672,14 @@ class Api extends \think\Controller
             $msg = ['status' => 6, 'info' => '陪玩师人数不能为空', 'date' => null];
         } elseif (intval($param['master_count']) > 4) {
             $msg = ['status' => 7, 'info' => '陪玩师人数过多', 'date' => null];
+        } elseif (intval($param['count']) + intval($param['master_count']) > 5) {
+            echo json_encode(['status' => 12, 'info' => '房间总人数错误', 'date' => null]);
         } elseif (empty($param['price'])) {
             $msg = ['status' => 14, 'info' => '每局价格不能为空', 'data' => null];
         } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5) {
             $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
-            $param['total_money'] = floatval($param['price']) * intval($param['num']) * (intval($param['count']) - 1);
+            $param['total_money'] = floatval($param['price']) * intval($param['num']) * (intval($param['count']));
             $count                = $r->getCount(['is_delete' => 0, 'uid' => $param['uid'], 'status' => ['<>', 10]]);
             if ($count) {
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
@@ -697,8 +700,7 @@ class Api extends \think\Controller
                 }
             }
         }
-        $param['in_count'] = 1;
-        $param['addtime']  = time();
+        $param['addtime'] = time();
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
@@ -798,7 +800,7 @@ class Api extends \think\Controller
      * @time   2018-11-09 10:59:17
      * @param  RoomModel $r RoomModel 实例
      */
-    public function get_room_info(RoomModel $r, RoomUserModel $ru)
+    public function get_room_info(RoomModel $r)
     {
         $param = $this->param;
         if (!empty($param['is_share']) && intval($param['is_share']) === 1) {
@@ -816,7 +818,7 @@ class Api extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,status room_status');
+        $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status room_status');
         if ($room) {
             if ($room['room_status'] === 10) {
                 echo json_encode(['status' => 3, 'info' => '游戏已完成', 'date' => null]);exit;
@@ -856,19 +858,28 @@ class Api extends \think\Controller
                     $room['para_max_str'] = $gci['para_str'];
                 }
             }
+            $ru       = new RoomUserModel();
             $roomuser = $ru->getList(['room_id' => $param['room_id']]);
             $uids     = array_column($roomuser, 'uid');
-            array_push($uids, $room['uid']);
-            // var_dump($uids);exit;
-            $u       = new UserModel();
-            $users   = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
-            $members = [];
+            $mu       = new RoomMasterModel();
+            $masters  = $mu->getList(['room_id' => $param['room_id']]);
+            $mids     = array_column($masters, 'uid');
+            $mids     = array_merge($mids, [$room['uid']]);
+            $uids     = array_merge($uids, $mids);
+            $u        = new UserModel();
+            $users    = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $members  = [];
             // 获取房间里玩家的状态
             $ustatus  = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status,total_money');
             $ustatarr = array_column($ustatus, null, 'uid');
             foreach ($users as $user) {
-                if ($user['id'] === $room['uid']) {
-                    $members['master'] = $user;
+                if (in_array($user['id'], $mids)) {
+                    if ($user['id'] === $room['uid']) {
+                        $user['master'] = 1;
+                    } else {
+                        $user['master'] = 0;
+                    }
+                    $members['master'][] = $user;
                 } else {
                     $usta = $ustatarr[$user['id']];
                     if (!empty($usta)) {
