@@ -696,7 +696,7 @@ class Api extends \think\Controller
             if (!$user) {
                 $msg = ['status' => 6, 'info' => '陪玩师不存在', 'data' => null];
             } elseif ($user['type'] !== 2 || $user['status'] !== 8) {
-                $msg = ['status' => 7, 'info' => '无权创建', 'data' => null];
+                $msg = ['status' => 7, 'info' => '您还未认证成为陪玩师，现在就去认证', 'data' => null];
             } else {
                 $ua       = new UserAttrModel();
                 $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']], ['curr_para', 'play_type']);
