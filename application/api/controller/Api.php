@@ -676,6 +676,8 @@ class Api extends \think\Controller
             echo json_encode(['status' => 12, 'info' => '房间总人数错误', 'date' => null]);
         } elseif (empty($param['price'])) {
             $msg = ['status' => 14, 'info' => '每局价格不能为空', 'data' => null];
+        } elseif (floatval($param['price']) < 1 || floatval($param['price']) > 100) {
+            $msg = ['status' => 16, 'info' => '每局价格只能是1-100', 'date' => null];
         } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5) {
             $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
