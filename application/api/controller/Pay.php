@@ -1211,10 +1211,9 @@ class Pay extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $list = $mml->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize");
-        $user = [];
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'money']);
         if ($list) {
-            $u    = new UserModel();
-            $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'money']);
             foreach ($list as &$item) {
                 $item['nickname'] = $user['nickname'];
                 $item['avatar']   = $user['avatar'];
