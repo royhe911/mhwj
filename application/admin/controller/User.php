@@ -140,33 +140,50 @@ class User extends \think\Controller
      * 用户审核
      * @author 贺强
      * @time   2018-11-01 17:27:55
-     * @param  UserModel $u UserModel 实例
+     * @param  UserModel     $u  UserModel 实例
+     * @param  UserAttrModel $ua UserAttrModel 实例
      */
-    public function auditor(UserModel $u)
+    public function auditor(UserModel $u, UserAttrModel $ua)
     {
         if ($this->request->isAjax()) {
             $param = $this->request->post();
             if (empty($param['id']) || empty($param['status'])) {
                 return ['status' => 1, 'info' => '非法参数'];
             }
-            if (intval($param['status']) === 8) {
-                $param['type'] = 2;
-                $content       = "恭喜你，审核已通过";
-            } else {
-                $param['type'] = 1;
-                $content       = "审核未通过，原因：" . $param['reason'];
+            $is_skill = 0;
+            if (!empty($param['is_skill'])) {
+                $is_skill = $param['is_skill'];
             }
-            $res = $u->modify($param, ['id' => $param['id']]);
-            if ($res) {
-                $m       = new MessageModel();
-                $message = $m->getModel(['type' => 1, 'uid' => $param['id']], true, 'addtime desc');
-                if ($message) {
-                    $m->modifyField('content', $content, ['id' => $message['id']]);
+            if (intval($param['status']) === 8) {
+                if ($is_skill) {
+                    $content = '恭喜你，游戏技能审核通过';
                 } else {
+                    $param['type'] = 2;
+                    $content       = "恭喜你，陪玩师认证审核已通过";
+                }
+            } else {
+                if ($is_skill) {
+                    $content = "技能审核未通过，原因：" . $param['reason'];
+                } else {
+                    $param['type'] = 1;
+                    $content       = "陪玩师认证审核未通过，原因：" . $param['reason'];
+                }
+            }
+            $m = new MessageModel();
+            if ($is_skill) {
+                $res = $ua->modify($param, ['id' => $param['id']]);
+                if ($res) {
                     $data = ['type' => 1, 'uid' => $param['id'], 'title' => '系统消息', 'content' => $content, 'addtime' => time()];
                     $m->add($data);
+                    return ['status' => 0, 'info' => '审核成功'];
                 }
-                return ['status' => 0, 'info' => '审核成功'];
+            } else {
+                $res = $u->modify($param, ['id' => $param['id']]);
+                if ($res) {
+                    $data = ['type' => 1, 'uid' => $param['id'], 'title' => '系统消息', 'content' => $content, 'addtime' => time()];
+                    $m->add($data);
+                    return ['status' => 0, 'info' => '审核成功'];
+                }
             }
             return ['status' => 4, 'info' => '审核失败'];
         }

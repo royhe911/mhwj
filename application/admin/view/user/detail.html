@@ -54,6 +54,7 @@
                                         <th style="width: 100px;">陪玩段位</th>
                                         <th style="width: 100px;">陪玩类型</th>
                                         <th>水平截图</th>
+                                        <th>状态</th>
                                     </tr>
                                     {foreach($user.attrs as $attr)}
                                     <tr>
@@ -62,6 +63,7 @@
                                         <td>{$attr.play_para}</td>
                                         <td>{$attr.play_type}</td>
                                         <td><a href="{$attr.level_url}" target="_blank"><img class="level_url" src="{$attr.level_url}"></a></td>
+                                        <td>{$attr.status_txt}{if($attr.status==1)} &nbsp; &nbsp; <a href="#" data-id="{$attr.id}" data-action="skill_audit">审核</a>{/if}</td>
                                     </tr>
                                     {/foreach}
                                 </table>
@@ -170,13 +172,31 @@
                 })
             })
         })
+        $('#skill_audit').click(function(){
+            var $id = $(this).data('id')
+            layer.confirm('陪玩师技能审核', {
+                btn: ['通过', '不通过', '取消'],
+                shade: false,
+                closeBtn: 0
+            }, function(){
+                auditor($id, 8, '', 1)
+            }, function(){
+                layer.prompt({
+                    formType: 2,
+                    title: '请输入驳回原因'
+                }, function(v, i, e){
+                    layer.close(i);
+                    auditor($id, 4, v, 1)
+                })
+            })
+        })
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'cancel') {
                 location.href = '/user/list';
             }
         });
-        function auditor($id, $status, $v) {
+        function auditor($id, $status, $v, $is_skill) {
             var $msg = '确实审核通过吗？';
             if ($status == 4) {
                 $msg = '确实审核不通过吗？';
@@ -185,7 +205,7 @@
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
                     url: '/user/auditor',
-                    data: {'id': $id, 'status': $status, 'reason': $v},
+                    data: {'id': $id, 'status': $status, 'reason': $v, 'is_skill': $is_skill},
                     success: function(data){
                         if (data.status == 0) {
                             layer.msg(data.info, {icon: 1, time: 1000}, function(){
