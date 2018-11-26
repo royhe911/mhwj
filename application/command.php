@@ -12,4 +12,5 @@
 return [
     'app\common\crontab\Test',
     'app\common\crontab\Coupon',
+    'app\common\crontab\PersonOrder',
 ];

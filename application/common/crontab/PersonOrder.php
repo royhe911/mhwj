@@ -32,8 +32,12 @@ class PersonOrder extends Command
     {
         $po   = new PersonOrderModel();
         $list = $po->getList(['status' => 1, 'addtime' => ['lt', time() - 300]], ['id']);
-        foreach ($list as $item) {
-            $po->modify('status', 4, ['id' => $item['id']]);
+        if ($list) {
+            $ids = '0';
+            foreach ($list as $item) {
+                $ids .= ",{$item['id']}";
+            }
+            $po->modifyField('status', 4, ['id' => ['in', $ids]]);
         }
     }
 }
