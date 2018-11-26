@@ -998,7 +998,6 @@ class Api extends \think\Controller
      */
     public function come_in_room($is_share = false)
     {
-        $r     = new RoomModel();
         $param = $this->param;
         $res   = true;
         if (empty($param['room_id'])) {
@@ -1019,6 +1018,7 @@ class Api extends \think\Controller
         if ($count) {
             echo json_encode(['status' => 22, 'info' => '您有订制订单未完成，请先完成订制订单', 'date' => null]);exit;
         }
+        $r   = new RoomModel();
         $res = $r->in_room($param);
         if ($is_share) {
             return $res;

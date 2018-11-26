@@ -12,6 +12,7 @@ use app\common\model\PersonOrderModel;
 use app\common\model\PersonRoomModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
+use app\common\model\UserAttrModel;
 use app\common\model\UserEvaluateModel;
 use app\common\model\UserInviteModel;
 use app\common\model\UserModel;
