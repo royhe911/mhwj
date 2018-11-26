@@ -854,7 +854,7 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $where = ['type' => ['<>', 3], 'uid' => $param['uid']];
+        $where = ['status' => ['<>', 4], 'uid' => $param['uid']];
         if (!empty($param['status'])) {
             $where['status'] = $param['status'];
         }
