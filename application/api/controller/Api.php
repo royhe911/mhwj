@@ -10,6 +10,7 @@ use app\common\model\GameModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
+use app\common\model\PersonOrderModel;
 use app\common\model\RoomMasterModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
@@ -1012,6 +1013,11 @@ class Api extends \think\Controller
         }
         if (!empty($msg) && !$is_share) {
             echo json_encode($msg);exit;
+        }
+        $po    = new PersonOrderModel();
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,10']]);
+        if ($count) {
+            echo json_encode(['status' => 22, 'info' => '您有订制订单未完成，请先完成订制订单', 'date' => null]);exit;
         }
         $res = $r->in_room($param);
         if ($is_share) {

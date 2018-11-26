@@ -662,6 +662,23 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $u     = new UserModel();
+        $count = $u->getCount(['id' => $param['master_id'], 'type' => 2, 'status' => 8]);
+        if (!$count) {
+            echo json_encode(['status' => 6, 'info' => '您还未认证成为陪玩师，请先认证', 'date' => null]);exit;
+        }
+        $po     = new PersonOrderModel();
+        $porder = $po->getModel(['id' => $param['order_id']]);
+        // 查询订制订单
+        $ord_where = ['uid' => $param['master_id'], 'game_id' => $porder['game_id'], 'status' => 8];
+        if ($porder['play_type'] === 1) {
+            $ord_where['play_type'] = 1;
+        }
+        $ua    = new UserAttrModel();
+        $count = $ua->getCount($ord_where);
+        if (!$count) {
+            echo json_encode(['status' => 7, 'info' => '您还未认证该游戏的陪玩类型', 'date' => null]);exit;
+        }
         $pmcount = $pmo->getCount(['order_id' => $param['order_id']]);
         if ($pmcount) {
             echo json_encode(['status' => 1, 'info' => '订单已被抢', 'data' => null]);exit;
@@ -1033,8 +1050,8 @@ class Pay extends \think\Controller
         if (!$morder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
         }
-        $r      = new RoomModel();
-        $room   = $r->getModel(['id' => $morder['room_id']]);
+        $r    = new RoomModel();
+        $room = $r->getModel(['id' => $morder['room_id']]);
         if ($room['uid'] === $morder['uid']) {
             $morder['can_complete'] = 1;
         } else {
