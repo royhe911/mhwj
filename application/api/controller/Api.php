@@ -152,7 +152,6 @@ class Api extends \think\Controller
         $user = $u->getModel(['openid' => $data['openid']]);
         if (!empty($user)) {
             $data['login_time'] = time();
-            $data['updatetime'] = time();
             $data['count']      = $user['count'] + 1;
             $res                = $u->modify($data, ['id' => $user['id']]);
             if ($res) {
@@ -163,7 +162,12 @@ class Api extends \think\Controller
                     $ld['login_time'] = time();
                     $ull->add($ld);
                 }
-                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $user['id'], 'mobile' => $user['mobile']]];
+                // 用户是否认证
+                $is_certified = 0;
+                if ($user['type'] === 2 && $user['status'] === 8) {
+                    $is_certified = 1;
+                }
+                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $user['id'], 'mobile' => $user['mobile'], 'is_certified' => $is_certified]];
             } else {
                 $msg = ['status' => 3, 'info' => '登录失败', 'data' => null];
             }
@@ -176,7 +180,7 @@ class Api extends \think\Controller
                 $cdata = ['uid' => $id, 'type' => 1, 'money' => 5, 'over_time' => time() + config('COUPONTERM') * 20 * 3600, 'addtime' => time()];
                 $c     = new CouponModel();
                 $c->add($cdata);
-                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $id, 'mobile' => '']];
+                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $id, 'mobile' => '', 'is_certified' => 0]];
             } else {
                 $msg = ['status' => 4, 'info' => '登录失败', 'data' => null];
             }
