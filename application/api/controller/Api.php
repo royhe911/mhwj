@@ -1015,7 +1015,7 @@ class Api extends \think\Controller
             echo json_encode($msg);exit;
         }
         $po    = new PersonOrderModel();
-        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,10']]);
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,4,10']]);
         if ($count) {
             echo json_encode(['status' => 22, 'info' => '您有订制订单未完成，请先完成订制订单', 'date' => null]);exit;
         }

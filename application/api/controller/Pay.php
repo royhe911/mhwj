@@ -233,7 +233,7 @@ class Pay extends \think\Controller
         }
         $po = new PersonOrderModel();
         // 查询该玩家是否已下了订制订单
-        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,10']]);
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,4,10']]);
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已下了订制订单', 'date' => null]);exit;
         }
@@ -420,11 +420,11 @@ class Pay extends \think\Controller
         }
         $ru = new RoomUserModel();
         // 查询譔下单人是否已在房间里
-        $count = $ru->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,10']]);
+        $count = $ru->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,4,10']]);
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'date' => null]);exit;
         }
-        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,10']]);
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,4,10']]);
         if ($count) {
             echo json_encode(['status' => 11, 'info' => '您有订单未完成', 'date' => null]);exit;
         }
@@ -569,7 +569,11 @@ class Pay extends \think\Controller
         }
         $porder = $po->getModel(['order_num' => $param['order_num']]);
         if (!$porder) {
-            echo json_encode(['status' => 1, 'info' => '订单不存在', 'data' => null]);exit;
+            echo json_encode(['status' => 2, 'info' => '订单不存在', 'data' => null]);exit;
+        }
+        $count = $po->getCount(['order_num' => $param['order_num'], 'addtime' => ['lt', time() - 300]]);
+        if ($count) {
+            echo json_encode(['status' => 3, 'info' => '订单已过期', 'date' => null]);exit;
         }
         // 调用微信支付接口进行支付
         //
