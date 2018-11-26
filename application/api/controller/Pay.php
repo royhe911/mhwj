@@ -1211,6 +1211,7 @@ class Pay extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $list = $mml->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize");
+        $user = [];
         if ($list) {
             $u    = new UserModel();
             $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'money']);
@@ -1221,6 +1222,9 @@ class Pay extends \think\Controller
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                 }
             }
+        }
+        if (empty($user['money'])) {
+            $user['money'] = 0;
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => ['money' => $user['money'], 'log' => $list]]);exit;
     }
