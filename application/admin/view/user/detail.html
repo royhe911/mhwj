@@ -53,8 +53,8 @@
                                         <th style="width: 100px;">当前段位</th>
                                         <th style="width: 100px;">陪玩段位</th>
                                         <th style="width: 100px;">陪玩类型</th>
-                                        <th>水平截图</th>
                                         <th>状态</th>
+                                        <th>水平截图</th>
                                     </tr>
                                     {foreach($user.attrs as $attr)}
                                     <tr>
@@ -62,8 +62,8 @@
                                         <td>{$attr.curr_para}</td>
                                         <td>{$attr.play_para}</td>
                                         <td>{$attr.play_type}</td>
+                                        <td>{$attr.status_txt}{if($attr.status==1)} &nbsp; &nbsp; <a href="#" data-id="{$attr.id}" class="skill_audit">审核</a>{/if}</td>
                                         <td><a href="{$attr.level_url}" target="_blank"><img class="level_url" src="{$attr.level_url}"></a></td>
-                                        <td>{$attr.status_txt}{if($attr.status==1)} &nbsp; &nbsp; <a href="#" data-id="{$attr.id}" data-action="skill_audit">审核</a>{/if}</td>
                                     </tr>
                                     {/foreach}
                                 </table>
@@ -172,7 +172,7 @@
                 })
             })
         })
-        $('#skill_audit').click(function(){
+        $('.skill_audit').click(function(){
             var $id = $(this).data('id')
             layer.confirm('陪玩师技能审核', {
                 btn: ['通过', '不通过', '取消'],

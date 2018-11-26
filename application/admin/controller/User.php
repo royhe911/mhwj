@@ -106,6 +106,13 @@ class User extends \think\Controller
                 } elseif ($attr['play_type'] === 2) {
                     $attr['play_type'] = '娱乐陪玩';
                 }
+                if ($attr['status'] === 8) {
+                    $attr['status_txt'] = '已审核';
+                } elseif ($attr['status'] === 4) {
+                    $attr['status_txt'] = '审核未通过';
+                } else {
+                    $attr['status_txt'] = '未审核';
+                }
             }
             // print_r($attrs);exit;
             $user['attrs'] = $attrs;
@@ -154,6 +161,7 @@ class User extends \think\Controller
             if (!empty($param['is_skill'])) {
                 $is_skill = $param['is_skill'];
             }
+            unset($param['is_skill']);
             if (intval($param['status']) === 8) {
                 if ($is_skill) {
                     $content = '恭喜你，游戏技能审核通过';
