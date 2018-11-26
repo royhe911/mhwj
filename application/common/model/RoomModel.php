@@ -42,7 +42,7 @@ class RoomModel extends CommonModel
             $mo   = new MasterOrderModel();
             if ($type === 1) {
                 $total_money = $data['total_money'] - $data['num'] * $data['price'];
-                if (5 - $data['master_count'] === 1) {
+                if ($data['count'] === 1) {
                     return 2;
                 }
                 $dida = ['count' => $data['count'] - 1, 'total_money' => $total_money];
