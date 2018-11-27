@@ -94,7 +94,7 @@ return [
     '/api/pay/odrsta'     => 'api/Pay/modify_order', // 修改订单状态
     '/api/pay/ppord'      => 'api/Pay/personal_preorder', // 订制下单
     '/api/pay/prepay'     => 'api/Pay/prepay', // 预支付
-    '/api/pay/notify'     => 'api/Pay/pay_notify', // 回调
+    '/api/pay/notify'     => 'api/Nofity/pay_notify', // 回调
     '/api/pay/personpay'  => 'api/Pay/person_pay', // 订制支付
     '/api/pay/popay'      => 'api/Pay/person_ord_pay', // 订制预支付
     '/api/pay/tasks'      => 'api/Pay/person_task', // 任务订单

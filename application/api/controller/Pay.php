@@ -1188,7 +1188,7 @@ class Pay extends \think\Controller
             'body'             => $param['body'],
             'mch_id'           => config('PAY_MCHID'),
             'nonce_str'        => $nonce_str,
-            'notify_url'       => 'https://' . config('WEBSITE') . '/api/pay/notify',
+            'notify_url'       => config('WEBSITE') . '/api/pay/notify',
             'openid'           => $param['openid'],
             'out_trade_no'     => $param['out_trade_no'],
             'spbill_create_ip' => get_client_ip(),
@@ -1202,27 +1202,13 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 1, 'info' => '无法连接服务器', 'data' => null]);exit;
         }
         $res = xml2array($res);
-        if (strval($res['result_code']) == 'FAIL') {
-            echo json_encode(['status' => 2, 'info' => $res['err_code_des'], 'data' => null]);exit;
-        }
         if (strval($res['return_code']) == 'FAIL') {
             echo json_encode(['status' => 3, 'info' => $res['return_msg'], 'data' => null]);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '操作成功', 'data' => $res]);exit;
-    }
-
-    /**
-     * 微信支付回调
-     * @author 贺强
-     * @time   2018-11-27 11:26:39
-     */
-    public function pay_notify()
-    {
-        $param = $this->request->get();
-        if (empty($param)) {
-            $param = $this->request->post();
+        if (!empty($res['result_code']) && strval($res['result_code']) == 'FAIL') {
+            echo json_encode(['status' => 2, 'info' => $res['err_code_des'], 'data' => null]);exit;
         }
-        print_r($param);exit;
+        echo json_encode(['status' => 0, 'info' => '操作成功', 'data' => $res]);exit;
     }
 
     /**

@@ -135,26 +135,7 @@ function array2xml($arr)
  */
 function xml2array($xml)
 {
-    $targetArr = [];
-    $xmlObj    = simplexml_load_string($xml);
-    $minArr    = (array) $xmlObj;
-    foreach ($minArr as $key => $value) {
-        if (is_string($value)) {
-            $targetArr[$key] = $value;
-        }
-        if (is_object($value)) {
-            $targetArr[$key] = xml2array($value->asXML());
-        }
-        if (is_array($value)) {
-            foreach ($value as $zkey => $zvalue) {
-                if (is_numeric($zkey)) {
-                    $targetArr[$key][] = xml2array($zvalue->asXML());
-                }
-                if (is_string($zkey)) {
-                    $targetArr[$key][$zkey] = xml2array($zvalue->asXML());
-                }
-            }
-        }
-    }
-    return $targetArr;
+    libxml_disable_entity_loader(true);
+    $values = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+    return $values;
 }
