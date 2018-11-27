@@ -1,6 +1,7 @@
 <?php
 namespace app\common\crontab;
 
+use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
 use think\console\Command;
 use think\console\Input;
@@ -31,19 +32,16 @@ class Room extends Command
     protected function execute(Input $input, Output $output)
     {
         $ru   = new RoomUserModel();
-        $list = $ru->getList(['status' => 5, 'ready_time' => ['lt', time() - 300]], ['id', 'room_id']);
+        $list = $ru->getList(['status' => 5, 'ready_time' => ['lt', time() - 300]], ['room_id']);
         if ($list) {
-            $ids      = '0';
-            $room_ids = '0';
+            $ids = '0';
             foreach ($list as $item) {
-                $ids .= ",{$item['id']}";
-                $room_ids .= ",{$item['room_id']}";
+                $ids .= ",{$item['room_id']}";
             }
-            if ($ids !== '0') {
-                $ru->modifyField('status', 4, ['id' => ['in', $ids]]);
-            }
-            if ($room_ids!=='0') {
-                $r=new Room();
+            if ($ids !== '0' && $ids !== '0') {
+                $ru->modifyField('status', 4, ['room_id' => ['in', $ids]]);
+                $r = new RoomModel();
+                $r->modifyField('status', 9, ['id' => ['in', $ids]]);
             }
         }
     }
