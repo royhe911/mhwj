@@ -1,5 +1,5 @@
 <?php
-namespace app\admin\controller;
+namespace app\api\controller;
 
 /**
  * Notify-控制器
