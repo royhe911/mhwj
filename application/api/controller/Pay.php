@@ -1159,4 +1159,15 @@ class Pay extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => ['money' => $user['money'], 'log' => $list]]);exit;
     }
 
+    /**
+     * 保存支付信息
+     * @author 贺强
+     * @time   2018-11-27 14:49:10
+     * @param  UserOrderModel $uo UserOrderModel 实例
+     */
+    public function save_pay_data(UserOrderModel $uo)
+    {
+        $param = $this->param;
+    }
+
 }

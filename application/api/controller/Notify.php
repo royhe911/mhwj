@@ -84,9 +84,11 @@ class Notify extends \think\Controller
      * @author 贺强
      * @time   2018-11-27 15:13:26
      */
-    public function refund()
+    public function refund($param = null)
     {
-        $param = $this->request->post();
+        if (empty($param)) {
+            $param = $this->request->post();
+        }
         if (empty($param['type'])) {
             $msg = ['status' => 5, 'info' => '退款类型不能为空', 'data' => null];
         } elseif (empty($param['uid'])) {
@@ -134,11 +136,11 @@ class Notify extends \think\Controller
         $url     = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
         $res     = $this->curl($url, $xmldata, false);
         if (!$res) {
-            echo json_encode(['status' => 1, 'info' => '无法连接服务器', 'data' => null]);exit;
+            echo json_encode(['status' => 10, 'info' => '无法连接服务器', 'data' => null]);exit;
         }
         $res = xml2array($res);
         if (strval($res['return_code']) == 'FAIL') {
-            echo json_encode(['status' => 3, 'info' => $res['return_msg'], 'data' => null]);exit;
+            echo json_encode(['status' => 20, 'info' => $res['return_msg'], 'data' => null]);exit;
         }
         $refund_desc = '';
         if (!empty($param['refund_desc'])) {
