@@ -123,7 +123,7 @@ class Notify extends \think\Controller
             'appid'          => config('APPID_PLAYER'),
             'mch_id'         => config('PAY_MCHID'),
             'nonce_str'      => $nonce_str,
-            'notify_url'     => config('WEBSITE') . '/api/pay/refund_url',
+            'notify_url'     => config('WEBSITE') . '/api/pay/r_notify',
             'out_refund_no'  => $out_refund_no;
             'out_trade_no'   => $out_trade_no,
             'refund_fee'     => $refund_fee, // 退款金额

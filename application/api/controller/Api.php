@@ -1026,7 +1026,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 21, 'info' => '不能同时进两个房间', 'date' => null]);exit;
         }
         $po    = new PersonOrderModel();
-        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,4,10']]);
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['in', '1,6,7']]);
         if ($count) {
             echo json_encode(['status' => 22, 'info' => '您有订制订单未完成，请先完成订制订单', 'date' => null]);exit;
         }
@@ -1077,13 +1077,17 @@ class Api extends \think\Controller
         }
         $res = $r->quit_room($param['room_id'], $param['uid']);
         if ($res !== true) {
-            echo json_encode(['status' => $res, 'info' => '退出失败', 'data' => null]);exit;
+            $msg = '';
+            if ($res === 4) {
+                $msg = '游戏已开始，不能退出';
+            }
+            echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '退出成功', 'data' => null]);exit;
     }
 
     /**
-     * 关闭房间
+     * 关闭/销毁房间
      * @author 贺强
      * @time   2018-11-12 10:02:20
      * @param  RoomModel     $r  RoomModel 实例

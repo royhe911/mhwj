@@ -166,7 +166,7 @@ class Pay extends \think\Controller
         }
         $po = new PersonOrderModel();
         // 查询该玩家是否已下了订制订单
-        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,4,10']]);
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['in', '1,6,7']]);
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已下了订制订单', 'date' => null]);exit;
         }
@@ -357,7 +357,7 @@ class Pay extends \think\Controller
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'date' => null]);exit;
         }
-        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,4,10']]);
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['in', '1,6,7']]);
         if ($count) {
             echo json_encode(['status' => 11, 'info' => '您有订单未完成', 'date' => null]);exit;
         }
