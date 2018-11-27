@@ -123,6 +123,7 @@ function array2xml($arr)
         $xml .= "<$key>$val</$key>";
     }
     $xml .= "</xml>";
+    return $xml;
 }
 
 /**
