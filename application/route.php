@@ -93,7 +93,7 @@ return [
     '/api/pay/userpay'    => 'api/Pay/user_pay', // 房间支付
     '/api/pay/odrsta'     => 'api/Pay/modify_order', // 修改订单状态
     '/api/pay/ppord'      => 'api/Pay/personal_preorder', // 订制下单
-    '/api/pay/prepay'     => 'api/Pay/prepay', // 预支付
+    '/api/pay/prepay'     => 'api/Notify/prepay', // 预支付
     '/api/pay/notify'     => 'api/Notify/pay_notify', // 回调
     '/api/pay/personpay'  => 'api/Pay/person_pay', // 订制支付
     '/api/pay/popay'      => 'api/Pay/person_ord_pay', // 订制预支付
