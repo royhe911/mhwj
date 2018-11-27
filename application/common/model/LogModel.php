@@ -8,7 +8,8 @@ class LogModel extends CommonModel
         $this->table = 'm_log';
     }
 
-    const TYPE_REFUND = 1; // 用户退款
+    const TYPE_REFUND      = 1; // 用户退款
+    const TYPE_SAVEPAYDATA = 2; // 保存支付数据
 
     /**
      * 写操作日志

@@ -5,6 +5,7 @@ use app\common\model\ConsumeModel;
 use app\common\model\CouponModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
+use app\common\model\LogModel;
 use app\common\model\MasterMoneyLogModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\PersonMasterOrderModel;
@@ -1163,11 +1164,23 @@ class Pay extends \think\Controller
      * 保存支付信息
      * @author 贺强
      * @time   2018-11-27 14:49:10
-     * @param  UserOrderModel $uo UserOrderModel 实例
      */
-    public function save_pay_data(UserOrderModel $uo)
+    public function save_pay_data()
     {
         $param = $this->param;
+        $model = new UserOrderModel();
+        if (!empty($param['type']) && intval($param['type']) === 2) {
+            $model = new PersonOrderModel();
+        }
+        unset($param['type']);
+        $res = $model->modifyField('transaction_id', $param['transaction_id'], ['order_num' => $param['order_num']]);
+        if (!$res) {
+            $l = new LogModel();
+            // 日志数据
+            $log_data = ['type' => LogModel::TYPE_SAVEPAYDATA, 'content' => json_encode($param)];
+            $l->addLog($log_data);
+        }
+        echo json_encode(['status' => 0, 'info' => '保存成功', 'data' => null]);exit;
     }
 
 }

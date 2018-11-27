@@ -117,6 +117,7 @@ return [
     /*--------   微信支付 api 开始  --------*/
     '/api/pay/prepay'     => 'api/Notify/prepay', // 预支付
     '/api/pay/notify'     => 'api/Notify/pay_notify', // 回调
+    '/api/pay/paydata'    => 'api/Notify/save_pay_data', // 支付成功前端回调
     '/api/pay/refund'     => 'api/Notify/refund', // 退款
     '/api/pay/r_notify'   => 'api/Notify/refund_notify', // 退款回调
     /*--------   微信支付 api 结束  --------*/
