@@ -93,8 +93,6 @@ return [
     '/api/pay/userpay'    => 'api/Pay/user_pay', // 房间支付
     '/api/pay/odrsta'     => 'api/Pay/modify_order', // 修改订单状态
     '/api/pay/ppord'      => 'api/Pay/personal_preorder', // 订制下单
-    '/api/pay/prepay'     => 'api/Notify/prepay', // 预支付
-    '/api/pay/notify'     => 'api/Notify/pay_notify', // 回调
     '/api/pay/personpay'  => 'api/Pay/person_pay', // 订制支付
     '/api/pay/popay'      => 'api/Pay/person_ord_pay', // 订制预支付
     '/api/pay/tasks'      => 'api/Pay/person_task', // 任务订单
@@ -115,4 +113,11 @@ return [
     '/api/person/rooms'   => 'api/Person/get_person_room', // 获取私聊房间
     '/api/pay/cancelord'  => 'api/Pay/cancel_order', // 取消订单
     /*--------   订制 api 结束  --------*/
+
+    /*--------   微信支付 api 开始  --------*/
+    '/api/pay/prepay'     => 'api/Notify/prepay', // 预支付
+    '/api/pay/notify'     => 'api/Notify/pay_notify', // 回调
+    '/api/pay/refund'     => 'api/Notify/refund', // 退款
+    '/api/pay/r_notify'   => 'api/Notify/refund_notify', // 退款回调
+    /*--------   微信支付 api 结束  --------*/
 ];
