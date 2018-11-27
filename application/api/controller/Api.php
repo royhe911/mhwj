@@ -789,6 +789,7 @@ class Api extends \think\Controller
                 if (!empty($gcarr[$item['game_id']]) && !empty($gcarr[$item['game_id']][$item['para_min']])) {
                     $item['para_min_str'] = $gcarr[$item['game_id']][$item['para_min']];
                 } else {
+
                     $item['para_min_str'] = '';
                 }
                 if (!empty($gcarr[$item['game_id']]) && !empty($gcarr[$item['game_id']][$item['para_max']])) {
@@ -979,6 +980,12 @@ class Api extends \think\Controller
                 $mo->addArr($mdat);
             }
         }
+        if ($status === 10) {
+            $ch = new ChatModel();
+            $ch->delByWhere(['room_id' => $param['room_id']]);
+            $cu = new ChatUserModel();
+            $cu->delByWhere(['room_id' => $param['room_id']]);
+        }
         $res = $r->modifyField('status', $status, ['id' => $param['room_id']]);
         if ($res === false) {
             echo json_encode(['status' => 40, 'info' => '修改失败', 'date' => null]);exit;
@@ -1063,6 +1070,9 @@ class Api extends \think\Controller
             // 房主踢人参数
             if (!empty($param['is_kicking']) && intval($param['is_kicking']) === 1 && $rusr['status'] !== 0) {
                 echo json_encode(['status' => 22, 'info' => '该用户已准备，不能踢', 'date' => null]);exit;
+            }
+            if ($rusr['status'] === 6) {
+                echo json_encode(['status' => 23, 'info' => '您已付款，不能退出', 'date' => null]);exit;
             }
         }
         $res = $r->quit_room($param['room_id'], $param['uid']);

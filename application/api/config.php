@@ -11,6 +11,7 @@ return [
     'PRE_KEY'             => 'TGHw56CZFy8xvwb8gAXhUYWcueWVuUdc', // 平台设置的密钥key
     'LOWERMONEY'          => 35, // 订单可使用优惠卷下限
     'COUPONTERM'          => 15, // 优惠卷期限
+    'PAY_MCHID'           => 1519826271, // 商户号
     'KG'                  => [
         ['para_id' => 5, 'para_str' => '全段位'],
         ['para_id' => 4, 'para_str' => '王者21星以下'],
