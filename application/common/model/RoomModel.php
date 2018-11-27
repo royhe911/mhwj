@@ -95,6 +95,9 @@ class RoomModel extends CommonModel
             if ($data['status'] === 10) {
                 return 11;
             }
+            if ($data['status'] === 9) {
+                return 12;
+            }
             if (intval($param['type']) === 1) {
                 $ru    = new RoomUserModel();
                 $count = $ru->getCount(['room_id' => $data['id'], 'uid' => $param['uid']]);

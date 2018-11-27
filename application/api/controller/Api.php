@@ -687,7 +687,8 @@ class Api extends \think\Controller
             $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
             $param['total_money'] = floatval($param['price']) * intval($param['num']) * (intval($param['count']));
-            $count                = $r->getCount(['is_delete' => 0, 'uid' => $param['uid'], 'status' => ['<>', 10]]);
+            // 获取房间
+            $count = $r->getCount(['is_delete' => 0, 'uid' => $param['uid'], 'status' => ['not in', '4,10']]);
             if ($count) {
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
             }
@@ -830,6 +831,9 @@ class Api extends \think\Controller
         if ($room) {
             if ($room['room_status'] === 10) {
                 echo json_encode(['status' => 3, 'info' => '游戏已完成', 'date' => null]);exit;
+            }
+            if ($room['room_status'] === 9) {
+                echo json_encode(['status' => 5, 'info' => '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还', 'data' => null]);exit;
             }
             $g    = new GameModel();
             $game = $g->getModel(['id' => $room['game_id']], ['name', 'url']);
@@ -1016,7 +1020,7 @@ class Api extends \think\Controller
             echo json_encode($msg);exit;
         }
         $ru    = new RoomUserModel();
-        $count = $ru->getCount(['room_id' => ['<>', $param['room_id']], 'uid' => $param['uid'], 'status' => ['<>', 10]]);
+        $count = $ru->getCount(['room_id' => ['<>', $param['room_id']], 'uid' => $param['uid'], 'status' => ['not in', '4,10']]);
         if ($count) {
             echo json_encode(['status' => 21, 'info' => '不能同时进两个房间', 'date' => null]);exit;
         }
@@ -1036,6 +1040,8 @@ class Api extends \think\Controller
                 $msg = '房间人数已满';
             } elseif ($res === 4) {
                 $msg = '房间不存在';
+            } elseif ($res === 12) {
+                $msg = '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还';
             }
             echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
         }

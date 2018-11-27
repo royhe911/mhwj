@@ -353,7 +353,7 @@ class Pay extends \think\Controller
         }
         $ru = new RoomUserModel();
         // 查询譔下单人是否已在房间里
-        $count = $ru->getCount(['uid' => $param['uid'], 'status' => ['not in', '3,4,10']]);
+        $count = $ru->getCount(['uid' => $param['uid'], 'status' => ['not in', '4,10']]);
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'date' => null]);exit;
         }
