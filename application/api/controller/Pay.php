@@ -200,7 +200,41 @@ class Pay extends \think\Controller
             $c     = new CouponModel();
             $c->add($odata);
         }
-        echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => ['order_num' => $order_num]]);exit;
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $param['uid']], ['openid']);
+        $url  = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
+        // 统一下单参数构造
+        $nonce_str    = get_random_str(15);
+        $out_trade_no = get_millisecond();
+        $body         = '游戏支付';
+        $unifiedorder = array(
+            'appid'            => config('APPID_PLAYER'),
+            'body'             => $body,
+            'mch_id'           => config('PAY_MCHID'),
+            'nonce_str'        => $nonce_str,
+            'notify_url'       => config('WEBSITE') . '/api/pay/notify',
+            'openid'           => $user['openid'],
+            'out_trade_no'     => $out_trade_no,
+            'spbill_create_ip' => get_client_ip(),
+            'total_fee'        => $param['order_money'],
+            'trade_type'       => 'JSAPI',
+        );
+        $unifiedorder['sign'] = $this->make_sign($unifiedorder);
+        // 数组转换为 xml
+        $xmldata = array2xml($unifiedorder);
+        $res     = $this->curl($url, $xmldata, false);
+        if (!$res) {
+            echo json_encode(['status' => 1, 'info' => '无法连接服务器', 'data' => null]);exit;
+        }
+        $res = xml2array($res);
+        if (strval($res['return_code']) == 'FAIL') {
+            echo json_encode(['status' => 3, 'info' => $res['return_msg'], 'data' => null]);exit;
+        }
+        if (!empty($res['result_code']) && strval($res['result_code']) == 'FAIL') {
+            echo json_encode(['status' => 2, 'info' => $res['err_code_des'], 'data' => null]);exit;
+        }
+        $pay_data = ['timeStamp' => time(), 'nonceStr' => $res['nonceStr'], 'package' => $res['prepay_id'], 'paySign' => $res['sign'], 'order_num' => $order_num];
+        echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => $pay_data]);exit;
     }
 
     /**
@@ -1168,6 +1202,14 @@ class Pay extends \think\Controller
     public function save_pay_data()
     {
         $param = $this->param;
+        if (empty($param['transaction_id'])) {
+            $msg = ['status' => 1, 'info' => '微信订单号不能为空', 'data' => null];
+        } elseif (empty($param['order_num'])) {
+            $msg = ['status' => 3, 'info' => '系统订单号不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
         $model = new UserOrderModel();
         if (!empty($param['type']) && intval($param['type']) === 2) {
             $model = new PersonOrderModel();
