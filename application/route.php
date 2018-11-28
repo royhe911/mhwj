@@ -123,5 +123,6 @@ return [
     '/api/pay/paydata'    => 'api/Pay/save_pay_data', // 支付成功前端回调
     '/api/pay/refund'     => 'api/Notify/refund', // 退款
     '/api/pay/r_notify'   => 'api/Notify/refund_notify', // 退款回调
+    '/api/pay/apply'      => 'api/Pay/apply_cash', // 申请提现
     /*--------   微信支付 api 结束  --------*/
 ];
