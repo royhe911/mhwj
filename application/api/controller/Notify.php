@@ -25,8 +25,6 @@ class Notify extends \think\Controller
             $msg = ['status' => 1, 'info' => 'openid 不能为空', 'data' => null];
         } elseif (empty($param['body'])) {
             $msg = ['status' => 2, 'info' => '商品描述不能为空', 'data' => null];
-        } elseif (empty($param['out_trade_no'])) {
-            $msg = ['status' => 3, 'info' => '订单号不能为空', 'data' => null];
         } elseif (empty($param['total_fee'])) {
             $msg = ['status' => 4, 'info' => '订单总金额不能为空', 'data' => null];
         }
@@ -36,6 +34,7 @@ class Notify extends \think\Controller
         $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
         // 统一下单参数构造
         $nonce_str    = get_random_str(15);
+        $out_trade_no = get_millisecond();
         $unifiedorder = array(
             'appid'            => config('APPID_PLAYER'),
             'body'             => $param['body'],
@@ -43,7 +42,7 @@ class Notify extends \think\Controller
             'nonce_str'        => $nonce_str,
             'notify_url'       => config('WEBSITE') . '/api/pay/notify',
             'openid'           => $param['openid'],
-            'out_trade_no'     => $param['out_trade_no'],
+            'out_trade_no'     => $out_trade_no,
             'spbill_create_ip' => get_client_ip(),
             'total_fee'        => $param['total_fee'],
             'trade_type'       => 'JSAPI',
