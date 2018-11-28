@@ -207,6 +207,8 @@ class Pay extends \think\Controller
         $nonce_str    = get_random_str(15);
         $out_trade_no = get_millisecond();
         $body         = '游戏支付';
+        $total_fee    = floatval($param['order_money']);
+        $total_fee *= 100;
         $unifiedorder = array(
             'appid'            => config('APPID_PLAYER'),
             'body'             => $body,
@@ -216,7 +218,7 @@ class Pay extends \think\Controller
             'openid'           => $user['openid'],
             'out_trade_no'     => $out_trade_no,
             'spbill_create_ip' => get_client_ip(),
-            'total_fee'        => $param['order_money'],
+            'total_fee'        => $total_fee,
             'trade_type'       => 'JSAPI',
         );
         $unifiedorder['sign'] = $this->make_sign($unifiedorder);
