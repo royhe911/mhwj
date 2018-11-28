@@ -1,7 +1,6 @@
 <?php
 namespace app\admin\controller;
 
-use app\common\model\LogModel;
 use app\common\model\MenuModel;
 use app\common\model\RoleAccessModel;
 use app\common\model\RoleModel;
@@ -31,8 +30,6 @@ class Menu extends \think\Controller
                 $param['orders'] = 99;
             }
             $res = $m->add($param);
-            $l   = new LogModel();
-            $l->addLog(['type' => LogModel::TYPE_ADD_MENU, 'content' => '添加菜单，添加的菜单标识：' . $param['identity']]);
             if ($res) {
                 return ['status' => 0, 'info' => '添加成功'];
             }
@@ -55,8 +52,6 @@ class Menu extends \think\Controller
         $admin = $this->is_valid(strtolower(basename(get_class())) . '_' . strtolower(__FUNCTION__));
         $id    = $this->request->post('id');
         $res   = $m->modifyField('is_delete', 1, ['id' => $id]);
-        $l     = new LogModel();
-        $l->addLog(['type' => LogModel::TYPE_DELETE_MENU, 'content' => '删除菜单']);
         if ($res) {
             return ['status' => 0, 'info' => '删除成功'];
         }
@@ -79,8 +74,6 @@ class Menu extends \think\Controller
                 return ['status' => 3, 'info' => '非法操作'];
             }
             $res = $m->modify($param, ['id' => $param['id']]);
-            $l   = new LogModel();
-            $l->addLog(['type' => LogModel::TYPE_EDIT_MENU, 'content' => '编辑菜单']);
             if ($res !== false) {
                 $m->modifyField('orders', $param['orders'], ['pid' => $param['id']]);
                 return ['status' => 0, 'info' => '修改成功'];
@@ -133,12 +126,10 @@ class Menu extends \think\Controller
         if ($this->request->isAjax()) {
             $param    = $this->request->post();
             $res      = $ra->updateRolePower($param);
-            $l        = new LogModel();
             $menu_ids = '';
             if (!empty($param['menu_ids'])) {
                 $menu_ids = implode(',', $param['menu_ids']);
             }
-            $l->addLog(['type' => LogModel::TYPE_POWER, 'content' => '分配菜单权限，分配的角色：' . $param['role_id'] . '，分配的权限：' . $menu_ids]);
             if ($res !== true) {
                 switch ($res) {
                     case 1:
