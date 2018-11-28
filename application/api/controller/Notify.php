@@ -12,6 +12,25 @@ use app\common\model\UserOrderModel;
  */
 class Notify extends \think\Controller
 {
+    private $param = [];
+
+    public function __construct()
+    {
+        $param = file_get_contents('php://input');
+        if (!empty($param)) {
+            $param = json_decode($param, true);
+            if (empty($param['vericode'])) {
+                echo json_encode(['status' => 300, 'info' => '非法参数', 'data' => null]);exit;
+            }
+            $vericode = $param['vericode'];
+            unset($param['vericode']);
+            $new_code = md5(config('MD5_PARAM'));
+            if ($vericode !== $new_code) {
+                echo json_encode(['status' => 100, 'info' => '非法参数', 'data' => null]);exit;
+            }
+            $this->param = $param;
+        }
+    }
 
     /**
      * 预支付请求接口
@@ -20,7 +39,7 @@ class Notify extends \think\Controller
      */
     public function prepay()
     {
-        $param = $this->request->post();
+        $param = $this->param;
         if (empty($param['openid'])) {
             $msg = ['status' => 1, 'info' => 'openid 不能为空', 'data' => null];
         } elseif (empty($param['body'])) {
@@ -123,7 +142,7 @@ class Notify extends \think\Controller
             'mch_id'         => config('PAY_MCHID'),
             'nonce_str'      => $nonce_str,
             'notify_url'     => config('WEBSITE') . '/api/pay/r_notify',
-            'out_refund_no'  => $out_refund_no;
+            'out_refund_no'  => $out_refund_no,
             'out_trade_no'   => $out_trade_no,
             'refund_fee'     => $refund_fee, // 退款金额
             'total_fee'      => $total_fee,
