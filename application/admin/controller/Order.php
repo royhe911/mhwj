@@ -2,6 +2,7 @@
 namespace app\admin\controller;
 
 use app\common\model\GameModel;
+use app\common\model\MasterMoneyLogModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\PersonMasterOrderModel;
 use app\common\model\PersonOrderModel;
@@ -340,5 +341,120 @@ class Order extends \think\Controller
         } else {
             return ['status' => 4, 'info' => '修改失败'];
         }
+    }
+
+    /**
+     * 申请提现列表
+     * @author 贺强
+     * @time   2018-11-28 20:05:09
+     * @param  MasterMoneyLogModel $mml MasterMoneyLogModel 实例
+     */
+    public function cash_list(MasterMoneyLogModel $mml)
+    {
+        $where = [];
+        // 分页参数
+        $page     = intval($this->request->get('page', 1));
+        $pagesize = intval($this->request->get('pagesize', config('PAGESIZE')));
+        $list     = $mml->getList($where, true, "$page,$pagesize", 'status desc,addtime desc');
+        if ($list) {
+            $uids = array_column($list, 'uid');
+            $u    = new UserModel();
+            $user = $u->getList(['id' => ['in', $uids]], 'id,nickname');
+            $user = array_column($user, 'nickname', 'id');
+            foreach ($list as &$item) {
+                if (!empty($user[$item['uid']])) {
+                    $item['nickname'] = $user[$item['uid']];
+                } else {
+                    $item['nickname'] = '';
+                }
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                switch ($item['status']) {
+                    case 1:
+                        $item['status_txt'] = '申请中';
+                        break;
+                    case 4:
+                        $item['status_txt'] = '审核不通过';
+                        break;
+                    case 8:
+                        $item['status_txt'] = '已提现';
+                        break;
+                    default:
+                        $item['status_txt'] = '';
+                        break;
+                }
+            }
+        }
+        $count = $mml->getCount($where);
+        $pages = ceil($count / $pagesize);
+        return $this->fetch('cashlist', ['list' => $list, 'pages' => $pages]);
+    }
+
+    /**
+     * 提现详情
+     * @author 贺强
+     * @time   2018-11-28 20:22:41
+     * @param  MasterMoneyLogModel $mml MasterMoneyLogModel 实例
+     */
+    public function cash_detail(MasterMoneyLogModel $mml)
+    {
+        $id   = $this->request->get('id');
+        $cash = $mml->getModel(['id' => $id]);
+        if ($cash) {
+            $u    = new UserModel();
+            $user = $u->getModel(['id' => $cash['uid']]);
+            if ($user) {
+                $cash['avatar']   = $user['avatar'];
+                $cash['nickname'] = $user['nickname'];
+                $cash['mobile']   = $user['mobile'];
+            } else {
+                $cash['avatar']   = '';
+                $cash['nickname'] = '';
+                $cash['mobile']   = '';
+            }
+            if (!empty($cash['addtime'])) {
+                $cash['addtime'] = date('Y-m-d H:i:s', $cash['addtime']);
+            }
+            if (!empty($cash['auditor_time'])) {
+                $cash['auditor_time'] = date('Y-m-d H:i:s', $cash['auditor_time']);
+            }
+            switch ($cash['status']) {
+                case 1:
+                    $cash['status_txt'] = '申请中';
+                    break;
+                case 4:
+                    $cash['status_txt'] = '审核不通过';
+                    break;
+                case 8:
+                    $cash['status_txt'] = '已提现';
+                    break;
+                default:
+                    $cash['status_txt'] = '';
+                    break;
+            }
+        }
+        return $this->fetch('cashdetail', ['cash' => $cash]);
+    }
+
+    /**
+     * 提现审核
+     * @author 贺强
+     * @time   2018-11-28 20:51:04
+     * @param  MasterMoneyLogModel $mml MasterMoneyLogModel 实例
+     */
+    public function auditors(MasterMoneyLogModel $mml)
+    {
+        $param = $this->request->post();
+        if (!empty($param['id']) && !empty($param['status'])) {
+            $param['auditor_time'] = time();
+            // 保存数据
+            $res = $mml->modify($param, ['id' => $param['id']]);
+            if (!$res) {
+                return ['status' => 4, 'info' => '审核失败'];
+            }
+            return ['status' => 0, 'info' => '审核成功'];
+        }
+        return ['status' => 3, 'info' => '非法操作'];
     }
 }

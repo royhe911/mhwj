@@ -38,7 +38,7 @@ class Room extends Command
             foreach ($list as $item) {
                 $ids .= ",{$item['room_id']}";
             }
-            if ($ids !== '0' && $ids !== '0') {
+            if ($ids !== '0') {
                 $ru->modifyField('status', 4, ['room_id' => ['in', $ids]]);
                 $r = new RoomModel();
                 $r->modifyField('status', 9, ['id' => ['in', $ids]]);

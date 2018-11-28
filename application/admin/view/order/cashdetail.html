@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提现详情</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/iCheck/custom.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
+    <style type="text/css">
+        .form-control{width: 200px;}
+        #preview{max-width: 120px;max-height: 120px;display: none;}
+        .level_url{max-width: 80px;max-height: 80px;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>提现详情</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal" onsubmit="return false">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">陪玩师昵称</label>
+                            <div class="col-sm-10">{$cash.nickname}</div>
+                        </div>
+                        <div class="hr-line-dashed kf"></div>
+                        <div class="form-group kf">
+                            <label class="col-sm-2 control-label">陪玩师电话</label>
+                            <div class="col-sm-10">{$cash.mobile}</div>
+                        </div>
+                        <div class="hr-line-dashed kf"></div>
+                        <div class="form-group kf">
+                            <label class="col-sm-2 control-label">提现金额</label>
+                            <div class="col-sm-10">{$cash.money}</div>
+                        </div>
+                        <div class="hr-line-dashed kf"></div>
+                        <div class="form-group kf">
+                            <label class="col-sm-2 control-label">陪玩师头像</label>
+                            <div class="col-sm-10">{$cash.avatar}</div>
+                        </div>
+                        <div class="hr-line-dashed kf"></div>
+                        <div class="form-group kf">
+                            <label class="col-sm-2 control-label">申请时间</label>
+                            <div class="col-sm-10">{$cash.addtime}</div>
+                        </div>
+                        <div class="hr-line-dashed kf"></div>
+                        <div class="form-group kf">
+                            <label class="col-sm-2 control-label">审核时间</label>
+                            <div class="col-sm-10">{$cash.auditor_time}</div>
+                        </div>
+                        <div class="hr-line-dashed kf"></div>
+                        <div class="form-group kf">
+                            <label class="col-sm-2 control-label">当前状态</label>
+                            <div class="col-sm-10">{$cash.status_txt}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <input class="btn btn-white" type="button" data-action="cancel" value="返回">{if($cash.status===1)} &nbsp; <input class="btn btn-sm btn-primary" type="button" data-action="shhe" value="审核">{/if}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript">
+    $(function(){
+        layer.config({extend: 'extend/layer.ext.js'});
+        $('input[data-action]').click(function(){
+            $action = $(this).data('action');
+            if ($action == 'cancel') {
+                location.href = '/order/cashlist';
+            } else if ($action == 'shhe') {
+                var $id = {$cash.id};
+                layer.confirm('提现审核', {
+                    btn: ['通过', '不通过', '取消'],
+                    shade: false,
+                    closeBtn: 0
+                }, function(){
+                    auditors($id, 8)
+                }, function(){
+                    layer.prompt({
+                        formType: 2,
+                        title: '请输入驳回原因'
+                    }, function(v, i, e){
+                        layer.close(i);
+                        auditors($id, 4, v)
+                    })
+                })
+            }
+        });
+        function auditors($id, $status, $v) {
+            var $msg = '确实审核通过吗？';
+            if ($status == 4) {
+                $msg = '确实审核不通过吗？';
+            }
+            layer.confirm($msg, {icon: 3}, function(){
+                $.ajax({
+                    type: 'post', cache: false, dataType: 'json',
+                    url: '/order/auditors',
+                    data:{'id': $id, 'status': $status, 'reason': $v},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        }else{
+                            layer.msg(data.info, {icon: 5, time: 1000})
+                        }
+                    }
+                })
+            })
+        }
+    });
+</script>
+</html>

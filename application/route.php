@@ -50,6 +50,9 @@ return [
     '/order/morders'      => 'admin/Order/morders', // 房间订单
     '/order/mdetail'      => 'admin/Order/mdetail', // 房间订单详情
     '/order/complete'     => 'admin/Order/complete', // 完成订单
+    '/order/cashlist'     => 'admin/Order/cash_list', // 提现列表
+    '/order/cashdetail'   => 'admin/Order/cash_detail', // 提现详情
+    '/order/auditors'     => 'admin/Order/auditors', // 提现审核
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图

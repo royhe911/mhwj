@@ -204,11 +204,11 @@ class Pay extends \think\Controller
         $user = $u->getModel(['id' => $param['uid']], ['openid']);
         $url  = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
         // 统一下单参数构造
-        $nonce_str    = get_random_str(15);
-        $out_trade_no = get_millisecond();
-        $body         = '游戏支付';
-        $total_fee    = floatval($param['order_money']);
-        $total_fee *= 100;
+        $nonce_str = get_random_str(15);
+        $body      = '游戏支付';
+        // $total_fee    = floatval($param['order_money']);
+        // $total_fee *= 100;
+        $total_fee    = 1;
         $unifiedorder = array(
             'appid'            => config('APPID_PLAYER'),
             'body'             => $body,
@@ -216,7 +216,7 @@ class Pay extends \think\Controller
             'nonce_str'        => $nonce_str,
             'notify_url'       => config('WEBSITE') . '/api/pay/notify',
             'openid'           => $user['openid'],
-            'out_trade_no'     => $out_trade_no,
+            'out_trade_no'     => $order_num,
             'spbill_create_ip' => get_client_ip(),
             'total_fee'        => $total_fee,
             'trade_type'       => 'JSAPI',
@@ -235,7 +235,10 @@ class Pay extends \think\Controller
         if (!empty($res['result_code']) && strval($res['result_code']) == 'FAIL') {
             echo json_encode(['status' => 2, 'info' => $res['err_code_des'], 'data' => null]);exit;
         }
-        $pay_data = ['timeStamp' => time(), 'nonceStr' => $res['nonceStr'], 'package' => $res['prepay_id'], 'signType' => 'MD5', 'paySign' => $res['sign'], 'order_num' => $order_num];
+        $pay_data = ['appId' => config('APPID_PLAYER'), 'nonceStr' => $res['nonce_str'], 'package' => 'prepay_id=' . $res['prepay_id'], 'signType' => 'MD5', 'timeStamp' => time()];
+        // 计算签名
+        $pay_data['paySign']   = $this->make_sign($pay_data);
+        $pay_data['order_num'] = $order_num;
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => $pay_data]);exit;
     }
 
@@ -1146,6 +1149,31 @@ class Pay extends \think\Controller
     }
 
     /**
+     * 陪玩师申请提现
+     * @author 贺强
+     * @time   2018-11-28 19:53:50
+     * @param  MasterMoneyLogModel $mml MasterMoneyLogModel 实例
+     */
+    public function apply_cash(MasterMoneyLogModel $mml)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
+        } elseif (empty($param['money'])) {
+            $msg = ['status' => 3, 'info' => '申请提现金额不能为家', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $param['addtime'] = time();
+        $res              = $mml->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 5, 'info' => '申请失败，请联系平台', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '申请成功，提现金额会在3个工作日内打到您的微信账号里', 'data' => null]);exit;
+    }
+
+    /**
      * 陪玩师提现记录
      * @author 贺强
      * @time   2018-11-18 15:47:48
@@ -1197,34 +1225,21 @@ class Pay extends \think\Controller
     }
 
     /**
-     * 保存支付信息
+     * 生成签名
      * @author 贺强
-     * @time   2018-11-27 14:49:10
+     * @time   2018-11-13 10:17:56
+     * @param  array  $arr 生成签名的数组
+     * @return string      返回生成的签名
      */
-    public function save_pay_data()
+    private function make_sign($arr)
     {
-        $param = $this->param;
-        if (empty($param['transaction_id'])) {
-            $msg = ['status' => 1, 'info' => '微信订单号不能为空', 'data' => null];
-        } elseif (empty($param['order_num'])) {
-            $msg = ['status' => 3, 'info' => '系统订单号不能为空', 'data' => null];
+        $stringA = '';
+        foreach ($arr as $key => $val) {
+            $stringA .= "{$key}={$val}&";
         }
-        if (!empty($msg)) {
-            echo json_encode($msg);exit;
-        }
-        $model = new UserOrderModel();
-        if (!empty($param['type']) && intval($param['type']) === 2) {
-            $model = new PersonOrderModel();
-        }
-        unset($param['type']);
-        $res = $model->modifyField('transaction_id', $param['transaction_id'], ['order_num' => $param['order_num']]);
-        if (!$res) {
-            $l = new LogModel();
-            // 日志数据
-            $log_data = ['type' => LogModel::TYPE_SAVEPAYDATA, 'content' => json_encode($param)];
-            $l->addLog($log_data);
-        }
-        echo json_encode(['status' => 0, 'info' => '保存成功', 'data' => null]);exit;
+        $stringA .= ('key=' . config('PRE_KEY'));
+        $sign = strtoupper(md5($stringA));
+        return $sign;
     }
 
 }

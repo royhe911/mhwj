@@ -2,7 +2,9 @@
 namespace app\api\controller;
 
 use app\common\model\LogModel;
+use app\common\model\PersonOrderModel;
 use app\common\model\RefundModel;
+use app\common\model\RoomUserModel;
 use app\common\model\UserOrderModel;
 
 /**
@@ -12,26 +14,6 @@ use app\common\model\UserOrderModel;
  */
 class Notify extends \think\Controller
 {
-    private $param = [];
-
-    public function __construct()
-    {
-        $param = file_get_contents('php://input');
-        if (!empty($param)) {
-            $param = json_decode($param, true);
-            if (empty($param['vericode'])) {
-                echo json_encode(['status' => 300, 'info' => '非法参数', 'data' => null]);exit;
-            }
-            $vericode = $param['vericode'];
-            unset($param['vericode']);
-            $new_code = md5(config('MD5_PARAM'));
-            if ($vericode !== $new_code) {
-                echo json_encode(['status' => 100, 'info' => '非法参数', 'data' => null]);exit;
-            }
-            $this->param = $param;
-        }
-    }
-
     /**
      * 预支付请求接口
      * @author 贺强
@@ -90,11 +72,39 @@ class Notify extends \think\Controller
      */
     public function pay_notify()
     {
-        $param = $this->request->get();
-        if (empty($param)) {
-            $param = $this->request->post();
+        $param = file_get_contents('php://input');
+        file_put_contents('/www/wwwroot/wwwdragontangcom/application/api/controller/' . time() . '.log', $param);
+        $param = xml2array($param);
+        file_put_contents('/www/wwwroot/wwwdragontangcom/application/api/controller/' . time() . '12.log', json_encode($param));
+        if ($param['result_code'] === 'SUCCESS') {
+            $order_num = $param['out_trade_no'];
+            $m         = new UserOrderModel();
+            $order     = $m->getModel(['order_num' => $order_num]);
+            $type      = 1;
+            if (!$order) {
+                $type  = 2;
+                $m     = new PersonOrderModel();
+                $order = $m->getModel(['order_num' => $order_num]);
+            }
+            $l = new LogModel();
+            if (!$order) {
+                $l->addLog(['type' => LogModel::TYPE_SAVEPAYDATA, 'content' => json_encode($param)]);
+            }
+            $order['transaction_id'] = $param['transaction_id'];
+            $order['status']         = 6;
+            $order['pay_time']       = time();
+            // 保存微信订单
+            $res = $m->modify($order, ['order_num' => $order_num]);
+            if ($type === 1) {
+                $ru = new RoomUserModel();
+                $ru->modifyField('status', 6, ['room_id' => $order['room_id'], 'uid' => $order['uid']]);
+            }
+            if (!$res) {
+                $l->addLog(['type' => LogModel::TYPE_SAVEPAYDATA, 'content' => '入库失败，order_num' . $order_num]);
+            } else {
+                echo "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";exit;
+            }
         }
-        file_put_contents('/www/wwwroot/wwwdragontangcom/application/api/controller/result.log', json_encode($param));
     }
 
     /**
