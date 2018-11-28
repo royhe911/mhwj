@@ -235,7 +235,7 @@ class Pay extends \think\Controller
         if (!empty($res['result_code']) && strval($res['result_code']) == 'FAIL') {
             echo json_encode(['status' => 2, 'info' => $res['err_code_des'], 'data' => null]);exit;
         }
-        $pay_data = ['timeStamp' => time(), 'nonceStr' => $res['nonceStr'], 'package' => $res['prepay_id'], 'paySign' => $res['sign'], 'order_num' => $order_num];
+        $pay_data = ['timeStamp' => time(), 'nonceStr' => $res['nonceStr'], 'package' => $res['prepay_id'], 'signType' => 'MD5', 'paySign' => $res['sign'], 'order_num' => $order_num];
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => $pay_data]);exit;
     }
 
