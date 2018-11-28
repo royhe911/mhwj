@@ -688,7 +688,7 @@ class Api extends \think\Controller
         } else {
             $param['total_money'] = floatval($param['price']) * intval($param['num']) * (intval($param['count']));
             // 获取房间
-            $count = $r->getCount(['is_delete' => 0, 'uid' => $param['uid'], 'status' => ['not in', '4,10']]);
+            $count = $r->getCount(['is_delete' => 0, 'uid' => $param['uid'], 'status' => ['not in', '4,9,10']]);
             if ($count) {
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
             }
