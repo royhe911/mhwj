@@ -1019,9 +1019,12 @@ class Api extends \think\Controller
         if (!empty($msg) && !$is_share) {
             echo json_encode($msg);exit;
         }
-        $ru    = new RoomUserModel();
-        $count = $ru->getCount(['room_id' => ['<>', $param['room_id']], 'uid' => $param['uid'], 'status' => ['not in', '4,10']]);
-        if ($count) {
+        $ru   = new RoomUserModel();
+        $room = $ru->getModel(['room_id' => ['<>', $param['room_id']], 'uid' => $param['uid']]);
+        if ($room['status'] !== 4) {
+            if ($room['status'] === 10) {
+                echo json_encode(['status' => 12, 'info' => '您已在该房间完成任务', 'date' => null]);exit;
+            }
             echo json_encode(['status' => 21, 'info' => '不能同时进两个房间', 'date' => null]);exit;
         }
         $po    = new PersonOrderModel();

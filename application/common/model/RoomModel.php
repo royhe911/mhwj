@@ -171,6 +171,8 @@ class RoomModel extends CommonModel
             $room = $this->getModel(['id' => $room_id]);
             if ($room['count'] === 1) {
                 $this->modify(['status' => 1, 'in_count' => 0], ['id' => $room_id]);
+                $mo = new MasterOrderModel();
+                $mo->modifyField('status', 0, ['room_id' => $room_id]);
             } elseif ($room['status'] === 5) {
                 $ru->modifyField('status', 4, ['room_id' => $room_id]);
                 $this->modifyField('status', 9, ['id' => $room_id]);
