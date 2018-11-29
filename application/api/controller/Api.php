@@ -1021,7 +1021,7 @@ class Api extends \think\Controller
             echo json_encode($msg);exit;
         }
         $uo    = new UserOrderModel();
-        $count = $uo->getCount(['room_id' => $param['room_id', 'uid' => $param['uid']], 'status' => 10]);
+        $count = $uo->getCount(['room_id' => $param['room_id'], 'uid' => $param['uid'], 'status' => 10]);
         if ($count) {
             echo json_encode(['status' => 12, 'info' => '您已完成该房间任务，详情请查看订单', 'date' => null]);exit;
         }
