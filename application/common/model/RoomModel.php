@@ -166,15 +166,12 @@ class RoomModel extends CommonModel
     {
         Db::startTrans();
         try {
+            $cu   = new ChatUserModel();
+            $ru   = new RoomUserModel();
             $room = $this->getModel(['id' => $room_id]);
             if ($room['count'] === 1) {
-                $this->modifyField('status', 1, ['id' => $room_id]);
-            } elseif ($room['status'] === 8) {
-                return 4;
-            }
-            $cu = new ChatUserModel();
-            $ru = new RoomUserModel();
-            if ($room['status'] === 5) {
+                $this->modify(['status' => 1, 'in_count' => 0], ['id' => $room_id]);
+            } elseif ($room['status'] === 5) {
                 $ru->modifyField('status', 4, ['room_id' => $room_id]);
                 $this->modifyField('status', 9, ['id' => $room_id]);
                 $cu->delByWhere(['room_id' => $room_id]);
