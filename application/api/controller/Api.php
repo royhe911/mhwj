@@ -335,6 +335,79 @@ class Api extends \think\Controller
     }
 
     /**
+     * 获取陪玩师详情
+     * @author 贺强
+     * @time   2018-11-29 18:51:43
+     * @param  UserModel $u UserModel 实例
+     */
+    public function get_master_info(UserModel $u)
+    {
+        $param = $this->param;
+        if (empty($param['id'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid    = $param['id'];
+        $master = $u->getModel(['id' => $uid], ['id', 'avatar', 'nickname']);
+        if ($master) {
+            // 查询陪玩师的接单数
+            $r     = new RoomModel();
+            $count = $r->getCount(['uid' => $uid]);
+            // 接单数
+            $master['number'] = 0;
+            if ($count) {
+                $master['number'] = $count;
+            }
+            // 查询计算陪玩师的好评率
+            $ue    = new UserEvaluateModel();
+            $count = $ue->getCount(['master_id' => $uid]);
+            $gcoun = $ue->getCount(['master_id' => $uid, 'score' => ['egt', 80]]);
+            $ratio = round($gcoun / $count * 100, 2);
+            if ($ratio > 0) {
+                $ratio .= '%';
+            }
+            // 评论数和好评率
+            $master['comment'] = $count;
+            $master['ratio']   = $ratio;
+            // 查询陪玩师的认证图
+            $ua   = new UserAttrModel();
+            $attr = $ua->getModel(['uid' => $master['id']]);
+            if (!empty($attr['level_url'])) {
+                $album = explode(',', $attr['level_url']);
+                if (!empty($album)) {
+                    foreach ($album as &$albm) {
+                        if (strpos($albm, 'http://') === false && strpos($albm, 'https://') === false) {
+                            $albm = config('WEBSITE') . $albm;
+                        }
+                    }
+                }
+                $master['album'] = $album;
+            }
+            // 查询陪玩师陪玩的游戏
+            $g    = new GameModel();
+            $game = $g->getModel(['id' => $attr['game_id']], ['name', 'url']);
+            if ($game) {
+                $master['gamename'] = $game['name'];
+                $gameurl            = $game['url'];
+                if (strpos($gameurl, 'http://') === false && strpos($gameurl, 'https://') === false) {
+                    $gameurl = config('WEBSITE') . $gameurl;
+                }
+                $master['gameurl'] = $gameurl;
+            }
+            // 查询陪玩师的游戏段位
+            $gc   = new GameConfigModel();
+            $conf = $gc->getModel(['game_id' => $attr['game_id'], 'para_id' => $attr['curr_para']], ['para_str']);
+            if ($conf) {
+                $master['para_str'] = $conf['para_str'];
+            }
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $master]);exit;
+        }
+        echo json_encode(['status' => 4, 'info' => '陪玩师不存在', 'data' => null]);exit;
+    }
+
+    /**
      * 获取游戏列表
      * @author 贺强
      * @time   2018-10-31 12:00:48
@@ -675,15 +748,15 @@ class Api extends \think\Controller
         } elseif (empty($param['count']) || intval($param['count']) < 2 || intval($param['count']) > 5) {
             $msg = ['status' => 5, 'info' => '房间人数只能是2-5人', 'data' => null];
         } elseif (empty($param['master_count'])) {
-            $msg = ['status' => 6, 'info' => '陪玩师人数不能为空', 'date' => null];
+            $msg = ['status' => 6, 'info' => '陪玩师人数不能为空', 'data' => null];
         } elseif (intval($param['master_count']) > 4) {
-            $msg = ['status' => 7, 'info' => '陪玩师人数过多', 'date' => null];
+            $msg = ['status' => 7, 'info' => '陪玩师人数过多', 'data' => null];
         } elseif (intval($param['count']) + intval($param['master_count']) > 5) {
-            echo json_encode(['status' => 12, 'info' => '房间总人数错误', 'date' => null]);
+            echo json_encode(['status' => 12, 'info' => '房间总人数错误', 'data' => null]);
         } elseif (empty($param['price'])) {
             $msg = ['status' => 14, 'info' => '每局价格不能为空', 'data' => null];
         } elseif (floatval($param['price']) < 1 || floatval($param['price']) > 100) {
-            $msg = ['status' => 16, 'info' => '每局价格只能是1-100', 'date' => null];
+            $msg = ['status' => 16, 'info' => '每局价格只能是1-100', 'data' => null];
         } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5) {
             $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
@@ -816,7 +889,7 @@ class Api extends \think\Controller
         if (!empty($param['is_share']) && intval($param['is_share']) === 1) {
             $state = $this->come_in_room(true);
             if ($state !== true) {
-                echo json_encode(['status' => $state, 'info' => '进入房间失败', 'date' => null]);exit;
+                echo json_encode(['status' => $state, 'info' => '进入房间失败', 'data' => null]);exit;
             }
         }
         if (empty($param['room_id'])) {
@@ -831,7 +904,7 @@ class Api extends \think\Controller
         $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status room_status');
         if ($room) {
             if ($room['room_status'] === 10) {
-                echo json_encode(['status' => 3, 'info' => '游戏已完成', 'date' => null]);exit;
+                echo json_encode(['status' => 3, 'info' => '游戏已完成', 'data' => null]);exit;
             }
             if ($room['room_status'] === 9) {
                 echo json_encode(['status' => 5, 'info' => '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还', 'data' => null]);exit;
@@ -936,29 +1009,29 @@ class Api extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['room_id'])) {
-            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
         } elseif (empty($param['status'])) {
-            $msg = ['status' => 3, 'info' => '要修改状态不能为空', 'date' => null];
+            $msg = ['status' => 3, 'info' => '要修改状态不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $room = $r->getModel(['id' => $param['room_id']]);
         if ($room['status'] === 5) {
-            echo json_encode(['status' => 7, 'info' => '不能重复开始', 'date' => null]);exit;
+            echo json_encode(['status' => 7, 'info' => '不能重复开始', 'data' => null]);exit;
         }
         $status = intval($param['status']);
         $ru     = new RoomUserModel();
         if ($status === 5) {
             $count = $ru->getCount(['room_id' => $param['room_id'], 'status' => 0]);
             if ($count) {
-                echo json_encode(['status' => 6, 'info' => '还有玩家未准备，不能开始', 'date' => null]);exit;
+                echo json_encode(['status' => 6, 'info' => '还有玩家未准备，不能开始', 'data' => null]);exit;
             }
         }
         $mo = new MasterOrderModel();
         if ($status === 8) {
             if ($room['status'] !== 6) {
-                echo json_encode(['status' => 7, 'info' => '还有玩家未支付，不能开车', 'date' => null]);exit;
+                echo json_encode(['status' => 7, 'info' => '还有玩家未支付，不能开车', 'data' => null]);exit;
             }
             $morder = $mo->getModel(['room_id' => $param['room_id']]);
             $rm     = new RoomMasterModel();
@@ -988,13 +1061,13 @@ class Api extends \think\Controller
         }
         $res = $r->modifyField('status', $status, ['id' => $param['room_id']]);
         if ($res === false) {
-            echo json_encode(['status' => 40, 'info' => '修改失败', 'date' => null]);exit;
+            echo json_encode(['status' => 40, 'info' => '修改失败', 'data' => null]);exit;
         }
         $mo->modifyField('status', $status, ['room_id' => $param['room_id']]);
         if ($status === 5) {
             $ru->modifyField('status', 5, ['room_id' => $param['room_id']]);
         }
-        echo json_encode(['status' => 0, 'info' => '修改成功', 'date' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
     }
 
     /**
@@ -1015,7 +1088,7 @@ class Api extends \think\Controller
             $msg = ['status' => 20, 'info' => '用户ID不能为空', 'data' => null];
         } elseif (empty($param['type'])) {
             $res = 30;
-            $msg = ['status' => 30, 'info' => '用户类型不能为空', 'date' => null];
+            $msg = ['status' => 30, 'info' => '用户类型不能为空', 'data' => null];
         }
         if (!empty($msg) && !$is_share) {
             echo json_encode($msg);exit;
@@ -1023,17 +1096,17 @@ class Api extends \think\Controller
         $uo    = new UserOrderModel();
         $count = $uo->getCount(['room_id' => $param['room_id'], 'uid' => $param['uid'], 'status' => 10]);
         if ($count) {
-            echo json_encode(['status' => 12, 'info' => '您已完成该房间任务，详情请查看订单', 'date' => null]);exit;
+            echo json_encode(['status' => 12, 'info' => '您已完成该房间任务，详情请查看订单', 'data' => null]);exit;
         }
         $ru    = new RoomUserModel();
         $count = $ru->getCount(['room_id' => ['<>', $param['room_id']], 'uid' => $param['uid'], 'status' => ['not in', '4,10']]);
         if ($count) {
-            echo json_encode(['status' => 21, 'info' => '不能同时进两个房间', 'date' => null]);exit;
+            echo json_encode(['status' => 21, 'info' => '不能同时进两个房间', 'data' => null]);exit;
         }
         $po    = new PersonOrderModel();
         $count = $po->getCount(['uid' => $param['uid'], 'status' => ['in', '1,6,7']]);
         if ($count) {
-            echo json_encode(['status' => 22, 'info' => '您有订制订单未完成，请先完成订制订单', 'date' => null]);exit;
+            echo json_encode(['status' => 22, 'info' => '您有订制订单未完成，请先完成订制订单', 'data' => null]);exit;
         }
         $r   = new RoomModel();
         $res = $r->in_room($param);
@@ -1076,10 +1149,10 @@ class Api extends \think\Controller
         if (!empty($rusr)) {
             // 房主踢人参数
             if (!empty($param['is_kicking']) && intval($param['is_kicking']) === 1 && $rusr['status'] !== 0) {
-                echo json_encode(['status' => 22, 'info' => '该用户已准备，不能踢', 'date' => null]);exit;
+                echo json_encode(['status' => 22, 'info' => '该用户已准备，不能踢', 'data' => null]);exit;
             }
             if ($rusr['status'] === 6) {
-                echo json_encode(['status' => 23, 'info' => '您已付款，不能退出', 'date' => null]);exit;
+                echo json_encode(['status' => 23, 'info' => '您已付款，不能退出', 'data' => null]);exit;
             }
         }
         $res = $r->quit_room($param['room_id'], $param['uid']);
@@ -1257,26 +1330,26 @@ class Api extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['master_id'])) {
-            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
         } elseif (empty($param['uid'])) {
-            $msg = ['status' => 3, 'info' => '玩家ID不能为空', 'date' => null];
+            $msg = ['status' => 3, 'info' => '玩家ID不能为空', 'data' => null];
         } elseif (empty($param['type'])) {
-            $msg = ['status' => 2, 'info' => '订单类型不能为空', 'date' => null];
+            $msg = ['status' => 2, 'info' => '订单类型不能为空', 'data' => null];
         } elseif (empty($param['order_id'])) {
-            $msg = ['status' => 4, 'info' => '订单ID不能为空', 'date' => null];
+            $msg = ['status' => 4, 'info' => '订单ID不能为空', 'data' => null];
         } elseif (empty($param['content'])) {
-            $msg = ['status' => 5, 'info' => '评论内容不能为空', 'date' => null];
+            $msg = ['status' => 5, 'info' => '评论内容不能为空', 'data' => null];
         } elseif (empty($param['score'])) {
-            $msg = ['status' => 7, 'info' => '评价分数不能为空', 'date' => null];
+            $msg = ['status' => 7, 'info' => '评价分数不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $res = $ue->add($param);
         if (!$res) {
-            echo json_encode(['status' => 40, 'info' => '评论失败', 'date' => null]);exit;
+            echo json_encode(['status' => 40, 'info' => '评论失败', 'data' => null]);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '评论成功', 'date' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '评论成功', 'data' => null]);exit;
     }
 
     /**
@@ -1294,9 +1367,9 @@ class Api extends \think\Controller
         $pagesize = 10;
         $list     = $u->getList($where, ['id,nickname,avatar'], "$page,$pagesize", $order);
         if (!$list) {
-            echo json_encode(['status' => 4, 'info' => '暂无数据', 'date' => null]);exit;
+            echo json_encode(['status' => 4, 'info' => '暂无数据', 'data' => null]);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**
@@ -1319,7 +1392,7 @@ class Api extends \think\Controller
         }
         $list = $r->getList($where, ['uid', 'count(*) c'], "$page,$pagesize", ['c' => 'desc'], 'uid');
         if (!$list) {
-            echo json_encode(['status' => 4, 'info' => '暂无数据', 'date' => null]);exit;
+            echo json_encode(['status' => 4, 'info' => '暂无数据', 'data' => null]);exit;
         }
         $uids  = array_column($list, 'uid');
         $u     = new UserModel();
@@ -1330,7 +1403,7 @@ class Api extends \think\Controller
                 $item = $users[$item['uid']];
             }
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**
@@ -1352,7 +1425,7 @@ class Api extends \think\Controller
         }
         $list = $ue->getList([], ['master_id', 'avg(score) score'], "$page,$pagesize", ['score' => 'desc'], 'master_id');
         if (!$list) {
-            echo json_encode(['status' => 4, 'info' => '暂无数据', 'date' => null]);exit;
+            echo json_encode(['status' => 4, 'info' => '暂无数据', 'data' => null]);exit;
         }
         $uids  = array_column($list, 'master_id');
         $u     = new UserModel();
@@ -1368,7 +1441,7 @@ class Api extends \think\Controller
                 $item['avatar']   = $master['avatar'];
             }
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
 }

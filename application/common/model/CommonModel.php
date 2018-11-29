@@ -160,7 +160,11 @@ class CommonModel extends Model
      */
     public function getCount($where = null, $group = null)
     {
-        $count = Db::table($this->table)->group($group)->where($where)->count();
+        $count = Db::table($this->table)
+            ->group($group)
+            ->where($where)
+            // ->fetchSql(true)
+            ->count();
         return $count;
     }
 

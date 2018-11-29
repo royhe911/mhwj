@@ -121,7 +121,7 @@ class Pay extends \think\Controller
         } else {
             $morder = $mo->getCount(['uid' => $param['uid'], 'room_id' => $param['room_id']]);
             if ($morder) {
-                $msg = ['status' => 3, 'info' => '不能重复下单', 'date' => null];
+                $msg = ['status' => 3, 'info' => '不能重复下单', 'data' => null];
             }
         }
         if (!empty($msg)) {
@@ -168,7 +168,7 @@ class Pay extends \think\Controller
         // 查询该玩家是否已下了订制订单
         $count = $po->getCount(['uid' => $param['uid'], 'status' => ['in', '1,6,7']]);
         if ($count) {
-            echo json_encode(['status' => 9, 'info' => '您已下了订制订单', 'date' => null]);exit;
+            echo json_encode(['status' => 9, 'info' => '您已下了订制订单', 'data' => null]);exit;
         }
         $uorder = $uo->getModel(['uid' => $param['uid'], 'room_id' => $param['room_id'], 'status' => ['<>', 3], 'status' => ['<>', 10]], ['order_num']);
         if ($count) {
@@ -206,11 +206,11 @@ class Pay extends \think\Controller
         // 调用微信预支付
         $pay_data = $this->wxpay($param['uid'], $order_num, $total_fee);
         if ($pay_data === false) {
-            $msg = ['status' => 5, 'info' => '玩家不存在', 'date' => null];
+            $msg = ['status' => 5, 'info' => '玩家不存在', 'data' => null];
         } elseif ($pay_data === 1) {
-            $msg = ['status' => 6, 'info' => '连接服务器失败', 'date' => null];
+            $msg = ['status' => 6, 'info' => '连接服务器失败', 'data' => null];
         } elseif ($pay_data === 2) {
-            $msg = ['status' => 7, 'info' => '预支付失败', 'date' => null];
+            $msg = ['status' => 7, 'info' => '预支付失败', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -320,7 +320,7 @@ class Pay extends \think\Controller
                 $pmo   = new PersonMasterOrderModel();
                 $pmord = $pmo->getModel(['order_id' => $uorder['id']]);
                 if (!$pmord) {
-                    echo json_encode(['status' => 5, 'info' => '订单没有被接，不能完成', 'date' => null]);exit;
+                    echo json_encode(['status' => 5, 'info' => '订单没有被接，不能完成', 'data' => null]);exit;
                 }
                 $master_id = $pmord['master_id'];
             }
@@ -374,11 +374,11 @@ class Pay extends \think\Controller
         // 查询譔下单人是否已在房间里
         $count = $ru->getCount(['uid' => $param['uid'], 'status' => ['not in', '4,10']]);
         if ($count) {
-            echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'date' => null]);exit;
+            echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
         }
         $count = $po->getCount(['uid' => $param['uid'], 'status' => ['in', '1,6,7']]);
         if ($count) {
-            echo json_encode(['status' => 11, 'info' => '您有订单未完成', 'date' => null]);exit;
+            echo json_encode(['status' => 11, 'info' => '您有订单未完成', 'data' => null]);exit;
         }
         $order_num            = get_millisecond();
         $param['order_num']   = $order_num;
@@ -394,11 +394,11 @@ class Pay extends \think\Controller
         // 调用微信预支付
         $pay_data = $this->wxpay($param['uid'], $order_num, $total_fee);
         if ($pay_data === false) {
-            $msg = ['status' => 5, 'info' => '玩家不存在', 'date' => null];
+            $msg = ['status' => 5, 'info' => '玩家不存在', 'data' => null];
         } elseif ($pay_data === 1) {
-            $msg = ['status' => 6, 'info' => '连接服务器失败', 'date' => null];
+            $msg = ['status' => 6, 'info' => '连接服务器失败', 'data' => null];
         } elseif ($pay_data === 2) {
-            $msg = ['status' => 7, 'info' => '预支付失败', 'date' => null];
+            $msg = ['status' => 7, 'info' => '预支付失败', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -464,28 +464,28 @@ class Pay extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['order_id'])) {
-            $msg = ['status' => 1, 'info' => '订单ID不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '订单ID不能为空', 'data' => null];
         }
         if (empty($param['uid'])) {
-            $msg = ['status' => 2, 'info' => '下单人ID不能为空', 'date' => null];
+            $msg = ['status' => 2, 'info' => '下单人ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $count = $po->getCount(['id' => $param['order_id'], 'uid' => $param['uid']]);
         if (!$count) {
-            echo json_encode(['status' => 4, 'info' => '非法操作', 'date' => null]);exit;
+            echo json_encode(['status' => 4, 'info' => '非法操作', 'data' => null]);exit;
         }
         $pmo   = new PersonMasterOrderModel();
         $count = $pmo->getCount(['order_id' => $param['order_id']]);
         if ($count) {
-            echo json_encode(['status' => 3, 'info' => '订单已被抢不能取消', 'date' => null]);exit;
+            echo json_encode(['status' => 3, 'info' => '订单已被抢不能取消', 'data' => null]);exit;
         }
         $res = $po->modifyField('status', 3, ['id' => $param['order_id']]);
         if (!$res) {
-            echo json_encode(['status' => 5, 'info' => '取消失败', 'date' => null]);exit;
+            echo json_encode(['status' => 5, 'info' => '取消失败', 'data' => null]);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '取消成功', 'date' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '取消成功', 'data' => null]);exit;
     }
 
     /**
@@ -498,14 +498,14 @@ class Pay extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['order_num'])) {
-            $msg = ['status' => 1, 'info' => '订单号不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $uorder = $uo->getModel(['order_num' => $param['order_num']]);
         if (!$uorder) {
-            echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+            echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
         }
         // 调用微信支付接口进行支付
         //
@@ -517,7 +517,7 @@ class Pay extends \think\Controller
         }
         $res = $uo->pay_money($uorder);
         if ($res !== true) {
-            echo json_encode(['status' => $res, 'info' => '支付失败', 'date' => null]);exit;
+            echo json_encode(['status' => $res, 'info' => '支付失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '支付成功', 'data' => ['order_id' => $uorder['id']]]);exit;
     }
@@ -540,7 +540,7 @@ class Pay extends \think\Controller
         }
         $count = $po->getCount(['order_num' => $param['order_num'], 'addtime' => ['lt', time() - 300]]);
         if ($count) {
-            echo json_encode(['status' => 3, 'info' => '订单已过期', 'date' => null]);exit;
+            echo json_encode(['status' => 3, 'info' => '订单已过期', 'data' => null]);exit;
         }
         // 调用微信支付接口进行支付
         //
@@ -636,7 +636,7 @@ class Pay extends \think\Controller
         $u     = new UserModel();
         $count = $u->getCount(['id' => $param['master_id'], 'type' => 2, 'status' => 8]);
         if (!$count) {
-            echo json_encode(['status' => 6, 'info' => '您还未认证成为陪玩师，请先认证', 'date' => null]);exit;
+            echo json_encode(['status' => 6, 'info' => '您还未认证成为陪玩师，请先认证', 'data' => null]);exit;
         }
         $po     = new PersonOrderModel();
         $porder = $po->getModel(['id' => $param['order_id']]);
@@ -648,7 +648,7 @@ class Pay extends \think\Controller
         $ua    = new UserAttrModel();
         $count = $ua->getCount($ord_where);
         if (!$count) {
-            echo json_encode(['status' => 7, 'info' => '您还未认证该游戏的陪玩类型', 'date' => null]);exit;
+            echo json_encode(['status' => 7, 'info' => '您还未认证该游戏的陪玩类型', 'data' => null]);exit;
         }
         $pmcount = $pmo->getCount(['order_id' => $param['order_id']]);
         if ($pmcount) {
@@ -685,7 +685,7 @@ class Pay extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['master_id'])) {
-            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -740,7 +740,7 @@ class Pay extends \think\Controller
                 }
             }
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**
@@ -754,7 +754,7 @@ class Pay extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['master_id'])) {
-            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -805,7 +805,7 @@ class Pay extends \think\Controller
                 }
             }
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**
@@ -867,7 +867,7 @@ class Pay extends \think\Controller
                 }
             }
         }
-        $msg = ['status' => 0, 'info' => '获取成功', 'date' => $list];
+        $msg = ['status' => 0, 'info' => '获取成功', 'data' => $list];
         echo json_encode($msg);exit;
     }
 
@@ -881,14 +881,14 @@ class Pay extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['order_num'])) {
-            $msg = ['status' => 1, 'info' => '订单号不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $porder = $po->getModel(['order_num' => $param['order_num']]);
         if (!$porder) {
-            echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+            echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
         }
         if (!empty($porder['addtime'])) {
             $porder['addtime'] = date('Y-m-d H:i:s', $porder['addtime']);
@@ -932,7 +932,7 @@ class Pay extends \think\Controller
             $comment['user_avatar']   = $user['avatar'];
         }
         $porder['comment'] = $comment;
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $porder]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $porder]);exit;
     }
 
     /**
@@ -945,14 +945,14 @@ class Pay extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['order_num'])) {
-            $msg = ['status' => 1, 'info' => '订单号不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $uorder = $uo->getModel(['order_num' => $param['order_num']]);
         if (!$uorder) {
-            echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+            echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
         }
         if (!empty($uorder['addtime'])) {
             $uorder['addtime'] = date('Y-m-d H:i:s', $uorder['addtime']);
@@ -1001,7 +1001,7 @@ class Pay extends \think\Controller
             $comment['user_avatar']   = $user['avatar'];
         }
         $uorder['comment'] = $comment;
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $uorder]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $uorder]);exit;
     }
 
     /**
@@ -1014,14 +1014,14 @@ class Pay extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['order_num'])) {
-            $msg = ['status' => 1, 'info' => '订单号不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $morder = $mo->getModel(['order_num' => $param['order_num']]);
         if (!$morder) {
-            echo json_encode(['status' => 3, 'info' => '订单不存在', 'date' => null]);exit;
+            echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
         }
         $r    = new RoomModel();
         $room = $r->getModel(['id' => $morder['room_id']]);
@@ -1062,7 +1062,7 @@ class Pay extends \think\Controller
         } else {
             $morder['play_type'] = '娱乐陪玩';
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $morder]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $morder]);exit;
     }
 
     /**
@@ -1075,7 +1075,7 @@ class Pay extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['uid'])) {
-            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -1093,7 +1093,7 @@ class Pay extends \think\Controller
                 }
             }
         }
-        $msg = ['status' => 0, 'info' => '获取成功', 'date' => $list];
+        $msg = ['status' => 0, 'info' => '获取成功', 'data' => $list];
         echo json_encode($msg);exit;
     }
 
@@ -1107,7 +1107,7 @@ class Pay extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['uid'])) {
-            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -1142,7 +1142,7 @@ class Pay extends \think\Controller
                 }
             }
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**
@@ -1180,7 +1180,7 @@ class Pay extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['uid'])) {
-            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'date' => null];
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -1218,7 +1218,7 @@ class Pay extends \think\Controller
         if (empty($user['money'])) {
             $user['money'] = 0;
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => ['money' => $user['money'], 'log' => $list]]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['money' => $user['money'], 'log' => $list]]);exit;
     }
 
     /**

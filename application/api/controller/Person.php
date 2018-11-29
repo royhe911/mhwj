@@ -168,6 +168,6 @@ class Person extends \think\Controller
                 $item             = $user;
             }
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'date' => $list]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 }
