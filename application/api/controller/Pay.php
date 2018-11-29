@@ -309,30 +309,27 @@ class Pay extends \think\Controller
             $type = intval($param['type']);
         }
         unset($param['type']);
+        $status = intval($param['status']);
         if ($type === 2) {
             $uo = new PersonOrderModel();
-            if (intval($param['status']) === 10) {
-                $uord = $uo->getModel(['order_num' => $param['order_num']]);
-                if ($uord) {
-                    $pmo   = new PersonMasterOrderModel();
-                    $pmord = $pmo->getCount(['order_id' => $uord['id']]);
-                    if (!$pmord) {
-                        echo json_encode(['status' => 5, 'info' => '订单没有被接，不能完成', 'date' => null]);exit;
-                    }
+        }
+        $order_num = $param['order_num'];
+        $uorder    = $uo->getModel(['order_num' => $order_num]);
+        if ($uorder) {
+            if ($status === 10 && $type === 2) {
+                $pmo   = new PersonMasterOrderModel();
+                $pmord = $pmo->getCount(['order_id' => $uorder['id']]);
+                if (!$pmord) {
+                    echo json_encode(['status' => 5, 'info' => '订单没有被接，不能完成', 'date' => null]);exit;
                 }
             }
+            if (($status === 6 || $status === 10) && $type === 1) {
+                $ru = new RoomUserModel();
+                $ru->modifyField('status', $status, ['room_id' => $uorder['room_id']]);
+            }
         }
-        if (intval($param['status']) === 6) {
+        if ($status === 6) {
             $param['pay_time'] = time();
-        }
-        if ($type === 1) {
-            if (intval($param['status']) === 6 || intval($param['status']) === 10) {
-                $uorder = $uo->getModel(['order_num' => $param['order_num']], ['room_id']);
-                if ($uorder) {
-                    $ru = new RoomUserModel();
-                    $ru->modifyField('status', $param['status'], ['room_id' => $uorder['room_id']]);
-                }
-            }
         }
         $res = $uo->modify($param, ['order_num' => $param['order_num']]);
         if (!$res) {
