@@ -318,14 +318,16 @@ class Pay extends \think\Controller
         if ($uorder) {
             if ($status === 10 && $type === 2) {
                 $pmo   = new PersonMasterOrderModel();
-                $pmord = $pmo->getCount(['order_id' => $uorder['id']]);
+                $pmord = $pmo->getModel(['order_id' => $uorder['id']]);
                 if (!$pmord) {
                     echo json_encode(['status' => 5, 'info' => '订单没有被接，不能完成', 'date' => null]);exit;
                 }
+                $master_id = $pmord['master_id'];
             }
             if (($status === 6 || $status === 10) && $type === 1) {
                 $ru = new RoomUserModel();
                 $ru->modifyField('status', $status, ['room_id' => $uorder['room_id']]);
+                $master_id = $uorder['master_id'];
             }
         }
         if ($status === 6) {
@@ -334,6 +336,11 @@ class Pay extends \think\Controller
         $res = $uo->modify($param, ['order_num' => $param['order_num']]);
         if (!$res) {
             echo json_encode(['status' => $res, 'info' => '修改失败', 'data' => null]);exit;
+        }
+        if ($status === 10) {
+            $money = $uorder['order_money'] * config('RATIO');
+            $u     = new UserModel();
+            $u->increment('money', ['id' => $master_id], $money);
         }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
     }
