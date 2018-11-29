@@ -169,25 +169,33 @@ class RoomModel extends CommonModel
             $room = $this->getModel(['id' => $room_id]);
             if ($room['count'] === 1) {
                 $this->modifyField('status', 1, ['id' => $room_id]);
-            } elseif ($room['status'] === 8 || $room['status'] === 5) {
+            } elseif ($room['status'] === 8) {
                 return 4;
             }
+            $cu = new ChatUserModel();
             $ru = new RoomUserModel();
+            if ($room['status'] === 5) {
+                $ru->modifyField('status', 4, ['room_id' => $room_id]);
+                $this->modifyField('status', 9, ['id' => $room_id]);
+                $cu->delByWhere(['room_id' => $room_id]);
+                $c = new ChatModel();
+                $c->delByWhere(['room_id' => $room_id]);
+            } else {
+                // 一旦有人退出，其它人取消准备
+                $ru->modifyField('status', 0, ['room_id' => $room_id, 'status' => ['<>', 6]]);
+                // 退出后房间已进入的人数减 1
+                $res = $this->decrement('in_count', ['id' => $room_id]);
+                if (!$res) {
+                    Db::rollback();
+                    return 2;
+                }
+            }
             // 删除退出房间的玩家
             $res = $ru->delByWhere(['room_id' => $room_id, 'uid' => $uid]);
             if (!$res) {
                 Db::rollback();
                 return 1;
             }
-            // 一旦有人退出，其它人取消准备
-            $ru->modifyField('status', 0, ['room_id' => $room_id, 'status' => ['<>', 6]]);
-            // 退出后房间已进入的人数减 1
-            $res = $this->decrement('in_count', ['id' => $room_id]);
-            if (!$res) {
-                Db::rollback();
-                return 2;
-            }
-            $cu = new ChatUserModel();
             // 删除退出房间玩家的聊天信息
             $cu->delByWhere(['room_id' => $room_id, 'uid' => $uid]);
             Db::commit();
