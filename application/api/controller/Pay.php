@@ -698,6 +698,8 @@ class Pay extends \think\Controller
         $where = ['uid' => $param['master_id']];
         if (!empty($param['status'])) {
             $where['status'] = $param['status'];
+        } else {
+            $where['status'] = ['not in', '3,9'];
         }
         // 分页参数
         $page     = 1;

@@ -1,8 +1,9 @@
 <?php
 namespace app\common\crontab;
 
+use app\common\model\MasterOrderModel;
+use app\common\model\RoomMasterModel;
 use app\common\model\RoomModel;
-use app\common\model\RoomUserModel;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
@@ -42,6 +43,10 @@ class Room extends Command
                 $ru->modifyField('status', 4, ['room_id' => ['in', $ids]]);
                 $r = new RoomModel();
                 $r->modifyField('status', 9, ['id' => ['in', $ids]]);
+                $mo = new MasterOrderModel();
+                $mo->modifyField('status', 9, ['room_id' => ['in', $ids]]);
+                $rm = new RoomMasterModel();
+                $rm->delByWhere(['room_id' => ['in', $ids]]);
             }
         }
     }
