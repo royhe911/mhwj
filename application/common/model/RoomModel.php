@@ -168,9 +168,11 @@ class RoomModel extends CommonModel
         try {
             $room = $this->getModel(['id' => $room_id]);
             if ($room['status'] === 8) {
-                return 4;
-            } elseif ($room['count'] === 1) {
-                $this->modifyField('status', 1, ['id' => $room_id]);
+                if ($room['count'] === 1) {
+                    $this->modifyField('status', 1, ['id' => $room_id]);
+                } else {
+                    return 4;
+                }
             }
             $ru = new RoomUserModel();
             // 删除退出房间的玩家
