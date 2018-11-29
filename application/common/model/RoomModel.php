@@ -167,12 +167,10 @@ class RoomModel extends CommonModel
         Db::startTrans();
         try {
             $room = $this->getModel(['id' => $room_id]);
-            if ($room['status'] === 8) {
-                if ($room['count'] === 1) {
-                    $this->modifyField('status', 1, ['id' => $room_id]);
-                } else {
-                    return 4;
-                }
+            if ($room['count'] === 1) {
+                $this->modifyField('status', 1, ['id' => $room_id]);
+            } elseif ($room['status'] === 8 || $room['status'] === 5) {
+                return 4;
             }
             $ru = new RoomUserModel();
             // 删除退出房间的玩家

@@ -1121,6 +1121,8 @@ class Api extends \think\Controller
         $c->delByWhere(['room_id' => $param['room_id']]);
         $cu = new ChatUserModel();
         $cu->delByWhere(['room_id' => $param['room_id']]);
+        $mo = new MasterOrderModel();
+        $mo->delByWhere(['room_id' => $param['room_id']]);
         echo json_encode(['status' => 0, 'info' => '关闭成功', 'data' => null]);exit;
     }
 
