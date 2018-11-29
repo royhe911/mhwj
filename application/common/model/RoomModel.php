@@ -166,26 +166,13 @@ class RoomModel extends CommonModel
     {
         Db::startTrans();
         try {
-            $count = $this->getCount(['id' => $room_id, 'status' => 8]);
-            if ($count) {
+            $room = $this->getModel(['id' => $room_id]);
+            if ($room['status'] === 8) {
                 return 4;
+            } elseif ($room['count'] === 1) {
+                $this->modifyField('status', 1, ['id' => $room_id]);
             }
-            $this->modifyField('status', 5, ['id' => $room_id, 'status' => 6]);
             $ru = new RoomUserModel();
-            // 查询退出房间玩家信息
-            $user = $ru->getModel(['room_id' => $room_id, 'uid' => $uid]);
-            if ($user['status'] === 6) {
-                $mo  = new MasterOrderModel();
-                $res = $mo->decrement('complete_money', ['room_id' => $room_id], $user['total_money']);
-                if (!$res) {
-                    Db::rollback();
-                    return 3;
-                }
-                // 发起退款
-                //
-                //
-                // 发起退款
-            }
             // 删除退出房间的玩家
             $res = $ru->delByWhere(['room_id' => $room_id, 'uid' => $uid]);
             if (!$res) {

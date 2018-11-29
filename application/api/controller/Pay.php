@@ -1247,7 +1247,7 @@ class Pay extends \think\Controller
     private function wxpay($uid, $order_num, $total_fee = 1, $body = '游戏支付')
     {
         $u    = new UserModel();
-        $user = $u->getModel(['id' => $param['uid']], ['openid']);
+        $user = $u->getModel(['id' => $uid], ['openid']);
         if (!$user) {
             return false;
         }
