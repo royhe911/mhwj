@@ -200,45 +200,21 @@ class Pay extends \think\Controller
             $c     = new CouponModel();
             $c->add($odata);
         }
-        $u    = new UserModel();
-        $user = $u->getModel(['id' => $param['uid']], ['openid']);
-        $url  = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
-        // 统一下单参数构造
-        $nonce_str = get_random_str(15);
-        $body      = '游戏支付';
-        // $total_fee    = floatval($param['order_money']);
+        // $total_fee = floatval($param['order_money']);
         // $total_fee *= 100;
-        $total_fee    = 1;
-        $unifiedorder = array(
-            'appid'            => config('APPID_PLAYER'),
-            'body'             => $body,
-            'mch_id'           => config('PAY_MCHID'),
-            'nonce_str'        => $nonce_str,
-            'notify_url'       => config('WEBSITE') . '/api/pay/notify',
-            'openid'           => $user['openid'],
-            'out_trade_no'     => $order_num,
-            'spbill_create_ip' => get_client_ip(),
-            'total_fee'        => $total_fee,
-            'trade_type'       => 'JSAPI',
-        );
-        $unifiedorder['sign'] = $this->make_sign($unifiedorder);
-        // 数组转换为 xml
-        $xmldata = array2xml($unifiedorder);
-        $res     = $this->curl($url, $xmldata, false);
-        if (!$res) {
-            echo json_encode(['status' => 1, 'info' => '无法连接服务器', 'data' => null]);exit;
+        $total_fee = 1;
+        // 调用微信预支付
+        $pay_data = $this->wxpay($param['uid'], $order_num, $total_fee);
+        if ($pay_data === false) {
+            $msg = ['status' => 5, 'info' => '玩家不存在', 'date' => null];
+        } elseif ($pay_data === 1) {
+            $msg = ['status' => 6, 'info' => '连接服务器失败', 'date' => null];
+        } elseif ($pay_data === 2) {
+            $msg = ['status' => 7, 'info' => '预支付失败', 'date' => null];
         }
-        $res = xml2array($res);
-        if (strval($res['return_code']) == 'FAIL') {
-            echo json_encode(['status' => 3, 'info' => $res['return_msg'], 'data' => null]);exit;
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
         }
-        if (!empty($res['result_code']) && strval($res['result_code']) == 'FAIL') {
-            echo json_encode(['status' => 2, 'info' => $res['err_code_des'], 'data' => null]);exit;
-        }
-        $pay_data = ['appId' => config('APPID_PLAYER'), 'nonceStr' => $res['nonce_str'], 'package' => 'prepay_id=' . $res['prepay_id'], 'signType' => 'MD5', 'timeStamp' => time()];
-        // 计算签名
-        $pay_data['paySign']   = $this->make_sign($pay_data);
-        $pay_data['order_num'] = $order_num;
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => $pay_data]);exit;
     }
 
@@ -408,7 +384,22 @@ class Pay extends \think\Controller
         if (!$res) {
             echo json_encode(['status' => 44, 'info' => '下单失败', 'data' => null]);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => ['order_num' => $order_num]]);exit;
+        // $total_fee    = floatval($param['order_money']);
+        // $total_fee *= 100;
+        $total_fee = 1;
+        // 调用微信预支付
+        $pay_data = $this->wxpay($param['uid'], $order_num, $total_fee);
+        if ($pay_data === false) {
+            $msg = ['status' => 5, 'info' => '玩家不存在', 'date' => null];
+        } elseif ($pay_data === 1) {
+            $msg = ['status' => 6, 'info' => '连接服务器失败', 'date' => null];
+        } elseif ($pay_data === 2) {
+            $msg = ['status' => 7, 'info' => '预支付失败', 'date' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => $pay_data]);exit;
     }
 
     /**
@@ -1242,6 +1233,61 @@ class Pay extends \think\Controller
         $stringA .= ('key=' . config('PRE_KEY'));
         $sign = strtoupper(md5($stringA));
         return $sign;
+    }
+
+    /**
+     * 微信支付
+     * @author 贺强
+     * @time   2018-11-29 11:08:11
+     * @param  integer $uid       用户ID
+     * @param  string  $order_num 本系统订单号
+     * @param  string  $body      商品描述
+     * @param  integer $total_fee 支付总金额
+     */
+    private function wxpay($uid, $order_num, $total_fee = 1, $body = '游戏支付')
+    {
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $param['uid']], ['openid']);
+        if (!$user) {
+            return false;
+        }
+        $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
+        // 统一下单参数构造
+        $nonce_str    = get_random_str(15);
+        $unifiedorder = array(
+            'appid'            => config('APPID_PLAYER'),
+            'body'             => $body,
+            'mch_id'           => config('PAY_MCHID'),
+            'nonce_str'        => $nonce_str,
+            'notify_url'       => config('WEBSITE') . '/api/pay/notify',
+            'openid'           => $user['openid'],
+            'out_trade_no'     => $order_num,
+            'spbill_create_ip' => get_client_ip(),
+            'total_fee'        => $total_fee,
+            'trade_type'       => 'JSAPI',
+        );
+        $unifiedorder['sign'] = $this->make_sign($unifiedorder);
+        // 数组转换为 xml
+        $xmldata = array2xml($unifiedorder);
+        $res     = $this->curl($url, $xmldata, false);
+        if (!$res) {
+            return 1;
+            echo json_encode(['status' => 1, 'info' => '无法连接服务器', 'data' => null]);exit;
+        }
+        $res = xml2array($res);
+        if (strval($res['return_code']) == 'FAIL') {
+            return 2;
+            echo json_encode(['status' => 3, 'info' => $res['return_msg'], 'data' => null]);exit;
+        }
+        if (!empty($res['result_code']) && strval($res['result_code']) == 'FAIL') {
+            return 2;
+            echo json_encode(['status' => 2, 'info' => $res['err_code_des'], 'data' => null]);exit;
+        }
+        $pay_data = ['appId' => config('APPID_PLAYER'), 'nonceStr' => $res['nonce_str'], 'package' => 'prepay_id=' . $res['prepay_id'], 'signType' => 'MD5', 'timeStamp' => time()];
+        // 计算签名
+        $pay_data['paySign']   = $this->make_sign($pay_data);
+        $pay_data['order_num'] = $order_num;
+        return $pay_data;
     }
 
 }
