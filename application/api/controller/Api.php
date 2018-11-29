@@ -19,6 +19,7 @@ use app\common\model\UserEvaluateModel;
 use app\common\model\UserInviteModel;
 use app\common\model\UserLoginLogModel;
 use app\common\model\UserModel;
+use app\common\model\UserOrderModel;
 use app\common\model\VericodeModel;
 use Qcloud\Sms\SmsSingleSender;
 
@@ -1019,12 +1020,14 @@ class Api extends \think\Controller
         if (!empty($msg) && !$is_share) {
             echo json_encode($msg);exit;
         }
-        $ru   = new RoomUserModel();
-        $room = $ru->getModel(['room_id' => ['<>', $param['room_id']], 'uid' => $param['uid']]);
-        if ($room['status'] !== 4) {
-            if ($room['status'] === 10) {
-                echo json_encode(['status' => 12, 'info' => '您已在该房间完成任务', 'date' => null]);exit;
-            }
+        $uo    = new UserOrderModel();
+        $count = $uo->getCount(['room_id' => $param['room_id'], 'status' => 10]);
+        if ($count) {
+            echo json_encode(['status' => 12, 'info' => '您已完成该房间任务，详情请查看订单', 'date' => null]);exit;
+        }
+        $ru    = new RoomUserModel();
+        $count = $ru->getCount(['room_id' => ['<>', $param['room_id']], 'uid' => $param['uid'], 'status' => ['not in', '4,10']]);
+        if ($count) {
             echo json_encode(['status' => 21, 'info' => '不能同时进两个房间', 'date' => null]);exit;
         }
         $po    = new PersonOrderModel();
