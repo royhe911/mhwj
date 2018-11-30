@@ -898,7 +898,8 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $porder = $po->getModel(['order_num' => $param['order_num']]);
+        $order_num = $param['order_num'];
+        $porder    = $po->getModel(['order_num' => $order_num]);
         if (!$porder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
         }
@@ -944,7 +945,23 @@ class Pay extends \think\Controller
             $comment['user_avatar']   = $user['avatar'];
         }
         $porder['comment'] = $comment;
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $porder]);exit;
+        // 订单未支付
+        $pay_data = null;
+        if ($porder['status'] === 1) {
+            $total_fee = $porder['order_money'] * 100;
+            $pay_data  = $this->wxpay($porder['uid'], $order_num, $total_fee);
+            if ($pay_data === false) {
+                $msg = ['status' => 5, 'info' => '玩家不存在', 'data' => null];
+            } elseif ($pay_data === 1) {
+                $msg = ['status' => 6, 'info' => '连接服务器失败', 'data' => null];
+            } elseif ($pay_data === 2) {
+                $msg = ['status' => 7, 'info' => '预支付失败', 'data' => null];
+            }
+            if (!empty($msg)) {
+                echo json_encode($msg);exit;
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['order' => $porder, 'pay_data' => $pay_data]]);exit;
     }
 
     /**
@@ -962,7 +979,8 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $uorder = $uo->getModel(['order_num' => $param['order_num']]);
+        $order_num = $param['order_num'];
+        $uorder    = $uo->getModel(['order_num' => $order_num]);
         if (!$uorder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
         }
@@ -1013,7 +1031,23 @@ class Pay extends \think\Controller
             $comment['user_avatar']   = $user['avatar'];
         }
         $uorder['comment'] = $comment;
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $uorder]);exit;
+        // 如果未支付
+        $pay_data = null;
+        if ($uorder['status'] === 1) {
+            $total_fee = $uorder['order_money'] * 100;
+            $pay_data  = $this->wxpay($uorder['uid'], $order_num, $total_fee);
+            if ($pay_data === false) {
+                $msg = ['status' => 5, 'info' => '玩家不存在', 'data' => null];
+            } elseif ($pay_data === 1) {
+                $msg = ['status' => 6, 'info' => '连接服务器失败', 'data' => null];
+            } elseif ($pay_data === 2) {
+                $msg = ['status' => 7, 'info' => '预支付失败', 'data' => null];
+            }
+            if (!empty($msg)) {
+                echo json_encode($msg);exit;
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['order' => $uorder, 'pay_data' => $pay_data]]);exit;
     }
 
     /**
@@ -1257,8 +1291,8 @@ class Pay extends \think\Controller
      * @time   2018-11-29 11:08:11
      * @param  integer $uid       用户ID
      * @param  string  $order_num 本系统订单号
-     * @param  string  $body      商品描述
      * @param  integer $total_fee 支付总金额
+     * @param  string  $body      商品描述
      */
     private function wxpay($uid, $order_num, $total_fee = 1, $body = '游戏支付')
     {
@@ -1288,16 +1322,15 @@ class Pay extends \think\Controller
         $res     = $this->curl($url, $xmldata, false);
         if (!$res) {
             return 1;
-            echo json_encode(['status' => 1, 'info' => '无法连接服务器', 'data' => null]);exit;
         }
         $res = xml2array($res);
         if (strval($res['return_code']) == 'FAIL') {
             return 2;
-            echo json_encode(['status' => 3, 'info' => $res['return_msg'], 'data' => null]);exit;
+            // var_dump($res['return_msg']);exit;
         }
         if (!empty($res['result_code']) && strval($res['result_code']) == 'FAIL') {
             return 2;
-            echo json_encode(['status' => 2, 'info' => $res['err_code_des'], 'data' => null]);exit;
+            // var_dump($res['err_code_des']);exit;
         }
         $pay_data = ['appId' => config('APPID_PLAYER'), 'nonceStr' => $res['nonce_str'], 'package' => 'prepay_id=' . $res['prepay_id'], 'signType' => 'MD5', 'timeStamp' => time()];
         // 计算签名
