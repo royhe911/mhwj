@@ -108,4 +108,23 @@ class Room extends Command
             $l->addLog($data);
         }
     }
+
+    /**
+     * 生成签名
+     * @author 贺强
+     * @time   2018-11-13 10:17:56
+     * @param  array  $arr 生成签名的数组
+     * @return string      返回生成的签名
+     */
+    private function make_sign($arr)
+    {
+        $stringA = '';
+        foreach ($arr as $key => $val) {
+            $stringA .= "{$key}={$val}&";
+        }
+        $stringA .= ('key=' . config('PRE_KEY'));
+        $sign = strtoupper(md5($stringA));
+        return $sign;
+    }
+
 }
