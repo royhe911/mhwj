@@ -11,6 +11,7 @@ use app\common\model\MasterOrderModel;
 use app\common\model\PersonMasterOrderModel;
 use app\common\model\PersonOrderModel;
 use app\common\model\PersonRoomModel;
+use app\common\model\RoomMasterModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
 use app\common\model\UserAttrModel;
@@ -347,8 +348,19 @@ class Pay extends \think\Controller
         }
         if ($status === 10) {
             $money = $uorder['order_money'] * config('RATIO');
+            $uids  = [$master_id];
+            if ($type === 1) {
+                $rm  = new RoomMasterModel();
+                $mss = $rm->getList(['room_id' => $uorder['room_id']], ['uid']);
+                if (!empty($mss)) {
+                    $uids = array_merge($uids, array_column($mss, 'uid'));
+                }
+            }
+            $money = round($money / count($uids), 2);
             $u     = new UserModel();
-            $u->increment('money', ['id' => $master_id], $money);
+            foreach ($uids as $uid) {
+                $u->increment('money', ['id' => $uid], $money);
+            }
         }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
     }
