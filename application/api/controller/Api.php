@@ -371,7 +371,7 @@ class Api extends \think\Controller
         $data['room']      = null;
         // 正在进行中的房间
         $r    = new RoomModel();
-        $room = $r->getModel(['uid' => $master_id, 'status' => ['in', '1,5,6,8']]);
+        $room = $r->getModel(['uid' => $master_id, 'status' => ['in', '0,1,5,6,8']]);
         if ($room) {
             $rmdt = ['room_id' => $room['id'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count']];
             // 正在进行中的房间
@@ -396,7 +396,7 @@ class Api extends \think\Controller
             echo json_encode($msg);exit;
         }
         $uid    = $param['id'];
-        $master = $u->getModel(['id' => $uid], ['id', 'avatar', 'nickname']);
+        $master = $u->getModel(['id' => $uid], ['id', 'avatar', 'nickname', 'introduce']);
         if ($master) {
             // 查询陪玩师的接单数
             $r     = new RoomModel();
@@ -422,6 +422,8 @@ class Api extends \think\Controller
             $master['comment'] = $count;
             $master['ratio']   = $ratio;
             // 查询陪玩师的认证图
+            $master['album'] = null;
+            // 取陪玩师属性
             $ua   = new UserAttrModel();
             $attr = $ua->getModel(['uid' => $master['id']]);
             if (!empty($attr['level_url'])) {
@@ -445,13 +447,19 @@ class Api extends \think\Controller
                     $gameurl = config('WEBSITE') . $gameurl;
                 }
                 $master['gameurl'] = $gameurl;
+            } else {
+                $master['gamename'] = '';
+                $master['gameurl']  = '';
             }
             // 查询陪玩师的游戏段位
             $gc   = new GameConfigModel();
             $conf = $gc->getModel(['game_id' => $attr['game_id'], 'para_id' => $attr['curr_para']], ['para_str']);
             if ($conf) {
                 $master['para_str'] = $conf['para_str'];
+            } else {
+                $master['para_str'] = '';
             }
+            $master['price'] = 4;
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $master]);exit;
         }
         echo json_encode(['status' => 4, 'info' => '陪玩师不存在', 'data' => null]);exit;

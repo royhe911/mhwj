@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use app\common\model\LogModel;
+use app\common\model\MasterOrderModel;
 use app\common\model\PersonOrderModel;
 use app\common\model\RefundModel;
 use app\common\model\RoomModel;
@@ -99,8 +100,13 @@ class Notify extends \think\Controller
             if ($type === 1) {
                 $ru = new RoomUserModel();
                 $ru->modifyField('status', 6, ['room_id' => $order['room_id'], 'uid' => $order['uid']]);
-                $r = new RoomModel();
-                $r->modifyField('status', 6, ['id' => $order['room_id']]);
+                $mo = new MasterOrderModel();
+                $mo->increment('complete_money', ['room_id' => $order['room_id']], $order['order_money']);
+                $morder = $mo->getModel(['room_id' => $order['room_id']], ['order_money', 'complete_money']);
+                if (!empty($morder) && $morder['order_money'] === $morder['complete_money']) {
+                    $r = new RoomModel();
+                    $r->modifyField('status', 6, ['id' => $order['room_id']]);
+                }
             }
             if (!$res) {
                 $l->addLog(['type' => LogModel::TYPE_SAVEPAYDATA, 'content' => '入库失败，order_num' . $order_num]);
