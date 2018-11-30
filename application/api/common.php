@@ -139,3 +139,32 @@ function xml2array($xml)
     $values = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
     return $values;
 }
+
+/**
+ * 格式化数字
+ * @author 贺强
+ * @time   2018-11-30 16:12:39
+ * @param  integer $num 要格式化的数字
+ * @return string       返回格式化后的字符串
+ */
+function format_number($num = 0)
+{
+    if ($num > 100000000) {
+        $num /= 100000000;
+        return round($num, 2) . '亿';
+    } elseif ($num > 10000000) {
+        $num /= 10000000;
+        return round($num, 2) . '千万';
+    } elseif ($num > 1000000) {
+        $num /= 1000000;
+        return round($num, 2) . '百万';
+    } elseif ($num > 100000) {
+        $num /= 100000;
+        return round($num, 2) . '十万';
+    } elseif ($num > 10000) {
+        $num /= 10000;
+        return round($num, 2) . '万';
+    } else {
+        return $num;
+    }
+}

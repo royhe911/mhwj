@@ -360,6 +360,7 @@ class Pay extends \think\Controller
             $u     = new UserModel();
             foreach ($uids as $uid) {
                 $u->increment('money', ['id' => $uid], $money);
+                $u->increment('acc_money', ['id' => $uid], $money);
             }
         }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;

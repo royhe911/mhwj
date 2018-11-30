@@ -10,6 +10,7 @@ use app\common\model\GameModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
+use app\common\model\PersonMasterOrderModel;
 use app\common\model\PersonOrderModel;
 use app\common\model\RoomMasterModel;
 use app\common\model\RoomModel;
@@ -335,6 +336,51 @@ class Api extends \think\Controller
     }
 
     /**
+     * 陪玩师成绩
+     * @author 贺强
+     * @time   2018-11-30 14:45:56
+     */
+    public function get_master_count()
+    {
+        $param = $this->param;
+        if (empty($param['master_id'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $master_id = $param['master_id'];
+        // 今日接单数
+        $data  = [];
+        $start = strtotime(date('Y-m-d'));
+        $end   = strtotime(date('Y-m-d', strtotime('+1 day')));
+        $phere = ['master_id' => $master_id, 'addtime' => ['between', [$start, $end]]];
+        $pmo   = new PersonMasterOrderModel();
+        // 订制订单数
+        $pcount = $pmo->getCount($phere);
+        $rhere  = ['uid' => $master_id, 'addtime' => ['between', [$start, $end]]];
+        $r      = new RoomModel();
+        $rcount = $r->getCount($rhere);
+        // 今日接单数
+        $data['count'] = $pcount + $rcount;
+        // 累计收益
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $master_id]);
+        // 累计收益
+        $data['acc_money'] = $user['acc_money'];
+        $data['room']      = null;
+        // 正在进行中的房间
+        $r    = new RoomModel();
+        $room = $r->getModel(['uid' => $master_id, 'status' => ['in', '1,5,6,8']]);
+        if ($room) {
+            $rmdt = ['room_id' => $room['id'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count']];
+            // 正在进行中的房间
+            $data['room'] = $rmdt;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
+    }
+
+    /**
      * 获取陪玩师详情
      * @author 贺强
      * @time   2018-11-29 18:51:43
@@ -544,6 +590,22 @@ class Api extends \think\Controller
             $msg = ['status' => 4, 'info' => '暂无技能', 'data' => null];
         }
         echo json_encode($msg);exit;
+    }
+
+    /**
+     * 获取游戏大段位
+     * @author 贺强
+     * @time   2018-11-30 14:28:15
+     * @param  GameConfigModel $gc GameConfigModel 实例
+     */
+    public function get_game_para(GameConfigModel $gc)
+    {
+        $param = $this->param;
+        if (empty($param['game_id'])) {
+            echo json_encode(['status' => 1, 'info' => '游戏ID不能为空', 'data' => null]);exit;
+        }
+        $where = ['game_id' => $param['game_id']];
+        $list  = $gc->getList($where, ['game_id', 'para', 'para_des'], 'para', 'para');
     }
 
     /**
@@ -1369,9 +1431,11 @@ class Api extends \think\Controller
         $order    = ['contribution' => 'desc'];
         $page     = 1;
         $pagesize = 10;
-        $list     = $u->getList($where, ['id,nickname,avatar'], "$page,$pagesize", $order);
-        if (!$list) {
-            echo json_encode(['status' => 4, 'info' => '暂无数据', 'data' => null]);exit;
+        $list     = $u->getList($where, ['id', 'nickname', 'avatar', 'contribution score'], "$page,$pagesize", $order);
+        if ($list) {
+            foreach ($list as &$item) {
+                $item['score'] = format_number($item['score']);
+            }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
@@ -1394,17 +1458,18 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $r->getList($where, ['uid', 'count(*) c'], "$page,$pagesize", ['c' => 'desc'], 'uid');
-        if (!$list) {
-            echo json_encode(['status' => 4, 'info' => '暂无数据', 'data' => null]);exit;
-        }
-        $uids  = array_column($list, 'uid');
-        $u     = new UserModel();
-        $users = $u->getList(['id' => ['in', $uids]], ['id master_id', 'nickname', 'avatar']);
-        $users = array_column($users, null, 'master_id');
-        foreach ($list as &$item) {
-            if (!empty($users[$item['uid']])) {
-                $item = $users[$item['uid']];
+        $list = $r->getList($where, ['uid', 'sum(num) score'], "$page,$pagesize", ['score' => 'desc'], 'uid');
+        if (!empty($list)) {
+            $uids  = array_column($list, 'uid');
+            $u     = new UserModel();
+            $users = $u->getList(['id' => ['in', $uids]], ['id master_id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'master_id');
+            foreach ($list as &$item) {
+                if (!empty($users[$item['uid']])) {
+                    $score         = $item['score'];
+                    $item          = $users[$item['uid']];
+                    $item['score'] = $score;
+                }
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
@@ -1428,21 +1493,23 @@ class Api extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $list = $ue->getList([], ['master_id', 'avg(score) score'], "$page,$pagesize", ['score' => 'desc'], 'master_id');
-        if (!$list) {
-            echo json_encode(['status' => 4, 'info' => '暂无数据', 'data' => null]);exit;
-        }
-        $uids  = array_column($list, 'master_id');
-        $u     = new UserModel();
-        $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
-        $users = array_column($users, null, 'id');
-        foreach ($list as &$item) {
-            $item['score'] = rtrim($item['score'], '0');
-            $item['score'] = rtrim($item['score'], '.');
-            if (!empty($users[$item['master_id']])) {
-                $master = $users[$item['master_id']];
-                // 取得陪玩师昵称和头像
-                $item['nickname'] = $master['nickname'];
-                $item['avatar']   = $master['avatar'];
+        if (!empty($list)) {
+            $uids  = array_column($list, 'master_id');
+            $u     = new UserModel();
+            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
+            foreach ($list as &$item) {
+                $item['score'] = rtrim($item['score'], '0');
+                $item['score'] = rtrim($item['score'], '.');
+                if (!empty($users[$item['master_id']])) {
+                    $master = $users[$item['master_id']];
+                    // 取得陪玩师昵称和头像
+                    $item['nickname'] = $master['nickname'];
+                    $item['avatar']   = $master['avatar'];
+                } else {
+                    $item['nickname'] = '';
+                    $item['avatar']   = '';
+                }
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;

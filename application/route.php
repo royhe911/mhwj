@@ -60,6 +60,7 @@ return [
     '/api/sync'           => 'api/Api/sync_userinfo', // 同步用户信息
     '/api/userinfo'       => 'api/Api/get_userinfo', // 获取用户信息
     '/api/masterinfo'     => 'api/Api/get_master_info', // 获取陪玩师信息
+    '/api/mastercount'    => 'api/Api/get_master_count', // 陪玩师成绩
     '/api/upload'         => 'admin/Upload/upload', // 上传文件
     '/api/games'          => 'api/Api/get_games', // 游戏列表
     '/api/gameconfig'     => 'api/Api/get_game_config', // 技能水平
