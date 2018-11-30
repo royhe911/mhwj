@@ -363,10 +363,14 @@ class Api extends \think\Controller
             // 查询计算陪玩师的好评率
             $ue    = new UserEvaluateModel();
             $count = $ue->getCount(['master_id' => $uid]);
-            $gcoun = $ue->getCount(['master_id' => $uid, 'score' => ['egt', 80]]);
-            $ratio = round($gcoun / $count * 100, 2);
-            if ($ratio > 0) {
-                $ratio .= '%';
+            if ($count > 0) {
+                $gcoun = $ue->getCount(['master_id' => $uid, 'score' => ['egt', 80]]);
+                $ratio = round($gcoun / $count * 100, 2);
+                if ($ratio > 0) {
+                    $ratio .= '%';
+                }
+            } else {
+                $ratio = 0;
             }
             // 评论数和好评率
             $master['comment'] = $count;

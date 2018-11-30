@@ -200,8 +200,16 @@ class Pay extends \think\Controller
             $c     = new CouponModel();
             $c->add($odata);
         }
-        // $total_fee = floatval($param['order_money']);
-        // $total_fee *= 100;
+        $last_money = floatval($param['order_money']);
+        if ($last_money > config('LOWERMONEY')) {
+            $c   = new CouponModel();
+            $cus = $c->getModel(['uid' => $param['uid'], 'status' => 0], ['id', 'money']);
+            if ($cus) {
+                $last_money -= $cus['money'];
+                $c->modifyField('status', 6, ['id' => $cus['id']]);
+            }
+        }
+        $total_fee = $last_money * 100;
         $total_fee = 1;
         // 调用微信预支付
         $pay_data = $this->wxpay($param['uid'], $order_num, $total_fee);
@@ -247,7 +255,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $uo->getList($where, ['order_num', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize", 'addtime desc');
+        $list = $uo->getList($where, ['order_num', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize", 'status,addtime desc');
         if ($list) {
             $u     = new UserModel();
             $user  = $u->getModel(['id' => $param['uid']]);
@@ -388,22 +396,7 @@ class Pay extends \think\Controller
         if (!$res) {
             echo json_encode(['status' => 44, 'info' => '下单失败', 'data' => null]);exit;
         }
-        // $total_fee    = floatval($param['order_money']);
-        // $total_fee *= 100;
-        $total_fee = 1;
-        // 调用微信预支付
-        $pay_data = $this->wxpay($param['uid'], $order_num, $total_fee);
-        if ($pay_data === false) {
-            $msg = ['status' => 5, 'info' => '玩家不存在', 'data' => null];
-        } elseif ($pay_data === 1) {
-            $msg = ['status' => 6, 'info' => '连接服务器失败', 'data' => null];
-        } elseif ($pay_data === 2) {
-            $msg = ['status' => 7, 'info' => '预支付失败', 'data' => null];
-        }
-        if (!empty($msg)) {
-            echo json_encode($msg);exit;
-        }
-        echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => $pay_data]);exit;
+        echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => ['order_num' => $order_num]]);exit;
     }
 
     /**
@@ -418,7 +411,8 @@ class Pay extends \think\Controller
         if (empty($param['order_num'])) {
             echo json_encode(['status' => 1, 'info' => '订单号不能为空', 'data' => null]);exit;
         }
-        $porder = $po->getModel(['order_num' => $param['order_num']], ['uid', 'order_num', 'game_id', 'region', 'para_id', 'num', 'price', 'type', 'addtime', 'order_money']);
+        $order_num = $param['order_num'];
+        $porder    = $po->getModel(['order_num' => $order_num], ['id', 'uid', 'order_num', 'game_id', 'region', 'para_id', 'num', 'price', 'type', 'addtime', 'order_money']);
         if (!$porder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
         }
@@ -427,6 +421,9 @@ class Pay extends \think\Controller
         }
         if ($porder['type'] === 1) {
             $porder['type'] = '普通订单';
+        }
+        if (!empty($porder['addtime'])) {
+            $porder['addtime'] = date('Y-m-d H:i:s', $porder['addtime']);
         }
         $g    = new GameModel();
         $game = $g->getModel(['id' => $porder['game_id']], ['name']);
@@ -441,7 +438,7 @@ class Pay extends \think\Controller
             $porder['para_str'] = $gameconf['para_str'];
         }
         $last_money = $porder['order_money'];
-        if ($porder['order_money'] > config('LOWERMONEY')) {
+        if ($last_money > config('LOWERMONEY')) {
             $c   = new CouponModel();
             $cus = $c->getModel(['uid' => $porder['uid'], 'status' => 0], ['id', 'money']);
             if ($cus) {
@@ -450,8 +447,23 @@ class Pay extends \think\Controller
             }
         }
         $porder['last_money'] = $last_money;
-        $po->modifyField('order_money', $last_money, ['order_num' => $param['order_num']]);
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $porder]);exit;
+        $po->modifyField('order_money', $last_money, ['order_num' => $order_num]);
+        // $total_fee    = floatval($last_money);
+        // $total_fee *= 100;
+        $total_fee = 1;
+        // 调用微信预支付
+        $pay_data = $this->wxpay($porder['uid'], $order_num, $total_fee);
+        if ($pay_data === false) {
+            $msg = ['status' => 5, 'info' => '玩家不存在', 'data' => null];
+        } elseif ($pay_data === 1) {
+            $msg = ['status' => 6, 'info' => '连接服务器失败', 'data' => null];
+        } elseif ($pay_data === 2) {
+            $msg = ['status' => 7, 'info' => '预支付失败', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['porder' => $porder, 'pay_data' => $pay_data]]);exit;
     }
 
     /**
@@ -837,7 +849,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $po->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize", 'addtime desc');
+        $list = $po->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize", 'status,addtime desc');
         if ($list) {
             $uids  = array_column($list, 'uid');
             $u     = new UserModel();
