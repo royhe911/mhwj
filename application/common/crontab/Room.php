@@ -52,10 +52,11 @@ class Room extends Command
                     $rm->delByWhere(['room_id' => ['in', $ids]]);
                     $uo = new UserOrderModel();
                     $uo->modifyField('status', 9, ['room_id' => ['in', $ids]]);
-                    $uords = $uo->getList(['room_id' => ['in', $ids]], ['uid', 'order_num', 'order_money']);
+                    $uords = $uo->getList(['room_id' => ['in', $ids]], ['uid', 'order_num', 'order_money', 'transaction_id']);
                     foreach ($uords as $uord) {
                         if (!empty($uord['transaction_id'])) {
-                            $this->exit_money(1, 1, $uord['transaction_id']);
+                            // 退款测试1分
+                            $this->exit_money($uord['order_num'], 1, 1, $uord['transaction_id']);
                         }
                     }
                 }
@@ -69,23 +70,22 @@ class Room extends Command
     /**
      * 退款
      * @author 贺强
-     * @time   2018-11-30 18:44:20
-     * @param  int    $total_fee      订单金额
-     * @param  int    $refund_fee     退款金额
-     * @param  string $transaction_id 微信订单号
+     * @time   2018-11-30 19:27:10
+     * @param  string  $out_trade_no   本系统订单号
+     * @param  integer $total_fee      订单总金额
+     * @param  integer $refund_fee     退款金额
+     * @param  string  $transaction_id 微信订单号
      */
-    public function exit_money($total_fee, $refund_fee, $transaction_id)
+    public function exit_money($out_trade_no = '', $total_fee = 0, $refund_fee = 0, $transaction_id = '')
     {
-        $nonce_str     = get_random_str(15);
-        $out_refund_no = get_millisecond(); // 退单号
-        // $total_fee      = $order['order_money'];
-        // $refund_fee     = $param['refund_fee']; // 退款金额
-        // $transaction_id = $order['transaction_id']; // 微信订单号
-        $refund = array(
-            'appid'          => config('APPID_PLAYER'),
-            'mch_id'         => config('PAY_MCHID'),
+        $appid         = 'wxe6f37de8e1e3225e';
+        $mchid         = 1519826271;
+        $nonce_str     = $this->get_random_str(15);
+        $out_refund_no = $this->get_millisecond(); // 退单号
+        $refund        = array(
+            'appid'          => $appid,
+            'mch_id'         => $mchid,
             'nonce_str'      => $nonce_str,
-            'notify_url'     => config('WEBSITE') . '/api/pay/r_notify',
             'out_refund_no'  => $out_refund_no,
             'out_trade_no'   => $out_trade_no,
             'refund_fee'     => $refund_fee, // 退款金额
@@ -94,12 +94,13 @@ class Room extends Command
         );
         $refund['sign'] = $this->make_sign($refund);
         // 数组转换为 xml
-        $xmldata     = array2xml($refund);
-        $url         = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
-        $res         = $this->curl($url, $xmldata, false);
-        $res         = xml2array($res);
+        $xmldata = $this->array2xml($refund);
+        $url     = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
+        $res     = $this->curl($url, $xmldata);
+        file_put_contents('/www/wwwroot/wwwdragontangcom/log/' . time() . 'A.log', $res);
+        $res         = $this->xml2array($res);
         $refund_desc = '房间销毁';
-        $data        = ['type' => $type, 'uid' => $uid, 'nonce_str' => $nonce_str, 'transaction_id' => $transaction_id, 'out_trade_no' => $out_trade_no, 'out_refund_no' => $out_refund_no, 'total_fee' => $total_fee, 'refund_fee' => $refund_fee, 'refund_desc' => $refund_desc, 'addtime' => time()];
+        $data        = ['type' => 1, 'uid' => $uid, 'nonce_str' => $nonce_str, 'transaction_id' => $transaction_id, 'out_trade_no' => $out_trade_no, 'out_refund_no' => $out_refund_no, 'total_fee' => $total_fee, 'refund_fee' => $refund_fee, 'refund_desc' => $refund_desc, 'addtime' => time()];
         $r           = new RefundModel();
         $res         = $r->add($data);
         if (!$res) {
@@ -118,13 +119,116 @@ class Room extends Command
      */
     private function make_sign($arr)
     {
+        $pre_key = '32292XXYJ629LRPWWLHM127XWNMDGDHL';
         $stringA = '';
         foreach ($arr as $key => $val) {
             $stringA .= "{$key}={$val}&";
         }
-        $stringA .= ('key=' . config('PRE_KEY'));
+        $stringA .= ('key=' . $pre_key);
         $sign = strtoupper(md5($stringA));
         return $sign;
+    }
+
+    /**
+     * 生成随机字符串
+     * @param  integer $num 生成字符串的长度
+     * @return string       返回生成的随机字符串
+     */
+    private function get_random_str($num = 8)
+    {
+        $pattern = 'AaZzBb0YyCc9XxDd8Ww7EeVvF6fUuG5gTtHhS4sIiRr3JjQqKkP2pLlO1oMmNn';
+        $str     = '';
+        for ($i = 0; $i < $num; $i++) {
+            $str .= $pattern{mt_rand(0, 35)}; //生成 php 随机数
+        }
+        return $str;
+    }
+
+    /**
+     * 获取毫秒数
+     */
+    private function get_millisecond()
+    {
+        list($microsecond, $time) = explode(' ', microtime()); //' '中间是一个空格
+        return (float) sprintf('%.0f', (floatval($microsecond) + floatval($time)) * 1000);
+    }
+
+    /**
+     * 数组转 xml
+     * @author 贺强
+     * @time   2018-11-13 15:03:03
+     * @param  array  $arr 被转换的数组
+     * @return string      返回转换后的 xml 字符串
+     */
+    private function array2xml($arr)
+    {
+        $xml = "<xml>";
+        foreach ($arr as $key => $val) {
+            $xml .= "<$key>$val</$key>";
+        }
+        $xml .= "</xml>";
+        return $xml;
+    }
+
+    /**
+     * xml 转换为数组
+     * @author 贺强
+     * @time   2018-11-13 15:12:04
+     * @param  string $xml 被转换的 xml
+     * @return array       返回转换后的数组
+     */
+    private function xml2array($xml)
+    {
+        libxml_disable_entity_loader(true);
+        $values = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+        return $values;
+    }
+
+    /**
+     * URL 请求
+     * @author 贺强
+     * @time   2018-10-30 12:13:06
+     * @param  string  $url     请求地址
+     * @param  string  $post    POST 数据
+     * @param  string  $charset 编码方式，默认utf8
+     * @return object           返回请求返回的数据
+     */
+    public function curl($url, $post = '', $charset = 'utf-8')
+    {
+        $keypath  = '/www/wwwroot/wwwdragontangcom/cert/apiclient_key.pem';
+        $certpath = '/www/wwwroot/wwwdragontangcom/cert/apiclient_cert.pem';
+        $ch       = curl_init();
+        //超时时间
+        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        //设置header
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        //要求结果为字符串且输出到屏幕上
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        //设置证书
+        //使用证书：cert 与 key 分别属于两个.pem文件
+        //默认格式为PEM，可以注释
+        curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'PEM');
+        curl_setopt($ch, CURLOPT_SSLCERT, $certpath);
+        //默认格式为PEM，可以注释
+        curl_setopt($ch, CURLOPT_SSLKEYTYPE, 'PEM');
+        curl_setopt($ch, CURLOPT_SSLKEY, $keypath);
+        //post提交方式
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        $data = curl_exec($ch);
+        //返回结果
+        if ($data) {
+            curl_close($ch);
+            return $data;
+        } else {
+            $error = curl_errno($ch);
+            echo "curl出错，错误码:$error" . "<br>";
+            curl_close($ch);
+            return false;
+        }
     }
 
 }

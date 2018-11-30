@@ -75,9 +75,7 @@ class Notify extends \think\Controller
     public function pay_notify()
     {
         $param = file_get_contents('php://input');
-        file_put_contents('/www/wwwroot/wwwdragontangcom/log/' . time() . '.log', $param);
         $param = xml2array($param);
-        file_put_contents('/www/wwwroot/wwwdragontangcom/log/' . time() . '12.log', json_encode($param));
         if ($param['result_code'] === 'SUCCESS') {
             $order_num = $param['out_trade_no'];
             $m         = new UserOrderModel();
@@ -106,6 +104,7 @@ class Notify extends \think\Controller
                 if (!empty($morder) && $morder['order_money'] === $morder['complete_money']) {
                     $r = new RoomModel();
                     $r->modifyField('status', 6, ['id' => $order['room_id']]);
+                    $mo->modifyField('status', 6, ['room_id' => $order['room_id']]);
                 }
             }
             if (!$res) {
