@@ -56,7 +56,7 @@ class Room extends Command
                     foreach ($uords as $uord) {
                         if (!empty($uord['transaction_id'])) {
                             // 退款测试1分
-                            $this->exit_money($uord['order_num'], 1, 1, $uord['transaction_id']);
+                            $this->exit_money($uord['order_num'], 1, 1, $uord['transaction_id'], $uord['uid']);
                         }
                     }
                 }
@@ -76,7 +76,7 @@ class Room extends Command
      * @param  integer $refund_fee     退款金额
      * @param  string  $transaction_id 微信订单号
      */
-    public function exit_money($out_trade_no = '', $total_fee = 0, $refund_fee = 0, $transaction_id = '')
+    public function exit_money($out_trade_no = '', $total_fee = 0, $refund_fee = 0, $transaction_id = '', $uid = 0)
     {
         $appid         = 'wxe6f37de8e1e3225e';
         $mchid         = 1519826271;
@@ -94,10 +94,9 @@ class Room extends Command
         );
         $refund['sign'] = $this->make_sign($refund);
         // 数组转换为 xml
-        $xmldata = $this->array2xml($refund);
-        $url     = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
-        $res     = $this->curl($url, $xmldata);
-        file_put_contents('/www/wwwroot/wwwdragontangcom/log/' . time() . 'A.log', $res);
+        $xmldata     = $this->array2xml($refund);
+        $url         = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
+        $res         = $this->curl($url, $xmldata);
         $res         = $this->xml2array($res);
         $refund_desc = '房间销毁';
         $data        = ['type' => 1, 'uid' => $uid, 'nonce_str' => $nonce_str, 'transaction_id' => $transaction_id, 'out_trade_no' => $out_trade_no, 'out_refund_no' => $out_refund_no, 'total_fee' => $total_fee, 'refund_fee' => $refund_fee, 'refund_desc' => $refund_desc, 'addtime' => time()];
