@@ -51,6 +51,11 @@ class Game extends \think\Controller
             } else {
                 $data['demo_url2'] = $param['demo_url2'];
             }
+            if (empty($param['demo_url3'])) {
+                return ['status' => 4, 'info' => '示例图片不能为空'];
+            } else {
+                $data['demo_url3'] = $param['demo_url3'];
+            }
             if (empty($param['sort'])) {
                 return ['status' => 4, 'info' => '排序不能为空'];
             } else {
@@ -156,6 +161,11 @@ class Game extends \think\Controller
                 return ['status' => 3, 'info' => '例图不能为空'];
             } else {
                 $data['demo_url2'] = $param['demo_url2'];
+            }
+            if (empty($param['demo_url3'])) {
+                return ['status' => 3, 'info' => '例图不能为空'];
+            } else {
+                $data['demo_url3'] = $param['demo_url3'];
             }
             if (empty($param['para_id_arr'])) {
                 return ['status' => 4, 'info' => '游戏段位不能为空'];

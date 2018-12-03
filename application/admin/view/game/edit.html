@@ -86,6 +86,20 @@
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
+                            <label class="col-sm-2 control-label">示例图片3</label>
+                            <div class="col-sm-10">
+                                <table width="100%">
+                                    <tr>
+                                        <td valign="top" width="120px"><input id="file_upload_demo3" name="file_upload_demo3" type="file"></td>
+                                        <td valign="top"><input class="btn btn-primary" type="button" data-action="upload_demo3" value="上传"></td>
+                                    </tr>
+                                    <tr><td colspan="2"><div id="progress_demo3"></div><input type="hidden" id="demo_url3" value="{$game.demo_url3}"></td></tr>
+                                    <tr><td colspan="2"><img id="preview_demo3" src="{$game.demo_url3}"></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
                             <label class="col-sm-2 control-label">排序</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="sort" value="{$game.sort}">
@@ -153,7 +167,7 @@
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'save') {
-                var identify = $('#identify'), name = $('#name'), urll = $('#urll').val(), demo_url1 = $('#demo_url1').val(), demo_url2 = $('#demo_url2').val();
+                var identify = $('#identify'), name = $('#name'), urll = $('#urll').val(), demo_url1 = $('#demo_url1').val(), demo_url2 = $('#demo_url2').val(), demo_url3 = $('#demo_url3').val();
                 if (identify.val() == '') {
                     layer.msg('游戏标识不能为空', {icon: 5, time: 1000}, function(){identify.focus()});
                     return false
@@ -171,6 +185,10 @@
                     return false
                 }
                 if (demo_url2 == '') {
+                    layer.msg('请上传示例图片', {icon: 5, time: 1000});
+                    return false
+                }
+                if (demo_url3 == '') {
                     layer.msg('请上传示例图片', {icon: 5, time: 1000});
                     return false
                 }
@@ -197,7 +215,7 @@
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
                     url: '/game/edit',
-                    data: {'id': {$game.id}, 'identify': identify.val(), 'name': name.val(), 'url': urll, 'demo_url1': demo_url1, 'demo_url2': demo_url2, 'sort': $('#sort').val(), 'paraids_arr': paraids_arr, 'para_id_arr': para_id_arr, 'para_str_arr': para_str_arr, 'del_ids': del_ids},
+                    data: {'id': {$game.id}, 'identify': identify.val(), 'name': name.val(), 'url': urll, 'demo_url1': demo_url1, 'demo_url2': demo_url2, 'demo_url3': demo_url3, 'sort': $('#sort').val(), 'paraids_arr': paraids_arr, 'para_id_arr': para_id_arr, 'para_str_arr': para_str_arr, 'del_ids': del_ids},
                     success: function(data){
                         if (data.status == 0) {
                             layer.msg(data.info, {icon: 6, time: 1000}, function(){location.href = '/game/list'});
@@ -223,6 +241,8 @@
                 $('#file_upload_demo1').uploadifive('upload')
             } else if ($action == 'upload_demo2') {
                 $('#file_upload_demo2').uploadifive('upload')
+            } else if ($action == 'upload_demo3') {
+                $('#file_upload_demo3').uploadifive('upload')
             }
         });
         $('#file_upload').uploadifive({
@@ -282,6 +302,26 @@
                 // data = eval('(' + data + ')');
                 data = JSON.parse(data);
                 $('#demo_url2').val(data.path);
+            }
+        });
+        $('#file_upload_demo3').uploadifive({
+            'auto'             : false,
+            'buttonText'       : '选择图片',
+            'queueID'          : 'progress_demo3',
+            'fileTypeDesc'     : 'Image Files',
+            'fileTypeExts'     : '*.jpg;*.gif;*.png',
+            'multi'            : false,
+            'removeCompleted'  : true,
+            'previewID'        : 'preview_demo3',
+            'formData'         : {
+                'timestamp' : '{$time}',
+                'token'     : '{$token}'
+            },
+            'uploadScript'     : '/upload',
+            'onUploadComplete' : function(file, data) {
+                // data = eval('(' + data + ')');
+                data = JSON.parse(data);
+                $('#demo_url3').val(data.path);
             }
         });
     });
