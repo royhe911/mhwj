@@ -624,6 +624,26 @@ class Api extends \think\Controller
     }
 
     /**
+     * 获取房间可选段位
+     * @author 贺强
+     * @time   2018-12-03 15:24:46
+     * @param  GameConfigModel $gc GameConfigModel 实例
+     */
+    public function get_room_para(GameConfigModel $gc)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            echo json_encode(['status' => 1, 'info' => '房间ID不能为空', 'data' => null]);exit;
+        }
+        $where = ['id' => $param['room_id']];
+        $r     = new RoomModel();
+        $room  = $r->getModel($where, ['game_id', 'para_min', 'para_max']);
+        $where = ['game_id' => $room['game_id'], 'para' => ['between', [$room['para_min'], $room['para_max']]]];
+        $list  = $gc->getList($where, ['para_str']);
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
      * 获取游戏技能
      * @author 贺强
      * @time   2018-11-01 09:31:43
@@ -926,10 +946,8 @@ class Api extends \think\Controller
             $gc     = new GameConfigModel();
             $gclist = $gc->getList(['game_id' => ['in', $game_ids]], ['game_id', 'para', 'para_des', 'para_id', 'para_str', 'price']);
             $gparr  = [];
-            $gcarr  = [];
             foreach ($gclist as $gci) {
                 $gparr[$gci['game_id']][$gci['para']]   = $gci['para_des'];
-                $gcarr[$gci['game_id']][$gci['para']][] = $gci['para_str'];
             }
             foreach ($list as &$item) {
                 if (!empty($users[$item['uid']])) {
@@ -949,11 +967,6 @@ class Api extends \think\Controller
                 } else {
                     $item['para_max_str'] = '';
                 }
-                $gcs = [];
-                for ($i = $item['para_min']; $i <= $item['para_max']; $i++) {
-                    $gcs = array_merge($gcs, $gcarr[$item['game_id']][$i]);
-                }
-                $item['para_str'] = $gcs;
                 if (!empty($attr_arr[$item['uid']]) && !empty($attr_arr[$item['uid']][$item['game_id']])) {
                     $item['winning'] = $attr_arr[$item['uid']][$item['game_id']];
                 } else {
