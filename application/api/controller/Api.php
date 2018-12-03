@@ -369,16 +369,16 @@ class Api extends \think\Controller
         // 累计收益
         $data['acc_money'] = $user['acc_money'];
         $data['order_num'] = '';
-        $data['room']      = null;
+        // $data['room']      = null;
         // 正在进行中的房间
         $r    = new RoomModel();
         $room = $r->getModel(['uid' => $master_id, 'status' => ['in', '0,1,5,6,8']]);
         if ($room) {
-            $mo     = new MasterOrderModel();
-            $morder = $mo->getModel(['room_id' => $room['id']]);
-            if ($morder) {
-                $data['order_num'] = $morder['order_num'];
-            }
+            // $mo     = new MasterOrderModel();
+            // $morder = $mo->getModel(['room_id' => $room['id']]);
+            // if ($morder) {
+            //     $data['order_num'] = $morder['order_num'];
+            // }
             $rmdt = ['room_id' => $room['id'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count']];
             // 正在进行中的房间
             $data['room'] = $rmdt;
@@ -1176,6 +1176,9 @@ class Api extends \think\Controller
         } elseif (empty($param['type'])) {
             $res = 30;
             $msg = ['status' => 30, 'info' => '用户类型不能为空', 'data' => null];
+        } elseif (intval($param['type']) === 1 && empty($param['para_str'])) {
+            $res = 40;
+            $msg = ['status' => 40, 'info' => '段位不能为空', 'data' => null];
         }
         if (!empty($msg) && !$is_share) {
             echo json_encode($msg);exit;
@@ -1206,6 +1209,8 @@ class Api extends \think\Controller
                 $msg = '房间人数已满';
             } elseif ($res === 4) {
                 $msg = '房间不存在';
+            } elseif ($res === 11) {
+                $msg = '游戏已结束';
             } elseif ($res === 12) {
                 $msg = '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还';
             }

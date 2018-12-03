@@ -1184,7 +1184,6 @@ class Pay extends \think\Controller
         // 分页参数
         $page     = 1;
         $pagesize = 10;
-        $param    = $this->param;
         if (!empty($param['page'])) {
             $page = $param['page'];
         }

@@ -98,14 +98,17 @@ class RoomModel extends CommonModel
             if ($data['status'] === 9) {
                 return 12;
             }
-            if (intval($param['type']) === 1) {
+            $type = intval($param['type']);
+            if ($type === 1) {
                 $ru    = new RoomUserModel();
                 $count = $ru->getCount(['room_id' => $data['id'], 'uid' => $param['uid']]);
                 if ($count) {
                     return true;
                 }
                 if ($data['in_count'] < $data['count']) {
-                    $in_data = ['room_id' => $data['id'], 'uid' => $param['uid'], 'addtime' => time(), 'price' => $data['price'], 'num' => $data['num'], 'total_money' => $data['price'] * $data['num']];
+                    $gc      = new GameConfigModel();
+                    $gconf   = $gc->getModel(['para_str' => $param['para_str']], ['price']);
+                    $in_data = ['room_id' => $data['id'], 'uid' => $param['uid'], 'addtime' => time(), 'price' => $gconf['price'], 'num' => $data['num'], 'total_money' => $gconf['price'] * $data['num']];
                     // 添加进入房间信息
                     $res = $ru->add($in_data);
                     if (!$res) {
@@ -122,15 +125,15 @@ class RoomModel extends CommonModel
                     Db::commit();
                     return true;
                 }
-            } elseif (intval($param['type']) === 2) {
-                $mu    = new RoomMasterModel();
-                $count = $mu->getCount(['room_id' => $data['id'], 'uid' => $param['uid']]);
+            } elseif ($type === 2) {
+                $rm    = new RoomMasterModel();
+                $count = $rm->getCount(['room_id' => $data['id'], 'uid' => $param['uid']]);
                 if ($count) {
                     return true;
                 }
                 if ($data['in_master_count'] < $data['master_count']) {
                     $in_data = ['room_id' => $data['id'], 'uid' => $param['uid'], 'addtime' => time()];
-                    $res     = $mu->add($in_data);
+                    $res     = $rm->add($in_data);
                     if (!$res) {
                         Db::rollback();
                         return 2;
@@ -150,6 +153,7 @@ class RoomModel extends CommonModel
             return 3;
         } catch (\Exception $e) {
             Db::rollback();
+            var_dump($e->getMessage());
             return 44;
         }
     }
