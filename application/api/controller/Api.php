@@ -954,6 +954,8 @@ class Api extends \think\Controller
         if ($list) {
             $uids     = array_column($list, 'uid');
             $game_ids = array_column($list, 'game_id');
+            $jd_count = $r->getList(['uid' => ['in', $uids]], ['count(*) c,uid']);
+            $jd_count = array_column($jd_count, 'c', 'uid');
             $u        = new UserModel();
             $users    = $u->getList(['is_delete' => 0, 'id' => ['in', $uids], 'type' => 2], 'id,nickname,avatar');
             $users    = array_column($users, null, 'id');
@@ -970,6 +972,11 @@ class Api extends \think\Controller
                 $gparr[$gci['game_id']][$gci['para']] = $gci['para_des'];
             }
             foreach ($list as &$item) {
+                if (!empty($jd_count[$item['uid']])) {
+                    $item['jd_count'] = $jd_count[$item['uid']];
+                } else {
+                    $item['jd_count'] = 0;
+                }
                 if (!empty($users[$item['uid']])) {
                     $item['nickname'] = $users[$item['uid']]['nickname'];
                     $item['avatar']   = $users[$item['uid']]['avatar'];
@@ -1207,14 +1214,20 @@ class Api extends \think\Controller
         $res   = true;
         if (empty($param['room_id'])) {
             $res = 10;
-            $msg = ['status' => 10, 'info' => '房间ID不能为空', 'data' => null];
-        } elseif (empty($param['uid'])) {
+            echo json_encode(['status' => 10, 'info' => '房间ID不能为空', 'data' => null]);exit;
+        }
+        $r    = new RoomModel();
+        $room = $r->getModel(['id' => $param['room_id']], ['type']);
+        if (empty($room)) {
+            echo json_encode(['status' => 10, 'info' => '房间不存在', 'data' => null]);exit;
+        }
+        if (empty($param['uid'])) {
             $res = 20;
             $msg = ['status' => 20, 'info' => '用户ID不能为空', 'data' => null];
         } elseif (empty($param['type'])) {
             $res = 30;
             $msg = ['status' => 30, 'info' => '用户类型不能为空', 'data' => null];
-        } elseif (intval($param['type']) === 1 && empty($param['para_str'])) {
+        } elseif ($room['type'] === 1 && intval($param['type']) === 1 && empty($param['para_str'])) {
             $res = 40;
             $msg = ['status' => 40, 'info' => '段位不能为空', 'data' => null];
         }
