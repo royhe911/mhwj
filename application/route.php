@@ -63,6 +63,7 @@ return [
     '/api/mastercount'    => 'api/Api/get_master_count', // 陪玩师成绩
     '/api/upload'         => 'admin/Upload/upload', // 上传文件
     '/api/games'          => 'api/Api/get_games', // 游戏列表
+    '/api/gamepara'       => 'api/Api/get_game_para', // 游戏大段位
     '/api/gameconfig'     => 'api/Api/get_game_config', // 技能水平
     '/api/addgame'        => 'api/Api/add_game', // 添加游戏
     '/api/examine'        => 'api/Api/user_examine', // 获取服务段位

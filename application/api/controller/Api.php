@@ -613,7 +613,8 @@ class Api extends \think\Controller
             echo json_encode(['status' => 1, 'info' => '游戏ID不能为空', 'data' => null]);exit;
         }
         $where = ['game_id' => $param['game_id']];
-        $list  = $gc->getList($where, ['game_id', 'para', 'para_des'], 'para', 'para');
+        $list  = $gc->getList($where, ['game_id', 'para', 'para_des'], null, 'para', 'para');
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**
