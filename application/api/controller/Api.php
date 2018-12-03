@@ -678,7 +678,11 @@ class Api extends \think\Controller
             if (strpos($demo_url2, 'http://') === false && strpos($demo_url2, 'https://') === false) {
                 $demo_url2 = config('WEBSITE') . $demo_url2;
             }
-            $data['demo_url'] = [$demo_url1, $demo_url2];
+            $demo_url3 = $game['demo_url3'];
+            if (strpos($demo_url3, 'http://') === false && strpos($demo_url3, 'https://') === false) {
+                $demo_url3 = config('WEBSITE') . $demo_url3;
+            }
+            $data['demo_url'] = [$demo_url1, $demo_url2, $demo_url3];
             $data['para']     = config($game['identify']);
             $data['config']   = $list;
             $msg              = ['status' => 0, 'info' => '获取成功', 'data' => $data];
