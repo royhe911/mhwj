@@ -336,7 +336,9 @@ class Pay extends \think\Controller
             if (($status === 6 || $status === 10) && $type === 1) {
                 $ru = new RoomUserModel();
                 $ru->modifyField('status', $status, ['room_id' => $uorder['room_id']]);
-                $master_id = $uorder['master_id'];
+                $r         = new RoomModel();
+                $room      = $r->getModel(['id' => $uorder['room_id']]);
+                $master_id = $room['uid'];
             }
         }
         if ($status === 6) {

@@ -368,11 +368,17 @@ class Api extends \think\Controller
         $user = $u->getModel(['id' => $master_id]);
         // 累计收益
         $data['acc_money'] = $user['acc_money'];
+        $data['order_num'] = '';
         $data['room']      = null;
         // 正在进行中的房间
         $r    = new RoomModel();
         $room = $r->getModel(['uid' => $master_id, 'status' => ['in', '0,1,5,6,8']]);
         if ($room) {
+            $mo     = new MasterOrderModel();
+            $morder = $mo->getModel(['room_id' => $room['id']]);
+            if ($morder) {
+                $data['order_num'] = $morder['order_num'];
+            }
             $rmdt = ['room_id' => $room['id'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count']];
             // 正在进行中的房间
             $data['room'] = $rmdt;
@@ -828,14 +834,14 @@ class Api extends \think\Controller
             $msg = ['status' => 7, 'info' => '陪玩师人数过多', 'data' => null];
         } elseif (intval($param['count']) + intval($param['master_count']) > 5) {
             echo json_encode(['status' => 12, 'info' => '房间总人数错误', 'data' => null]);
-        } elseif (empty($param['price'])) {
-            $msg = ['status' => 14, 'info' => '每局价格不能为空', 'data' => null];
+        } /* elseif (empty($param['price'])) {
+        $msg = ['status' => 14, 'info' => '每局价格不能为空', 'data' => null];
         } elseif (floatval($param['price']) < 1 || floatval($param['price']) > 100) {
-            $msg = ['status' => 16, 'info' => '每局价格只能是1-100', 'data' => null];
-        } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5) {
+        $msg = ['status' => 16, 'info' => '每局价格只能是1-100', 'data' => null];
+        }*/elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5) {
             $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
         } else {
-            $param['total_money'] = floatval($param['price']) * intval($param['num']) * (intval($param['count']));
+            // $param['total_money'] = floatval($param['price']) * intval($param['num']) * (intval($param['count']));
             // 获取房间
             $count = $r->getCount(['is_delete' => 0, 'uid' => $param['uid'], 'status' => ['not in', '4,9,10']]);
             if ($count) {
@@ -847,7 +853,7 @@ class Api extends \think\Controller
                 $msg = ['status' => 6, 'info' => '陪玩师不存在', 'data' => null];
             } elseif ($user['type'] !== 2 || $user['status'] !== 8) {
                 $msg = ['status' => 7, 'info' => '您还未认证成为陪玩师，现在就去认证', 'data' => null];
-            } else {
+            } elseif (intval($param['type']) === 1) {
                 $ua       = new UserAttrModel();
                 $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']], ['curr_para', 'play_type']);
                 if (!$userAttr) {
@@ -864,7 +870,7 @@ class Api extends \think\Controller
         $res = $r->add($param);
         if ($res) {
             $mo   = new MasterOrderModel();
-            $mord = ['uid' => $param['uid'], 'room_id' => $res, 'order_money' => $param['total_money'], 'play_type' => $param['type'], 'game_id' => $param['game_id'], 'region' => $param['region'], 'order_num' => get_millisecond(), 'addtime' => time()];
+            $mord = ['uid' => $param['uid'], 'room_id' => $res, 'play_type' => $param['type'], 'game_id' => $param['game_id'], 'region' => $param['region'], 'order_num' => get_millisecond(), 'addtime' => time()];
             $mo->add($mord);
             $msg = ['status' => 0, 'info' => '创建成功', 'data' => ['id' => $res, 'count' => $param['count'], 'in_count' => 1]];
         } else {
@@ -923,7 +929,7 @@ class Api extends \think\Controller
             $gcarr  = [];
             foreach ($gclist as $gci) {
                 $gparr[$gci['game_id']][$gci['para']]   = $gci['para_des'];
-                $gcarr[$gci['game_id']][$gci['para']][] = (object)[$gci['para_str'], $gci['price']];
+                $gcarr[$gci['game_id']][$gci['para']][] = $gci['para_str'];
             }
             foreach ($list as &$item) {
                 if (!empty($users[$item['uid']])) {
