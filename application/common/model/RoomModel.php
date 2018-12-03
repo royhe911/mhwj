@@ -153,7 +153,6 @@ class RoomModel extends CommonModel
             return 3;
         } catch (\Exception $e) {
             Db::rollback();
-            var_dump($e->getMessage());
             return 44;
         }
     }
