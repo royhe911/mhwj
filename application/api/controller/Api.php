@@ -947,7 +947,7 @@ class Api extends \think\Controller
             $gclist = $gc->getList(['game_id' => ['in', $game_ids]], ['game_id', 'para', 'para_des', 'para_id', 'para_str', 'price']);
             $gparr  = [];
             foreach ($gclist as $gci) {
-                $gparr[$gci['game_id']][$gci['para']]   = $gci['para_des'];
+                $gparr[$gci['game_id']][$gci['para']] = $gci['para_des'];
             }
             foreach ($list as &$item) {
                 if (!empty($users[$item['uid']])) {
@@ -987,6 +987,11 @@ class Api extends \think\Controller
     {
         $param = $this->param;
         if (!empty($param['is_share']) && intval($param['is_share']) === 1) {
+            $ru    = new RoomUserModel();
+            $count = $ru->getCount(['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+            if (!$count) {
+                echo json_encode(['status' => 14, 'info' => '选择段位', 'data' => null]);exit;
+            }
             $state = $this->come_in_room(true);
             if ($state !== true) {
                 echo json_encode(['status' => $state, 'info' => '进入房间失败', 'data' => null]);exit;
