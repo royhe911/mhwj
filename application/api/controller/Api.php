@@ -613,7 +613,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 1, 'info' => '游戏ID不能为空', 'data' => null]);exit;
         }
         $where = ['game_id' => $param['game_id']];
-        $list  = $gc->getList($where, ['game_id', 'para', 'para_des'], null, 'para', 'para');
+        $list  = $gc->getList($where, ['game_id', 'para', 'para_des', 'price'], null, 'para', 'para');
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
@@ -918,10 +918,12 @@ class Api extends \think\Controller
                 $attr_arr[$attr['uid']][$attr['game_id']] = $attr['winning'];
             }
             $gc     = new GameConfigModel();
-            $gclist = $gc->getList(['game_id' => ['in', $game_ids]], 'game_id,para_id,para_str');
+            $gclist = $gc->getList(['game_id' => ['in', $game_ids]], ['game_id', 'para', 'para_des', 'para_id', 'para_str', 'price']);
+            $gparr  = [];
             $gcarr  = [];
             foreach ($gclist as $gci) {
-                $gcarr[$gci['game_id']][$gci['para_id']] = $gci['para_str'];
+                $gparr[$gci['game_id']][$gci['para']]   = $gci['para_des'];
+                $gcarr[$gci['game_id']][$gci['para']][] = (object)[$gci['para_str'], $gci['price']];
             }
             foreach ($list as &$item) {
                 if (!empty($users[$item['uid']])) {
@@ -931,17 +933,21 @@ class Api extends \think\Controller
                     $item['nickname'] = '';
                     $item['avatar']   = '';
                 }
-                if (!empty($gcarr[$item['game_id']]) && !empty($gcarr[$item['game_id']][$item['para_min']])) {
-                    $item['para_min_str'] = $gcarr[$item['game_id']][$item['para_min']];
+                if (!empty($gparr[$item['game_id']]) && !empty($gparr[$item['game_id']][$item['para_min']])) {
+                    $item['para_min_str'] = $gparr[$item['game_id']][$item['para_min']];
                 } else {
-
                     $item['para_min_str'] = '';
                 }
-                if (!empty($gcarr[$item['game_id']]) && !empty($gcarr[$item['game_id']][$item['para_max']])) {
-                    $item['para_max_str'] = $gcarr[$item['game_id']][$item['para_max']];
+                if (!empty($gparr[$item['game_id']]) && !empty($gparr[$item['game_id']][$item['para_max']])) {
+                    $item['para_max_str'] = $gparr[$item['game_id']][$item['para_max']];
                 } else {
                     $item['para_max_str'] = '';
                 }
+                $gcs = [];
+                for ($i = $item['para_min']; $i <= $item['para_max']; $i++) {
+                    $gcs = array_merge($gcs, $gcarr[$item['game_id']][$i]);
+                }
+                $item['para_str'] = $gcs;
                 if (!empty($attr_arr[$item['uid']]) && !empty($attr_arr[$item['uid']][$item['game_id']])) {
                     $item['winning'] = $attr_arr[$item['uid']][$item['game_id']];
                 } else {
