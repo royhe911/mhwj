@@ -658,7 +658,7 @@ class Api extends \think\Controller
         }
         $game_id = $param['game_id'];
         $where   = ['is_delete' => 0, 'id' => $game_id];
-        $game    = $g->getModel($where, 'identify,url,demo_url1,demo_url2');
+        $game    = $g->getModel($where, 'identify,url,demo_url1,demo_url2,demo_url3');
         if (!$game) {
             echo json_encode(['status' => 2, 'info' => '数据错误', 'data' => null]);exit;
         }
@@ -848,22 +848,32 @@ class Api extends \think\Controller
             $msg = ['status' => 12, 'info' => '最低服务段位不能为空', 'data' => null];
         } elseif (intval($param['type']) === 1 && empty($param['para_max'])) {
             $msg = ['status' => 13, 'info' => '最高服务段位不能为空', 'data' => null];
+        } elseif (intval($param['type']) === 2 && empty($param['price'])) {
+            $msg = ['status' => 15, 'info' => '每小时价格不能为空', 'data' => null];
+        } elseif (intval($param['type']) === 2 && intval($param['count']) !== 1) {
+            $msg = ['status' => 16, 'info' => '娱乐陪玩玩家人数只能为1人', 'data' => null];
+        } elseif (intval($param['type']) === 2 && intval($param['master_count']) !== 1) {
+            $msg = ['status' => 16, 'info' => '娱乐陪玩陪玩师人数只能为1人', 'data' => null];
         } elseif (empty($param['region'])) {
             $msg = ['status' => 4, 'info' => '房间所属大区不能为空', 'data' => null];
-        } elseif (empty($param['count']) || intval($param['count']) < 2 || intval($param['count']) > 5) {
-            $msg = ['status' => 5, 'info' => '房间人数只能是2-5人', 'data' => null];
+        } elseif (empty($param['count']) || intval($param['count']) < 1 || intval($param['count']) > 4) {
+            $msg = ['status' => 5, 'info' => '房间玩家人数只能是1-4人', 'data' => null];
         } elseif (empty($param['master_count'])) {
             $msg = ['status' => 6, 'info' => '陪玩师人数不能为空', 'data' => null];
         } elseif (intval($param['master_count']) > 4) {
             $msg = ['status' => 7, 'info' => '陪玩师人数过多', 'data' => null];
         } elseif (intval($param['count']) + intval($param['master_count']) > 5) {
-            echo json_encode(['status' => 12, 'info' => '房间总人数错误', 'data' => null]);
+            $msg = ['status' => 12, 'info' => '房间总人数错误', 'data' => null];
         } /* elseif (empty($param['price'])) {
         $msg = ['status' => 14, 'info' => '每局价格不能为空', 'data' => null];
         } elseif (floatval($param['price']) < 1 || floatval($param['price']) > 100) {
         $msg = ['status' => 16, 'info' => '每局价格只能是1-100', 'data' => null];
-        }*/elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5) {
-            $msg = ['status' => 15, 'info' => '局数不正确', 'data' => null];
+        }*/elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5 || (intval($param['type']) === 2 && intval($param['num']) > 3)) {
+            $str = '局数不正确';
+            if (intval($param['type']) === 2) {
+                $str = '小时数不正确';
+            }
+            $msg = ['status' => 15, 'info' => $str, 'data' => null];
         } else {
             // $param['total_money'] = floatval($param['price']) * intval($param['num']) * (intval($param['count']));
             // 获取房间
@@ -888,6 +898,9 @@ class Api extends \think\Controller
             }
         }
         $param['addtime'] = time();
+        if (intval($param['type']) === 2) {
+            $param['total_money'] = $param['price'] * $param['num'];
+        }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
@@ -895,6 +908,9 @@ class Api extends \think\Controller
         if ($res) {
             $mo   = new MasterOrderModel();
             $mord = ['uid' => $param['uid'], 'room_id' => $res, 'play_type' => $param['type'], 'game_id' => $param['game_id'], 'region' => $param['region'], 'order_num' => get_millisecond(), 'addtime' => time()];
+            if (intval($param['type']) === 2) {
+                $mord['order_money'] = $param['price'] * $param['num'];
+            }
             $mo->add($mord);
             $msg = ['status' => 0, 'info' => '创建成功', 'data' => ['id' => $res, 'count' => $param['count'], 'in_count' => 1]];
         } else {

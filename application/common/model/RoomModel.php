@@ -28,7 +28,7 @@ class RoomModel extends CommonModel
         Db::startTrans();
         try {
             $where = "id=$room_id";
-            $sql   = "select id,price,num,total_money,in_count,count,master_count,status from m_room where {$where} for update";
+            $sql   = "select id,price,`type`,num,total_money,in_count,count,master_count,status from m_room where {$where} for update";
             $data  = Db::query($sql);
             if (!$data) {
                 Db::rollback();
@@ -36,6 +36,9 @@ class RoomModel extends CommonModel
             }
             $data = $data[0];
             if ($data['status'] === 10 || $data['status'] === 8 || $data['status'] === 5) {
+                return 10;
+            }
+            if ($data['type'] === 2) {
                 return 10;
             }
             $type = intval($type);
@@ -82,7 +85,7 @@ class RoomModel extends CommonModel
         Db::startTrans();
         try {
             // 进入房间锁定房间信息以免两个人同时进入
-            $sql  = "select id,uid,price,num,in_count,count,in_master_count,master_count,status from m_room where id={$param['room_id']} for update";
+            $sql  = "select id,uid,price,type,num,in_count,count,in_master_count,master_count,status from m_room where id={$param['room_id']} for update";
             $data = Db::query($sql);
             if (!$data) {
                 Db::rollback();
@@ -106,9 +109,14 @@ class RoomModel extends CommonModel
                     return true;
                 }
                 if ($data['in_count'] < $data['count']) {
-                    $gc      = new GameConfigModel();
-                    $gconf   = $gc->getModel(['para_str' => $param['para_str']], ['price']);
-                    $in_data = ['room_id' => $data['id'], 'uid' => $param['uid'], 'addtime' => time(), 'price' => $gconf['price'], 'num' => $data['num'], 'total_money' => $gconf['price'] * $data['num']];
+                    if ($data['type'] === 1) {
+                        $gc    = new GameConfigModel();
+                        $gconf = $gc->getModel(['para_str' => $param['para_str']], ['price']);
+                        $price = $gconf['price'];
+                    } else {
+                        $price = $data['price'];
+                    }
+                    $in_data = ['room_id' => $data['id'], 'uid' => $param['uid'], 'addtime' => time(), 'price' => $price, 'num' => $data['num'], 'total_money' => $price * $data['num'] * $data['count']];
                     // 添加进入房间信息
                     $res = $ru->add($in_data);
                     if (!$res) {
