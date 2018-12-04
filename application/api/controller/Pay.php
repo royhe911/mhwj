@@ -615,10 +615,19 @@ class Pay extends \think\Controller
         $gc     = new GameConfigModel();
         $gconfs = $gc->getList(null, ['game_id', 'para_id', 'para_str']);
         $gc_arr = [];
+        $uids   = array_column($list, 'uid');
+        $u      = new UserModel();
+        $users  = $u->getList(['id' => ['in', $uids]], ['id', 'avatar']);
+        $users  = array_column($users, 'avatar', 'id');
         foreach ($gconfs as $gco) {
             $gc_arr[$gco['game_id']][$gco['para_id']] = $gco['para_str'];
         }
         foreach ($list as &$item) {
+            if (!empty($users[$item['uid']])) {
+                $item['avatar'] = $users[$item['uid']];
+            } else {
+                $item['avatar'] = '';
+            }
             if (!empty($games[$item['game_id']])) {
                 $item['gamename'] = $games[$item['game_id']];
             } else {
@@ -660,15 +669,16 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $u     = new UserModel();
-        $count = $u->getCount(['id' => $param['master_id'], 'type' => 2, 'status' => 8]);
+        $master_id = $param['master_id'];
+        $u         = new UserModel();
+        $count     = $u->getCount(['id' => $master_id, 'type' => 2, 'status' => 8]);
         if (!$count) {
             echo json_encode(['status' => 6, 'info' => '您还未认证成为陪玩师，请先认证', 'data' => null]);exit;
         }
         $po     = new PersonOrderModel();
         $porder = $po->getModel(['id' => $param['order_id']]);
         // 查询订制订单
-        $ord_where = ['uid' => $param['master_id'], 'game_id' => $porder['game_id'], 'status' => 8];
+        $ord_where = ['uid' => $master_id, 'game_id' => $porder['game_id'], 'status' => 8];
         if ($porder['play_type'] === 1) {
             $ord_where['play_type'] = 1;
         }
