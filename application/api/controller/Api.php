@@ -850,32 +850,17 @@ class Api extends \think\Controller
             $msg = ['status' => 13, 'info' => '最高服务段位不能为空', 'data' => null];
         } elseif (intval($param['type']) === 2 && empty($param['price'])) {
             $msg = ['status' => 15, 'info' => '每小时价格不能为空', 'data' => null];
-        } elseif (intval($param['type']) === 2 && intval($param['count']) !== 1) {
-            $msg = ['status' => 16, 'info' => '娱乐陪玩玩家人数只能为1人', 'data' => null];
-        } elseif (intval($param['type']) === 2 && intval($param['master_count']) !== 1) {
-            $msg = ['status' => 16, 'info' => '娱乐陪玩陪玩师人数只能为1人', 'data' => null];
         } elseif (empty($param['region'])) {
             $msg = ['status' => 4, 'info' => '房间所属大区不能为空', 'data' => null];
-        } elseif (empty($param['count']) || intval($param['count']) < 1 || intval($param['count']) > 4) {
-            $msg = ['status' => 5, 'info' => '房间玩家人数只能是1-4人', 'data' => null];
-        } elseif (empty($param['master_count'])) {
-            $msg = ['status' => 6, 'info' => '陪玩师人数不能为空', 'data' => null];
-        } elseif (intval($param['master_count']) > 4) {
-            $msg = ['status' => 7, 'info' => '陪玩师人数过多', 'data' => null];
-        } elseif (intval($param['count']) + intval($param['master_count']) > 5) {
-            $msg = ['status' => 12, 'info' => '房间总人数错误', 'data' => null];
-        } /* elseif (empty($param['price'])) {
-        $msg = ['status' => 14, 'info' => '每局价格不能为空', 'data' => null];
-        } elseif (floatval($param['price']) < 1 || floatval($param['price']) > 100) {
-        $msg = ['status' => 16, 'info' => '每局价格只能是1-100', 'data' => null];
-        }*/elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5 || (intval($param['type']) === 2 && intval($param['num']) > 3)) {
+        } elseif (empty($param['master_count']) || intval($param['master_count']) < 1 || intval($param['master_count']) > 4) {
+            $msg = ['status' => 6, 'info' => '陪玩师人数只能为1-4人', 'data' => null];
+        } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5 || (intval($param['type']) === 2 && intval($param['num']) > 3)) {
             $str = '局数不正确';
             if (intval($param['type']) === 2) {
                 $str = '小时数不正确';
             }
             $msg = ['status' => 15, 'info' => $str, 'data' => null];
         } else {
-            // $param['total_money'] = floatval($param['price']) * intval($param['num']) * (intval($param['count']));
             // 获取房间
             $count = $r->getCount(['is_delete' => 0, 'uid' => $param['uid'], 'status' => ['not in', '4,9,10']]);
             if ($count) {
@@ -896,6 +881,13 @@ class Api extends \think\Controller
                     $msg = ['status' => 11, 'info' => '您的等级不够陪玩的等级', 'data' => null];
                 }
             }
+        }
+        if (intval($param['type']) === 2) {
+            $param['count']        = 1;
+            $param['master_count'] = 1;
+        }
+        if (intval($param['type']) === 1) {
+            $param['count'] = 5 - intval($param['master_count']);
         }
         $param['addtime'] = time();
         if (intval($param['type']) === 2) {
@@ -960,10 +952,17 @@ class Api extends \think\Controller
             $users    = $u->getList(['is_delete' => 0, 'id' => ['in', $uids], 'type' => 2], 'id,nickname,avatar');
             $users    = array_column($users, null, 'id');
             $ua       = new UserAttrModel();
-            $attrs    = $ua->getList(['uid' => ['in', $uids], 'game_id' => ['in', $game_ids]], 'uid,game_id,winning');
+            $attrs    = $ua->getList(['uid' => ['in', $uids], 'game_id' => ['in', $game_ids]], ['uid', 'game_id', 'winning', 'level_url']);
             $attr_arr = [];
+            $levels   = [];
             foreach ($attrs as $attr) {
                 $attr_arr[$attr['uid']][$attr['game_id']] = $attr['winning'];
+                $urls = explode(',', $attr['level_url']);
+                $uurl = $urls[0];
+                if (!empty($uurl) && strpos($uurl, 'http://') === false && strpos($uurl, 'https://') === false) {
+                    $uurl = config('WEBSITE') . $uurl;
+                }
+                $levels[$attr['uid']][$attr['game_id']] = $uurl;
             }
             $gc     = new GameConfigModel();
             $gclist = $gc->getList(['game_id' => ['in', $game_ids]], ['game_id', 'para', 'para_des', 'para_id', 'para_str', 'price']);
@@ -998,6 +997,11 @@ class Api extends \think\Controller
                     $item['winning'] = $attr_arr[$item['uid']][$item['game_id']];
                 } else {
                     $item['winning'] = 0;
+                }
+                if (!empty($levels[$item['uid']]) && !empty($levels[$item['uid']][$item['game_id']])) {
+                    $item['level_url'] = $levels[$item['uid']][$item['game_id']];
+                } else {
+                    $item['level_url'] = '';
                 }
             }
         }
