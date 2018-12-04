@@ -1506,7 +1506,7 @@ class Api extends \think\Controller
     public function get_rich_list(UserModel $u)
     {
         $param    = $this->param;
-        $where    = ['is_delete' => 0, 'type' => 1];
+        $where    = ['is_delete' => 0, 'type' => 1, 'nickname' => ['<>', ''], 'avatar' => ['<>', '']];
         $order    = ['contribution' => 'desc'];
         $page     = 1;
         $pagesize = 10;
@@ -1516,7 +1516,7 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list     = $u->getList($where, ['id', 'nickname', 'avatar', 'contribution score'], "$page,$pagesize", $order);
+        $list = $u->getList($where, ['id', 'nickname', 'avatar', 'contribution score'], "$page,$pagesize", $order);
         if ($list) {
             foreach ($list as &$item) {
                 $item['score'] = format_number($item['score']);
