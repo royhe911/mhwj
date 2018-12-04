@@ -63,7 +63,9 @@
                                         <td>{$attr.play_para}</td>
                                         <td>{$attr.play_type}</td>
                                         <td>{$attr.status_txt}{if($attr.status==1)} &nbsp; &nbsp; <a href="#" data-id="{$attr.id}" class="skill_audit">审核</a>{/if}</td>
-                                        <td><a href="{$attr.level_url}" target="_blank"><img class="level_url" src="{$attr.level_url}"></a></td>
+                                        <td>
+                                            {foreach $attr.level_url as $url}<a href="{$url}" target="_blank"><img class="level_url" src="{$url}"></a>{/foreach}
+                                        </td>
                                     </tr>
                                     {/foreach}
                                 </table>
