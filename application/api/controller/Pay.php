@@ -615,10 +615,13 @@ class Pay extends \think\Controller
         $gc     = new GameConfigModel();
         $gconfs = $gc->getList(null, ['game_id', 'para_id', 'para_str']);
         $gc_arr = [];
+        $users  = [];
         $uids   = array_column($list, 'uid');
-        $u      = new UserModel();
-        $users  = $u->getList(['id' => ['in', $uids]], ['id', 'avatar']);
-        $users  = array_column($users, 'avatar', 'id');
+        if (!empty($uids)) {
+            $u     = new UserModel();
+            $users = $u->getList(['id' => ['in', $uids]], ['id', 'avatar']);
+            $users = array_column($users, 'avatar', 'id');
+        }
         foreach ($gconfs as $gco) {
             $gc_arr[$gco['game_id']][$gco['para_id']] = $gco['para_str'];
         }

@@ -1207,7 +1207,7 @@ class Api extends \think\Controller
         if ($status === 10) {
             $count = $ru->getCount(['room_id' => $room_id]);
             if (!$count) {
-                echo json_encode(['status' => 22, 'info' => '房间未开始，不能完成', 'data' => null]);exit;
+                echo json_encode(['status' => 22, 'info' => '游戏未开始，不能完成', 'data' => null]);exit;
             }
             $ch = new ChatModel();
             $ch->delByWhere(['room_id' => $room_id]);
