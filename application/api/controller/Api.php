@@ -402,7 +402,7 @@ class Api extends \think\Controller
             echo json_encode($msg);exit;
         }
         $uid    = $param['id'];
-        $master = $u->getModel(['id' => $uid], ['id', 'avatar', 'nickname', 'introduce']);
+        $master = $u->getModel(['id' => $uid], ['id', 'avatar', 'nickname', 'introduce', 'wx']);
         if ($master) {
             // 查询陪玩师的接单数
             $r     = new RoomModel();
@@ -1069,9 +1069,6 @@ class Api extends \think\Controller
             } elseif ($room['region'] === 2) {
                 $room['region'] = '微信';
             }
-            // if ($room['uid'] != $param['uid']) {
-            //     $room['total_money'] /= $room['count'];
-            // }
             $gc     = new GameConfigModel();
             $gclist = $gc->getList(['game_id' => $room['game_id'], 'para_id' => ['in', [$room['para_min'], $room['para_max']]]], 'para_id,para_str');
             foreach ($gclist as $gci) {
@@ -1090,7 +1087,7 @@ class Api extends \think\Controller
             $mids     = array_merge($mids, [$room['uid']]);
             $uids     = array_merge($uids, $mids);
             $u        = new UserModel();
-            $users    = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users    = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar', 'wx']);
             $members  = [];
             // 获取房间里玩家的状态
             $ustatus  = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status,total_money');
