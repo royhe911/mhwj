@@ -99,6 +99,7 @@ class Notify extends \think\Controller
                 $ru = new RoomUserModel();
                 $ru->modifyField('status', 6, ['room_id' => $order['room_id'], 'uid' => $order['uid']]);
                 $mo = new MasterOrderModel();
+                $mo->increment('order_money', ['room_id' => $order['room_id']], $order['order_money']);
                 $mo->increment('complete_money', ['room_id' => $order['room_id']], $order['order_money']);
                 $count = $ru->getCount(['room_id' => $order['room_id'], 'status' => 6]);
                 $r     = new RoomModel();
