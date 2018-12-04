@@ -40,7 +40,10 @@ class PersonOrderexit extends Command
                 // 测试数据
                 $total_fee  = 1;
                 $refund_fee = 1;
-                $this->exit_money($item['order_num'], $total_fee, $refund_fee, $item['transaction_id'], $item['uid']);
+                $res        = $this->exit_money($item['order_num'], $total_fee, $refund_fee, $item['transaction_id'], $item['uid']);
+                if ($res === true) {
+                    $po->modifyField('status', 2, ['order_num' => $item['order_num']]);
+                }
             }
         }
     }
@@ -86,6 +89,7 @@ class PersonOrderexit extends Command
             $log_data = ['type' => LogModel::TYPE_REFUND, 'content' => json_encode($data)];
             $l->addLog($data);
         }
+        return true;
     }
 
     /**
