@@ -957,6 +957,7 @@ class Api extends \think\Controller
             $levels   = [];
             foreach ($attrs as $attr) {
                 $attr_arr[$attr['uid']][$attr['game_id']] = $attr['winning'];
+                // 取第一张水平截图
                 $urls = explode(',', $attr['level_url']);
                 $uurl = $urls[0];
                 if (!empty($uurl) && strpos($uurl, 'http://') === false && strpos($uurl, 'https://') === false) {
