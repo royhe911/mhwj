@@ -1510,6 +1510,12 @@ class Api extends \think\Controller
         $order    = ['contribution' => 'desc'];
         $page     = 1;
         $pagesize = 10;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
         $list     = $u->getList($where, ['id', 'nickname', 'avatar', 'contribution score'], "$page,$pagesize", $order);
         if ($list) {
             foreach ($list as &$item) {

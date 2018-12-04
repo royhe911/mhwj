@@ -100,9 +100,10 @@ class Notify extends \think\Controller
                 $ru->modifyField('status', 6, ['room_id' => $order['room_id'], 'uid' => $order['uid']]);
                 $mo = new MasterOrderModel();
                 $mo->increment('complete_money', ['room_id' => $order['room_id']], $order['order_money']);
-                $morder = $mo->getModel(['room_id' => $order['room_id']], ['order_money', 'complete_money']);
-                if (!empty($morder) && $morder['order_money'] === $morder['complete_money']) {
-                    $r = new RoomModel();
+                $count = $ru->getCount(['room_id' => $order['room_id'], 'status' => 6]);
+                $r     = new RoomModel();
+                $room  = $r->getModel(['id' => $order['room_id']], ['count']);
+                if ($count === $room['count']) {
                     $r->modifyField('status', 6, ['id' => $order['room_id']]);
                     $mo->modifyField('status', 6, ['room_id' => $order['room_id']]);
                 }
