@@ -2,6 +2,7 @@
 namespace app\common\crontab;
 
 use app\common\model\PersonOrderModel;
+use app\common\model\RefundModel;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
