@@ -165,10 +165,16 @@ class Api extends \think\Controller
                     $ld['login_time'] = time();
                     $ull->add($ld);
                 }
-                // 用户是否认证
+                // 用户是否认证，0未认证  1已认证  2审核中  4审核未通过
                 $is_certified = 0;
-                if ($user['type'] === 2 && $user['status'] === 8) {
-                    $is_certified = 1;
+                if ($user['type'] === 2) {
+                    if ($user['status'] === 8) {
+                        $is_certified = 1;
+                    } elseif ($user['status'] === 1) {
+                        $is_certified = 2;
+                    } elseif ($user['status'] === 4) {
+                        $is_certified = 4;
+                    }
                 }
                 $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $user['id'], 'mobile' => $user['mobile'], 'is_certified' => $is_certified]];
             } else {
@@ -920,6 +926,9 @@ class Api extends \think\Controller
     public function get_room_list(RoomModel $r)
     {
         $param = $this->param;
+        if (empty($param['uid'])) {
+            echo json_encode(['status' => 1, 'info' => '玩家ID不能为空', 'data' => null]);exit;
+        }
         $where = 'is_delete=0 and status in (0,1,5,6,8) and in_master_count=master_count';
         if (!empty($param['game_id'])) {
             $where .= " and game_id={$param['game_id']}";
@@ -1006,7 +1015,14 @@ class Api extends \think\Controller
                 }
             }
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+        $user = null;
+        $ru   = new RoomUserModel();
+        $rou  = $ru->getModel(['uid' => $param['uid'], 'status' => ['in', '0,1,5,6']]);
+        if (!empty($rou)) {
+            $room = $r->getModel(['id' => $rou['room_id']]);
+            $user = ['id' => $room['id'], 'count' => $room['count'], 'in_count' => $room['in_count']];
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['list' => $list, 'user' => $user]]);exit;
     }
 
     /**
