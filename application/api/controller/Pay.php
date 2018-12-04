@@ -512,7 +512,7 @@ class Pay extends \think\Controller
         if (!$res) {
             echo json_encode(['status' => 5, 'info' => '取消失败', 'data' => null]);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '取消成功', 'data' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '取消成功，您的退款会在3个工作日原路返回到你的支付账户', 'data' => null]);exit;
     }
 
     /**
@@ -977,7 +977,8 @@ class Pay extends \think\Controller
         $pay_data = null;
         if ($porder['status'] === 1) {
             $total_fee = $porder['order_money'] * 100;
-            $pay_data  = $this->wxpay($porder['uid'], $order_num, $total_fee);
+            // 调用微信支付
+            $pay_data = $this->wxpay($porder['uid'], $order_num, $total_fee);
             if ($pay_data === false) {
                 $msg = ['status' => 5, 'info' => '玩家不存在', 'data' => null];
             } elseif ($pay_data === 1) {
