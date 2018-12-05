@@ -976,6 +976,7 @@ class Pay extends \think\Controller
         // 订单未支付
         $pay_data = null;
         if ($porder['status'] === 1) {
+            $po->modifyField('addtime', time(), ['id' => $porder['id']]);
             $total_fee = $porder['order_money'] * 100;
             $total_fee = 1;
             // 调用微信支付
