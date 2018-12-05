@@ -882,20 +882,22 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $po->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize", 'status,addtime desc');
+        $list = $po->getList($where, ['order_num', 'uid', 'game_id', 'play_type', 'order_money', 'addtime', 'status'], "$page,$pagesize", 'addtime desc,status');
         if ($list) {
             $uids  = array_column($list, 'uid');
             $u     = new UserModel();
-            $users = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname']);
-            $users = array_column($users, 'nickname', 'id');
+            $users = $u->getList(['type' => 1, 'id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
             $g     = new GameModel();
             $games = $g->getList(['is_delete' => 0], ['id', 'name']);
             $games = array_column($games, 'name', 'id');
             foreach ($list as &$item) {
                 if (!empty($users[$item['uid']])) {
-                    $item['nickname'] = $users[$item['uid']];
+                    $item['nickname'] = $users[$item['uid']]['nickname'];
+                    $item['avatar']   = $users[$item['uid']]['avatar'];
                 } else {
                     $item['nickname'] = '';
+                    $item['avatar']   = '';
                 }
                 if (!empty($games[$item['game_id']])) {
                     $item['gamename'] = $games[$item['game_id']];
@@ -1028,20 +1030,14 @@ class Pay extends \think\Controller
         } else {
             $uorder['gamename'] = '';
         }
-        $uid  = 0;
-        $r    = new RoomModel();
-        $room = $r->getModel(['id' => $uorder['room_id']], ['uid']);
-        if ($room) {
-            $uid = $room['uid'];
-        }
         $u    = new UserModel();
-        $user = $u->getModel(['id' => $uid], ['avatar', 'nickname']);
+        $user = $u->getModel(['id' => $uorder['uid']], ['avatar', 'nickname']);
         if ($user) {
-            $uorder['master_avatar']   = $user['avatar'];
-            $uorder['master_nickname'] = $user['nickname'];
+            $uorder['avatar']   = $user['avatar'];
+            $uorder['nickname'] = $user['nickname'];
         } else {
-            $uorder['master_avatar']   = '';
-            $uorder['master_nickname'] = '';
+            $uorder['avatar']   = '';
+            $uorder['nickname'] = '';
         }
         if ($uorder['region'] === 1) {
             $uorder['region'] = 'QQ';
