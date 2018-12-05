@@ -674,7 +674,7 @@ class Pay extends \think\Controller
         }
         $master_id = $param['master_id'];
         $r         = new RoomModel();
-        $count     = $r->getCount(['status' => ['in', '0,1,5,6,8']]);
+        $count     = $r->getCount(['uid' => $master_id, 'status' => ['in', '0,1,5,6,8']]);
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
         }
