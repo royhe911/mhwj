@@ -1116,7 +1116,7 @@ class Api extends \think\Controller
             $users   = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar', 'wx', 'qq']);
             $members = [];
             // 获取房间里玩家的状态
-            $ustatus  = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status,total_money');
+            $ustatus  = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status,price,total_money');
             $ustatarr = array_column($ustatus, null, 'uid');
             foreach ($users as $user) {
                 if (in_array($user['id'], $mids)) {
