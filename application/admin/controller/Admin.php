@@ -264,7 +264,7 @@ class Admin extends \think\Controller
             if (empty($param['avatar'])) {
                 unset($param['avatar']);
             }
-            $param['uptimetime'] = time();
+            $param['updatetime'] = time();
             $res                 = $a->modify($param, ['id' => $id]);
             if (!$res) {
                 return ['status' => 4, 'info' => '修改失败'];
