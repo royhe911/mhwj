@@ -1047,8 +1047,7 @@ class Api extends \think\Controller
         }
         if (empty($param['room_id'])) {
             $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
-        }
-        if (empty($param['uid'])) {
+        } elseif (empty($param['uid'])) {
             $msg = ['status' => 2, 'info' => '用户ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
@@ -1056,11 +1055,20 @@ class Api extends \think\Controller
         }
         $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status room_status');
         if ($room) {
+            $ru       = new RoomUserModel();
+            $roomuser = $ru->getList(['room_id' => $param['room_id']]);
+            $uids     = array_column($roomuser, 'uid');
             if ($room['room_status'] === 10) {
-                echo json_encode(['status' => 3, 'info' => '游戏已完成', 'data' => null]);exit;
+                $msg = ['status' => 3, 'info' => '游戏已完成', 'data' => null];
+            } elseif ($room['room_status'] === 9) {
+                $msg = ['status' => 5, 'info' => '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还', 'data' => null];
+            } elseif ($room['count'] === $room['in_count']) {
+                if (!in_array(intval($param['uid']), $uids)) {
+                    $msg = ['status' => 6, 'info' => '房间人数已满', 'data' => null];
+                }
             }
-            if ($room['room_status'] === 9) {
-                echo json_encode(['status' => 5, 'info' => '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还', 'data' => null]);exit;
+            if (!empty($msg)) {
+                echo json_encode($msg);exit;
             }
             $g    = new GameModel();
             $game = $g->getModel(['id' => $room['game_id']], ['name', 'url']);
@@ -1094,17 +1102,14 @@ class Api extends \think\Controller
                     $room['para_max_str'] = $gci['para_str'];
                 }
             }
-            $ru       = new RoomUserModel();
-            $roomuser = $ru->getList(['room_id' => $param['room_id']]);
-            $uids     = array_column($roomuser, 'uid');
-            $mu       = new RoomMasterModel();
-            $masters  = $mu->getList(['room_id' => $param['room_id']]);
-            $mids     = array_column($masters, 'uid');
-            $mids     = array_merge($mids, [$room['uid']]);
-            $uids     = array_merge($uids, $mids);
-            $u        = new UserModel();
-            $users    = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar', 'wx', 'qq']);
-            $members  = [];
+            $mu      = new RoomMasterModel();
+            $masters = $mu->getList(['room_id' => $param['room_id']]);
+            $mids    = array_column($masters, 'uid');
+            $mids    = array_merge($mids, [$room['uid']]);
+            $uids    = array_merge($uids, $mids);
+            $u       = new UserModel();
+            $users   = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar', 'wx', 'qq']);
+            $members = [];
             // 获取房间里玩家的状态
             $ustatus  = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status,total_money');
             $ustatarr = array_column($ustatus, null, 'uid');
