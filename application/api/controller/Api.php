@@ -1022,6 +1022,11 @@ class Api extends \think\Controller
             $room = $r->getModel(['id' => $rou['room_id']]);
             $user = ['id' => $room['id'], 'count' => $room['count'], 'in_count' => $room['in_count']];
         }
+        $po  = new PersonOrderModel();
+        $pod = $po->getModel(['uid' => $param['uid'], 'status' => 7], ['id']);
+        if (!empty($pod)) {
+            $user['porder'] = $pod['id'];
+        }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['list' => $list, 'user' => $user]]);exit;
     }
 
