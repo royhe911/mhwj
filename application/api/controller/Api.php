@@ -1116,7 +1116,15 @@ class Api extends \think\Controller
             $users   = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar', 'wx', 'qq']);
             $members = [];
             // 获取房间里玩家的状态
-            $ustatus  = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status,price,total_money');
+            $ustatus     = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status,price,total_money');
+            $total_money = 0;
+            $price       = 0;
+            foreach ($ustatus as $utta) {
+                $total_money += $utta['total_money'];
+                $price += $utta['price'];
+            }
+            $total_money /= count($mids);
+            $price /= count($mids);
             $ustatarr = array_column($ustatus, null, 'uid');
             foreach ($users as $user) {
                 if (in_array($user['id'], $mids)) {
@@ -1125,6 +1133,8 @@ class Api extends \think\Controller
                     } else {
                         $user['master'] = 0;
                     }
+                    $room['total_money'] = $total_money;
+                    $room['price']       = $price;
                     $members['master'][] = $user;
                 } else {
                     $usta = $ustatarr[$user['id']];
