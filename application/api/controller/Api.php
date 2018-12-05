@@ -1040,10 +1040,12 @@ class Api extends \think\Controller
     {
         $param = $this->param;
         if (!empty($param['is_share']) && intval($param['is_share']) === 1) {
-            $ru    = new RoomUserModel();
-            $count = $ru->getCount(['room_id' => $param['room_id'], 'uid' => $param['uid']]);
-            if (!$count) {
-                echo json_encode(['status' => 14, 'info' => '选择段位', 'data' => null]);exit;
+            if (intval($param['type']) === 1) {
+                $ru    = new RoomUserModel();
+                $count = $ru->getCount(['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+                if (!$count) {
+                    echo json_encode(['status' => 14, 'info' => '选择段位', 'data' => null]);exit;
+                }
             }
             $state = $this->come_in_room(true);
             if ($state !== true) {
