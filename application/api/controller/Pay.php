@@ -687,13 +687,15 @@ class Pay extends \think\Controller
         $porder = $po->getModel(['id' => $param['order_id']]);
         // 查询订制订单
         $ord_where = ['uid' => $master_id, 'game_id' => $porder['game_id'], 'status' => 8];
+        $tip       = 'yule';
         if ($porder['play_type'] === 1) {
+            $tip                    = 'shile';
             $ord_where['play_type'] = 1;
         }
         $ua    = new UserAttrModel();
         $count = $ua->getCount($ord_where);
         if (!$count) {
-            echo json_encode(['status' => 7, 'info' => '您还未认证该游戏的陪玩类型', 'data' => null]);exit;
+            echo json_encode(['status' => 7, 'info' => '您还未认证该游戏的陪玩类型', 'data' => $tip]);exit;
         }
         $pmcount = $pmo->getCount(['order_id' => $param['order_id']]);
         if ($pmcount) {
