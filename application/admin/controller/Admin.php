@@ -2,7 +2,6 @@
 namespace app\admin\controller;
 
 use app\common\model\AdminModel;
-use app\common\model\LogModel;
 use app\common\model\MenuModel;
 use app\common\model\RoleAccessModel;
 use app\common\model\RoleModel;
@@ -165,8 +164,6 @@ class Admin extends \think\Controller
             $param['addtime'] = time();
             $param['status']  = 8;
             $res              = $a->add($param);
-            $l                = new LogModel();
-            $l->addLog(['type' => LogModel::TYPE_ADD_USER, 'content' => '添加用户，添加的用户：' . $param['username']]);
             if (!$res) {
                 return ['status' => 4, 'info' => '添加失败'];
             }
@@ -205,23 +202,18 @@ class Admin extends \think\Controller
             $field = 'is_delete';
             $value = 1;
             $msg   = '删除';
-            $data  = ['type' => LogModel::TYPE_DELETE_USER, 'content' => '删除用户，被删除的用户ID：' . $ids];
         } elseif ($type === 'disable' || $type === 'disableAll') {
             $field = 'status';
             $value = 6;
             $msg   = '禁用';
-            $data  = ['type' => LogModel::TYPE_DISABLE_USER, 'content' => '禁用用户，被禁用的用户ID：' . $ids];
         } elseif ($type == 'enable' || $type == 'enableAll') {
             $field = 'status';
             $value = 8;
             $msg   = '启用';
-            $data  = ['type' => LogModel::TYPE_ENABLE_USER, 'content' => '启用用户，被启用的用户ID：' . $ids];
         } else {
             return ['status' => 2, 'info' => '非法操作'];
         }
         $res = $a->modifyField($field, $value, ['id' => ['in', $ids]]);
-        $l   = new LogModel();
-        $l->addLog($data);
         if ($res) {
             return ['status' => 0, 'info' => $msg . '成功'];
         } elseif ($res === false) {
@@ -254,10 +246,12 @@ class Admin extends \think\Controller
             if ($role_id != 1) {
                 unset($param['role_id']);
             }
+            $is_pwd = false;
             if (!empty($param['pwd'])) {
                 $salt          = get_random_str(); // 生成密码盐
                 $param['salt'] = $salt;
                 $param['pwd']  = get_password($param['pwd'], $salt);
+                $is_pwd        = true;
             } else {
                 unset($param['pwd']);
             }
@@ -269,9 +263,13 @@ class Admin extends \think\Controller
             if (!$res) {
                 return ['status' => 4, 'info' => '修改失败'];
             }
-            $l = new LogModel();
-            $l->addLog(['type' => LogModel::TYPE_EDIT_USER, 'content' => '修改用户，被修改的用户ID：' . $id]);
-            return ['status' => 0, 'info' => '修改成功'];
+            $msg    = '修改成功';
+            $status = 0;
+            if ($is_pwd) {
+                $status = 88;
+                $msg    = '密码重修成功，请重新登录';
+            }
+            return ['status' => $status, 'info' => $msg];
         } else {
             $id = $this->request->get('id');
             if (empty($id) || !is_numeric($id)) {

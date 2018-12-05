@@ -149,6 +149,10 @@
                     success: function(data){
                         if (data.status == 0) {
                             layer.msg(data.info, {icon: 6, time: 1000});
+                        }else if (data.status == 88) {
+                            layer.msg(data.info, {icon: 6, time: 1000}, function(){
+                                window.top.location.href = '/login?action=logout'
+                            })
                         }else{
                             layer.msg(data.info, {icon: 5, time: 1000});
                         }

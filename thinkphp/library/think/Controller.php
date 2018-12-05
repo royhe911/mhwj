@@ -87,7 +87,7 @@ class Controller
         $admin  = Session::get('admin');
         $action = $this->request->get('action');
         if (empty($admin) && empty($action)) {
-            $this->error('登录超时，请重新登录', url('/admin/login'));
+            $this->error('登录超时，请重新登录', url('/login'));
         }
         return $admin;
     }
