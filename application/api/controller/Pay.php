@@ -673,8 +673,13 @@ class Pay extends \think\Controller
             echo json_encode($msg);exit;
         }
         $master_id = $param['master_id'];
-        $u         = new UserModel();
-        $count     = $u->getCount(['id' => $master_id, 'type' => 2, 'status' => 8]);
+        $r         = new RoomModel();
+        $count     = $r->getCount(['status' => ['in', '0,1,5,6,8']]);
+        if ($count) {
+            echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
+        }
+        $u     = new UserModel();
+        $count = $u->getCount(['id' => $master_id, 'type' => 2, 'status' => 8]);
         if (!$count) {
             echo json_encode(['status' => 6, 'info' => '您还未认证成为陪玩师，请先认证', 'data' => null]);exit;
         }
