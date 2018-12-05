@@ -941,15 +941,27 @@ class Pay extends \think\Controller
         if (!empty($porder['addtime'])) {
             $porder['addtime'] = date('Y-m-d H:i:s', $porder['addtime']);
         }
-        $u = new UserModel();
+        $u       = new UserModel();
+        $pmo     = new PersonMasterOrderModel();
+        $pmorder = $pmo->getModel(['order_id' => $porder['id']]);
         // 属性赋值
-        $porder['avatar']   = '';
-        $porder['nickname'] = '';
+        $porder['master_avatar']   = '';
+        $porder['master_nickname'] = '';
+        $porder['master_id']       = 0;
+        if ($pmorder) {
+            $user = $u->getModel(['id' => $pmorder['master_id']], ['avatar', 'nickname']);
+            if ($user) {
+                $porder['master_id']       = $pmorder['master_id'];
+                $porder['master_avatar']   = $user['avatar'];
+                $porder['master_nickname'] = $user['nickname'];
+            }
+        }
+        // 属性赋值
+        $porder['avatar'] = '';
         // 获取玩家信息
-        $user = $u->getModel(['id' => $porder['uid']], ['avatar', 'nickname']);
+        $user = $u->getModel(['id' => $porder['uid']], ['avatar']);
         if ($user) {
-            $porder['avatar']   = $user['avatar'];
-            $porder['nickname'] = $user['nickname'];
+            $porder['avatar'] = $user['avatar'];
         }
         $g    = new GameModel();
         $game = $g->getModel(['id' => $porder['game_id']], ['name']);
