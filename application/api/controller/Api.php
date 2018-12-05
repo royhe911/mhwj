@@ -1063,6 +1063,11 @@ class Api extends \think\Controller
             $ru       = new RoomUserModel();
             $roomuser = $ru->getList(['room_id' => $param['room_id']]);
             $uids     = array_column($roomuser, 'uid');
+            $mu       = new RoomMasterModel();
+            $masters  = $mu->getList(['room_id' => $param['room_id']]);
+            $mids     = array_column($masters, 'uid');
+            $mids     = array_merge($mids, [$room['uid']]);
+            $uids     = array_merge($uids, $mids);
             if ($room['room_status'] === 10) {
                 $msg = ['status' => 3, 'info' => '游戏已完成', 'data' => null];
             } elseif ($room['room_status'] === 9) {
@@ -1107,11 +1112,6 @@ class Api extends \think\Controller
                     $room['para_max_str'] = $gci['para_str'];
                 }
             }
-            $mu      = new RoomMasterModel();
-            $masters = $mu->getList(['room_id' => $param['room_id']]);
-            $mids    = array_column($masters, 'uid');
-            $mids    = array_merge($mids, [$room['uid']]);
-            $uids    = array_merge($uids, $mids);
             $u       = new UserModel();
             $users   = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar', 'wx', 'qq']);
             $members = [];
@@ -1178,11 +1178,11 @@ class Api extends \think\Controller
         }
         $room_id = $param['room_id'];
         $room    = $r->getModel(['id' => $room_id]);
-        if ($room['status'] === 5) {
+        $status  = intval($param['status']);
+        if ($room['status'] === 5 && $status === 5) {
             echo json_encode(['status' => 7, 'info' => '不能重复开始', 'data' => null]);exit;
         }
-        $status = intval($param['status']);
-        $ru     = new RoomUserModel();
+        $ru = new RoomUserModel();
         if ($status === 5) {
             $count = $ru->getCount(['room_id' => $room_id, 'status' => 0]);
             if ($count) {
@@ -1215,8 +1215,7 @@ class Api extends \think\Controller
             }
         }
         if ($status === 10) {
-            $count = $ru->getCount(['room_id' => $room_id]);
-            if (!$count) {
+            if ($room['status'] !== 8) {
                 echo json_encode(['status' => 22, 'info' => '游戏未开始，不能完成', 'data' => null]);exit;
             }
             $ch = new ChatModel();
