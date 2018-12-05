@@ -385,7 +385,7 @@ class Api extends \think\Controller
             // if ($morder) {
             //     $data['order_num'] = $morder['order_num'];
             // }
-            $rmdt = ['room_id' => $room['id'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count']];
+            $rmdt = ['room_id' => $room['id'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count'], 'status' => $room['status']];
             // 正在进行中的房间
             $data['room'] = $rmdt;
         }
@@ -880,7 +880,7 @@ class Api extends \think\Controller
                 $msg = ['status' => 7, 'info' => '您还未认证成为陪玩师，现在就去认证', 'data' => null];
             } elseif (intval($param['type']) === 1) {
                 $ua       = new UserAttrModel();
-                $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']], ['curr_para', 'play_type']);
+                $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id'], 'play_type' => $param['type']], ['curr_para', 'play_type']);
                 if (!$userAttr) {
                     $msg = ['status' => 10, 'info' => '您不能陪玩此游戏', 'data' => null];
                 } elseif ($userAttr['play_type'] === 1 && $userAttr['curr_para'] < $param['para_min']) {
@@ -1129,34 +1129,39 @@ class Api extends \think\Controller
             $price /= count($mids);
             $ustatarr = array_column($ustatus, null, 'uid');
             foreach ($users as $user) {
+                if (!empty($ustatarr[$user['id']])) {
+                    $usta       = $ustatarr[$user['id']];
+                    $status_txt = '';
+                    if ($usta['status'] === 0) {
+                        $status_txt = '未准备';
+                    } elseif ($usta['status'] === 1) {
+                        $status_txt = '已准备';
+                    } elseif ($usta['status'] === 6) {
+                        $status_txt = '已支付';
+                    }
+                }
+                if ($user['id'] === intval($param['uid'])) {
+                    if (in_array($user['id'], $mids)) {
+                        $room['total_money'] = $total_money;
+                        $room['price']       = $price;
+                    } else {
+                        $room['total_money'] = $usta['total_money'];
+                        $room['price']       = $usta['price'];
+                        $room['status']      = $usta['status'];
+                        $room['status_txt']  = $status_txt;
+                    }
+                }
                 if (in_array($user['id'], $mids)) {
                     if ($user['id'] === $room['uid']) {
                         $user['master'] = 1;
                     } else {
                         $user['master'] = 0;
                     }
-                    $room['total_money'] = $total_money;
-                    $room['price']       = $price;
                     $members['master'][] = $user;
                 } else {
-                    $usta = $ustatarr[$user['id']];
                     if (!empty($usta)) {
-                        $user['status'] = $usta['status'];
-                        $status_txt     = '';
-                        if ($usta['status'] === 0) {
-                            $status_txt = '未准备';
-                        } elseif ($usta['status'] === 1) {
-                            $status_txt = '已准备';
-                        } elseif ($usta['status'] === 6) {
-                            $status_txt = '已支付';
-                        }
+                        $user['status']     = $usta['status'];
                         $user['status_txt'] = $status_txt;
-                        if ($user['id'] === intval($param['uid'])) {
-                            $room['total_money'] = $usta['total_money'];
-                            $room['price']       = $usta['price'];
-                            $room['status']      = $usta['status'];
-                            $room['status_txt']  = $status_txt;
-                        }
                     }
                     $members['users'][] = $user;
                 }

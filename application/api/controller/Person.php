@@ -142,7 +142,7 @@ class Person extends \think\Controller
         }
         $list = $pr->getList(["$field" => $param['id']], ['order_id']);
         if (!$list) {
-            echo json_encode(['status' => 4, 'info' => '暂无聊天房间', 'data' => null]);exit;
+            echo json_encode(['status' => 4, 'info' => '暂无私聊', 'data' => null]);exit;
         }
         $order_ids = array_column($list, 'order_id');
         // 查询私聊最新记录
