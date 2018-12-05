@@ -31,20 +31,24 @@ class PersonOrderexit extends Command
      */
     protected function execute(Input $input, Output $output)
     {
-        $po   = new PersonOrderModel();
-        $list = $po->getList(['status' => 3], ['order_num', 'uid', 'order_money', 'transaction_id']);
-        if ($list) {
-            foreach ($list as $item) {
-                $total_fee  = $item['order_money'] * 100;
-                $refund_fee = $item['order_money'] * 100;
-                // 测试数据
-                $total_fee  = 1;
-                $refund_fee = 1;
-                $res        = $this->exit_money($item['order_num'], $total_fee, $refund_fee, $item['transaction_id'], $item['uid']);
-                if ($res === true) {
-                    $po->modifyField('status', 2, ['order_num' => $item['order_num']]);
+        try {
+            $po   = new PersonOrderModel();
+            $list = $po->getList(['status' => 3], ['order_num', 'uid', 'order_money', 'transaction_id']);
+            if ($list) {
+                foreach ($list as $item) {
+                    $total_fee  = $item['order_money'] * 100;
+                    $refund_fee = $item['order_money'] * 100;
+                    // 测试数据
+                    $total_fee  = 1;
+                    $refund_fee = 1;
+                    $res        = $this->exit_money($item['order_num'], $total_fee, $refund_fee, $item['transaction_id'], $item['uid']);
+                    if ($res === true) {
+                        $po->modifyField('status', 2, ['order_num' => $item['order_num']]);
+                    }
                 }
             }
+        } catch (\Exception $e) {
+            file_put_contents('/www/wwwroot/wwwdragontangcom/log/personexit' . time() . '.log', $e->getMessage());
         }
     }
 

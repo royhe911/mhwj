@@ -61,9 +61,8 @@ class Room extends Command
                     }
                 }
             }
-            echo "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";exit;
         } catch (\Exception $e) {
-            file_put_contents('/www/wwwroot/wwwdragontangcom/log/' . time() . '.log', $e->getMessage());
+            file_put_contents('/www/wwwroot/wwwdragontangcom/log/room' . time() . '.log', $e->getMessage());
         }
     }
 
