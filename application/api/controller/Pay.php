@@ -939,20 +939,15 @@ class Pay extends \think\Controller
         if (!empty($porder['addtime'])) {
             $porder['addtime'] = date('Y-m-d H:i:s', $porder['addtime']);
         }
-        $u       = new UserModel();
-        $pmo     = new PersonMasterOrderModel();
-        $pmorder = $pmo->getModel(['order_id' => $porder['id']]);
+        $u = new UserModel();
         // 属性赋值
-        $porder['master_avatar']   = '';
-        $porder['master_nickname'] = '';
-        $porder['master_id']       = 0;
-        if ($pmorder) {
-            $user = $u->getModel(['id' => $pmorder['master_id']], ['avatar', 'nickname']);
-            if ($user) {
-                $porder['master_id']       = $pmorder['master_id'];
-                $porder['master_avatar']   = $user['avatar'];
-                $porder['master_nickname'] = $user['nickname'];
-            }
+        $porder['avatar']   = '';
+        $porder['nickname'] = '';
+        // 获取玩家信息
+        $user = $u->getModel(['id' => $porder['uid']], ['avatar', 'nickname']);
+        if ($user) {
+            $porder['avatar']   = $user['avatar'];
+            $porder['nickname'] = $user['nickname'];
         }
         $g    = new GameModel();
         $game = $g->getModel(['id' => $porder['game_id']], ['name']);
@@ -982,6 +977,7 @@ class Pay extends \think\Controller
         $pay_data = null;
         if ($porder['status'] === 1) {
             $total_fee = $porder['order_money'] * 100;
+            $total_fee = 1;
             // 调用微信支付
             $pay_data = $this->wxpay($porder['uid'], $order_num, $total_fee);
             if ($pay_data === false) {
