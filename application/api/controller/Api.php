@@ -385,7 +385,7 @@ class Api extends \think\Controller
             // if ($morder) {
             //     $data['order_num'] = $morder['order_num'];
             // }
-            $rmdt = ['room_id' => $room['id'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count'], 'status' => $room['status']];
+            $rmdt = ['room_id' => $room['id'], 'room_name' => $room['name'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count'], 'status' => $room['status']];
             // 正在进行中的房间
             $data['room'] = $rmdt;
         }
