@@ -145,7 +145,7 @@
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
                     url: '/admin/edit',
-                    data: {'id': {$admin['id']}, 'username': username.val(), 'pwd': pwd2.val(), 'role_id': role_id, 'realname': realname.val(), 'nickname': nickname.val(), 's_id': s_id, 'avatar': avatar, 'email': $('#email').val(), 'mobile': $('#mobile').val()},
+                    data: {'id': {$admin['id']}, 'username': username.val(), 'pwd': pwd2.val(), 'role_id': role_id, 'realname': realname.val(), 'nickname': nickname.val(), 'avatar': avatar, 'email': $('#email').val(), 'mobile': $('#mobile').val()},
                     success: function(data){
                         if (data.status == 0) {
                             layer.msg(data.info, {icon: 6, time: 1000});
