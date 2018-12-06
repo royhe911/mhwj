@@ -1321,6 +1321,8 @@ class Api extends \think\Controller
                 $msg = '游戏已结束';
             } elseif ($res === 12) {
                 $msg = '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还';
+            } elseif ($res === 5) {
+                $msg = '您还没有认证实力上分';
             }
             echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
         }

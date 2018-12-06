@@ -140,6 +140,11 @@ class RoomModel extends CommonModel
                     return true;
                 }
                 if ($data['in_master_count'] < $data['master_count']) {
+                    $ua    = new UserAttrModel();
+                    $count = $ua->getCount(['uid' => $param['uid'], 'play_type' => 1]);
+                    if (!$count) {
+                        return 5;
+                    }
                     $in_data = ['room_id' => $data['id'], 'uid' => $param['uid'], 'addtime' => time()];
                     $res     = $rm->add($in_data);
                     if (!$res) {
