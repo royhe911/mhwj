@@ -395,7 +395,7 @@ class Pay extends \think\Controller
         if (!$count) {
             echo json_encode(['status' => 6, 'info' => '该订单不属于你', 'data' => null]);exit;
         }
-        if ($porder['status'] !== 7) {
+        if ($porder['status'] !== 7 && $porder['status'] !== 10) {
             echo json_encode(['status' => 7, 'info' => '该订单不能被完成', 'data' => null]);exit;
         }
         $res = $pmo->modifyField('status', 1, ['order_id' => $porder['id'], 'status' => 0]);

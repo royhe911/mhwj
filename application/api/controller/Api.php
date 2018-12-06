@@ -861,9 +861,9 @@ class Api extends \think\Controller
         } elseif (empty($param['master_count']) || intval($param['master_count']) < 1 || intval($param['master_count']) > 4) {
             $msg = ['status' => 6, 'info' => '陪玩师人数只能为1-4人', 'data' => null];
         } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5 || (intval($param['type']) === 2 && intval($param['num']) > 3)) {
-            $str = '局数不正确';
+            $str = '局数只能是1-5局';
             if (intval($param['type']) === 2) {
-                $str = '小时数不正确';
+                $str = '小时数只能是1-3小时';
             }
             $msg = ['status' => 15, 'info' => $str, 'data' => null];
         } else {
