@@ -186,7 +186,7 @@ class RoomModel extends CommonModel
                 $mo->modifyField('status', 0, ['room_id' => $room_id]);
             } elseif ($room['status'] === 5) {
                 $ru->modifyField('status', 4, ['room_id' => $room_id]);
-                $this->modifyField('status', 9, ['id' => $room_id]);
+                $this->modifyField('status', 7, ['id' => $room_id]);
                 $cu->delByWhere(['room_id' => $room_id]);
                 $c = new ChatModel();
                 $c->delByWhere(['room_id' => $room_id]);

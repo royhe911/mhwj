@@ -1,66 +1,52 @@
 <?php
 namespace app\common\crontab;
 
-use app\common\model\MasterOrderModel;
-use app\common\model\RoomMasterModel;
 use app\common\model\RoomModel;
-use app\common\model\RoomUserModel;
 use app\common\model\UserOrderModel;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
 
 /**
- * 销毁房间定时任务类
+ * 退出房间退款定时任务类
  * @author 贺强
- * @time   2018-11-27 19:21:03
+ * @time   2018-12-06 15:47:11
  */
-class Room extends Command
+class Roomrefund extends Command
 {
     /**
      * 设置定时任务时间执行规则
      * @author 贺强
-     * @time   2018-11-27 19:21:07
+     * @time   2018-12-06 15:47:18
      */
     protected function configure()
     {
-        $this->setName('room')->setDescription('here is the remark');
+        $this->setName('roomrefund')->setDescription('here is the remark');
     }
 
     /**
      * 执行定时任务
      * @author 贺强
-     * @time   2018-11-27 19:21:15
+     * @time   2018-12-06 15:47:29
      */
     protected function execute(Input $input, Output $output)
     {
         try {
-            $ru   = new RoomUserModel();
-            $list = $ru->getList(['status' => 5, 'ready_time' => ['lt', time() - 300]], ['room_id']);
+            $r    = new RoomModel();
+            $list = $r->getList(['status' => 7], ['id']);
             if ($list) {
-                $ids = '0';
-                foreach ($list as $item) {
-                    $ids .= ",{$item['room_id']}";
+                $ids = array_column($list, 'id');
+                $uo  = new UserOrderModel();
+                // 查询已支付订单
+                $ordlist = $uo->getList(['room_id' => ['in', $ids], 'transaction_id' => ['<>', '']]);
+                foreach ($ordlist as $uord) {
+                    // 退款
+                    $this->exit_money($uord['order_num'], 1, 1, $uord['transaction_id'], $uord['uid']);
                 }
-                if ($ids !== '0') {
-                    $ru->modifyField('status', 4, ['room_id' => ['in', $ids]]);
-                    $r = new RoomModel();
-                    $r->modifyField('status', 9, ['id' => ['in', $ids]]);
-                    $mo = new MasterOrderModel();
-                    $mo->modifyField('status', 9, ['room_id' => ['in', $ids]]);
-                    $rm = new RoomMasterModel();
-                    $rm->delByWhere(['room_id' => ['in', $ids]]);
-                    $uo = new UserOrderModel();
-                    $uo->modifyField('status', 9, ['room_id' => ['in', $ids]]);
-                    $uords = $uo->getList(['room_id' => ['in', $ids], 'transaction_id' => ['<>', '']], ['uid', 'order_num', 'order_money', 'transaction_id']);
-                    foreach ($uords as $uord) {
-                        // 退款测试1分
-                        $this->exit_money($uord['order_num'], 1, 1, $uord['transaction_id'], $uord['uid']);
-                    }
-                }
+                $r->modifyField('status', 9, ['status' => 7]);
             }
         } catch (\Exception $e) {
-            file_put_contents('/www/wwwroot/wwwdragontangcom/log/room' . time() . '.log', $e->getMessage());
+            file_put_contents('/www/wwwroot/wwwdragontangcom/log/roomrefund' . time() . '.log', $e->getMessage());
         }
     }
 

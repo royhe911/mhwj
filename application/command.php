@@ -14,5 +14,6 @@ return [
     'app\common\crontab\Coupon',
     'app\common\crontab\PersonOrder',
     'app\common\crontab\Room',
+    'app\common\crontab\Roomrefund',
     'app\common\crontab\PersonOrderexit',
 ];
