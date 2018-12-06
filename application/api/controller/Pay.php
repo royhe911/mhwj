@@ -434,11 +434,11 @@ class Pay extends \think\Controller
         // 查询譔下单人是否已在房间里
         $count = $ru->getCount(['uid' => $param['uid'], 'status' => ['not in', '4,10']]);
         if ($count) {
-            echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
+            echo json_encode(['status' => 9, 'info' => '您有订单还未完成', 'data' => null]);exit;
         }
         $count = $po->getCount(['uid' => $param['uid'], 'status' => ['in', '1,6,7']]);
         if ($count) {
-            echo json_encode(['status' => 11, 'info' => '您有订单未完成', 'data' => null]);exit;
+            echo json_encode(['status' => 11, 'info' => '您有订单还未完成', 'data' => null]);exit;
         }
         $order_num            = get_millisecond();
         $param['order_num']   = $order_num;
