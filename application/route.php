@@ -99,6 +99,7 @@ return [
     '/api/pay/uodrs'      => 'api/Pay/get_user_order', // 玩家订单
     '/api/pay/userpay'    => 'api/Pay/user_pay', // 房间支付
     '/api/pay/odrsta'     => 'api/Pay/modify_order', // 修改订单状态
+    '/api/pay/mposta'     => 'api/Pay/master_porder', // 陪玩师完成订制订单
     '/api/pay/ppord'      => 'api/Pay/personal_preorder', // 订制下单
     '/api/pay/personpay'  => 'api/Pay/person_pay', // 订制支付
     '/api/pay/popay'      => 'api/Pay/person_ord_pay', // 订制预支付

@@ -369,6 +369,43 @@ class Pay extends \think\Controller
     }
 
     /**
+     * 陪玩师修改订制订单状态
+     * @author 贺强
+     * @time   2018-12-06 16:47:18
+     * @param  PersonMasterOrderModel $pmo PersonMasterOrderModel 实例
+     */
+    public function master_porder(PersonMasterOrderModel $pmo)
+    {
+        $param = $this->param;
+        if (empty($param['order_num'])) {
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'data' => null];
+        }
+        if (empty($param['master_id'])) {
+            $msg = ['status' => 3, 'info' => '陪玩师ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $po     = new PersonOrderModel();
+        $porder = $po->getModel(['order_num' => $param['order_num']]);
+        if (!$porder) {
+            echo json_encode(['status' => 5, 'info' => '订单不存在', 'data' => null]);exit;
+        }
+        $count = $pmo->getCount(['master_id' => $param['master_id'], 'order_id' => $porder['id']]);
+        if (!$count) {
+            echo json_encode(['status' => 6, 'info' => '该订单不属于你', 'data' => null]);exit;
+        }
+        if ($porder['status'] !== 7) {
+            echo json_encode(['status' => 7, 'info' => '该订单不能被完成', 'data' => null]);exit;
+        }
+        $res = $pmo->modifyField('status', 1, ['order_id' => $porder['id'], 'status' => 0]);
+        if (!$res) {
+            echo json_encode(['status' => 9, 'info' => '完成失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '完成成功', 'data' => null]);exit;
+    }
+
+    /**
      * 订制下单
      * @author 贺强
      * @time   2018-11-15 15:23:27
@@ -697,13 +734,18 @@ class Pay extends \think\Controller
         if (!$count) {
             echo json_encode(['status' => 7, 'info' => '您还未认证该游戏的陪玩类型', 'data' => $tip]);exit;
         }
+        $count = $pmo->getList(['master_id' => $param['master_id'], 'status' => 0]);
+        if ($count) {
+            echo json_encode(['status' => 11, 'info' => '您还有未完成的订制订单', 'data' => null]);exit;
+        }
         $pmcount = $pmo->getCount(['order_id' => $param['order_id']]);
         if ($pmcount) {
             echo json_encode(['status' => 1, 'info' => '订单已被抢', 'data' => null]);exit;
         }
         $param['addtime'] = time();
-        $res              = $pmo->robbing_order($param);
-        $msg              = ['status' => $res, 'data' => null];
+        // 抢单
+        $res = $pmo->robbing_order($param);
+        $msg = ['status' => $res, 'data' => null];
         if ($res === 1) {
             $msg['info'] = '订单已被抢';
         } elseif ($res === 2) {
