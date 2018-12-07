@@ -242,7 +242,7 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $where = ['uid' => $param['uid'], 'status' => ['<>', 3]];
+        $where = ['uid' => $param['uid'], 'status' => ['in', '1,6,10']];
         if (!empty($param['status']) && $param['status'] != 'all') {
             $where['status'] = $param['status'];
         }
@@ -380,9 +380,6 @@ class Pay extends \think\Controller
         if (empty($param['order_num'])) {
             $msg = ['status' => 1, 'info' => '订单号不能为空', 'data' => null];
         }
-        if (empty($param['master_id'])) {
-            $msg = ['status' => 3, 'info' => '陪玩师ID不能为空', 'data' => null];
-        }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
@@ -394,10 +391,6 @@ class Pay extends \think\Controller
         $porder = $po->getModel(['order_num' => $param['order_num']]);
         if (!$porder) {
             echo json_encode(['status' => 5, 'info' => '订单不存在', 'data' => null]);exit;
-        }
-        $count = $pmo->getCount(['master_id' => $param['master_id'], 'order_id' => $porder['id']]);
-        if (!$count) {
-            echo json_encode(['status' => 6, 'info' => '该订单不属于你', 'data' => null]);exit;
         }
         // 如果陪玩师点开车则修改订单状态
         if ($status === 8) {
@@ -858,7 +851,9 @@ class Pay extends \think\Controller
         }
         $where = ['a.master_id' => $param['master_id']];
         if (!empty($param['status'])) {
-            $where['po.status'] = $param['status'];
+            if (intval($param['status']) === 6) {
+                $where['a.status'] = ['in', '7,8'];
+            }
         }
         // 分页参数
         $page     = 1;
@@ -869,7 +864,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $pmo->getJoinList([['m_person_order po', ['a.order_id=po.id']]], $where, ['master_id', 'order_num', 'a.uid', 'game_id', 'play_type', 'order_money', 'a.addtime', 'po.status'], "$page,$pagesize");
+        $list = $pmo->getJoinList([['m_person_order po', ['a.order_id=po.id']]], $where, ['master_id', 'order_num', 'a.uid', 'game_id', 'play_type', 'order_money', 'a.addtime', 'a.status'], "$page,$pagesize");
         if ($list) {
             $uids   = array_column($list, 'uid');
             $u      = new UserModel();
@@ -985,6 +980,10 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $type = 2;
+        if (!empty($param['type'])) {
+            $type = 1;
+        }
         $order_num = $param['order_num'];
         $porder    = $po->getModel(['order_num' => $order_num]);
         if (!$porder) {
@@ -1001,6 +1000,9 @@ class Pay extends \think\Controller
         $porder['master_nickname'] = '';
         $porder['master_id']       = 0;
         if ($pmorder) {
+            if ($type === 2) {
+                $porder['status'] = $pmorder['status'];
+            }
             $user = $u->getModel(['id' => $pmorder['master_id']], ['avatar', 'nickname']);
             if ($user) {
                 $porder['master_id']       = $pmorder['master_id'];
