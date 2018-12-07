@@ -55,7 +55,10 @@ class Person extends \think\Controller
         }
         $order_id = $param['order_id'];
         $room     = $pr->getModel(['order_id' => $order_id]);
-        $chatlog  = null;
+        if (!$room) {
+            echo json_encode(['status' => 5, 'info' => '房间已销毁', 'data' => null]);exit;
+        }
+        $chatlog = null;
         if ($room) {
             $res     = $pr->modify($param, ['order_id' => $order_id]);
             $pc      = new PersonChatModel();
@@ -64,8 +67,11 @@ class Person extends \think\Controller
             $param['addtime'] = time();
             $res              = $pr->add($param);
         }
-        $po      = new PersonOrderModel();
-        $porder  = $po->getModel(['id' => $order_id]);
+        $po     = new PersonOrderModel();
+        $porder = $po->getModel(['id' => $order_id]);
+        if (!$porder) {
+            echo json_encode(['status' => 5, 'info' => '房间已销毁', 'data' => null]);exit;
+        }
         $members = null;
         $u       = new UserModel();
         $users   = $u->getList(['id' => ['in', "{$room['uid']},{$room['master_id']}"]], ['id', 'nickname', 'avatar', 'qq', 'wx']);
