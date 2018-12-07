@@ -386,6 +386,10 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $status = 10;
+        if (!empty($param['status'])) {
+            $status = $param['status'];
+        }
         $po     = new PersonOrderModel();
         $porder = $po->getModel(['order_num' => $param['order_num']]);
         if (!$porder) {
@@ -395,14 +399,18 @@ class Pay extends \think\Controller
         if (!$count) {
             echo json_encode(['status' => 6, 'info' => '该订单不属于你', 'data' => null]);exit;
         }
-        if ($porder['status'] !== 7 && $porder['status'] !== 10) {
+        // 如果陪玩师点开车则修改订单状态
+        if ($status === 8) {
+            $po->modifyField('status', 8, ['order_num' => $param['order_num']]);
+        }
+        if ($status === 10 && $porder['status'] !== 8 && $porder['status'] !== 10) {
             echo json_encode(['status' => 7, 'info' => '该订单不能被完成', 'data' => null]);exit;
         }
-        $res = $pmo->modifyField('status', 1, ['order_id' => $porder['id'], 'status' => 0]);
-        if (!$res) {
-            echo json_encode(['status' => 9, 'info' => '完成失败', 'data' => null]);exit;
+        $res = $pmo->modifyField('status', $status, ['order_id' => $porder['id']]);
+        if ($res === false) {
+            echo json_encode(['status' => 9, 'info' => '修改失败', 'data' => null]);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '完成成功', 'data' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
     }
 
     /**
