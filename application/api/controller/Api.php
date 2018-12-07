@@ -390,7 +390,12 @@ class Api extends \think\Controller
             $data['room'] = $rmdt;
         } else {
             $person = $pmo->getModel(['master_id' => $master_id, 'status' => ['<>', 10]], ['order_id', 'status']);
-            // 正在进行中的私聊房间
+            if ($person) {
+                $po     = new PersonOrderModel();
+                $porder = $po->getModel(['id' => $person['order_id']]);
+                // 正在进行中的私聊房间
+                $person['order_num'] = $porder['order_num'];
+            }
             $data['person'] = $person;
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
@@ -1390,24 +1395,31 @@ class Api extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $count = $r->getCount(['id' => $param['room_id'], 'uid' => $param['uid']]);
+        $room_id = $param['room_id'];
+        $uid     = $param['uid'];
+        $count   = $r->getCount(['id' => $room_id, 'uid' => $uid]);
         if (!$count) {
-            echo json_encode(['status' => 3, 'info' => '您不是房主，无权关闭', 'data' => null]);exit;
+            $rm  = new RoomMasterModel();
+            $res = $rm->delByWhere(['uid' => $uid, 'room_id' => $room_id]);
+            if (!$res) {
+                echo json_encode(['status' => 3, 'info' => '您不是房主，无权关闭', 'data' => null]);exit;
+            }
+            echo json_encode(['status' => 0, 'info' => '退出房间成功', 'data' => null]);exit;
         }
-        $count = $ru->getCount(['room_id' => $param['room_id']]);
+        $count = $ru->getCount(['room_id' => $room_id]);
         if ($count) {
             echo json_encode(['status' => 4, 'info' => '房间里有其他玩家，不能关闭']);exit;
         }
-        $res = $r->delById($param['room_id']);
+        $res = $r->delById($room_id);
         if (!$res) {
             echo json_encode(['status' => 44, 'info' => '关闭失败', 'data' => null]);exit;
         }
         $c = new ChatModel();
-        $c->delByWhere(['room_id' => $param['room_id']]);
+        $c->delByWhere(['room_id' => $room_id]);
         $cu = new ChatUserModel();
-        $cu->delByWhere(['room_id' => $param['room_id']]);
+        $cu->delByWhere(['room_id' => $room_id]);
         $mo = new MasterOrderModel();
-        $mo->delByWhere(['room_id' => $param['room_id']]);
+        $mo->delByWhere(['room_id' => $room_id]);
         echo json_encode(['status' => 0, 'info' => '关闭成功', 'data' => null]);exit;
     }
 
