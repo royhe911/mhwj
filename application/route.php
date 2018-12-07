@@ -113,6 +113,7 @@ return [
     '/api/pay/masterord'  => 'api/Pay/get_master_order', // 陪玩师房间订单
     '/api/pay/masterpord' => 'api/Pay/get_master_pord', // 陪玩师订制订单
     '/api/pay/pordinfo'   => 'api/Pay/get_pord_info', // 订制订单详情
+    '/api/pay/pordstatus' => 'api/Pay/get_pord_status', // 订制订单状态
     '/api/pay/uordinfo'   => 'api/Pay/get_uord_info', // 房间玩家订单详情
     '/api/pay/mordinfo'   => 'api/Pay/get_mord_info', // 房间陪玩师订单详情
     /*--------   支付 api 结束  --------*/

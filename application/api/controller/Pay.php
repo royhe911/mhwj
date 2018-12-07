@@ -1064,6 +1064,28 @@ class Pay extends \think\Controller
     }
 
     /**
+     * 获取订单状态
+     * @author 贺强
+     * @time   2018-12-07 20:48:51
+     * @param  PersonOrderModel $po PersonOrderModel 实例
+     */
+    public function get_pord_status(PersonOrderModel $po)
+    {
+        $param = $this->param;
+        if (empty($param['order_id'])) {
+            $msg = ['status' => 1, 'info' => '订单ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $porder = $po->getModel(['id' => $param['order_id']], ['status']);
+        if ($porder) {
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['status' => $porder['status']]]);exit;
+        }
+        echo json_encode(['status' => 4, 'info' => '订单不存在', 'data' => null]);exit;
+    }
+
+    /**
      * 获取玩家房间订单详情
      * @author 贺强
      * @time   2018-11-19 10:46:02
