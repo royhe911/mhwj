@@ -1088,7 +1088,7 @@ class Api extends \think\Controller
             $uids     = array_merge($uids, $mids);
             if ($room['room_status'] === 10) {
                 $msg = ['status' => 3, 'info' => '游戏已完成', 'data' => null];
-            } elseif ($room['room_status'] === 9) {
+            } elseif ($room['room_status'] === 9 || $room['room_status'] === 7) {
                 $msg = ['status' => 5, 'info' => '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还', 'data' => null];
             } elseif ($room['count'] === $room['in_count']) {
                 if (!in_array(intval($param['uid']), $uids)) {
@@ -1362,8 +1362,13 @@ class Api extends \think\Controller
             if (!empty($param['is_kicking']) && intval($param['is_kicking']) === 1 && $rusr['status'] !== 0) {
                 echo json_encode(['status' => 22, 'info' => '该用户已准备，不能踢', 'data' => null]);exit;
             }
-            if ($rusr['status'] === 6) {
-                echo json_encode(['status' => 23, 'info' => '您已付款，不能退出', 'data' => null]);exit;
+            if ($rusr['status'] === 5) {
+                $msg = ['status' => 23, 'info' => '房主已点开始，不能退出', 'data' => null];
+            } elseif ($rusr['status'] === 6) {
+                $msg = ['status' => 23, 'info' => '您已付款，不能退出', 'data' => null];
+            }
+            if (!empty($msg)) {
+                echo json_encode($msg);exit;
             }
         }
         $res = $r->quit_room($param['room_id'], $param['uid']);

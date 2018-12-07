@@ -146,7 +146,7 @@ class Person extends \think\Controller
             $selid = 'master_id';
             $field = 'uid';
         }
-        $list = $pr->getList(["$field" => $id], ['order_id', 'master_id', 'uid']);
+        $list = $pr->getList(["$field" => $id], ['order_id', 'master_id', 'uid', 'addtime']);
         if (!$list) {
             echo json_encode(['status' => 4, 'info' => '暂无私聊', 'data' => null]);exit;
         }
