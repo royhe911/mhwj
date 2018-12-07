@@ -1606,11 +1606,13 @@ class Api extends \think\Controller
             $u     = new UserModel();
             $users = $u->getList(['id' => ['in', $uids]], ['id master_id', 'nickname', 'avatar']);
             $users = array_column($users, null, 'master_id');
-            foreach ($list as &$item) {
+            foreach ($list as $k => &$item) {
                 if (!empty($users[$item['uid']])) {
                     $score         = $item['score'];
                     $item          = $users[$item['uid']];
                     $item['score'] = $score;
+                } else {
+                    unset($list[$k]);
                 }
             }
         }
@@ -1640,7 +1642,7 @@ class Api extends \think\Controller
             $u     = new UserModel();
             $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
             $users = array_column($users, null, 'id');
-            foreach ($list as &$item) {
+            foreach ($list as $k => &$item) {
                 $item['score'] = rtrim($item['score'], '0');
                 $item['score'] = rtrim($item['score'], '.');
                 if (!empty($users[$item['master_id']])) {
@@ -1649,8 +1651,7 @@ class Api extends \think\Controller
                     $item['nickname'] = $master['nickname'];
                     $item['avatar']   = $master['avatar'];
                 } else {
-                    $item['nickname'] = '';
-                    $item['avatar']   = '';
+                    unset($list[$k]);
                 }
             }
         }
