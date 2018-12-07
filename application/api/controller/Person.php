@@ -139,18 +139,23 @@ class Person extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $id    = $param['id'];
+        $selid = 'uid';
         $field = 'master_id';
         if (!empty($param['type']) && intval($param['type']) === 1) {
+            $selid = 'master_id';
             $field = 'uid';
         }
-        $list = $pr->getList(["$field" => $param['id']], ['order_id']);
+        $list = $pr->getList(["$field" => $id], ['order_id', 'master_id', 'uid']);
         if (!$list) {
             echo json_encode(['status' => 4, 'info' => '暂无私聊', 'data' => null]);exit;
         }
         $order_ids = array_column($list, 'order_id');
+        $order_ids = implode(',', $order_ids);
+        $uids      = array_column($list, "$selid");
         // 查询私聊最新记录
         $pc      = new PersonChatModel();
-        $sql     = 'select * from (select order_id,nickname,avatar,content,addtime from m_person_chat order by addtime desc) t group by t.order_id';
+        $sql     = "select * from (select order_id,content,addtime from m_person_chat where order_id in ($order_ids) order by addtime desc) t group by t.order_id";
         $chatlog = $pc->query($sql);
         foreach ($chatlog as &$chat) {
             if (!empty($chat['addtime'])) {
@@ -158,18 +163,29 @@ class Person extends \think\Controller
             }
         }
         $chatlog = array_column($chatlog, null, 'order_id');
-        $u       = new UserModel();
+        // 取得用户头像
+        $u     = new UserModel();
+        $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+        $users = array_column($users, null, 'id');
         foreach ($list as &$item) {
             if (!empty($chatlog[$item['order_id']])) {
-                $item = $chatlog[$item['order_id']];
+                $val = $chatlog[$item['order_id']];
             } else {
-                $user = $u->getModel(['id' => $param['id']], ['nickname', 'avatar']);
                 // 给聊天内容和时间赋空值
-                $user['order_id'] = $item['order_id'];
-                $user['content']  = '';
-                $user['addtime']  = '';
-                $item             = $user;
+                $val['order_id'] = $item['order_id'];
+                $val['content']  = '';
+                $val['addtime']  = date('Y-m-d H:i:s', $item['addtime']);
             }
+            if (!empty($users[$item["$selid"]])) {
+                $user = $users[$item["$selid"]];
+                // 取聊天对方的昵称头像
+                $val['nickname'] = $user['nickname'];
+                $val['avatar']   = $user['avatar'];
+            } else {
+                $val['nickname'] = '';
+                $val['avatar']   = '';
+            }
+            $item = $val;
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
