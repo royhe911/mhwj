@@ -1039,7 +1039,7 @@ class Api extends \think\Controller
             $user = ['id' => $room['id'], 'count' => $room['count'], 'in_count' => $room['in_count']];
         }
         $po  = new PersonOrderModel();
-        $pod = $po->getModel(['uid' => $param['uid'], 'status' => 7], ['id']);
+        $pod = $po->getModel(['uid' => $param['uid'], 'status' => ['in', '1,6,7,8']], ['id']);
         if (!empty($pod)) {
             $user['porder'] = $pod['id'];
         }
