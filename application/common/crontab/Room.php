@@ -36,7 +36,7 @@ class Room extends Command
     {
         try {
             $ru   = new RoomUserModel();
-            $list = $ru->getList(['status' => 5, 'ready_time' => ['lt', time() - 300]], ['room_id']);
+            $list = $ru->getList(['status' => 5, 'ready_time' => ['lt', time() - 180]], ['room_id']);
             if ($list) {
                 $ids = '0';
                 foreach ($list as $item) {
