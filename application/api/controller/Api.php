@@ -875,7 +875,7 @@ class Api extends \think\Controller
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
             }
             $pmo   = new PersonMasterOrderModel();
-            $count = $pmo->getCount(['master_id' => $param['uid'], 'status' => 0]);
+            $count = $pmo->getCount(['master_id' => $param['uid'], 'status' => ['<>', 10]]);
             if ($count) {
                 echo json_encode(['status' => 17, 'info' => '您还有未完成的订制订单', 'data' => null]);exit;
             }
