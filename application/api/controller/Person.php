@@ -65,7 +65,7 @@ class Person extends \think\Controller
         $members = null;
         $person  = $pr->getModel(['order_id' => $param['order_id']]);
         $u       = new UserModel();
-        $users   = $u->getList(['id' => ['in', "{$person['uid']},{$person['master_id']}"]], ['id', 'nickname', 'avatar']);
+        $users   = $u->getList(['id' => ['in', "{$person['uid']},{$person['master_id']}"]], ['id', 'nickname', 'avatar', 'qq', 'wx']);
         foreach ($users as $user) {
             if ($user['id'] === $person['master_id']) {
                 $members['master'] = $user;
@@ -146,8 +146,8 @@ class Person extends \think\Controller
         }
         $order_ids = array_column($list, 'order_id');
         // 查询私聊最新记录
-        $pc  = new PersonChatModel();
-        $sql = 'select * from (select order_id,nickname,avatar,content,addtime from m_person_chat order by addtime desc) t group by t.order_id';
+        $pc      = new PersonChatModel();
+        $sql     = 'select * from (select order_id,nickname,avatar,content,addtime from m_person_chat order by addtime desc) t group by t.order_id';
         $chatlog = $pc->query($sql);
         foreach ($chatlog as &$chat) {
             if (!empty($chat['addtime'])) {
