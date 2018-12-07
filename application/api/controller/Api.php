@@ -375,9 +375,9 @@ class Api extends \think\Controller
         // 累计收益
         $data['acc_money'] = $user['acc_money'];
         $data['order_num'] = '';
-        // $data['room']      = null;
+        $data['room']      = null;
+        $data['person']    = null;
         // 正在进行中的房间
-        $r    = new RoomModel();
         $room = $r->getModel(['uid' => $master_id, 'status' => ['in', '0,1,5,6,8']]);
         if ($room) {
             // $mo     = new MasterOrderModel();
@@ -388,6 +388,10 @@ class Api extends \think\Controller
             $rmdt = ['room_id' => $room['id'], 'room_name' => $room['name'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count'], 'status' => $room['status']];
             // 正在进行中的房间
             $data['room'] = $rmdt;
+        } else {
+            $person = $pmo->getModel(['master_id' => $master_id, 'status' => ['<>', 10]], ['order_id', 'status']);
+            // 正在进行中的私聊房间
+            $data['person'] = $person;
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
     }
