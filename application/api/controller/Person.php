@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use app\common\model\PersonChatModel;
+use app\common\model\PersonOrderModel;
 use app\common\model\PersonRoomModel;
 use app\common\model\UserModel;
 
@@ -52,25 +53,27 @@ class Person extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $room    = $pr->getModel(['order_id' => $param['order_id']]);
-        $chatlog = null;
+        $order_id = $param['order_id'];
+        $room     = $pr->getModel(['order_id' => $order_id]);
+        $chatlog  = null;
         if ($room) {
-            $res     = $pr->modify($param, ['order_id' => $param['order_id']]);
+            $res     = $pr->modify($param, ['order_id' => $order_id]);
             $pc      = new PersonChatModel();
-            $chatlog = $pc->getList(['order_id' => $param['order_id']], ['avatar', 'content', 'author_type']);
+            $chatlog = $pc->getList(['order_id' => $order_id], ['avatar', 'content', 'author_type']);
         } else {
             $param['addtime'] = time();
             $res              = $pr->add($param);
         }
+        $po      = new PersonOrderModel();
+        $porder  = $po->getModel(['id' => $order_id]);
         $members = null;
-        $person  = $pr->getModel(['order_id' => $param['order_id']]);
         $u       = new UserModel();
-        $users   = $u->getList(['id' => ['in', "{$person['uid']},{$person['master_id']}"]], ['id', 'nickname', 'avatar', 'qq', 'wx']);
+        $users   = $u->getList(['id' => ['in', "{$room['uid']},{$room['master_id']}"]], ['id', 'nickname', 'avatar', 'qq', 'wx']);
         foreach ($users as $user) {
-            if ($user['id'] === $person['master_id']) {
+            if ($user['id'] === $room['master_id']) {
                 $members['master'] = $user;
             }
-            if ($user['id'] === $person['uid']) {
+            if ($user['id'] === $room['uid']) {
                 $members['users'] = $user;
             }
         }
@@ -81,7 +84,7 @@ class Person extends \think\Controller
             $members['users'] = null;
         }
         if ($res !== false) {
-            $msg = ['status' => 0, 'info' => '进入房间成功', 'data' => ['members' => $members, 'chatlog' => $chatlog]];
+            $msg = ['status' => 0, 'info' => '进入房间成功', 'data' => ['order' => ['order_num' => $porder['order_num'], 'region' => $porder['region']], 'members' => $members, 'chatlog' => $chatlog]];
         } else {
             $msg = ['status' => 4, 'info' => '进入房间失败', 'data' => null];
         }
