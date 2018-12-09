@@ -1229,6 +1229,25 @@ class Pay extends \think\Controller
         } else {
             $morder['play_type'] = '娱乐陪玩';
         }
+        $uo      = new UserOrderModel();
+        $comment = $uo->getJoinList([['m_user_evaluate ue', 'a.id=ue.order_id']], ['type' => 1, 'a.room_id' => $morder['room_id']], ['ue.uid', 'ue.content', 'ue.score', 'ue.addtime']);
+        if ($comment) {
+            $uids  = array_column($comment, 'uid');
+            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
+            foreach ($comment as &$cmt) {
+                if (!empty($users[$cmt['uid']])) {
+                    $user = $users[$cmt['uid']];
+                    // 属性赋值
+                    $cmt['nickname'] = $user['nickname'];
+                    $cmt['avatar']   = $user['avatar'];
+                } else {
+                    $cmt['nickname'] = '';
+                    $cmt['avatar']   = '';
+                }
+            }
+        }
+        $morder['comment'] = $comment;
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $morder]);exit;
     }
 
