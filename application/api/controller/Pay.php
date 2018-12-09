@@ -1033,12 +1033,15 @@ class Pay extends \think\Controller
             $porder['play_type'] = '娱乐陪玩';
         }
         $ue      = new UserEvaluateModel();
-        $comment = $ue->getModel(['type' => 2, 'order_id' => $porder['id']], ['uid', 'content', 'score']);
+        $comment = $ue->getModel(['type' => 2, 'order_id' => $porder['id']], ['uid', 'content', 'score', 'addtime']);
         if ($comment) {
             $user = $u->getModel(['id' => $comment['uid']], ['avatar', 'nickname']);
             // 属性赋值
             $comment['user_nickname'] = $user['nickname'];
             $comment['user_avatar']   = $user['avatar'];
+            if ($comment['addtime']) {
+                $comment['addtime'] = date('Y-m-d H:i:s', $comment['addtime']);
+            }
         }
         $porder['comment'] = $comment;
         // 订单未支付
@@ -1138,12 +1141,15 @@ class Pay extends \think\Controller
             $uorder['play_type'] = '娱乐陪玩';
         }
         $ue      = new UserEvaluateModel();
-        $comment = $ue->getModel(['type' => 1, 'order_id' => $uorder['id']], ['uid', 'content', 'score']);
+        $comment = $ue->getModel(['type' => 1, 'order_id' => $uorder['id']], ['uid', 'content', 'score', 'addtime']);
         if ($comment) {
             $user = $u->getModel(['id' => $comment['uid']], ['avatar', 'nickname']);
             // 属性赋值
             $comment['user_nickname'] = $user['nickname'];
             $comment['user_avatar']   = $user['avatar'];
+            if ($comment['addtime']) {
+                $comment['addtime'] = date('Y-m-d H:i:s', $comment['addtime']);
+            }
         }
         $uorder['comment'] = $comment;
         // 如果未支付

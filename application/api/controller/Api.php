@@ -1565,6 +1565,7 @@ class Api extends \think\Controller
         } elseif (empty($param['score'])) {
             $msg = ['status' => 7, 'info' => '评价分数不能为空', 'data' => null];
         }
+        $param['addtime'] = time();
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
