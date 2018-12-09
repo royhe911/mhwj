@@ -1236,6 +1236,9 @@ class Pay extends \think\Controller
             $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
             $users = array_column($users, null, 'id');
             foreach ($comment as &$cmt) {
+                if ($cmt['addtime']) {
+                    $cmt['addtime'] = date('Y-m-d H:i:s', $cmt['addtime']);
+                }
                 if (!empty($users[$cmt['uid']])) {
                     $user = $users[$cmt['uid']];
                     // 属性赋值
