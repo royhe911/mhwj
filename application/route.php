@@ -53,6 +53,11 @@ return [
     '/order/cashlist'     => 'admin/Order/cash_list', // 提现列表
     '/order/cashdetail'   => 'admin/Order/cash_detail', // 提现详情
     '/order/auditors'     => 'admin/Order/auditors', // 提现审核
+    '/goods/list'         => 'admin/Goods/lists', // 商品列表
+    '/goods/add'          => 'admin/Goods/add', // 添加商品
+    '/goods/edit'         => 'admin/Goods/edit', // 编辑商品
+    '/goods/editsort'     => 'admin/Goods/editsort', // 编辑商品排序
+    '/goods/operate'      => 'admin/Goods/operate', // 操作商品
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图
@@ -132,4 +137,8 @@ return [
     '/api/pay/r_notify'   => 'api/Notify/refund_notify', // 退款回调
     '/api/pay/apply'      => 'api/Pay/apply_cash', // 申请提现
     /*--------   微信支付 api 结束  --------*/
+
+    /*--------   砍价 api 开始  --------*/
+    '/api/kj/test'        => 'api/Kanjia/test', // 砍价算法
+    /*--------   砍价 api 结束  --------*/
 ];

@@ -259,9 +259,8 @@ class Game extends \think\Controller
         $pagesize = intval($this->request->get('pagesize', config('PAGESIZE')));
         $list     = $g->getList($where, true, "$page,$pagesize", 'sort');
         foreach ($list as &$item) {
-            if (!empty($item['url'])) {
-                //config('WEBSITE') .
-                $item['url'] = $item['url'];
+            if (!empty($item['url']) && strpos($item['url'], 'https://') === false) {
+                $item['url'] = config('WEBSITE') . $item['url'];
             }
             if (!empty($item['addtime'])) {
                 $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修改商品</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/iCheck/custom.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
+    <style type="text/css">
+        .form-control{width: 200px;}
+        #preview,#preview_demo11,#preview_demo12{max-width: 120px;max-height: 120px;}
+        .para_id{width: 80px;}
+        .reduce,.plus{cursor: pointer;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>修改商品</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal" onsubmit="return false">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">商品名称</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="name" value="{$goods.name}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">商品图片</label>
+                            <div class="col-sm-10">
+                                <table width="100%">
+                                    <tr>
+                                        <td valign="top" width="120px"><input id="file_upload" name="file_upload" type="file"></td>
+                                        <td valign="top"><input class="btn btn-primary" type="button" data-action="upload" value="上传"></td>
+                                    </tr>
+                                    <tr><td colspan="2"><div id="progress"></div><input type="hidden" id="urll" value="{$goods.url}"></td></tr>
+                                    <tr><td colspan="2"><img id="preview" src="{$goods.url1}"></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">商品价格</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="price" value="{$goods.price}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">所需最低刀数</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="min_knife_num" value="1">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">所需最多刀数</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="max_knife_num" value="1">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">排序</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="sort" value="{$goods.sort}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">商品描述</label>
+                            <div class="col-sm-10">
+                                <textarea id="desc" rows="5" cols="50">{$goods.desc}</textarea>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <input class="btn btn-primary" type="button" data-action="save" value="保存内容">
+                                <input class="btn btn-white" type="button" data-action="cancel" value="取消">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/h+/js/plugins/iCheck/icheck.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript" src="/static/uploadifive/jquery.uploadifive.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",});
+        $('.plus').click(function(){
+            var $str = '<tr>' + 
+                '<td><input type="text" class="form-control para_id" placeholder="段位"></td>' + 
+                '<td><input type="text" class="form-control para_str" placeholder="段位描述"></td>' + 
+                '<td><img src="/static/h+/img/reduce.png" class="reduce" data-id="0"><input type="hidden" class="paraids" value="0"></td></tr>';
+            $('#para').append($str);
+        });
+        var del_ids = [];
+        $('#para').on('click', '.reduce', function(){
+            del_ids.push($(this).data('id'));
+            $(this).parent().parent().remove()
+        });
+        $('#cancel').click(function(){
+            location.href = '/goods/list';
+        });
+        $('input[data-action]').click(function(){
+            $action = $(this).data('action');
+            if ($action == 'save') {
+                var name = $('#name'), urll = $('#urll').val(), price = $('#price');
+                if (name.val() == '') {
+                    layer.msg('商品名称不能为空', {icon: 5, time: 1000}, function(){name.focus()});
+                    return false
+                }
+                if (urll == '') {
+                    layer.msg('请上传商品图片', {icon: 5, time: 1000});
+                    return false
+                }
+                $.ajax({
+                    type: 'post', cache: false, dataType: 'json',
+                    url: '/goods/edit',
+                    data: {'id': {$goods.id}, 'name': name.val(), 'url': urll, 'sort': $('#sort').val(), 'price': price.val(), 'min_knife_num': $('#min_knife_num').val(), 'max_knife_num': $('#max_knife_num').val(), 'desc': $('#desc').val()},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 6, time: 1000}, function(){location.href = '/goods/list'});
+                        }else{
+                            layer.msg(data.info, {icon: 5, time: 1000});
+                        }
+                    }
+                })
+            } else if ($action == 'cancel') {
+                location.href = '/goods/list'
+            } else if ($action == 'upload') {
+                $('#file_upload').uploadifive('upload')
+            }
+        });
+        $('#file_upload').uploadifive({
+            'auto'             : false,
+            'buttonText'       : '选择图片',
+            'queueID'          : 'progress',
+            'fileTypeDesc'     : 'Image Files',
+            'fileTypeExts'     : '*.jpg;*.gif;*.png',
+            'multi'            : false,
+            'removeCompleted'  : true,
+            'formData'         : {
+                'timestamp' : '{$time}',
+                'token'     : '{$token}'
+            },
+            'uploadScript'     : '/upload',
+            'onUploadComplete' : function(file, data) {
+                // data = eval('(' + data + ')');
+                data = JSON.parse(data);
+                $('#urll').val(data.path);
+            }
+        });
+    });
+</script>
+</html>
