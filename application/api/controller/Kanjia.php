@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use app\common\model\GoodsModel;
+use app\common\model\GoodsSkinModel;
 use app\common\model\GoodsTaskInfoModel;
 use app\common\model\GoodsTaskModel;
 use app\common\model\UserModel;
@@ -59,7 +60,7 @@ class Kanjia extends \think\Controller
             echo json_encode(['status' => 7, 'info' => '商品不存在', 'data' => null]);exit;
         }
         $num      = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
-        $task     = ['uid' => $param['uid'], 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'addtime' => time()];
+        $task     = ['uid' => $param['uid'], 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time()];
         $data     = $this->algorithm($goods['price'], $num);
         $taskInfo = [];
         foreach ($data as $k => $item) {
@@ -109,6 +110,9 @@ class Kanjia extends \think\Controller
             }
             echo json_encode(['status' => $info, 'info' => $msg, 'data' => null]);exit;
         }
+        if (!empty($info['addtime'])) {
+            $info['addtime'] = date('Y-m-d H:i:s', $info['addtime']);
+        }
         echo json_encode(['status' => 0, 'info' => '砍价成功', 'data' => $info]);exit;
     }
 
@@ -149,6 +153,34 @@ class Kanjia extends \think\Controller
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 获取皮肤列表
+     * @author 贺强
+     * @time   2018-12-11 16:10:23
+     * @param  GoodsSkinModel $gs GoodsSkinModel 实例
+     */
+    public function get_skin(GoodsSkinModel $gs)
+    {
+        $param = $this->param;
+        $page  = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $gs->getList([], ['name', 'url', 'price'], "$page,$pagesize");
+        if ($list) {
+            foreach ($list as &$item) {
+                if (!empty($item['url']) && strpos($item['url'], 'https://') === false && strpos($item['url'], 'http://') === false) {
+                    $item['url'] = config('WEBSITE') . $item['url'];
+                }
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => null]);exit;
     }
 
     /**

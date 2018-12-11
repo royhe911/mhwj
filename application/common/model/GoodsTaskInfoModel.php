@@ -42,7 +42,7 @@ class GoodsTaskInfoModel extends CommonModel
             }
             // 防并发查询
             $id   = $info['id'];
-            $sql  = "select id,price from m_goods_task_info where id=$id for update";
+            $sql  = "select price from m_goods_task_info where id=$id for update";
             $data = Db::query($sql);
             if (!$data) {
                 Db::rollback();
@@ -53,26 +53,34 @@ class GoodsTaskInfoModel extends CommonModel
             $data['uid']     = $param['uid'];
             $data['addtime'] = time();
             $data['is_use']  = 1;
-            // 修改砍价
+            // 修改砍价详情
             $res = $this->modify($data, ['id' => $id]);
             if (!$res) {
                 Db::rollback();
                 return 20;
             }
-            $count = $this->getCount(['task_id' => $task_id, 'is_use' => 0]);
+            $gt      = new GoodsTaskModel();
+            $gt_data = ['has_cut_money' => $data['price']];
+            $count   = $this->getCount(['task_id' => $task_id, 'is_use' => 0]);
             if (!$count) {
-                $gt  = new GoodsTaskModel();
-                $res = $gt->modifyField('status', 8, ['id' => $task_id]);
-                if (!$res) {
-                    Db::rollback();
-                    return 30;
-                }
+                $gt_data['status'] = 8;
                 // 如果已砍完，则修改任务状态为已完成
                 $res = $this->modifyField('status', 8, ['task_id' => $task_id]);
                 if (!$res) {
                     Db::rollback();
                     return 30;
                 }
+                $task = $gt->getModel(['id' => $task_id], ['goods_id']);
+                if ($task) {
+                    $g = new GoodsModel();
+                    $g->increment('count', ['id' => $task['goods_id']]);
+                    $g->increment('has_get', ['id' => $task['goods_id']]);
+                }
+            }
+            $res = $gt->modify($gt_data, ['id' => $task_id]);
+            if (!$res) {
+                Db::rollback();
+                return 30;
             }
             Db::commit();
             return $data;
