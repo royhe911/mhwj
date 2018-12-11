@@ -1,6 +1,7 @@
 <?php
 namespace app\common\crontab;
 
+use app\common\model\GoodsModel;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
@@ -29,6 +30,7 @@ class Goods extends Command
      */
     protected function execute(Input $input, Output $output)
     {
-        
+        $g = new GoodsModel();
+        $g->modifyField('count', 0);
     }
 }
