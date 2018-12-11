@@ -140,5 +140,6 @@ return [
 
     /*--------   砍价 api 开始  --------*/
     '/api/kj/test'        => 'api/Kanjia/test', // 砍价算法
+    '/api/kj/launch'      => 'api/Kanjia/launch', // 发起砍价
     /*--------   砍价 api 结束  --------*/
 ];

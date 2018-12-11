@@ -1,6 +1,10 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\GoodsModel;
+use app\common\model\GoodsTaskInfoModel;
+use app\common\model\GoodsTaskModel;
+
 /**
  * 砍价-控制器
  * @author 贺强
@@ -32,6 +36,67 @@ class Kanjia extends \think\Controller
     }
 
     /**
+     * 发起砍价
+     * @author 贺强
+     * @time   2018-12-11 09:35:13
+     * @param  GoodsModel     $g  GoodsModel     实例
+     * @param  GoodsTaskModel $gt GoodsTaskModel 实例
+     */
+    public function launch(GoodsModel $g, GoodsTaskModel $gt)
+    {
+        $param = $this->param;
+        if (empty($param['goods_id'])) {
+            $msg = ['status' => 1, 'info' => '请选择要砍价的商品', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '发起人ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $goods = $g->getModel(['id' => $param['goods_id']]);
+        if (!$goods) {
+            echo json_encode(['status' => 7, 'info' => '商品不存在', 'data' => null]);exit;
+        }
+        $num      = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
+        $task     = ['uid' => $param['uid'], 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'addtime' => time()];
+        $data     = $this->algorithm($goods['price'], $num);
+        $taskInfo = [];
+        foreach ($data as $k => $item) {
+            $info = ['price' => $item, 'is_baodao' => 0];
+            if ($k === 8) {
+                $info['is_baodao'] = 1;
+            }
+            $taskInfo[] = $info;
+        }
+        $res = $gt->launch($task, $taskInfo);
+        if ($res !== true) {
+            $msg = ['status' => $res, 'info' => '发起失败', 'data' => null];
+        } else {
+            $msg = ['status' => 0, 'info' => '发起成功', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+
+    }
+
+    public function help_chop(GoodsTaskInfoModel $gti)
+    {
+        $param = $this->param;
+        if (empty($param['task_id'])) {
+            $msg = ['status' => 1, 'info' => '任务ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '帮砍者ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $info = $gti->getModel($where, ['id','price']);
+        if (!$info) {
+            echo json_encode(['status' => 5, 'info' => '砍价已完成', 'data' => null]);exit;
+        }
+
+    }
+
+    /**
      * 砍价算法
      * @author 贺强
      * @time   2018-12-10 11:53:29
@@ -39,7 +104,7 @@ class Kanjia extends \think\Controller
      * @param  int   $num   需砍刀数
      * @return array        返回每刀砍的价格数组
      */
-    public function algorithm($total, $num)
+    private function algorithm($total, $num)
     {
         $num_arr   = [];
         $avg_num   = $total * 0.03;
@@ -60,13 +125,15 @@ class Kanjia extends \think\Controller
             }
             $avg  = $total / ($num - $i - 3);
             $rand = $this->random_fload($avg - $avg_num, $avg);
+            if ($rand <= 0) {
+                $rand = 0.01;
+            }
             $rand = sprintf('%.2f', $rand);
             $rand = $rand < 0 ? 0 : $rand;
             $total -= $rand;
             $num_arr[] = $rand;
         }
         $num_arr[] = sprintf('%.2f', $total);
-        // $this->array_sort($num_arr);
         return $num_arr;
     }
 
@@ -81,16 +148,6 @@ class Kanjia extends \think\Controller
     private function random_fload($min, $max)
     {
         return $min + mt_rand() / mt_getrandmax() * ($max - $min);
-    }
-
-    public function array_sort(&$arr)
-    {
-        $max_arr = [];
-        for ($i = 0; $i < 3; $i++) {
-            $max_arr[] = max($arr);
-            $arr       = array_diff($arr, [max($arr)]);
-        }
-        $arr = array_merge($max_arr, $arr);
     }
 
     public function test()
