@@ -17,4 +17,5 @@ return [
     'app\common\crontab\Roomrefund',
     'app\common\crontab\PersonOrderexit',
     'app\common\crontab\Kjtask',
+    'app\common\crontab\Goods',
 ];
