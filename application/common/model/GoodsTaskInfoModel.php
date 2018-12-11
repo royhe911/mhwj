@@ -30,6 +30,7 @@ class GoodsTaskInfoModel extends CommonModel
             if (!empty($param['is_baodao']) && intval($param['is_baodao']) === 1) {
                 $where['is_baodao'] = 1;
             }
+            // 查询是否还有非宝刀砍价
             $count = $this->getCount($where);
             if (!$count) {
                 $where['is_baodao'] = 1;
@@ -39,6 +40,7 @@ class GoodsTaskInfoModel extends CommonModel
                 Db::rollback();
                 return 40;
             }
+            // 防并发查询
             $id   = $info['id'];
             $sql  = "select id,price from m_goods_task_info where id=$id for update";
             $data = Db::query($sql);
@@ -59,6 +61,13 @@ class GoodsTaskInfoModel extends CommonModel
             }
             $count = $this->getCount(['task_id' => $task_id, 'is_use' => 0]);
             if (!$count) {
+                $gt  = new GoodsTaskModel();
+                $res = $gt->modifyField('status', 8, ['id' => $task_id]);
+                if (!$res) {
+                    Db::rollback();
+                    return 30;
+                }
+                // 如果已砍完，则修改任务状态为已完成
                 $res = $this->modifyField('status', 8, ['task_id' => $task_id]);
                 if (!$res) {
                     Db::rollback();
