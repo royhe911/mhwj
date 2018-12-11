@@ -144,5 +144,6 @@ return [
     '/api/kj/helpchop'    => 'api/Kanjia/help_chop', // 帮忙砍价
     '/api/kj/helplist'    => 'api/Kanjia/get_help_list', // 帮砍帮
     '/api/kj/skin'        => 'api/Kanjia/get_skin', // 皮肤列表
+    '/api/kj/kjinfo'      => 'api/Kanjia/get_kj_info', // 砍价信息
     /*--------   砍价 api 结束  --------*/
 ];

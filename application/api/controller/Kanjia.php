@@ -172,9 +172,29 @@ class Kanjia extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
+    /**
+     * 获取用户发起的砍价
+     * @author 贺强
+     * @time   2018-12-11 18:40:58
+     * @param  GoodsTaskModel $gt GoodsTaskModel 实例
+     */
     public function get_kj_info(GoodsTaskModel $gt)
     {
-        # code...
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $task = $gt->getModel(['uid' => $param['uid'], 'status' => 1]);
+        if (!$task) {
+            echo json_encode(['status' => 0, 'info' => '没有砍价', 'data' => ['is_kj' => 0]]);exit;
+        }
+        $g     = new GoodsModel();
+        $goods = $g->getModel(['id' => $task['goods_id']]);
+        $data  = ['starttime' => date('Y/m/d H:i:s'), 'endtime' => date('Y/m/d H:i:s', $goods['deadline']), 'has_cut_money' => $task['has_cut_money'], 'overplus' => $task['total_money'] - $task['has_cut_money']];
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
     }
 
     /**
