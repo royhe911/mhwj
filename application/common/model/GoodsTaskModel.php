@@ -26,14 +26,16 @@ class GoodsTaskModel extends CommonModel
     {
         Db::startTrans();
         try {
-            $res = $this->add($task);
-            if (!$res) {
+            $tid = $this->add($task);
+            if (!$tid) {
                 Db::rollback();
                 return 1;
             }
+            $g = new GoodsModel();
+            $g->increment('count', ['id' => $task['goods_id']]);
             $gti = new GoodsTaskInfoModel();
             foreach ($taskInfo as &$info) {
-                $info['task_id'] = $res;
+                $info['task_id'] = $tid;
             }
             $res = $gti->addArr($taskInfo);
             if (!$res) {
@@ -41,10 +43,11 @@ class GoodsTaskModel extends CommonModel
                 return 3;
             }
             Db::commit();
-            return true;
+            return ['tid' => $tid];
         } catch (\Exception $e) {
             Db::rollback();
-            print_r($taskInfo);
+            // var_dump($e->getMessage());
+            // print_r($task);
             return 44;
         }
     }

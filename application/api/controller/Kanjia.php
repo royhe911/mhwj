@@ -59,9 +59,16 @@ class Kanjia extends \think\Controller
         if (!$goods) {
             echo json_encode(['status' => 7, 'info' => '商品不存在', 'data' => null]);exit;
         }
-        $num      = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
-        $task     = ['uid' => $param['uid'], 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time()];
-        $data     = $this->algorithm($goods['price'], $num);
+        $uid  = $param['uid'];
+        $num  = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
+        $task = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time()];
+        if ($goods['count'] === 2) {
+            $task['is_lucky']  = 1;
+            $num               = mt_rand(2, 4);
+            $task['knife_num'] = $num;
+        }
+        $data = $this->algorithm($goods['price'], $num);
+        // 砍价详情
         $taskInfo = [];
         foreach ($data as $k => $item) {
             $info = ['price' => $item, 'is_baodao' => 0];
@@ -71,10 +78,12 @@ class Kanjia extends \think\Controller
             $taskInfo[] = $info;
         }
         $res = $gt->launch($task, $taskInfo);
-        if ($res !== true) {
+        if (!is_array($res)) {
             $msg = ['status' => $res, 'info' => '发起失败', 'data' => null];
         } else {
-            $msg = ['status' => 0, 'info' => '发起成功', 'data' => null];
+            $gti  = new GoodsTaskInfoModel();
+            $data = $gti->helpChop(['task_id' => $res['tid'], 'uid' => $uid, 'is_self' => 1]);
+            $msg  = ['status' => 0, 'info' => '发起成功', 'data' => $data];
         }
         echo json_encode($msg);exit;
 
@@ -97,9 +106,17 @@ class Kanjia extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $info = $gti->getModel(['task_id' => $param['task_id'], 'uid' => $param['uid']]);
+        $info = $gti->getModel(['uid' => $param['uid'], 'is_self' => 0]);
         if ($info) {
-            echo json_encode(['status' => 5, 'info' => '您已砍过了', 'data' => null]);exit;
+            $gt   = new GoodsTaskModel();
+            $task = $gt->getModel(['id' => $param['task_id']]);
+            if ($task) {
+                $g     = new GoodsModel();
+                $goods = $g->getModel(['id' => $task['goods_id']], ['deadline']);
+                if ($goods && $goods['deadline'] > time()) {
+                    echo json_encode(['status' => 5, 'info' => '您已在活动期内砍过了', 'data' => null]);exit;
+                }
+            }
         }
         $info = $gti->helpChop($param);
         if (!is_array($info)) {
@@ -155,6 +172,11 @@ class Kanjia extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
+    public function get_kj_info(GoodsTaskModel $gt)
+    {
+        # code...
+    }
+
     /**
      * 获取皮肤列表
      * @author 贺强
@@ -193,7 +215,17 @@ class Kanjia extends \think\Controller
      */
     private function algorithm($total, $num)
     {
-        $num_arr   = [];
+        $num_arr = [];
+        if ($num < 5) {
+            for ($i = 1; $i < $num; $i++) {
+                $rand = $this->random_fload(1, $total * 0.65);
+                $rand = sprintf('%.2f', $rand);
+                $total -= $rand;
+                $num_arr[] = $rand;
+            }
+            $num_arr[] = sprintf('%.2f', $total);
+            return $num_arr;
+        }
         $avg_num   = $total * 0.03;
         $third_min = $total * 0.1;
         $third_max = $total * 0.2;

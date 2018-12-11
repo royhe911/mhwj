@@ -42,7 +42,7 @@ class GoodsTaskInfoModel extends CommonModel
             }
             // 防并发查询
             $id   = $info['id'];
-            $sql  = "select price from m_goods_task_info where id=$id for update";
+            $sql  = "select task_id,price from m_goods_task_info where id=$id for update";
             $data = Db::query($sql);
             if (!$data) {
                 Db::rollback();
@@ -53,6 +53,9 @@ class GoodsTaskInfoModel extends CommonModel
             $data['uid']     = $param['uid'];
             $data['addtime'] = time();
             $data['is_use']  = 1;
+            if (!empty($param['is_self'])) {
+                $data['is_self'] = 1;
+            }
             // 修改砍价详情
             $res = $this->modify($data, ['id' => $id]);
             if (!$res) {
@@ -73,7 +76,6 @@ class GoodsTaskInfoModel extends CommonModel
                 $task = $gt->getModel(['id' => $task_id], ['goods_id']);
                 if ($task) {
                     $g = new GoodsModel();
-                    $g->increment('count', ['id' => $task['goods_id']]);
                     $g->increment('has_get', ['id' => $task['goods_id']]);
                 }
             }
