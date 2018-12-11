@@ -180,7 +180,7 @@ class Kanjia extends \think\Controller
                 }
             }
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**
