@@ -32,7 +32,7 @@ class Kjtask extends Command
     protected function execute(Input $input, Output $output)
     {
         $gt   = new GoodsTaskModel();
-        $list = $gt->getList(['status' => 1], 'id,addtime');
+        $list = $gt->getList(['status' => 1], ['id', 'addtime']);
         if ($list) {
             $ids = [];
             foreach ($list as $item) {

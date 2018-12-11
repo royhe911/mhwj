@@ -4,6 +4,7 @@ namespace app\api\controller;
 use app\common\model\GoodsModel;
 use app\common\model\GoodsTaskInfoModel;
 use app\common\model\GoodsTaskModel;
+use app\common\model\UserModel;
 
 /**
  * 砍价-控制器
@@ -78,6 +79,12 @@ class Kanjia extends \think\Controller
 
     }
 
+    /**
+     * 帮砍
+     * @author 贺强
+     * @time   2018-12-11 12:25:28
+     * @param  GoodsTaskInfoModel $gti GoodsTaskInfoModel 实例
+     */
     public function help_chop(GoodsTaskInfoModel $gti)
     {
         $param = $this->param;
@@ -89,11 +96,59 @@ class Kanjia extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $info = $gti->getModel($where, ['id','price']);
-        if (!$info) {
-            echo json_encode(['status' => 5, 'info' => '砍价已完成', 'data' => null]);exit;
+        $info = $gti->getModel(['task_id' => $param['task_id'], 'uid' => $param['uid']]);
+        if ($info) {
+            echo json_encode(['status' => 5, 'info' => '您已砍过了', 'data' => null]);exit;
         }
+        $info = $gti->helpChop($param);
+        if (!is_array($info)) {
+            if ($info === 40 || $info === 10) {
+                $msg = '砍价已完成';
+            } elseif ($info === 20 || $info === 30) {
+                $msg = '砍价失败，请重试';
+            }
+            echo json_encode(['status' => $info, 'info' => $msg, 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '砍价成功', 'data' => $info]);exit;
+    }
 
+    /**
+     * 获得帮砍帮
+     * @author 贺强
+     * @time   2018-12-11 14:18:07
+     * @param  GoodsTaskInfoModel $gti GoodsTaskInfoModel 实例
+     */
+    public function get_help_list(GoodsTaskInfoModel $gti)
+    {
+        $param = $this->param;
+        if (empty($param['task_id'])) {
+            $msg = ['status' => 1, 'info' => '任务ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $list = $gti->getList(['task_id' => $param['task_id'], 'is_use' => 1, 'uid' => ['>', 0]], ['uid', 'price', 'addtime']);
+        if ($list) {
+            $uids  = array_column($list, 'uid');
+            $u     = new UserModel();
+            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
+            foreach ($list as &$item) {
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                if (!empty($users[$item['uid']])) {
+                    $user = $users[$item['uid']];
+                    // 属性赋值
+                    $item['nickname'] = $user['nickname'];
+                    $item['avatar']   = $user['avatar'];
+                } else {
+                    $item['nickname'] = '';
+                    $item['avatar']   = '';
+                }
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**

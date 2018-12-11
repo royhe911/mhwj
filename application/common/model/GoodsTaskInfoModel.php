@@ -66,7 +66,7 @@ class GoodsTaskInfoModel extends CommonModel
                 }
             }
             Db::commit();
-            return true;
+            return $data;
         } catch (\Exception $e) {
             Db::rollback();
             return 44;

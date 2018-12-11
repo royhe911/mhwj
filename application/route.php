@@ -141,5 +141,7 @@ return [
     /*--------   砍价 api 开始  --------*/
     '/api/kj/test'        => 'api/Kanjia/test', // 砍价算法
     '/api/kj/launch'      => 'api/Kanjia/launch', // 发起砍价
+    '/api/kj/helpchop'    => 'api/Kanjia/help_chop', // 帮忙砍价
+    '/api/kj/helplist'    => 'api/Kanjia/get_help_list', // 帮砍帮
     /*--------   砍价 api 结束  --------*/
 ];
