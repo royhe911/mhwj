@@ -53,7 +53,6 @@ class GoodsTaskInfoModel extends CommonModel
             // 属性赋值
             $data['uid']     = $param['uid'];
             $data['addtime'] = time();
-            $data['is_use']  = 1;
             $data['status']  = 8;
             if (!empty($param['is_self'])) {
                 $data['is_self'] = 1;

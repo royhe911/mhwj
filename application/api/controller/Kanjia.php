@@ -138,6 +138,8 @@ class Kanjia extends \think\Controller
                 $msg = '砍价已完成';
             } elseif ($info === 20 || $info === 30) {
                 $msg = '砍价失败，请重试';
+            } elseif ($info === 44) {
+                $msg = '服务器异常';
             }
             echo json_encode(['status' => $info, 'info' => $msg, 'data' => null]);exit;
         }
