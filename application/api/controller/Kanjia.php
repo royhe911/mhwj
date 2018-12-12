@@ -193,7 +193,7 @@ class Kanjia extends \think\Controller
         }
         $g     = new GoodsModel();
         $goods = $g->getModel(['id' => $task['goods_id']]);
-        $data  = ['starttime' => date('Y/m/d H:i:s'), 'endtime' => date('Y/m/d H:i:s', $task['addtime'] + 24 * 3600), 'has_cut_money' => $task['has_cut_money'], 'overplus' => $task['total_money'] - $task['has_cut_money'], 'box1' => $task['box1'], 'box2' => $task['box2']];
+        $data  = ['task_id' => $task['id'], 'starttime' => date('Y/m/d H:i:s'), 'endtime' => date('Y/m/d H:i:s', $task['addtime'] + 24 * 3600), 'has_cut_money' => $task['has_cut_money'], 'overplus' => $task['total_money'] - $task['has_cut_money'], 'box1' => $task['box1'], 'box2' => $task['box2']];
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
     }
 
