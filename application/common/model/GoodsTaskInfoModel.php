@@ -27,14 +27,15 @@ class GoodsTaskInfoModel extends CommonModel
         try {
             $task_id = $param['task_id'];
             $where   = ['status' => 1, 'task_id' => $task_id, 'is_use' => 0, 'is_baodao' => 0];
-            if (!empty($param['is_baodao']) && intval($param['is_baodao']) === 1) {
-                $where['is_baodao'] = 1;
-            }
+            // 如果是宝刀
+            // if (!empty($param['is_baodao']) && intval($param['is_baodao']) === 1) {
+            //     $where['is_baodao'] = 1;
+            // }
             // 查询是否还有非宝刀砍价
-            $count = $this->getCount($where);
-            if (!$count) {
-                $where['is_baodao'] = 1;
-            }
+            // $count = $this->getCount($where);
+            // if (!$count) {
+            //     $where['is_baodao'] = 1;
+            // }
             $info = $this->getModel($where, ['id'], 'id');
             if (!$info) {
                 Db::rollback();
