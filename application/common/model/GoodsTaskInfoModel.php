@@ -26,7 +26,7 @@ class GoodsTaskInfoModel extends CommonModel
         Db::startTrans();
         try {
             $task_id = $param['task_id'];
-            $where   = ['status' => 1, 'task_id' => $task_id, 'is_use' => 0, 'is_baodao' => 0];
+            $where   = ['status' => 1, 'task_id' => $task_id];
             // 如果是宝刀
             // if (!empty($param['is_baodao']) && intval($param['is_baodao']) === 1) {
             //     $where['is_baodao'] = 1;
@@ -74,7 +74,7 @@ class GoodsTaskInfoModel extends CommonModel
                 return 20;
             }
             $gt->increment('has_cut_money', ['id' => $task_id], $data['price']);
-            $count = $this->getCount(['task_id' => $task_id, 'is_use' => 0]);
+            $count = $this->getCount(['task_id' => $task_id, 'status' => 1]);
             if (!$count) {
                 $gt->modifyField('status', 8, ['id' => $task_id]);
                 // 如果已砍完，则修改任务状态为已完成

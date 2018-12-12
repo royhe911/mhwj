@@ -162,7 +162,7 @@ class Kanjia extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $list = $gti->getList(['task_id' => $param['task_id'], 'is_use' => 1, 'uid' => ['>', 0]], ['uid', 'price', 'addtime']);
+        $list = $gti->getList(['task_id' => $param['task_id'], 'status' => 8, 'uid' => ['>', 0]], ['uid', 'price', 'addtime']);
         if ($list) {
             $uids  = array_column($list, 'uid');
             $u     = new UserModel();
