@@ -35,7 +35,7 @@ class GoodsTaskInfoModel extends CommonModel
             if (!$count) {
                 $where['is_baodao'] = 1;
             }
-            $info = $this->getModel($where, ['id']);
+            $info = $this->getModel($where, ['id'], 'id');
             if (!$info) {
                 Db::rollback();
                 return 40;
