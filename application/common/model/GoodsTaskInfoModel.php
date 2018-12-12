@@ -64,7 +64,7 @@ class GoodsTaskInfoModel extends CommonModel
                 $gt->modifyField('box1', 1, ['id' => $id]);
             }
             if (!empty($param['box2'])) {
-                $data['is_box'] = 1;
+                $data['is_box'] = 2;
                 $gt->modifyField('box2', 1, ['id' => $id]);
             }
             // 修改砍价详情

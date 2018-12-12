@@ -110,10 +110,17 @@ class Kanjia extends \think\Controller
             echo json_encode($msg);exit;
         }
         $uid       = intval($param['uid']);
+        $task_id   = $param['task_id'];
         $git_where = ['uid' => $uid, 'is_self' => 0, 'is_box' => 0];
+        if (!empty($param['box1'])) {
+            $git_where['is_box'] = 1;
+        }
+        if (!empty($param['box2'])) {
+            $git_where['is_box'] = 2;
+        }
         // 查询任务
         $gt   = new GoodsTaskModel();
-        $task = $gt->getModel(['id' => $param['task_id']]);
+        $task = $gt->getModel(['id' => $task_id]);
         if ($uid === $task['uid']) {
             $git_where['is_self'] = 1;
         }
