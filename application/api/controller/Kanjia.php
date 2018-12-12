@@ -108,16 +108,20 @@ class Kanjia extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $info = $gti->getModel(['uid' => $param['uid'], 'is_box' => 0]);
-        if ($info) {
-            $gt   = new GoodsTaskModel();
-            $task = $gt->getModel(['id' => $param['task_id']]);
-            if ($task && ($info['is_self'] === 0 || $task['uid'] === intval($param['uid']))) {
-                $g     = new GoodsModel();
-                $goods = $g->getModel(['id' => $task['goods_id']], ['deadline']);
-                if ($goods && $goods['deadline'] > time()) {
-                    echo json_encode(['status' => 5, 'info' => '您已在活动期内砍过了', 'data' => null]);exit;
-                }
+        $uid       = intval($param['uid']);
+        $git_where = ['uid' => $uid, 'is_self' => 0, 'is_box' => 0];
+        // 查询任务
+        $gt   = new GoodsTaskModel();
+        $task = $gt->getModel(['id' => $param['task_id']]);
+        if ($uid === $task['uid']) {
+            $git_where['is_self'] = 1;
+        }
+        $info = $gti->getModel($git_where);
+        if ($info && $task) {
+            $g     = new GoodsModel();
+            $goods = $g->getModel(['id' => $task['goods_id']], ['deadline']);
+            if ($goods && $goods['deadline'] > time()) {
+                echo json_encode(['status' => 5, 'info' => '您已在活动期内砍过了', 'data' => null]);exit;
             }
         }
         $info = $gti->helpChop($param);
