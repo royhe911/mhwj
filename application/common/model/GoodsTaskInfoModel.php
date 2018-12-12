@@ -56,13 +56,21 @@ class GoodsTaskInfoModel extends CommonModel
             if (!empty($param['is_self'])) {
                 $data['is_self'] = 1;
             }
+            $gt = new GoodsTaskModel();
+            if (!empty($param['box1'])) {
+                $data['is_box'] = 1;
+                $gt->modifyField('box1', 1, ['id' => $id]);
+            }
+            if (!empty($param['box2'])) {
+                $data['is_box'] = 1;
+                $gt->modifyField('box2', 1, ['id' => $id]);
+            }
             // 修改砍价详情
             $res = $this->modify($data, ['id' => $id]);
             if (!$res) {
                 Db::rollback();
                 return 20;
             }
-            $gt      = new GoodsTaskModel();
             $gt_data = ['has_cut_money' => $data['price']];
             $count   = $this->getCount(['task_id' => $task_id, 'is_use' => 0]);
             if (!$count) {

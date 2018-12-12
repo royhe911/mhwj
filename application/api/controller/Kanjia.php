@@ -106,7 +106,7 @@ class Kanjia extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $info = $gti->getModel(['uid' => $param['uid'], 'is_self' => 0]);
+        $info = $gti->getModel(['uid' => $param['uid'], 'is_self' => 0, 'is_box' => 0]);
         if ($info) {
             $gt   = new GoodsTaskModel();
             $task = $gt->getModel(['id' => $param['task_id']]);
@@ -193,7 +193,7 @@ class Kanjia extends \think\Controller
         }
         $g     = new GoodsModel();
         $goods = $g->getModel(['id' => $task['goods_id']]);
-        $data  = ['starttime' => date('Y/m/d H:i:s'), 'endtime' => date('Y/m/d H:i:s', $task['addtime'] + 24 * 3600), 'has_cut_money' => $task['has_cut_money'], 'overplus' => $task['total_money'] - $task['has_cut_money']];
+        $data  = ['starttime' => date('Y/m/d H:i:s'), 'endtime' => date('Y/m/d H:i:s', $task['addtime'] + 24 * 3600), 'has_cut_money' => $task['has_cut_money'], 'overplus' => $task['total_money'] - $task['has_cut_money'], 'box1' => $task['box1'], 'box2' => $task['box2']];
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
     }
 
@@ -258,10 +258,11 @@ class Kanjia extends \think\Controller
         $baodao = $this->random_fload($third_min, $third_max);
         $total -= $baodao;
         for ($i = 1; $i < $num - 3; $i++) {
-            if ($i === 6) {
-                $num_arr[] = sprintf('%.2f', $baodao);
-                continue;
-            }
+            // 生成宝刀
+            // if ($i === 6) {
+            //     $num_arr[] = sprintf('%.2f', $baodao);
+            //     continue;
+            // }
             $avg  = $total / ($num - $i - 3);
             $rand = $this->random_fload($avg - $avg_num, $avg);
             if ($rand <= 0) {
