@@ -185,6 +185,7 @@ class Kanjia extends \think\Controller
             $uids  = array_column($list, 'uid');
             $u     = new UserModel();
             $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
             foreach ($list as &$item) {
                 if (!empty($item['addtime'])) {
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
