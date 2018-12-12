@@ -88,10 +88,6 @@ class GoodsTaskInfoModel extends CommonModel
                     $g->increment('has_get', ['id' => $task['goods_id']]);
                 }
             }
-            if (!$res) {
-                Db::rollback();
-                return 30;
-            }
             Db::commit();
             return $data;
         } catch (\Exception $e) {
