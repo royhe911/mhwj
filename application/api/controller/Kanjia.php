@@ -63,7 +63,8 @@ class Kanjia extends \think\Controller
         $goods_id = $param['goods_id'];
         $num      = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
         $task     = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time()];
-        if ($goods['count'] === $goods['lucky']) {
+        $lucky    = explode(',', $goods['lucky']);
+        if (in_array($goods['count'], $lucky)) {
             $task['is_lucky']  = 1;
             $num               = mt_rand(2, 4);
             $task['knife_num'] = $num;

@@ -18,7 +18,9 @@
         .ttb{width: 80px;text-align: center;}
         .avatar{width: 64px;height: 64px;border-radius: 32px;}
         .sort{width: 80px;}
-        .sort_i,.lucky_i{width: 50px;display: none;}
+        .lucky{width: 120px;}
+        .sort_i{width: 50px;display: none;}
+        .lucky_i{width: 100px;display: none;}
     </style>
 </head>
 <body class="gray-bg">
@@ -70,7 +72,7 @@
                             <td>{$item.price}</td>
                             <td>{$item.min_knife_num}</td>
                             <td>{$item.max_knife_num}</td>
-                            <td class="lucky"><span class="lucky_p">{$item.lucky+1}</span><input type="text" class="lucky_i" value="{$item.lucky+1}" data-id="{$item.id}" data-lucky="{$item.lucky+1}"></td>
+                            <td class="lucky"><span class="lucky_p">{$item.lucky}</span><input type="text" class="lucky_i" value="{$item.lucky}" data-id="{$item.id}" data-lucky="{$item.lucky}"></td>
                             <td>{$item.count}</td>
                             <td>{$item.has_get}</td>
                             <td>{$item.addtime}</td>

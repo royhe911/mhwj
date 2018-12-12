@@ -158,7 +158,12 @@ class Goods extends \think\Controller
             if (empty($param['id']) || empty($param['lucky'])) {
                 return ['status' => 1, 'info' => '非法参数'];
             }
-            $lucky = intval($param['lucky']) - 1;
+            $lucky = $param['lucky'];
+            $lucky = explode(',', $lucky);
+            foreach ($lucky as &$ly) {
+                $ly -= 1;
+            }
+            $lucky = implode(',', $lucky);
             $res   = $g->modifyField('lucky', $lucky, ['id' => $param['id']]);
             if ($res === false) {
                 return ['status' => 2, 'info' => '修改失败'];
@@ -186,6 +191,13 @@ class Goods extends \think\Controller
             }
             if (!empty($item['addtime'])) {
                 $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+            }
+            if (!empty($item['lucky'])) {
+                $lucky = explode(',', $item['lucky']);
+                foreach ($lucky as &$ly) {
+                    $ly += 1;
+                }
+                $item['lucky'] = implode(',', $lucky);
             }
         }
         $count = $g->getCount($where);
