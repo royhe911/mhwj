@@ -59,9 +59,10 @@ class Kanjia extends \think\Controller
         if (!$goods) {
             echo json_encode(['status' => 7, 'info' => '商品不存在', 'data' => null]);exit;
         }
-        $uid  = $param['uid'];
-        $num  = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
-        $task = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time()];
+        $uid      = $param['uid'];
+        $goods_id = $param['goods_id'];
+        $num      = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
+        $task     = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time()];
         if ($goods['count'] === $goods['lucky']) {
             $task['is_lucky']  = 1;
             $num               = mt_rand(2, 4);
@@ -107,11 +108,11 @@ class Kanjia extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $info = $gti->getModel(['uid' => $param['uid'], 'is_self' => 0, 'is_box' => 0]);
+        $info = $gti->getModel(['uid' => $param['uid'], 'is_box' => 0]);
         if ($info) {
             $gt   = new GoodsTaskModel();
             $task = $gt->getModel(['id' => $param['task_id']]);
-            if ($task) {
+            if ($task && ($info['is_self'] === 0 || $task['uid'] === intval($param['uid']))) {
                 $g     = new GoodsModel();
                 $goods = $g->getModel(['id' => $task['goods_id']], ['deadline']);
                 if ($goods && $goods['deadline'] > time()) {
