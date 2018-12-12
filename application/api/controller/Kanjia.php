@@ -55,15 +55,20 @@ class Kanjia extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $goods = $g->getModel(['id' => $param['goods_id']]);
+        $goods_id = $param['goods_id'];
+        $goods    = $g->getModel(['id' => $goods_id]);
         if (!$goods) {
             echo json_encode(['status' => 7, 'info' => '商品不存在', 'data' => null]);exit;
         }
-        $uid      = $param['uid'];
-        $goods_id = $param['goods_id'];
-        $num      = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
-        $task     = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time()];
-        $lucky    = explode(',', $goods['lucky']);
+        $uid = $param['uid'];
+        // 查询用户是否已发起过砍价
+        $count = $gt->getCount(['uid' => $uid, 'goods_id' => $goods_id, 'status' => ['in', [1, 8]]]);
+        if ($count) {
+            echo json_encode(['status' => 9, 'info' => '不能重复发起砍价', 'data' => null]);exit;
+        }
+        $num   = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
+        $task  = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time()];
+        $lucky = explode(',', $goods['lucky']);
         if (in_array($goods['count'], $lucky)) {
             $task['is_lucky']  = 1;
             $num               = mt_rand(2, 4);
@@ -235,7 +240,7 @@ class Kanjia extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $task = $gt->getModel(['uid' => $param['uid'], 'status' => 1]);
+        $task = $gt->getModel(['uid' => $param['uid']]);
         if (!$task) {
             echo json_encode(['status' => 0, 'info' => '没有砍价', 'data' => ['is_kj' => 0]]);exit;
         }
