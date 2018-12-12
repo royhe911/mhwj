@@ -75,9 +75,8 @@ class GoodsTaskInfoModel extends CommonModel
             $gt->increment('has_cut_money', ['id' => $task_id], $data['price']);
             $count = $this->getCount(['task_id' => $task_id, 'status' => 1]);
             if (!$count) {
-                $gt->modifyField('status', 8, ['id' => $task_id]);
                 // 如果已砍完，则修改任务状态为已完成
-                $res = $this->modifyField('status', 8, ['task_id' => $task_id]);
+                $res = $gt->modifyField('status', 8, ['id' => $task_id]);
                 if (!$res) {
                     Db::rollback();
                     return 30;
