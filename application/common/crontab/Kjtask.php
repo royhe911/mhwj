@@ -44,7 +44,7 @@ class Kjtask extends Command
             if (!empty($ids)) {
                 $gt->modifyField('status', 4, ['id' => ['in', $ids]]);
                 $gti = new GoodsTaskInfoModel();
-                $gti->modifyField('status', 4, ['task_id' => ['in', $ids]]);
+                $gti->modifyField('status', 4, ['task_id' => ['in', $ids], 'status' => 1]);
             }
         }
     }
