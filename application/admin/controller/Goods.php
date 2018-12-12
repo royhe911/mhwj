@@ -146,6 +146,28 @@ class Goods extends \think\Controller
     }
 
     /**
+     * 修改幸运儿
+     * @author 贺强
+     * @time   2018-12-12 10:12:34
+     * @param  GoodsModel $g GoodsModel 实例
+     */
+    public function editlucky(GoodsModel $g)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['id']) || empty($param['lucky'])) {
+                return ['status' => 1, 'info' => '非法参数'];
+            }
+            $lucky = intval($param['lucky']) - 1;
+            $res   = $g->modifyField('lucky', $lucky, ['id' => $param['id']]);
+            if ($res === false) {
+                return ['status' => 2, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        }
+    }
+
+    /**
      * 商品列表
      * @author 贺强
      * @time   2018-12-10 16:56:13

@@ -17,7 +17,7 @@
         .ttd{width: 250px;text-align: center;}
         .ttb{width: 80px;text-align: center;}
         .avatar{width: 64px;height: 64px;border-radius: 32px;}
-        .sort_i{width: 50px;display: none;}
+        .sort_i,.lucky_i{width: 50px;display: none;}
     </style>
 </head>
 <body class="gray-bg">
@@ -50,6 +50,7 @@
                             <th>价格</th>
                             <th>所需最少刀数</th>
                             <th>所需最多刀数</th>
+                            <th>幸运儿倍数</th>
                             <th>今日发起数</th>
                             <th>累计获得人数</th>
                             <th>添加时间</th>
@@ -65,9 +66,10 @@
                             <td>{if($item.status==1)}<span style="color: #0f0">上架</span>{else/}<span style="color: #f00">下架</span>{/if}</td>
                             <td>{$item.name}</td>
                             <td><img src="{$item.url}" class="avatar" onerror="this.style.display='none'"></td>
-                            <td>{$item['price']}</td>
-                            <td>{$item['min_knife_num']}</td>
-                            <td>{$item['max_knife_num']}</td>
+                            <td>{$item.price}</td>
+                            <td>{$item.min_knife_num}</td>
+                            <td>{$item.max_knife_num}</td>
+                            <td class="lucky"><span class="lucky_p">{$item.lucky+1}</span><input type="text" class="lucky_i" value="{$item.lucky+1}" data-id="{$item.id}" data-lucky="{$item.lucky+1}"></td>
                             <td>{$item.count}</td>
                             <td>{$item.has_get}</td>
                             <td>{$item.addtime}</td>
@@ -111,6 +113,18 @@
                 edit_sort($(this))
             }
         })
+        $('.lucky').click(function(){
+            $(this).find('.lucky_p').css('display', 'none');
+            $(this).find('.lucky_i').css('display', 'block').focus().select();
+        });
+        $('.lucky_i').blur(function(){
+            edit_lucky($(this))
+        })
+        $('.lucky_i').keypress(function(obj){
+            if (obj.keyCode == 13) {
+                edit_lucky($(this))
+            }
+        })
         $('a[data-action]').click(function(){
             var $action = $(this).data('action'), $id = $(this).data('id');
             var $ids = '0';
@@ -126,6 +140,11 @@
             operation($ids, $action)
         });
 
+        /**
+         * 修改商品排序
+         * @author 贺强
+         * @time   2018-12-12 10:14:25
+         */
         function edit_sort($this) {
             if ($this.val() == $this.data('sort')) {
                 $this.css('display', 'none');
@@ -149,6 +168,39 @@
             }
         }
 
+        /**
+         * 修改幸运儿
+         * @author 贺强
+         * @time   2018-12-12 10:14:55
+         */
+        function edit_lucky($this) {
+            if ($this.val() == $this.data('lucky')) {
+                $this.css('display', 'none');
+                $this.prev('.lucky_p').css('display', 'block');
+            }else{
+                $id = $this.data('id'), $lucky = $this.val();
+                $.ajax({
+                    type: 'post', dataType: 'json', cache: false,
+                    url: '/goods/editlucky',
+                    data: {'id': $id, 'lucky': $lucky},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.info, {icon: 5, time: 2000})
+                        }
+                    }
+                })
+            }
+        }
+
+        /**
+         * 上下架删除操作
+         * @author 贺强
+         * @time   2018-12-12 10:15:22
+         */
         function operation($ids, $type) {
             var $msg = '', $tip = '';
             if ($type == 'del' || $type == 'delAll') {

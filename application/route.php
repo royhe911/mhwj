@@ -58,6 +58,7 @@ return [
     '/goods/edit'         => 'admin/Goods/edit', // 编辑商品
     '/goods/editsort'     => 'admin/Goods/editsort', // 编辑商品排序
     '/goods/operate'      => 'admin/Goods/operate', // 操作商品
+    '/goods/editlucky'     => 'admin/Goods/editlucky', // 设置幸运儿
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图
