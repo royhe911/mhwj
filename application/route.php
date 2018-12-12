@@ -147,5 +147,6 @@ return [
     '/api/kj/skin'        => 'api/Kanjia/get_skin', // 皮肤列表
     '/api/kj/kjinfo'      => 'api/Kanjia/get_kj_info', // 砍价信息
     '/api/kj/knifelist'   => 'api/Kanjia/knife_list', // 快刀榜
+    '/api/kj/kjlist'      => 'api/Kanjia/get_kj_list', // 砍价榜
     /*--------   砍价 api 结束  --------*/
 ];

@@ -279,6 +279,54 @@ class Kanjia extends \think\Controller
     }
 
     /**
+     * 获取砍列表
+     * @author 贺强
+     * @time   2018-12-12 18:31:26
+     * @param  GoodsTaskModel $gt GoodsTaskModel 实例
+     */
+    public function get_kj_list(GoodsTaskModel $gt)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $page = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $where = ['uid' => $param['uid']];
+        $list  = $gt->getList($where, ['uid', 'total_money', 'knife_num', 'addtime', 'status'], "$page,$pagesize");
+        if ($list) {
+            $uids  = array_column($list, 'uid');
+            $u     = new UserModel();
+            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
+            foreach ($list as &$item) {
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                if (!empty($users[$item['uid']])) {
+                    $user = $users[$item['uid']];
+                    // 属性赋值
+                    $item['nickname'] = $user['nickname'];
+                    $item['avatar']   = $user['avatar'];
+                } else {
+                    $item['nickname'] = '';
+                    $item['avatar']   = '';
+                }
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
      * 砍价算法
      * @author 贺强
      * @time   2018-12-10 11:53:29
