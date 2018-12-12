@@ -62,7 +62,7 @@ class Kanjia extends \think\Controller
         $uid  = $param['uid'];
         $num  = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
         $task = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time()];
-        if ($goods['count'] === config('LUCKY')) {
+        if ($goods['count'] === $goods['lucky']) {
             $task['is_lucky']  = 1;
             $num               = mt_rand(2, 4);
             $task['knife_num'] = $num;
@@ -72,9 +72,10 @@ class Kanjia extends \think\Controller
         $taskInfo = [];
         foreach ($data as $k => $item) {
             $info = ['price' => $item, 'is_baodao' => 0];
-            if ($k === 8) {
-                $info['is_baodao'] = 1;
-            }
+            // 是否是宝刀
+            // if ($k === 8) {
+            //     $info['is_baodao'] = 1;
+            // }
             $taskInfo[] = $info;
         }
         $res = $gt->launch($task, $taskInfo);
