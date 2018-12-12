@@ -134,7 +134,7 @@ class Kanjia extends \think\Controller
     }
 
     /**
-     * 获得帮砍帮
+     * 获得砍价帮
      * @author 贺强
      * @time   2018-12-11 14:18:07
      * @param  GoodsTaskInfoModel $gti GoodsTaskInfoModel 实例
@@ -154,6 +154,37 @@ class Kanjia extends \think\Controller
             $u     = new UserModel();
             $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
             $users = array_column($users, null, 'id');
+            foreach ($list as &$item) {
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                if (!empty($users[$item['uid']])) {
+                    $user = $users[$item['uid']];
+                    // 属性赋值
+                    $item['nickname'] = $user['nickname'];
+                    $item['avatar']   = $user['avatar'];
+                } else {
+                    $item['nickname'] = '';
+                    $item['avatar']   = '';
+                }
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 快刀榜
+     * @author 贺强
+     * @time   2018-12-12 11:14:23
+     * @param  GoodsTaskModel $gt GoodsTaskModel 实例
+     */
+    public function knife_list(GoodsTaskModel $gt)
+    {
+        $list = $gt->getList([], ['uid', 'total_money', 'knife_num', 'addtime'], '1,10', 'knife_num');
+        if ($list) {
+            $uids  = array_column($list, 'uid');
+            $u     = new UserModel();
+            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
             foreach ($list as &$item) {
                 if (!empty($item['addtime'])) {
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);

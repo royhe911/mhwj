@@ -58,7 +58,7 @@ return [
     '/goods/edit'         => 'admin/Goods/edit', // 编辑商品
     '/goods/editsort'     => 'admin/Goods/editsort', // 编辑商品排序
     '/goods/operate'      => 'admin/Goods/operate', // 操作商品
-    '/goods/editlucky'     => 'admin/Goods/editlucky', // 设置幸运儿
+    '/goods/editlucky'    => 'admin/Goods/editlucky', // 设置幸运儿
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图
@@ -146,5 +146,6 @@ return [
     '/api/kj/helplist'    => 'api/Kanjia/get_help_list', // 帮砍帮
     '/api/kj/skin'        => 'api/Kanjia/get_skin', // 皮肤列表
     '/api/kj/kjinfo'      => 'api/Kanjia/get_kj_info', // 砍价信息
+    '/api/kj/knifelist'   => 'api/Kanjia/knife_list', // 快刀榜
     /*--------   砍价 api 结束  --------*/
 ];
