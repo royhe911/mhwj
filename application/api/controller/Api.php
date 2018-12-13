@@ -486,7 +486,7 @@ class Api extends \think\Controller
             $room = $r->getModel(['uid' => $uid, 'status' => 1], ['id room_id', 'name', 'type', 'para_min', 'para_max', 'num', 'price', 'total_money', 'in_count', 'count', 'in_master_count', 'master_count', 'addtime', 'status']);
             if ($room) {
                 if (!empty($room['addtime'])) {
-                    $room['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                    $room['addtime'] = date('Y-m-d H:i:s', $room['addtime']);
                 }
                 $master['room'] = $room;
             }
