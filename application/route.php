@@ -59,6 +59,7 @@ return [
     '/goods/editsort'     => 'admin/Goods/editsort', // 编辑商品排序
     '/goods/operate'      => 'admin/Goods/operate', // 操作商品
     '/goods/editlucky'    => 'admin/Goods/editlucky', // 设置幸运儿
+    '/goods/prizes'       => 'admin/Goods/prizes', // 砍价成功列表
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图
@@ -123,7 +124,9 @@ return [
     '/api/pay/pordstatus' => 'api/Pay/get_pord_status', // 订制订单状态
     '/api/pay/uordinfo'   => 'api/Pay/get_uord_info', // 房间玩家订单详情
     '/api/pay/mordinfo'   => 'api/Pay/get_mord_info', // 房间陪玩师订单详情
+    '/api/pay/callback'   => 'api/Pay/pay_callback', // 支付回调
     /*--------   支付 api 结束  --------*/
+
     /*--------   订制 api 开始  --------*/
     '/api/person/inroom'  => 'api/Person/come_in_room', // 进入私聊房间
     '/api/person/addchat' => 'api/Person/add_chat', // 添加私聊

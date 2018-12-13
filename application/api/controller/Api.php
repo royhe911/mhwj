@@ -1639,8 +1639,9 @@ class Api extends \think\Controller
             $users = array_column($users, null, 'master_id');
             foreach ($list as $k => &$item) {
                 if (!empty($users[$item['uid']])) {
-                    $score         = $item['score'];
-                    $item          = $users[$item['uid']];
+                    $score = $item['score'];
+                    $item  = $users[$item['uid']];
+                    // 陪玩师分数
                     $item['score'] = $score;
                 } else {
                     unset($list[$k]);

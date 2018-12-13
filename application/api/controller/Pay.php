@@ -1410,6 +1410,33 @@ class Pay extends \think\Controller
     }
 
     /**
+     * 前端回调修改订单状态
+     * @author 贺强
+     * @time   2018-12-13 15:06:08
+     */
+    public function pay_callback()
+    {
+        $param = $this->param;
+        if (empty($param['order_num'])) {
+            $msg = ['status' => 1, 'info' => '订单号不能为空', 'data' => null];
+        } elseif (empty($param['order_type'])) {
+            $msg = ['status' => 3, 'info' => '订单类型不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uo = new UserOrderModel();
+        if (intval($param['order_type']) === 2) {
+            $uo = new PersonOrderModel();
+        }
+        $res = $uo->modifyField('status', 6, ['order_num' => $param['order_num']]);
+        if (!$res) {
+            echo json_encode(['status' => 9, 'info' => '修改失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
+    }
+
+    /**
      * 生成签名
      * @author 贺强
      * @time   2018-11-13 10:17:56
