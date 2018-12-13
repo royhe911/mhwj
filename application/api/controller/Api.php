@@ -1700,10 +1700,13 @@ class Api extends \think\Controller
         $where = ['play_type' => 2, 'level_url' => ['<>', '']];
         $count = $ua->getCount($where);
         $num   = ceil($count / $pagesize);
-        $page = mt_rand(1, $num);
-        $list = $ua->getList($where, ['uid', 'level_url'], "$page,$pagesize");
+        $page  = mt_rand(1, $num);
+        $list  = $ua->getList($where, ['uid', 'level_url'], "$page,$pagesize");
         if ($list) {
             $uids  = array_column($list, 'uid');
+            $uo    = new UserOrderModel();
+            $order = $uo->getList(['uid' => ['in', $uids], 'play_type' => 2], ['uid,count(*) c'], [], '', 'uid');
+            $order = array_column($order, 'c', 'uid');
             $u     = new UserModel();
             $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
             $users = array_column($users, null, 'id');
@@ -1724,6 +1727,9 @@ class Api extends \think\Controller
                         }
                     }
                     $item['level_url'] = $level_url;
+                }
+                if (!empty($order[$item['uid']])) {
+                    # code...
                 }
             }
             shuffle($list);
