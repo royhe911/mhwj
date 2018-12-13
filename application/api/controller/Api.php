@@ -1699,11 +1699,8 @@ class Api extends \think\Controller
         }
         $where = ['play_type' => 2, 'level_url' => ['<>', '']];
         $count = $ua->getCount($where);
-        $num   = $count / $pagesize;
-        if ($num < 1) {
-            $num = 1;
-        }
-        $page = ceil(mt_rand(1, $num));
+        $num   = ceil($count / $pagesize);
+        $page = mt_rand(1, $num);
         $list = $ua->getList($where, ['uid', 'level_url'], "$page,$pagesize");
         if ($list) {
             $uids  = array_column($list, 'uid');
