@@ -1711,9 +1711,6 @@ class Api extends \think\Controller
                     $item['nickname'] = $user['nickname'];
                     $item['avatar']   = $user['avatar'];
                 } else {
-                    $item['nickname'] = '';
-                    $item['avatar']   = '';
-                } else {
                     unset($list[$k]);
                 }
                 if (!empty($item['level_url'])) {
