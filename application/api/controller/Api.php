@@ -483,9 +483,12 @@ class Api extends \think\Controller
             $master['price'] = 4;
             $master['room']  = null;
             // 查询该陪玩师有没有正在开的房间
-            $room = $r->getModel(['uid' => $uid, 'status' => ['<', 2]], ['id room_id', 'name', 'type', 'para_min', 'para_max', 'num', 'price', 'total_money', 'in_count', 'count', 'in_master_count', 'master_count', 'addtime', 'status']);
+            $room = $r->getModel(['uid' => $uid, 'status' => 1], ['id room_id', 'name', 'type', 'para_min', 'para_max', 'num', 'price', 'total_money', 'in_count', 'count', 'in_master_count', 'master_count', 'addtime', 'status']);
             if ($room) {
-                # code...
+                if (!empty($room['addtime'])) {
+                    $room['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                $master['room'] = $room;
             }
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $master]);exit;
         }
