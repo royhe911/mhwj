@@ -1729,7 +1729,9 @@ class Api extends \think\Controller
                     $item['level_url'] = $level_url;
                 }
                 if (!empty($order[$item['uid']])) {
-                    # code...
+                    $item['count'] = $order[$item['uid']];
+                } else {
+                    $item['count'] = 0;
                 }
             }
             shuffle($list);
