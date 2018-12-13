@@ -307,6 +307,8 @@ class Goods extends \think\Controller
             }
             $task_id = $param['task_id'];
             unset($param['task_id']);
+            $param['addtime'] = time();
+            // 添加发放记录
             $res = $gd->add($param);
             if ($res) {
                 $gt->modifyField('status', 10, ['id' => $task_id]);

@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\GoodsDistributeModel;
 use app\common\model\GoodsModel;
 use app\common\model\GoodsSkinModel;
 use app\common\model\GoodsTaskInfoModel;
@@ -244,9 +245,36 @@ class Kanjia extends \think\Controller
         if (!$task) {
             echo json_encode(['status' => 0, 'info' => '没有砍价', 'data' => ['is_kj' => 0]]);exit;
         }
-        $g     = new GoodsModel();
-        $goods = $g->getModel(['id' => $task['goods_id']]);
-        $data  = ['task_id' => $task['id'], 'starttime' => date('Y/m/d H:i:s'), 'endtime' => date('Y/m/d H:i:s', $task['addtime'] + 24 * 3600), 'has_cut_money' => $task['has_cut_money'], 'overplus' => $task['total_money'] - $task['has_cut_money'], 'box1' => $task['box1'], 'box2' => $task['box2'], 'status' => $task['status']];
+        $g      = new GoodsModel();
+        $goods  = $g->getModel(['id' => $task['goods_id']]);
+        $winner = null;
+        $gd     = new GoodsDistributeModel();
+        $count  = $gd->getCount();
+        if ($count) {
+            $pagesize = 10;
+            $num      = ceil($count / $pagesize);
+            $page     = mt_rand(1, $num);
+            $distri   = $gd->getList([], ['uid', 'skin_name'], "$page,$pagesize");
+            if ($distri) {
+                $uids  = array_column($distri, 'uid');
+                $u     = new UserModel();
+                $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+                $users = array_column($users, null, 'id');
+                foreach ($distri as &$item) {
+                    if (!empty($users[$item['uid']])) {
+                        $user = $users[$item['uid']];
+                        // 属性赋值
+                        $item['nickname'] = $user['nickname'];
+                        $item['avatar']   = $user['avatar'];
+                    } else {
+                        $item['nickname'] = '';
+                        $item['avatar']   = '';
+                    }
+                }
+            }
+            $winner = $distri;
+        }
+        $data = ['task_id' => $task['id'], 'starttime' => date('Y/m/d H:i:s'), 'endtime' => date('Y/m/d H:i:s', $task['addtime'] + 24 * 3600), 'has_cut_money' => $task['has_cut_money'], 'overplus' => $task['total_money'] - $task['has_cut_money'], 'box1' => $task['box1'], 'box2' => $task['box2'], 'status' => $task['status'], 'winner' => $winner];
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
     }
 
