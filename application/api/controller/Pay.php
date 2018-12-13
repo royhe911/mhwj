@@ -334,6 +334,9 @@ class Pay extends \think\Controller
                 $master_id = $pmord['master_id'];
             }
             if (($status === 6 || $status === 10) && $type === 1) {
+                if ($status===10) {
+                    
+                }
                 $ru = new RoomUserModel();
                 $ru->modifyField('status', $status, ['room_id' => $uorder['room_id']]);
                 $r         = new RoomModel();
