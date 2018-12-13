@@ -1680,4 +1680,52 @@ class Api extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
+    /**
+     * 获取娱乐陪玩师
+     * @author 贺强
+     * @time   2018-12-13 09:47:27
+     * @param  UserModel $u UserModel 实例
+     */
+    public function get_yule_list(UserAttrModel $ua)
+    {
+        $param    = $this->param;
+        $page     = 1;
+        $pagesize = 6;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $where = ['play_type' => 2];
+        $list  = $ua->getList($where, ['uid', 'level_url'], "$page,$pagesize");
+        if ($list) {
+            $uids  = array_column($list, 'uid');
+            $u     = new UserModel();
+            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
+            foreach ($list as &$item) {
+                if (!empty($users[$item['uid']])) {
+                    $user = $users[$item['uid']];
+                    // 属性赋值
+                    $item['nickname'] = $user['nickname'];
+                    $item['avatar']   = $user['avatar'];
+                } else {
+                    $item['nickname'] = '';
+                    $item['avatar']   = '';
+                }
+                if (!empty($item['level_url'])) {
+                    $level_url = explode(',', $item['level_url']);
+                    foreach ($level_url as &$url) {
+                        if (strpos($url, 'http://') === false && strpos($url, 'https://') === false) {
+                            $url = config('WEBSITE') . $url;
+                        }
+                    }
+                    $item['level_url'] = $level_url;
+                }
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
 }
