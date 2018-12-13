@@ -1417,19 +1417,16 @@ class Pay extends \think\Controller
     public function pay_callback()
     {
         $param = $this->param;
-        if (empty($param['order_num'])) {
-            $msg = ['status' => 1, 'info' => '订单号不能为空', 'data' => null];
-        } elseif (empty($param['order_type'])) {
-            $msg = ['status' => 3, 'info' => '订单类型不能为空', 'data' => null];
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '玩家ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $uo = new UserOrderModel();
-        if (intval($param['order_type']) === 2) {
-            $uo = new PersonOrderModel();
-        }
-        $res = $uo->modifyField('status', 6, ['order_num' => $param['order_num']]);
+        $ru  = new RoomUserModel();
+        $res = $ru->modifyField('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
         if (!$res) {
             echo json_encode(['status' => 9, 'info' => '修改失败', 'data' => null]);exit;
         }
