@@ -1704,7 +1704,7 @@ class Api extends \think\Controller
             $u     = new UserModel();
             $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
             $users = array_column($users, null, 'id');
-            foreach ($list as &$item) {
+            foreach ($list as $k => &$item) {
                 if (!empty($users[$item['uid']])) {
                     $user = $users[$item['uid']];
                     // 属性赋值
@@ -1713,6 +1713,8 @@ class Api extends \think\Controller
                 } else {
                     $item['nickname'] = '';
                     $item['avatar']   = '';
+                } else {
+                    unset($list[$k]);
                 }
                 if (!empty($item['level_url'])) {
                     $level_url = explode(',', $item['level_url']);
