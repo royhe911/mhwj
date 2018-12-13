@@ -1697,7 +1697,7 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $where = ['play_type' => 2];
+        $where = ['play_type' => 2, 'level_url' => ['<>', '']];
         $list  = $ua->getList($where, ['uid', 'level_url'], "$page,$pagesize");
         if ($list) {
             $uids  = array_column($list, 'uid');
