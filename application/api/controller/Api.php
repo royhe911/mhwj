@@ -1705,7 +1705,7 @@ class Api extends \think\Controller
         if ($list) {
             $uids  = array_column($list, 'uid');
             $uo    = new UserOrderModel();
-            $order = $uo->getList(['uid' => ['in', $uids], 'play_type' => 2], ['uid,count(*) c'], [], '', 'uid');
+            $order = $uo->getList(['uid' => ['in', $uids], 'play_type' => 2], ['uid', 'count(*) c'], '', '', 'uid');
             $order = array_column($order, 'c', 'uid');
             $u     = new UserModel();
             $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
