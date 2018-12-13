@@ -1698,6 +1698,9 @@ class Api extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $where = ['play_type' => 2, 'level_url' => ['<>', '']];
+        $count = $ua->getCount($where);
+        $num   = $count / $pagesize;
+        $page  = mt_rand(1, $num);
         $list  = $ua->getList($where, ['uid', 'level_url'], "$page,$pagesize");
         if ($list) {
             $uids  = array_column($list, 'uid');
@@ -1723,6 +1726,7 @@ class Api extends \think\Controller
                     $item['level_url'] = $level_url;
                 }
             }
+            shuffle($list);
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
