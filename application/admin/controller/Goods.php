@@ -1,7 +1,11 @@
 <?php
 namespace app\admin\controller;
 
+use app\common\model\GoodsDistributeModel;
 use app\common\model\GoodsModel;
+use app\common\model\GoodsSkinModel;
+use app\common\model\GoodsTaskModel;
+use app\common\model\UserModel;
 
 /**
  * 商品-控制器
@@ -203,5 +207,124 @@ class Goods extends \think\Controller
         $count = $g->getCount($where);
         $pages = ceil($count / $pagesize);
         return $this->fetch('list', ['list' => $list, 'pages' => $pages]);
+    }
+
+    /**
+     * 砍价成功列表
+     * @author 贺强
+     * @time   2018-12-13 14:19:55
+     * @param  GoodsTaskModel $gt GoodsTaskModel 实例
+     */
+    public function prizes(GoodsTaskModel $gt)
+    {
+        $where = ['status' => ['in', [8, 10]]];
+        // 分页参数
+        $page     = intval($this->request->get('page', 1));
+        $pagesize = intval($this->request->get('pagesize', config('PAGESIZE')));
+        $list     = $gt->getList($where, true, "$page,$pagesize", ['addtime' => 'desc', 'status']);
+        $pages    = 0;
+        if ($list) {
+            $uids  = array_column($list, 'uid');
+            $u     = new UserModel();
+            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
+            $gids  = array_column($list, 'goods_id');
+            $g     = new GoodsModel();
+            $goods = $g->getList(['id' => ['in', $gids]], ['id', 'name']);
+            $goods = array_column($goods, 'name', 'id');
+            foreach ($list as &$item) {
+                if (!empty($users[$item['uid']])) {
+                    $user = $users[$item['uid']];
+                    // 属性赋值
+                    $item['nickname'] = $user['nickname'];
+                    $item['avatar']   = $user['avatar'];
+                } else {
+                    $item['nickname'] = '';
+                    $item['avatar']   = '';
+                }
+                if (!empty($goods[$item['goods_id']])) {
+                    $item['goods_name'] = $goods[$item['goods_id']];
+                } else {
+                    $item['goods_name'] = '';
+                }
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                if ($item['is_lucky']) {
+                    $item['is_lucky'] = '是';
+                } else {
+                    $item['is_lucky'] = '不是';
+                }
+                if ($item['box1']) {
+                    $item['box1'] = '已使用';
+                } else {
+                    $item['box1'] = '未使用';
+                }
+                if ($item['box2']) {
+                    $item['box2'] = '已使用';
+                } else {
+                    $item['box2'] = '未使用';
+                }
+                if ($item['status'] === 8) {
+                    $item['status_txt'] = '砍价成功';
+                } elseif ($item['status'] === 10) {
+                    $item['status_txt'] = '已派发奖品';
+                } else {
+                    $item['status_txt'] = '';
+                }
+            }
+            $count = $gt->getCount($where);
+            $pages = ceil($count / $pagesize);
+        }
+        return $this->fetch('prizes', ['list' => $list, 'pages' => $pages]);
+    }
+
+    /**
+     * 发放奖品
+     * @author 贺强
+     * @time   2018-12-13 17:26:47
+     * @param  GoodsDistributeModel $gd GoodsDistributeModel 实例
+     */
+    public function ffjp(GoodsDistributeModel $gd)
+    {
+        $gt = new GoodsTaskModel();
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['uid'])) {
+                return ['status' => 1, 'info' => '中奖者ID不能为空'];
+            }
+            if (empty($param['wx'])) {
+                return ['status' => 3, 'info' => '中奖者微信不能为空'];
+            }
+            if (empty($param['goods_name'])) {
+                return ['status' => 5, 'info' => '奖品名称不能为空'];
+            }
+            if (empty($param['mobile'])) {
+                return ['status' => 7, 'info' => '中奖者手机不能为空'];
+            }
+            if (empty($param['skinID'])) {
+                return ['status' => 9, 'info' => '皮肤ID不能为空'];
+            }
+            $task_id = $param['task_id'];
+            unset($param['task_id']);
+            $res = $gd->add($param);
+            if ($res) {
+                $gt->modifyField('status', 10, ['id' => $task_id]);
+                return ['status' => 0, 'info' => '发放成功'];
+            } else {
+                return ['status' => 4, 'info' => '发放失败'];
+            }
+        } else {
+            $id    = $this->request->get('id');
+            $task  = $gt->getModel(['id' => $id]);
+            $g     = new GoodsModel();
+            $goods = $g->getModel(['id' => $task['goods_id']]);
+            $gs    = new GoodsSkinModel();
+            $skin  = $gs->getList(['goods_id' => $task['goods_id']], ['id', 'name', 'url', 'price']);
+            $u     = new UserModel();
+            $user  = $u->getModel(['id' => $task['uid']]);
+            $data  = ['uid' => $task['uid'], 'goods_name' => $goods['name'], 'mobile' => $user['mobile'], 'avatar' => $user['avatar'], 'skin' => $skin, 'task_id' => $id];
+            return $this->fetch('ffjp', ['data' => $data]);
+        }
     }
 }

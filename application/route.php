@@ -60,6 +60,7 @@ return [
     '/goods/operate'      => 'admin/Goods/operate', // 操作商品
     '/goods/editlucky'    => 'admin/Goods/editlucky', // 设置幸运儿
     '/goods/prizes'       => 'admin/Goods/prizes', // 砍价成功列表
+    '/goods/ffjp'         => 'admin/Goods/ffjp', // 发放奖品
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图
