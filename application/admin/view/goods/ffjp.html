@@ -96,7 +96,7 @@
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'save') {
-                var wx = $('#wx'), mobile = $('#mobile'), goods_name = $('#goods_name'), skinID = $('#skinID'), skinName = '', skinUrl = '', skinPrice = 0;
+                var wx = $('#wx'), mobile = $('#mobile'), goods_name = $('#goods_name'), skinID = $('#skinID').find('option:selected'), skinName = '', skinUrl = '', skinPrice = 0;
                 if (wx.val() == '') {
                     layer.msg('中奖者微信不能为空', {icon: 5, time: 1000}, function(){wx.focus()});
                     return false
@@ -109,7 +109,7 @@
                     layer.msg('奖品名称不能为空', {icon: 5, time: 1000}, function(){goods_name.focus()});
                     return false
                 }
-                if (skinID.val() == 0) {
+                if ($('#skinID').val() == 0) {
                     layer.msg('请选择皮肤', {icon: 5, time: 1000});
                     return false
                 } else {
@@ -120,7 +120,7 @@
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
                     url: '/goods/ffjp',
-                    data: {'uid': {$data.uid},'wx': wx.val(), 'mobile': mobile.val(), 'address': $('#address').val(), 'goods_name': goods_name.val(), 'skinID': skinID, 'skinName': skinName, 'skinUrl': skinUrl, 'skinPrice': skinPrice, 'task_id': {$data.task_id}},
+                    data: {'uid': {$data.uid},'wx': wx.val(), 'mobile': mobile.val(), 'address': $('#address').val(), 'goods_name': goods_name.val(), 'skin_id': $('#skinID').val(), 'skin_name': skinName, 'skin_url': skinUrl, 'skin_price': skinPrice, 'task_id': {$data.task_id}},
                     success: function(data){
                         if (data.status == 0) {
                             layer.msg('发放成功', {icon: 6, time: 2000}, function(){

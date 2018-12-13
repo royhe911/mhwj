@@ -302,7 +302,7 @@ class Goods extends \think\Controller
             if (empty($param['mobile'])) {
                 return ['status' => 7, 'info' => '中奖者手机不能为空'];
             }
-            if (empty($param['skinID'])) {
+            if (empty($param['skin_id'])) {
                 return ['status' => 9, 'info' => '皮肤ID不能为空'];
             }
             $task_id = $param['task_id'];
