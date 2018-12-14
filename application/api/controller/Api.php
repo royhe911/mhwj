@@ -538,16 +538,18 @@ class Api extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['uid']) || empty($param['game_id'])) {
-            echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
+            $msg = ['status' => 1, 'info' => '参数缺失', 'data' => null];
+        } elseif (empty($param['curr_para'])) {
+            $msg = ['status' => 2, 'info' => '当前段位不能为空', 'data' => null];
+        } elseif (empty($param['play_type'])) {
+            $msg = ['status' => 4, 'info' => '陪玩类型不能为空', 'data' => null];
+        } elseif (empty($param['level_url'])) {
+            $msg = ['status' => 5, 'info' => '水平截图不能为空', 'data' => null];
+        } elseif (intval($param['play_type']) === 1 && empty($para['logo'])) {
+            $msg = ['status' => 6, 'info' => '头像不能为空', 'data' => null];
         }
-        if (empty($param['curr_para'])) {
-            echo json_encode(['status' => 2, 'info' => '当前段位不能为空', 'data' => null]);exit;
-        }
-        if (empty($param['play_type'])) {
-            echo json_encode(['status' => 4, 'info' => '陪玩类型不能为空', 'data' => null]);exit;
-        }
-        if (empty($param['level_url'])) {
-            echo json_encode(['status' => 5, 'info' => '水平截图不能为空', 'data' => null]);exit;
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
         }
         $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']]);
         if ($userAttr) {
@@ -986,9 +988,10 @@ class Api extends \think\Controller
             $users    = $u->getList(['is_delete' => 0, 'id' => ['in', $uids], 'type' => 2], 'id,nickname,avatar');
             $users    = array_column($users, null, 'id');
             $ua       = new UserAttrModel();
-            $attrs    = $ua->getList(['uid' => ['in', $uids], 'game_id' => ['in', $game_ids]], ['uid', 'game_id', 'winning', 'level_url']);
+            $attrs    = $ua->getList(['uid' => ['in', $uids], 'game_id' => ['in', $game_ids]], ['uid', 'game_id', 'winning', 'level_url', 'logo']);
             $attr_arr = [];
             $levels   = [];
+            $logos    = [];
             foreach ($attrs as $attr) {
                 $attr_arr[$attr['uid']][$attr['game_id']] = $attr['winning'];
                 // 取第一张水平截图
@@ -998,6 +1001,9 @@ class Api extends \think\Controller
                     $uurl = config('WEBSITE') . $uurl;
                 }
                 $levels[$attr['uid']][$attr['game_id']] = $uurl;
+                if (!empty($attr['logo']) && strpos($attr['logo'], 'http://') === false && strpos($attr['logo'], 'https://') === false) {
+                    $logo[$attr['uid']][$attr['game_id']] = config('WEBSITE') . $attr['logo'];
+                }
             }
             $gc     = new GameConfigModel();
             $gclist = $gc->getList(['game_id' => ['in', $game_ids]], ['game_id', 'para', 'para_des', 'para_id', 'para_str', 'price']);
@@ -1037,6 +1043,11 @@ class Api extends \think\Controller
                     $item['level_url'] = $levels[$item['uid']][$item['game_id']];
                 } else {
                     $item['level_url'] = '';
+                }
+                if (!empty($logos[$item['uid']]) && !empty($logos[$item['uid']][$item['game_id']])) {
+                    $item['logo'] = $logos[$item['uid']][$item['game_id']];
+                } else {
+                    $item['logo'] = '';
                 }
             }
         }
