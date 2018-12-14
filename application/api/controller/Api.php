@@ -1008,6 +1008,9 @@ class Api extends \think\Controller
                 $gparr[$gci['game_id']][$gci['para']] = $gci['para_des'];
             }
             foreach ($list as &$item) {
+                if (!empty($item['url']) && strpos($item['url'], 'http://') === false && strpos($item['url'], 'https://') === false) {
+                    $item['url'] = config('WEBSITE') . $item['url'];
+                }
                 if (!empty($jd_count[$item['uid']])) {
                     $item['jd_count'] = $jd_count[$item['uid']];
                 } else {
