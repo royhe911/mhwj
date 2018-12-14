@@ -237,7 +237,7 @@ class Admin extends \think\Controller
         if ($this->request->isAjax()) {
             $param = $this->request->post();
             $id    = $admin['id'];
-            if ($role_id === 1) {
+            if ($role_id === 0) {
                 $id = $param['id'];
             } elseif ($admin['username'] !== $param['username']) {
                 return ['status' => 1, 'info' => '非法操作，只能修改自己的账号'];
@@ -251,7 +251,9 @@ class Admin extends \think\Controller
                 $salt          = get_random_str(); // 生成密码盐
                 $param['salt'] = $salt;
                 $param['pwd']  = get_password($param['pwd'], $salt);
-                $is_pwd        = true;
+                if ($admin['username'] === $param['username']) {
+                    $is_pwd = true;
+                }
             } else {
                 unset($param['pwd']);
             }
@@ -259,7 +261,8 @@ class Admin extends \think\Controller
                 unset($param['avatar']);
             }
             $param['updatetime'] = time();
-            $res                 = $a->modify($param, ['id' => $id]);
+            // 执行修改
+            $res = $a->modify($param, ['id' => $id]);
             if (!$res) {
                 return ['status' => 4, 'info' => '修改失败'];
             }
