@@ -545,7 +545,7 @@ class Api extends \think\Controller
             $msg = ['status' => 4, 'info' => '陪玩类型不能为空', 'data' => null];
         } elseif (empty($param['level_url'])) {
             $msg = ['status' => 5, 'info' => '水平截图不能为空', 'data' => null];
-        } elseif (intval($param['play_type']) === 1 && empty($para['logo'])) {
+        } elseif (intval($param['play_type']) === 1 && empty($param['logo'])) {
             $msg = ['status' => 6, 'info' => '头像不能为空', 'data' => null];
         }
         if (!empty($msg)) {
