@@ -302,16 +302,14 @@ class Admin extends \think\Controller
         $where   = ['is_delete' => 0];
         $keyword = '';
         $type    = 0;
-        if ($this->request->isPost()) {
-            $param = $this->request->post();
-            // print_r($param);exit;
-            if (!empty($param['keyword'])) {
-                $where['mobile|email|qq|wx'] = ['like', "%{$param['keyword']}%"];
-                $keyword                     = $param['keyword'];
-            }
-            if (!empty($param['type']) && is_numeric($param['type'])) {
-                $where['role_id'] = $type = $param['type'];
-            }
+        $param   = $this->request->get();
+        // print_r($param);exit;
+        if (!empty($param['keyword'])) {
+            $where['mobile|email|qq|wx'] = ['like', "%{$param['keyword']}%"];
+            $keyword                     = $param['keyword'];
+        }
+        if (!empty($param['type']) && is_numeric($param['type'])) {
+            $where['role_id'] = $type = $param['type'];
         }
         // 分页参数
         $page     = intval($this->request->get('page', 1));
