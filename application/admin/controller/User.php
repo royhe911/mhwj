@@ -23,7 +23,7 @@ class User extends \think\Controller
     public function lists(UserModel $u)
     {
         $where = ['is_delete' => 0];
-        $param = $this->request->post();
+        $param = $this->request->get();
         if (!empty($param['type'])) {
             $where['type'] = $param['type'];
         } else {
