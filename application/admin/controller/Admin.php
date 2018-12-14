@@ -237,7 +237,7 @@ class Admin extends \think\Controller
         if ($this->request->isAjax()) {
             $param = $this->request->post();
             $id    = $admin['id'];
-            if ($role_id === 0) {
+            if ($role_id === 1) {
                 $id = $param['id'];
             } elseif ($admin['username'] !== $param['username']) {
                 return ['status' => 1, 'info' => '非法操作，只能修改自己的账号'];
@@ -261,8 +261,7 @@ class Admin extends \think\Controller
                 unset($param['avatar']);
             }
             $param['updatetime'] = time();
-            // 执行修改
-            $res = $a->modify($param, ['id' => $id]);
+            $res                 = $a->modify($param, ['id' => $id]);
             if (!$res) {
                 return ['status' => 4, 'info' => '修改失败'];
             }
