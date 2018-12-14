@@ -1692,6 +1692,10 @@ class Api extends \think\Controller
                 $item['score'] = rtrim($item['score'], '.');
                 if (!empty($users[$item['master_id']])) {
                     $master = $users[$item['master_id']];
+                    if (empty($master['avatar'])) {
+                        unset($list[$k]);
+                        continue;
+                    }
                     // 取得陪玩师昵称和头像
                     $item['nickname'] = $master['nickname'];
                     $item['avatar']   = $master['avatar'];
