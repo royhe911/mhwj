@@ -242,7 +242,6 @@ class Admin extends \think\Controller
             } elseif ($admin['username'] !== $param['username']) {
                 return ['status' => 1, 'info' => '非法操作，只能修改自己的账号'];
             }
-            unset($param['username']);
             if ($role_id != 1) {
                 unset($param['role_id']);
             }
@@ -260,8 +259,10 @@ class Admin extends \think\Controller
             if (empty($param['avatar'])) {
                 unset($param['avatar']);
             }
+            unset($param['username']);
             $param['updatetime'] = time();
-            $res                 = $a->modify($param, ['id' => $id]);
+            // 执行修改
+            $res = $a->modify($param, ['id' => $id]);
             if (!$res) {
                 return ['status' => 4, 'info' => '修改失败'];
             }
