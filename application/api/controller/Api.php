@@ -1660,6 +1660,7 @@ class Api extends \think\Controller
                     unset($list[$k]);
                 }
             }
+            $list = array_merge($list);
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
@@ -1703,6 +1704,7 @@ class Api extends \think\Controller
                     unset($list[$k]);
                 }
             }
+            $list = array_merge($list);
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
