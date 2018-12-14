@@ -876,6 +876,8 @@ class Api extends \think\Controller
             $msg = ['status' => 15, 'info' => '每小时价格不能为空', 'data' => null];
         } elseif (intval($param['type']) === 2 && intval($param['price']) > 999) {
             $msg = ['status' => 18, 'info' => '每小时价格只能是1-999', 'data' => null];
+        } elseif (intval($param['type']) === 2 && empty($param['url'])) {
+            $msg = ['status' => 19, 'info' => '房间图片不能为空', 'data' => null];
         } elseif (empty($param['region'])) {
             $msg = ['status' => 4, 'info' => '房间所属大区不能为空', 'data' => null];
         } elseif (empty($param['master_count']) || intval($param['master_count']) < 1 || intval($param['master_count']) > 4) {
@@ -976,7 +978,7 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,status', "$page,$pagesize", 'status');
+        $list = $r->getList($where, 'id,uid,url,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,status', "$page,$pagesize", 'status');
         if ($list) {
             $uids     = array_column($list, 'uid');
             $game_ids = array_column($list, 'game_id');
