@@ -553,6 +553,8 @@ class Api extends \think\Controller
         }
         $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']]);
         if ($userAttr) {
+            $param['status'] = 1;
+            // 修改技能
             $res = $ua->modify($param, ['uid' => $param['uid'], 'game_id' => $param['game_id']]);
         } else {
             $res = $ua->add($param);
@@ -988,7 +990,7 @@ class Api extends \think\Controller
             $users    = $u->getList(['is_delete' => 0, 'id' => ['in', $uids], 'type' => 2], 'id,nickname,avatar');
             $users    = array_column($users, null, 'id');
             $ua       = new UserAttrModel();
-            $attrs    = $ua->getList(['uid' => ['in', $uids], 'game_id' => ['in', $game_ids]], ['uid', 'game_id', 'winning', 'level_url', 'logo']);
+            $attrs    = $ua->getList(['status' => 8, 'uid' => ['in', $uids], 'game_id' => ['in', $game_ids]], ['uid', 'game_id', 'winning', 'level_url', 'logo']);
             $attr_arr = [];
             $levels   = [];
             $logos    = [];
