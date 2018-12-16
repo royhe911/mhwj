@@ -336,7 +336,7 @@ class Pay extends \think\Controller
             if (($status === 6 || $status === 10) && $type === 1) {
                 $r    = new RoomModel();
                 $room = $r->getModel(['id' => $uorder['room_id']]);
-                if ($status === 10 && $room['status'] !== 8) {
+                if ($status === 10 && $room['status'] !== 8 && $room['status'] !== 10) {
                     echo json_encode(['status' => 11, 'info' => '陪玩师还没有开车，不能完成', 'data' => null]);exit;
                 }
                 $ru = new RoomUserModel();
