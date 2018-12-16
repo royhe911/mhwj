@@ -916,9 +916,9 @@ class Api extends \think\Controller
                 $msg = ['status' => 7, 'info' => '您还未认证成为陪玩师，现在就去认证', 'data' => null];
             } elseif (intval($param['type']) === 1) {
                 $ua       = new UserAttrModel();
-                $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id'], 'play_type' => $param['type']], ['curr_para', 'play_type']);
+                $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id'], 'play_type' => $param['type'], 'status' => 8], ['curr_para', 'play_type']);
                 if (!$userAttr) {
-                    $msg = ['status' => 10, 'info' => '您不能陪玩此游戏', 'data' => null];
+                    $msg = ['status' => 10, 'info' => '您的审核还未通过，不能陪玩此游戏', 'data' => null];
                 } elseif ($userAttr['play_type'] === 1 && $userAttr['curr_para'] < $param['para_min']) {
                     $msg = ['status' => 11, 'info' => '您的等级不够陪玩的等级', 'data' => null];
                 }
@@ -1115,7 +1115,7 @@ class Api extends \think\Controller
             $mids     = array_merge([$room['uid']], $mids);
             $uids     = array_merge($uids, $mids);
             if ($room['room_status'] === 10) {
-                $msg = ['status' => 3, 'info' => '游戏已完成', 'data' => null];
+                $msg = ['status' => 3, 'info' => '陪玩师已确认订单，房间已销毁，请到订单列表完成订单', 'data' => null];
             } elseif ($room['room_status'] === 9 || $room['room_status'] === 7) {
                 $msg = ['status' => 5, 'info' => '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还', 'data' => null];
             } elseif ($room['count'] === $room['in_count']) {

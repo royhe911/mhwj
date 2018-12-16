@@ -369,6 +369,10 @@ class Pay extends \think\Controller
                     $uids = array_merge($uids, array_column($mss, 'uid'));
                 }
             }
+            if ($type === 2) {
+                $pr = new PersonRoomModel();
+                $pr->modifyField('is_delete', 1, ['order_id' => $uorder['id']]);
+            }
             $money = round($money / count($uids), 2);
             $u     = new UserModel();
             foreach ($uids as $uid) {
