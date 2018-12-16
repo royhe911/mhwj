@@ -1,8 +1,10 @@
 <?php
 namespace app\common\crontab;
 
+use app\common\model\MasterOrderModel;
 use app\common\model\RefundModel;
 use app\common\model\RoomModel;
+use app\common\model\RoomUserModel;
 use app\common\model\UserOrderModel;
 use think\console\Command;
 use think\console\Input;
@@ -43,7 +45,12 @@ class Roomrefund extends Command
                 foreach ($ordlist as $uord) {
                     // 退款
                     $this->exit_money($uord['order_num'], 1, 1, $uord['transaction_id'], $uord['uid']);
+                    $uo->modifyField('status', 9, ['room_id' => ['in', $ids]]);
                 }
+                $ru = new RoomUserModel();
+                $ru->modifyField('status', 4, ['room_id' => ['in', $ids]]);
+                $mo = new MasterOrderModel();
+                $mo->modifyField('status', 9, ['room_id' => ['in', $ids]]);
                 $r->modifyField('status', 9, ['status' => 7]);
             }
         } catch (\Exception $e) {

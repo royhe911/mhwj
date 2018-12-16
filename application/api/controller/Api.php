@@ -897,7 +897,7 @@ class Api extends \think\Controller
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
             }
             $mo    = new MasterOrderModel();
-            $count = $mo->getCount(['uid' => $param['uid'], 'status' => ['not in', [3, 10]]]);
+            $count = $mo->getCount(['uid' => $param['uid'], 'status' => ['not in', [3, 9, 10]]]);
             if ($count) {
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
             }
