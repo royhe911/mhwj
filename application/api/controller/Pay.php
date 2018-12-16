@@ -1430,7 +1430,7 @@ class Pay extends \think\Controller
         }
         $ru  = new RoomUserModel();
         $res = $ru->modifyField('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
-        if (!$res) {
+        if ($res === false) {
             echo json_encode(['status' => 9, 'info' => '修改失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;

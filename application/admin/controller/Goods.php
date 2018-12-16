@@ -177,6 +177,32 @@ class Goods extends \think\Controller
     }
 
     /**
+     * 修改所需刀数
+     * @author 贺强
+     * @time   2018-12-12 10:12:34
+     * @param  GoodsModel $g GoodsModel 实例
+     */
+    public function editknife(GoodsModel $g)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['id']) || empty($param['knife'])) {
+                return ['status' => 1, 'info' => '非法参数'];
+            }
+            $knife = $param['knife'];
+            $field = 'min_knife_num';
+            if ($param['type'] == 'max') {
+                $field = 'max_knife_num';
+            }
+            $res = $g->modifyField($field, $knife, ['id' => $param['id']]);
+            if ($res === false) {
+                return ['status' => 2, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        }
+    }
+
+    /**
      * 商品列表
      * @author 贺强
      * @time   2018-12-10 16:56:13

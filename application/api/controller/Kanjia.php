@@ -130,14 +130,14 @@ class Kanjia extends \think\Controller
         if ($uid === $task['uid']) {
             $git_where['is_self'] = 1;
         }
-        $info = $gti->getModel($git_where);
-        if ($info && $task) {
-            $g     = new GoodsModel();
-            $goods = $g->getModel(['id' => $task['goods_id']], ['deadline']);
-            if ($goods && $goods['deadline'] > time()) {
-                echo json_encode(['status' => 5, 'info' => '您已在活动期内砍过了', 'data' => null]);exit;
-            }
-        }
+        // $info = $gti->getModel($git_where);
+        // if ($info && $task) {
+        //     $g     = new GoodsModel();
+        //     $goods = $g->getModel(['id' => $task['goods_id']], ['deadline']);
+        //     if ($goods && $goods['deadline'] > time()) {
+        //         echo json_encode(['status' => 5, 'info' => '您已在活动期内砍过了', 'data' => null]);exit;
+        //     }
+        // }
         $info = $gti->helpChop($param);
         if (!is_array($info)) {
             if ($info === 40 || $info === 10) {
@@ -384,8 +384,8 @@ class Kanjia extends \think\Controller
             $num_arr[] = $f_num;
             $total -= $f_num;
         }
-        $baodao = $this->random_fload($third_min, $third_max);
-        $total -= $baodao;
+        // $baodao = $this->random_fload($third_min, $third_max);
+        // $total -= $baodao;
         for ($i = 1; $i < $num - 3; $i++) {
             // 生成宝刀
             // if ($i === 6) {
@@ -394,8 +394,8 @@ class Kanjia extends \think\Controller
             // }
             $avg  = $total / ($num - $i - 3);
             $rand = $this->random_fload($avg - $avg_num, $avg);
-            if ($rand <= 0) {
-                $rand = 0.01;
+            if ($rand < 0.1) {
+                $rand = 0.1;
             }
             $rand = sprintf('%.2f', $rand);
             $rand = $rand < 0 ? 0 : $rand;

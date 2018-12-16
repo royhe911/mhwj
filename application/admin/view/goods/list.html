@@ -19,7 +19,7 @@
         .avatar{width: 64px;height: 64px;border-radius: 32px;}
         .sort{width: 80px;}
         .lucky{width: 120px;}
-        .sort_i{width: 50px;display: none;}
+        .sort_i,.max_knife_num_i,.min_knife_num_i{width: 50px;display: none;}
         .lucky_i{width: 100px;display: none;}
     </style>
 </head>
@@ -70,8 +70,8 @@
                             <td>{$item.name}</td>
                             <td><img src="{$item.url}" class="avatar" onerror="this.style.display='none'"></td>
                             <td>{$item.price}</td>
-                            <td>{$item.min_knife_num}</td>
-                            <td>{$item.max_knife_num}</td>
+                            <td class="min_knife_num"><span class="min_knife_num_p">{$item.min_knife_num}</span><input type="text" class="min_knife_num_i" value="{$item.min_knife_num}" data-id="{$item.id}" data-knife="{$item.min_knife_num}"></td>
+                            <td class="max_knife_num"><span class="max_knife_num_p">{$item.max_knife_num}</span><input type="text" class="max_knife_num_i" value="{$item.max_knife_num}" data-id="{$item.id}" data-knife="{$item.max_knife_num}"></td>
                             <td class="lucky"><span class="lucky_p">{$item.lucky}</span><input type="text" class="lucky_i" value="{$item.lucky}" data-id="{$item.id}" data-lucky="{$item.lucky}"></td>
                             <td>{$item.count}</td>
                             <td>{$item.has_get}</td>
@@ -128,6 +128,30 @@
                 edit_lucky($(this))
             }
         })
+        $('.min_knife_num').click(function(){
+            $(this).find('.min_knife_num_p').css('display', 'none');
+            $(this).find('.min_knife_num_i').css('display', 'block').focus().select();
+        });
+        $('.min_knife_num_i').blur(function(){
+            edit_knife_min($(this))
+        })
+        $('.min_knife_num_i').keypress(function(obj){
+            if (obj.keyCode == 13) {
+                edit_knife_min($(this))
+            }
+        })
+        $('.max_knife_num').click(function(){
+            $(this).find('.max_knife_num_p').css('display', 'none');
+            $(this).find('.max_knife_num_i').css('display', 'block').focus().select();
+        });
+        $('.max_knife_num_i').blur(function(){
+            edit_knife_max($(this))
+        })
+        $('.max_knife_num_i').keypress(function(obj){
+            if (obj.keyCode == 13) {
+                edit_knife_min($(this))
+            }
+        })
         $('a[data-action]').click(function(){
             var $action = $(this).data('action'), $id = $(this).data('id');
             var $ids = '0';
@@ -158,6 +182,52 @@
                     type: 'post', dataType: 'json', cache: false,
                     url: '/goods/editsort',
                     data: {'id': $id, 'sort': $sort},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.info, {icon: 5, time: 2000})
+                        }
+                    }
+                })
+            }
+        }
+
+        function edit_knife_min($this) {
+            if ($this.val() == $this.data('knife')) {
+                $this.css('display', 'none');
+                $this.prev('.min_knife_num_p').css('display', 'block');
+            }else{
+                $id = $this.data('id'), $knife = $this.val();
+                $.ajax({
+                    type: 'post', dataType: 'json', cache: false,
+                    url: '/goods/editknife',
+                    data: {'id': $id, 'knife': $knife, 'type': 'min'},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.info, {icon: 5, time: 2000})
+                        }
+                    }
+                })
+            }
+        }
+
+        function edit_knife_max($this) {
+            if ($this.val() == $this.data('knife')) {
+                $this.css('display', 'none');
+                $this.prev('.max_knife_num_p').css('display', 'block');
+            }else{
+                $id = $this.data('id'), $knife = $this.val();
+                $.ajax({
+                    type: 'post', dataType: 'json', cache: false,
+                    url: '/goods/editknife',
+                    data: {'id': $id, 'knife': $knife, 'type': 'max'},
                     success: function(data){
                         if (data.status == 0) {
                             layer.msg(data.info, {icon: 1, time: 1000}, function(){

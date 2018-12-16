@@ -896,6 +896,11 @@ class Api extends \think\Controller
             if ($count) {
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
             }
+            $mo    = new MasterOrderModel();
+            $count = $mo->getCount(['uid' => $param['uid'], 'status' => ['not in', [3, 10]]]);
+            if ($count) {
+                echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
+            }
             $pmo   = new PersonMasterOrderModel();
             $count = $pmo->getCount(['master_id' => $param['uid'], 'status' => ['<>', 10]]);
             if ($count) {
@@ -933,7 +938,6 @@ class Api extends \think\Controller
         }
         $res = $r->add($param);
         if ($res) {
-            $mo   = new MasterOrderModel();
             $mord = ['uid' => $param['uid'], 'room_id' => $res, 'play_type' => $param['type'], 'game_id' => $param['game_id'], 'region' => $param['region'], 'order_num' => get_millisecond(), 'addtime' => time()];
             if (intval($param['type']) === 2) {
                 $mord['order_money'] = $param['price'] * $param['num'];

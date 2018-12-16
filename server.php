@@ -13,6 +13,18 @@ $serv->set(array(
     'ssl_key_file'             => '/etc/letsencrypt/live/www.dragontang.com/privkey.key',
 ));
 
+// 连接数据库
+$mysql_conf = array(
+    'host'    => '127.0.0.1:3306',
+    'db'      => 'douzhietc',
+    'db_user' => 'douzhietc',
+    'db_pwd'  => '4zX8K8wnG4BTBftm',
+    );
+$mysqli = @new mysqli($mysql_conf['host'], $mysql_conf['db_user'], $mysql_conf['db_pwd']);
+$mysqli->query("set names 'utf8'");//编码转化
+$select_db = $mysqli->select_db($mysql_conf['db']);
+
+
 $serv->on('connect', function ($serv, $fd) {
     echo "client:$fd Connect." . PHP_EOL;
 });
@@ -23,8 +35,12 @@ $serv->on("receive", function (swoole_server $serv, $fd, $from_id, $data) {
 });
 
 $serv->on('open', function ($server, $req) {
-    echo "server#{$server->worker_pid}: handshake success with fd#{$req->fd}" . PHP_EOL;;
-    // file_put_contents('/www/wwwroot/wwwdragontangcom/swoole.log', $server->worker_pid.',', FILE_APPEND);
+    $sql = 'select uid,count(*) count from m_chat_user where is_read=0 group by uid';
+    $data = $mysqli->query($sql);
+    $data = json_encode($data->fetch_assoc());
+    //if($data){
+        $server->push($req->fd, $data);
+    //}
 });
 
 $serv->on('message', function ($server, $frame) {
