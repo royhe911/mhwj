@@ -130,14 +130,14 @@ class Kanjia extends \think\Controller
         if ($uid === $task['uid']) {
             $git_where['is_self'] = 1;
         }
-        // $info = $gti->getModel($git_where);
-        // if ($info && $task) {
-        //     $g     = new GoodsModel();
-        //     $goods = $g->getModel(['id' => $task['goods_id']], ['deadline']);
-        //     if ($goods && $goods['deadline'] > time()) {
-        //         echo json_encode(['status' => 5, 'info' => '您已在活动期内砍过了', 'data' => null]);exit;
-        //     }
-        // }
+        $info = $gti->getModel($git_where);
+        if ($info && $task) {
+            $g     = new GoodsModel();
+            $goods = $g->getModel(['id' => $task['goods_id']], ['deadline']);
+            if ($goods && $goods['deadline'] > time()) {
+                echo json_encode(['status' => 5, 'info' => '您已在活动期内砍过了', 'data' => null]);exit;
+            }
+        }
         $info = $gti->helpChop($param);
         if (!is_array($info)) {
             if ($info === 40 || $info === 10) {
