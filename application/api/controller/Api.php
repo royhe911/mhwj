@@ -386,7 +386,7 @@ class Api extends \think\Controller
             if ($rmst) {
                 $room = $r->getModel(['id' => $rmst['room_id']]);
             }
-            $is_master = 1;
+            $is_master = 0;
         }
         if ($room) {
             $rmdt = ['room_id' => $room['id'], 'room_name' => $room['name'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count'], 'status' => $room['status'], 'is_master' => $is_master];
