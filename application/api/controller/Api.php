@@ -1093,11 +1093,19 @@ class Api extends \think\Controller
     {
         $param = $this->param;
         if (!empty($param['is_share']) && intval($param['is_share']) === 1) {
-            if (intval($param['type']) === 1) {
+            $type = intval($param['type']);
+            $uid  = $param['uid'];
+            if ($type === 1) {
                 $ru    = new RoomUserModel();
-                $count = $ru->getCount(['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+                $count = $ru->getCount(['room_id' => $param['room_id'], 'uid' => $uid]);
                 if (!$count) {
                     echo json_encode(['status' => 14, 'info' => '选择段位', 'data' => null]);exit;
+                }
+            } elseif ($type === 2) {
+                $ua    = new UserAttrModel();
+                $count = $ua->getCount(['uid' => $uid, 'status' => 8, 'game_id' => $param['game_id']]);
+                if (!$count) {
+                    echo json_encode(['status' => 14, 'info' => '您还未认证此游戏，不能陪玩', 'data' => null]);exit;
                 }
             }
             $state = $this->come_in_room(true);
