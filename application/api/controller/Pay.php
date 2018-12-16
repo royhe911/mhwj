@@ -726,6 +726,11 @@ class Pay extends \think\Controller
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
         }
+        $rm    = new RoomMasterModel();
+        $count = $rm->getCount(['uid' => $master_id]);
+        if ($count) {
+            echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
+        }
         $u     = new UserModel();
         $count = $u->getCount(['id' => $master_id, 'type' => 2, 'status' => 8]);
         if (!$count) {
