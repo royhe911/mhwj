@@ -165,13 +165,14 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $po = new PersonOrderModel();
+        $uid = $param['uid'];
+        $po  = new PersonOrderModel();
         // 查询该玩家是否已下了订制订单
-        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['in', '1,6,7']]);
+        $count = $po->getCount(['uid' => $uid, 'status' => ['in', '1,6,7']]);
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已下了订制订单', 'data' => null]);exit;
         }
-        $uorder = $uo->getModel(['uid' => $param['uid'], 'room_id' => $param['room_id'], 'status' => ['<>', 3], 'status' => ['<>', 10]], ['order_num']);
+        $uorder = $uo->getModel(['uid' => $uid, 'room_id' => $param['room_id'], 'status' => ['<>', 3], 'status' => ['<>', 10]], ['order_num']);
         if ($count) {
             echo json_encode(['status' => 0, 'info' => '重复下单成功', 'data' => ['order_num' => $uorder['order_num']]]);exit;
         }
@@ -195,7 +196,7 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 4, 'info' => '下单失败', 'data' => null]);exit;
         }
         $ui     = new UserInviteModel();
-        $invite = $ui->getModel(['is_delete' => 0, 'invited_uid' => $param['uid']]);
+        $invite = $ui->getModel(['is_delete' => 0, 'invited_uid' => $uid]);
         if ($invite) {
             $odata = ['uid' => $invite['uid'], 'type' => 1, 'money' => 5, 'over_time' => config('COUPONTERM') * 24 * 3666, 'addtime' => time()];
             $c     = new CouponModel();
@@ -204,7 +205,7 @@ class Pay extends \think\Controller
         $last_money = floatval($param['order_money']);
         if ($last_money > config('LOWERMONEY')) {
             $c   = new CouponModel();
-            $cus = $c->getModel(['uid' => $param['uid'], 'status' => 0], ['id', 'money']);
+            $cus = $c->getModel(['uid' => $uid, 'status' => 0], ['id', 'money']);
             if ($cus) {
                 $last_money -= $cus['money'];
                 $c->modifyField('status', 6, ['id' => $cus['id']]);
@@ -213,7 +214,7 @@ class Pay extends \think\Controller
         $total_fee = $last_money * 100;
         $total_fee = 1;
         // 调用微信预支付
-        $pay_data = $this->wxpay($param['uid'], $order_num, $total_fee);
+        $pay_data = $this->wxpay($uid, $order_num, $total_fee);
         if ($pay_data === false) {
             $msg = ['status' => 5, 'info' => '玩家不存在', 'data' => null];
         } elseif ($pay_data === 1) {
@@ -224,6 +225,13 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $u = new UserModel();
+        if ($total_fee > 0) {
+            $u->increment('contribution', ['id' => $uid], $total_fee);
+        }
+        $data = ['uid' => $uid, 'type' => 1, 'money' => $last_money, 'addtime' => time()];
+        $csm  = new ConsumeModel();
+        $res  = $csm->add($data);
         echo json_encode(['status' => 0, 'info' => '下单成功', 'data' => $pay_data]);exit;
     }
 

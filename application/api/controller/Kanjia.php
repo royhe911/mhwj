@@ -241,7 +241,7 @@ class Kanjia extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $task = $gt->getModel(['uid' => $param['uid']]);
+        $task = $gt->getModel(['uid' => $param['uid']], true, 'addtime desc');
         if (!$task) {
             echo json_encode(['status' => 0, 'info' => '没有砍价', 'data' => ['is_kj' => 0]]);exit;
         }
