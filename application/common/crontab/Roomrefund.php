@@ -3,6 +3,7 @@ namespace app\common\crontab;
 
 use app\common\model\MasterOrderModel;
 use app\common\model\RefundModel;
+use app\common\model\RoomMasterModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
 use app\common\model\UserOrderModel;

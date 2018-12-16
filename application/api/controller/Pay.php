@@ -575,14 +575,6 @@ class Pay extends \think\Controller
         if (!$uorder) {
             echo json_encode(['status' => 3, 'info' => '订单不存在', 'data' => null]);exit;
         }
-        // 调用微信支付接口进行支付
-        //
-        //
-        // 支付成功后更改订单
-        $state = true;
-        if (!$state) {
-            echo json_encode(['status' => 4, 'info' => '支付失败', 'data' => null]);exit;
-        }
         $res = $uo->pay_money($uorder);
         if ($res !== true) {
             echo json_encode(['status' => $res, 'info' => '支付失败', 'data' => null]);exit;
@@ -1422,16 +1414,17 @@ class Pay extends \think\Controller
         $param = $this->param;
         if (empty($param['room_id'])) {
             $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
-        } elseif (empty($param['uid'])) {
-            $msg = ['status' => 3, 'info' => '玩家ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $ru  = new RoomUserModel();
-        $res = $ru->modifyField('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
-        if ($res === false) {
-            echo json_encode(['status' => 9, 'info' => '修改失败', 'data' => null]);exit;
+        $room_id = $param['room_id'];
+        $r       = new RoomModel();
+        $room    = $r->getModel(['id' => $room_id], ['count']);
+        $ru      = new RoomUserModel();
+        $count   = $ru->getCount(['room_id' => $room_id, 'status' => 6]);
+        if ($count === $room['count']) {
+            $r->modifyField('status', 6, ['id' => $room_id]);
         }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
     }
