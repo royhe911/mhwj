@@ -1016,8 +1016,10 @@ class Api extends \think\Controller
             $gc     = new GameConfigModel();
             $gclist = $gc->getList(['game_id' => ['in', $game_ids]], ['game_id', 'para', 'para_des', 'para_id', 'para_str', 'price']);
             $gparr  = [];
+            $gcarr  = [];
             foreach ($gclist as $gci) {
                 $gparr[$gci['game_id']][$gci['para']] = $gci['para_des'];
+                $gcarr[$gci['game_id']][$gci['para']] = $gci['price'];
             }
             foreach ($list as &$item) {
                 if (!empty($jd_count[$item['uid']])) {
@@ -1031,6 +1033,11 @@ class Api extends \think\Controller
                 } else {
                     $item['nickname'] = '';
                     $item['avatar']   = '';
+                }
+                if (!empty($gcarr[$item['game_id']]) && !empty($gcarr[$item['game_id']][$item['para_min']])) {
+                    $item['price'] = $gparr[$item['game_id']][$item['para_min']];
+                } else {
+                    $item['price'] = 0;
                 }
                 if (!empty($gparr[$item['game_id']]) && !empty($gparr[$item['game_id']][$item['para_min']])) {
                     $item['para_min_str'] = $gparr[$item['game_id']][$item['para_min']];
