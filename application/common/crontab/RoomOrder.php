@@ -35,7 +35,10 @@ class RoomOrder extends Command
         if ($list) {
             $ids = [];
             foreach ($list as $item) {
-                $ids.=",{}"
+                $ids[] = $item['id'];
+            }
+            if (!empty($ids)) {
+                $uo->modifyField('status', 10, ['id' => ['in', $ids]]);
             }
         }
     }
