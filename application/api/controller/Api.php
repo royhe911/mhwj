@@ -880,6 +880,8 @@ class Api extends \think\Controller
             $msg = ['status' => 12, 'info' => '最低服务段位不能为空', 'data' => null];
         } elseif (intval($param['type']) === 1 && empty($param['para_max'])) {
             $msg = ['status' => 13, 'info' => '最高服务段位不能为空', 'data' => null];
+        } elseif (intval($param['type']) === 1 && intval($param['para_min']) > intval($param['para_max'])) {
+            $msg = ['status' => 14, 'info' => '最低段位不能高于最高段位', 'data' => null];
         } elseif (intval($param['type']) === 2 && empty($param['price'])) {
             $msg = ['status' => 15, 'info' => '每小时价格不能为空', 'data' => null];
         } elseif (intval($param['type']) === 2 && intval($param['price']) > 999) {
