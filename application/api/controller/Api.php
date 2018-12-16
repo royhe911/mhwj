@@ -378,16 +378,18 @@ class Api extends \think\Controller
         $data['room']      = null;
         $data['person']    = null;
         // 正在进行中的房间
-        $room = $r->getModel(['uid' => $master_id, 'status' => ['in', '0,1,5,6,8']]);
+        $room      = $r->getModel(['uid' => $master_id, 'status' => ['in', '0,1,5,6,8']]);
+        $is_master = 1;
         if (empty($room)) {
             $rm   = new RoomMasterModel();
             $rmst = $rm->getModel(['uid' => $master_id]);
             if ($rmst) {
                 $room = $r->getModel(['id' => $rmst['room_id']]);
             }
+            $is_master = 1;
         }
         if ($room) {
-            $rmdt = ['room_id' => $room['id'], 'room_name' => $room['name'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count'], 'status' => $room['status']];
+            $rmdt = ['room_id' => $room['id'], 'room_name' => $room['name'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count'], 'status' => $room['status'], 'is_master' => $is_master];
             // 正在进行中的房间
             $data['room'] = $rmdt;
         } else {
