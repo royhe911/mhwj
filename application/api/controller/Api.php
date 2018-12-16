@@ -553,7 +553,7 @@ class Api extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id']]);
+        $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id'], 'play_type' => $param['play_type']]);
         if ($userAttr) {
             $param['status'] = 1;
             // 修改技能
