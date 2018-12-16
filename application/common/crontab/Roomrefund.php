@@ -47,6 +47,8 @@ class Roomrefund extends Command
                     $this->exit_money($uord['order_num'], 1, 1, $uord['transaction_id'], $uord['uid']);
                     $uo->modifyField('status', 9, ['room_id' => ['in', $ids]]);
                 }
+                $rm = new RoomMasterModel();
+                $rm->delByWhere(['room_id' => ['in', $ids]]);
                 $ru = new RoomUserModel();
                 $ru->modifyField('status', 4, ['room_id' => ['in', $ids]]);
                 $mo = new MasterOrderModel();
