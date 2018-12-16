@@ -1389,8 +1389,8 @@ class Api extends \think\Controller
         $rusr = $ru->getModel(['room_id' => $param['room_id'], 'uid' => $param['uid']]);
         if (!empty($rusr)) {
             // 房主踢人参数
-            if (!empty($param['is_kicking']) && intval($param['is_kicking']) === 1 && $rusr['status'] !== 0) {
-                echo json_encode(['status' => 22, 'info' => '该用户已准备，不能踢', 'data' => null]);exit;
+            if (!empty($param['is_kicking']) && intval($param['is_kicking']) === 1 && $rusr['status'] > 4) {
+                echo json_encode(['status' => 22, 'info' => '您已点开始，不能踢', 'data' => null]);exit;
             }
             if ($rusr['status'] === 5) {
                 $msg = ['status' => 23, 'info' => '房主已点开始，不能退出', 'data' => null];

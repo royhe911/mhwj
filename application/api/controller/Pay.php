@@ -527,6 +527,9 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $data = ['uid' => $porder['uid'], 'type' => 1, 'money' => $last_money, 'addtime' => time()];
+        $c    = new ConsumeModel();
+        $c->add($data);
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['porder' => $porder, 'pay_data' => $pay_data]]);exit;
     }
 
