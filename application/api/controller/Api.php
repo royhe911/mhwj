@@ -1297,6 +1297,11 @@ class Api extends \think\Controller
             if ($room['status'] !== 8) {
                 echo json_encode(['status' => 22, 'info' => '游戏未开始，不能完成', 'data' => null]);exit;
             }
+            $morderlist = $mo->getList(['room_id' => $room_id]);
+            $u          = new UserModel();
+            foreach ($morderlist as $mitem) {
+                $u->increment('money', ['id' => $mitem['id']], $mitem['order_money']);
+            }
             $rm = new RoomMasterModel();
             $rm->delByWhere(['room_id' => $room_id]);
             $ch = new ChatModel();
