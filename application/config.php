@@ -233,4 +233,5 @@ return [
     'APPID_PLAYER'           => 'wxe6f37de8e1e3225e', // 玩家端 appid
     'APPSECRET_PLAYER'       => '357566bea005201ce062acaabd4a58e9', // 玩家端 appSecret
     'PAY_MCHID'              => 1519826271, // 商户号
+    'PRE_KEY'                => '32292XXYJ629LRPWWLHM127XWNMDGDHL', // 平台设置的密钥key
 ];

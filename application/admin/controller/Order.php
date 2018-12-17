@@ -505,7 +505,7 @@ class Order extends \think\Controller
             'spbill_create_ip' => get_client_ip(),
         ];
         // 生成签名
-        $transfers['sign'] = make_sign($transfers);
+        $transfers['sign'] = $this->make_sign($transfers);
         // 数组转xml
         $xmldata = array2xml($transfers);
         $res     = curl($url, $xmldata, false);
@@ -520,5 +520,23 @@ class Order extends \think\Controller
             return 2;
         }
         return true;
+    }
+
+    /**
+     * 生成签名
+     * @author 贺强
+     * @time   2018-11-13 10:17:56
+     * @param  array  $arr 生成签名的数组
+     * @return string      返回生成的签名
+     */
+    private function make_sign($arr)
+    {
+        $stringA = '';
+        foreach ($arr as $key => $val) {
+            $stringA .= "{$key}={$val}&";
+        }
+        $stringA .= ('key=' . config('PRE_KEY'));
+        $sign = strtoupper(md5($stringA));
+        return $sign;
     }
 }

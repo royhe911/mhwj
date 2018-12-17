@@ -6,7 +6,6 @@ return [
     'MD5_PARAM'           => 'douzhikeji',
     'SDKAPPID'            => '1400158369',
     'APPKEY'              => 'de4357e1435d09cb5880a2e1d4a22273', // 发短信用的 App 凭证
-    'PRE_KEY'             => '32292XXYJ629LRPWWLHM127XWNMDGDHL', // 平台设置的密钥key
     'LOWERMONEY'          => 35, // 订单可使用优惠卷下限
     'COUPONTERM'          => 15, // 优惠卷期限
     'RATIO'               => 1, //陪玩师分钱比例
