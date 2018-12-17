@@ -137,6 +137,7 @@ class RoomModel extends CommonModel
                 $rm    = new RoomMasterModel();
                 $count = $rm->getCount(['room_id' => $data['id'], 'uid' => $param['uid']]);
                 if ($count) {
+                    $rm->modifyField('is_delete', 0, ['room_id' => $data['id'], 'uid' => $param['uid']]);
                     return true;
                 }
                 if ($data['in_master_count'] < $data['master_count']) {
