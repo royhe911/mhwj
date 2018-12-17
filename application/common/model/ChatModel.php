@@ -33,7 +33,7 @@ class ChatModel extends CommonModel
             $master   = $r->getModel(['id' => $data['room_id']], 'uid,id room_id');
             $ids      = [$master];
             $rm       = new RoomMasterModel();
-            $mid_list = $rm->getList(['room_id' => $data['room_id', 'is_delete' => 0]], ['uid', 'room_id']);
+            $mid_list = $rm->getList(['room_id' => $data['room_id'], 'is_delete' => 0], ['uid', 'room_id']);
             $ids      = array_merge($ids, $mid_list);
             $ru       = new RoomUserModel();
             $uid_list = $ru->getList(['room_id' => $data['room_id']], 'uid,room_id');
