@@ -1,6 +1,7 @@
 <?php
 namespace app\common\crontab;
 
+use app\common\model\UserModel;
 use app\common\model\UserOrderModel;
 use think\console\Command;
 use think\console\Input;
@@ -31,14 +32,12 @@ class RoomOrder extends Command
     protected function execute(Input $input, Output $output)
     {
         $uo   = new UserOrderModel();
-        $list = $uo->getList(['status' => 6, 'addtime' => ['lt', time() - 3 * 24 * 3600]], ['id']);
+        $list = $uo->getList(['status' => 6, 'addtime' => ['lt', time() - 3 * 24 * 3600]], ['id', 'uid', 'order_money']);
         if ($list) {
-            $ids = [];
+            $u = new UserModel();
             foreach ($list as $item) {
-                $ids[] = $item['id'];
-            }
-            if (!empty($ids)) {
-                $uo->modifyField('status', 10, ['id' => ['in', $ids]]);
+                $u->increment('money', ['id' => $item['uid']], $item['order_money']);
+                $uo->modifyField('status', 10, ['id' => $item['id']]);
             }
         }
     }

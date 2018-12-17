@@ -501,13 +501,14 @@ class Order extends \think\Controller
             'nonce_str'        => $nonce_str,
             'openid'           => $openid,
             'partner_trade_no' => $order_num,
+            're_user_name'     => $username,
             'spbill_create_ip' => get_client_ip(),
         ];
         // 生成签名
         $transfers['sign'] = make_sign($transfers);
         // 数组转xml
         $xmldata = array2xml($transfers);
-        $res     = $this->curl($url, $xmldata, false);
+        $res     = curl($url, $xmldata, false);
         if (!$res) {
             return 1;
         }
