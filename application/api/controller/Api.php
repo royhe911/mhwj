@@ -1039,7 +1039,7 @@ class Api extends \think\Controller
                     $item['avatar']   = '';
                 }
                 if (!empty($gcarr[$item['game_id']]) && !empty($gcarr[$item['game_id']][$item['para_min']])) {
-                    $item['price'] = $gparr[$item['game_id']][$item['para_min']];
+                    $item['price'] = $gcarr[$item['game_id']][$item['para_min']];
                 } else {
                     $item['price'] = 0;
                 }
