@@ -377,12 +377,12 @@ class Pay extends \think\Controller
             $money = round($money / count($uids), 2);
             $u     = new UserModel();
             $mi_dt = [];
-            $mi    = new MasterIncomeModel();
             foreach ($uids as $uid) {
                 $mi_dt[] = ['uid' => $uid, 'money' => $money, 'addtime' => time()];
                 $u->increment('money', ['id' => $uid], $money);
                 $u->increment('acc_money', ['id' => $uid], $money);
             }
+            $mi = new MasterIncomeModel();
             $mi->addArr($mi_dt);
         }
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
