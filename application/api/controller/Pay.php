@@ -1366,14 +1366,21 @@ class Pay extends \think\Controller
             $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
         } elseif (empty($param['money'])) {
             $msg = ['status' => 3, 'info' => '申请提现金额不能为家', 'data' => null];
+        } elseif (empty($param['realname'])) {
+            $msg = ['status' => 5, 'info' => '真实姓名不能为空', 'data' => null];
         }
-        $param['addtime'] = time();
+        $param['order_num'] = get_millisecond();
+        $param['addtime']   = time();
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $res = $mml->applyCash($param);
         if ($res !== true) {
-            echo json_encode(['status' => $res, 'info' => '申请失败，请联系平台', 'data' => null]);exit;
+            $msg = '申请失败，请联系平台';
+            if ($res === 30) {
+                $msg = '余额不足';
+            }
+            echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '申请成功，提现金额会在3个工作日内打到您的微信钱包里', 'data' => null]);exit;
     }
@@ -1411,7 +1418,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $mml->getList($where, ['uid', 'money', 'addtime', 'status', 'reason'], "$page,$pagesize");
+        $list = $mml->getList($where, ['uid', 'money', 'addtime', 'status', 'reason'], "$page,$pagesize", 'addtime desc');
         $u    = new UserModel();
         $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'money']);
         if ($list) {

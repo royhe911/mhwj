@@ -1,8 +1,6 @@
 <?php
 //配置文件
 return [
-    'APPID_PLAYER'        => 'wxe6f37de8e1e3225e', // 玩家端 appid
-    'APPSECRET_PLAYER'    => '357566bea005201ce062acaabd4a58e9', // 玩家端 appSecret
     'APPID_ACCOMPANY'     => 'wxecd6bfdba0623aa5', // 陪玩端 appid
     'APPSECRET_ACCOMPANY' => '6478992f651e85bb966b8fd5db9c8771', // 小程序 appSecret
     'MD5_PARAM'           => 'douzhikeji',
@@ -11,7 +9,6 @@ return [
     'PRE_KEY'             => '32292XXYJ629LRPWWLHM127XWNMDGDHL', // 平台设置的密钥key
     'LOWERMONEY'          => 35, // 订单可使用优惠卷下限
     'COUPONTERM'          => 15, // 优惠卷期限
-    'PAY_MCHID'           => 1519826271, // 商户号
     'RATIO'               => 1, //陪玩师分钱比例
     'KG'                  => [
         ['para_id' => 5, 'para_str' => '全段位'],

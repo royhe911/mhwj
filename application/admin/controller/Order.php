@@ -353,8 +353,8 @@ class Order extends \think\Controller
     {
         $where = [];
         // 分页参数
-        $page     = intval($this->request->get('page', 1));
-        $pagesize = intval($this->request->get('pagesize', config('PAGESIZE')));
+        $page     = $this->request->get('page', 1);
+        $pagesize = $this->request->get('pagesize', config('PAGESIZE'));
         $list     = $mml->getList($where, true, "$page,$pagesize", 'status desc,addtime desc');
         if ($list) {
             $uids = array_column($list, 'uid');
@@ -408,6 +408,7 @@ class Order extends \think\Controller
                 $cash['avatar']   = $user['avatar'];
                 $cash['nickname'] = $user['nickname'];
                 $cash['mobile']   = $user['mobile'];
+                $cash['openid']   = $user['openid'];
             } else {
                 $cash['avatar']   = '';
                 $cash['nickname'] = '';
@@ -446,15 +447,76 @@ class Order extends \think\Controller
     public function auditors(MasterMoneyLogModel $mml)
     {
         $param = $this->request->post();
-        if (!empty($param['id']) && !empty($param['status'])) {
-            $param['auditor_time'] = time();
-            // 保存数据
-            $res = $mml->modify($param, ['id' => $param['id']]);
-            if (!$res) {
-                return ['status' => 4, 'info' => '审核失败'];
-            }
-            return ['status' => 0, 'info' => '审核成功'];
+        if (empty($param['id']) || empty($param['status'])) {
+            return ['status' => 3, 'info' => '非法操作'];
         }
-        return ['status' => 3, 'info' => '非法操作'];
+        $log = $mml->getModel(['id' => $param['id']]);
+        if (!$log) {
+            return ['status' => 1, 'info' => '提现记录不存在'];
+        }
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $log['uid']]);
+        if (!$user) {
+            return ['status' => 5, 'info' => '用户不存在'];
+        }
+        $status = intval($param['status']);
+        $trans  = false;
+        if ($status === 8) {
+            $amount = floatval($log['money']) * 100;
+            $amount = 1;
+            $trans  = $this->transfers($log['order_num'], $user['openid'], $amount);
+        }
+        if ($trans !== true) {
+            return ['status' => $trans, 'info' => '打款失败'];
+        }
+        $param['auditor_time'] = time();
+        // 保存数据
+        $res = $mml->modify($param, ['id' => $param['id']]);
+        if (!$res) {
+            return ['status' => 4, 'info' => '审核失败'];
+        }
+        return ['status' => 0, 'info' => '审核成功'];
+    }
+
+    /**
+     * 微信打款
+     * @author 贺强
+     * @time   2018-12-17 16:00:36
+     * @param  string $order_num 商户订单号
+     * @param  string $openid    用户微信openid
+     * @param  string $username  玩家真实姓名
+     * @param  int    $amount    提现金额
+     */
+    private function transfers($order_num, $openid, $username, $amount)
+    {
+        $url       = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers';
+        $nonce_str = get_random_str(15);
+        $transfers = [
+            'amount'           => $amount,
+            'check_name'       => 'FORCE_CHECK',
+            'desc'             => '陪玩师提现',
+            'mchid'            => config('PAY_MCHID'),
+            'mch_appid'        => config('APPID_PLAYER'),
+            'nonce_str'        => $nonce_str,
+            'openid'           => $openid,
+            'partner_trade_no' => $order_num,
+            'spbill_create_ip' => get_client_ip(),
+        ];
+        // 生成签名
+        $transfers['sign'] = make_sign($transfers);
+        // 数组转xml
+        $xmldata = array2xml($transfers);
+        $res     = $this->curl($url, $xmldata, false);
+        if (!$res) {
+            return 1;
+        }
+        $res = xml2array($res);
+        if (strval($res['return_code']) === 'FAIL') {
+            return 2;
+        }
+        if (!empty($res['result_code']) && strval($res['result_code'])) {
+            return 2;
+        }
+        return true;
     }
 }
