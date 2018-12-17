@@ -120,6 +120,7 @@ return [
     '/api/pay/coupons'    => 'api/Pay/get_user_coupon', // 获取玩家优惠卷
     '/api/pay/consume'    => 'api/Pay/get_consume_log', // 获取玩家消费记录
     '/api/pay/moneylog'   => 'api/Pay/get_money_log', // 提现记录
+    '/api/pay/income'     => 'api/Pay/get_master_income', // 收入记录
     '/api/pay/masterord'  => 'api/Pay/get_master_order', // 陪玩师房间订单
     '/api/pay/masterpord' => 'api/Pay/get_master_pord', // 陪玩师订制订单
     '/api/pay/pordinfo'   => 'api/Pay/get_pord_info', // 订制订单详情

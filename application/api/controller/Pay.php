@@ -6,6 +6,7 @@ use app\common\model\CouponModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
 use app\common\model\LogModel;
+use app\common\model\MasterIncomeModel;
 use app\common\model\MasterMoneyLogModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\PersonMasterOrderModel;
@@ -1407,6 +1408,57 @@ class Pay extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $list = $mml->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize");
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'money']);
+        if ($list) {
+            foreach ($list as &$item) {
+                $item['nickname'] = $user['nickname'];
+                $item['avatar']   = $user['avatar'];
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+            }
+        }
+        if (empty($user['money'])) {
+            $user['money'] = 0;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['money' => $user['money'], 'log' => $list]]);exit;
+    }
+
+    /**
+     * 获取陪玩师收入记录
+     * @author 贺强
+     * @time   2018-12-17 09:37:11
+     * @param  MasterIncomeModel $mi MasterIncomeModel 实例
+     */
+    public function get_master_income(MasterIncomeModel $mi)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $where = ['uid' => $param['uid']];
+        if (!empty($param['addtime'])) {
+            $begin = date('Y-m-01', strtotime($param['addtime']));
+        } else {
+            $begin = date('Y-m-01');
+        }
+        // 取每月第一天和最后一天的数据
+        $where['addtime'] = ['between', [strtotime($begin), strtotime(date('Y-m-d', strtotime("$begin +1 month -1 d")))]];
+        // 分页参数
+        $page     = 1;
+        $pagesize = 10;
+        $param    = $this->param;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $mi->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize");
         $u    = new UserModel();
         $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'money']);
         if ($list) {
