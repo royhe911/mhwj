@@ -463,6 +463,7 @@ class Order extends \think\Controller
         $trans  = false;
         if ($status === 8) {
             $amount = floatval($log['money']) * 100;
+            // 测试提现金额
             $amount = 1;
             $trans  = $this->transfers($log['order_num'], $user['openid'], $amount);
         }
