@@ -1094,9 +1094,9 @@ class Api extends \think\Controller
     public function get_room_info(RoomModel $r)
     {
         $param = $this->param;
+        $type  = intval($param['type']);
         if (!empty($param['is_share']) && intval($param['is_share']) === 1) {
-            $type = intval($param['type']);
-            $uid  = $param['uid'];
+            $uid = $param['uid'];
             if ($type === 1) {
                 $ru    = new RoomUserModel();
                 $count = $ru->getCount(['room_id' => $param['room_id'], 'uid' => $uid]);
