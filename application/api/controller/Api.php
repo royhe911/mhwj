@@ -1126,9 +1126,11 @@ class Api extends \think\Controller
         $room_id = $param['room_id'];
         $uid     = intval($param['uid']);
         $ru      = new RoomUserModel();
-        $count   = $ru->getCount(['room_id' => $room_id, 'uid' => $uid]);
-        if (!$count) {
-            echo json_encode(['status' => 11, 'info' => '您还未进入房间', 'data' => null]);exit;
+        if ($type === 1) {
+            $count = $ru->getCount(['room_id' => $room_id, 'uid' => $uid]);
+            if (!$count) {
+                echo json_encode(['status' => 11, 'info' => '您还未进入房间', 'data' => null]);exit;
+            }
         }
         $room = $r->getModel(['id' => $room_id], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status room_status');
         if ($room) {
