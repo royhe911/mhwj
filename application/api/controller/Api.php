@@ -1331,6 +1331,7 @@ class Api extends \think\Controller
             $res = 10;
             echo json_encode(['status' => 10, 'info' => '房间ID不能为空', 'data' => null]);exit;
         }
+        $ru   = new RoomUserModel();
         $r    = new RoomModel();
         $room = $r->getModel(['id' => $param['room_id']], ['type']);
         if (empty($room)) {
@@ -1345,6 +1346,11 @@ class Api extends \think\Controller
         } elseif ($room['type'] === 1 && intval($param['type']) === 1 && empty($param['para_str'])) {
             $res = 40;
             $msg = ['status' => 40, 'info' => '段位不能为空', 'data' => null];
+        } elseif (!empty($param['para_str'])) {
+            $count = $ru->getCount(['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+            if ($count) {
+                $msg = ['status' => 41, 'info' => '不能重复选择段位', 'data' => null];
+            }
         }
         if (!empty($msg) && !$is_share) {
             echo json_encode($msg);exit;
@@ -1354,7 +1360,6 @@ class Api extends \think\Controller
         if ($count) {
             echo json_encode(['status' => 12, 'info' => '您已完成该房间任务，详情请查看订单', 'data' => null]);exit;
         }
-        $ru    = new RoomUserModel();
         $count = $ru->getCount(['room_id' => ['<>', $param['room_id']], 'uid' => $param['uid'], 'status' => ['not in', '4,10']]);
         if ($count) {
             echo json_encode(['status' => 21, 'info' => '不能同时进两个房间', 'data' => null]);exit;
