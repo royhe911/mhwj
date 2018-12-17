@@ -1113,6 +1113,11 @@ class Api extends \think\Controller
                 if (!$count) {
                     echo json_encode(['status' => 14, 'info' => '您还未认证此游戏，不能陪玩', 'data' => null]);exit;
                 }
+                $pm    = new PersonMasterOrderModel();
+                $count = $pm->getCount(['master_id' => $uid, 'status' => ['<>', 10]]);
+                if ($count) {
+                    echo json_encode(['status' => 16, 'info' => '您还有未完成的订制订单', 'data' => null]);exit;
+                }
             }
             $state = $this->come_in_room(true);
             if ($state !== true) {
