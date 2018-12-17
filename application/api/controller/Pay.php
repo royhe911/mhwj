@@ -1498,17 +1498,14 @@ class Pay extends \think\Controller
         if (empty($param['room_id'])) {
             $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
         }
+        if (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '用户ID不能为空', 'data' => null];
+        }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $room_id = $param['room_id'];
-        $r       = new RoomModel();
-        $room    = $r->getModel(['id' => $room_id], ['count']);
         $ru      = new RoomUserModel();
-        $count   = $ru->getCount(['room_id' => $room_id, 'status' => 6]);
-        if ($count === $room['count']) {
-            $r->modifyField('status', 6, ['id' => $room_id]);
-        }
+        $ru->modifyField('status', 6, ['id' => $param['room_id'], 'uid' => $param['uid']]);
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
     }
 

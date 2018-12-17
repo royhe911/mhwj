@@ -1123,13 +1123,16 @@ class Api extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $room = $r->getModel(['id' => $param['room_id']], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status room_status');
+        $room_id = $param['room_id'];
+        $uid     = intval($param['uid']);
+        $count   = $ru->getCount(['room_id' => $room_id, 'uid' => $uid]);
+        $room    = $r->getModel(['id' => $room_id], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status room_status');
         if ($room) {
             $ru       = new RoomUserModel();
-            $roomuser = $ru->getList(['room_id' => $param['room_id']]);
+            $roomuser = $ru->getList(['room_id' => $room_id]);
             $uids     = array_column($roomuser, 'uid');
             $rm       = new RoomMasterModel();
-            $masters  = $rm->getList(['room_id' => $param['room_id']]);
+            $masters  = $rm->getList(['room_id' => $room_id]);
             $mids     = array_column($masters, 'uid');
             $mids     = array_merge([$room['uid']], $mids);
             $uids     = array_merge($uids, $mids);
@@ -1138,7 +1141,7 @@ class Api extends \think\Controller
             } elseif ($room['room_status'] === 9 || $room['room_status'] === 7) {
                 $msg = ['status' => 5, 'info' => '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还', 'data' => null];
             } elseif ($room['count'] === $room['in_count']) {
-                if (!in_array(intval($param['uid']), $uids)) {
+                if (!in_array($uid, $uids)) {
                     $msg = ['status' => 6, 'info' => '房间人数已满', 'data' => null];
                 }
             }
@@ -1181,7 +1184,7 @@ class Api extends \think\Controller
             $users   = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar', 'wx', 'qq']);
             $members = [];
             // 获取房间里玩家的状态
-            $ustatus     = $ru->getList(['room_id' => $param['room_id'], 'uid' => ['in', $uids]], 'uid,status,price,total_money');
+            $ustatus     = $ru->getList(['room_id' => $room_id, 'uid' => ['in', $uids]], 'uid,status,price,total_money');
             $total_money = 0;
             $price       = 0;
             foreach ($ustatus as $utta) {
@@ -1203,7 +1206,7 @@ class Api extends \think\Controller
                         $status_txt = '已支付';
                     }
                 }
-                if ($user['id'] === intval($param['uid'])) {
+                if ($user['id'] === $uid) {
                     if (in_array($user['id'], $mids)) {
                         $room['total_money'] = $total_money;
                         $room['price']       = $price;
@@ -1231,7 +1234,7 @@ class Api extends \think\Controller
             }
             $room['members'] = $members;
             $c               = new ChatModel();
-            $list            = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $param['room_id'], 'c.uid' => $param['uid']], ['a.uid', 'a.avatar', 'a.content']);
+            $list            = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $room_id, 'c.uid' => $uid], ['a.uid', 'a.avatar', 'a.content']);
             $room['chatlog'] = $list;
             $msg             = ['status' => 0, 'info' => '获取成功', 'data' => $room];
         } else {
