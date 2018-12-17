@@ -465,7 +465,7 @@ class Order extends \think\Controller
             $amount = floatval($log['money']) * 100;
             // 测试提现金额
             $amount = 1;
-            $trans  = $this->transfers($log['order_num'], $user['openid'], $amount);
+            $trans  = $this->transfers($log['order_num'], $user['openid'], $log['realname'], $amount);
         }
         if ($trans !== true) {
             return ['status' => $trans, 'info' => '打款失败'];
