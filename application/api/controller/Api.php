@@ -1531,11 +1531,11 @@ class Api extends \think\Controller
         } elseif (empty($param['content'])) {
             $msg = ['status' => 4, 'info' => '聊天内容不能为空', 'data' => null];
         }
+        $param['addtime'] = time();
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $param['addtime'] = time();
-        $res              = $c->add_chat($param);
+        $res = $c->add_chat($param);
         if (!$res) {
             echo json_encode(['status' => $res, 'info' => '添加失败', 'data' => null]);exit;
         }
