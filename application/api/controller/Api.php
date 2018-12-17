@@ -1104,6 +1104,10 @@ class Api extends \think\Controller
                     echo json_encode(['status' => 14, 'info' => '选择段位', 'data' => null]);exit;
                 }
             } elseif ($type === 2) {
+                $count = $r->getCount(['id' => ['<>', $param['room_id']], 'uid' => $uid, 'status' => ['in', '0,1,5,6,8']]);
+                if ($count) {
+                    echo json_encode(['status' => 14, 'info' => '您已有正在进行中的房间', 'data' => null]);exit;
+                }
                 $ua    = new UserAttrModel();
                 $count = $ua->getCount(['uid' => $uid, 'status' => 8, 'game_id' => $param['game_id']]);
                 if (!$count) {
