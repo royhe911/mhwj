@@ -1458,7 +1458,7 @@ class Api extends \think\Controller
         $count = $r->getCount(['id' => $room_id, 'uid' => $uid]);
         if (!$count) {
             $rm  = new RoomMasterModel();
-            $res = $rm->modifyField('is_delete', 1, ['uid' => $uid, 'room_id' => $room_id]);
+            $res = $rm->delByWhere(['uid' => $uid, 'room_id' => $room_id]);
             if (!$res) {
                 echo json_encode(['status' => 3, 'info' => '您不是房主，无权关闭', 'data' => null]);exit;
             }
