@@ -732,7 +732,7 @@ class Pay extends \think\Controller
             echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
         }
         $rm    = new RoomMasterModel();
-        $count = $rm->getCount(['uid' => $master_id]);
+        $count = $rm->getCount(['uid' => $master_id, 'is_delete' => 0]);
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
         }

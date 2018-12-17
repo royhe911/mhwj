@@ -382,7 +382,7 @@ class Api extends \think\Controller
         $is_master = 1;
         if (empty($room)) {
             $rm   = new RoomMasterModel();
-            $rmst = $rm->getModel(['uid' => $master_id]);
+            $rmst = $rm->getModel(['uid' => $master_id, 'is_delete' => 0]);
             if ($rmst) {
                 $room = $r->getModel(['id' => $rmst['room_id']]);
             }
@@ -1128,8 +1128,8 @@ class Api extends \think\Controller
             $ru       = new RoomUserModel();
             $roomuser = $ru->getList(['room_id' => $param['room_id']]);
             $uids     = array_column($roomuser, 'uid');
-            $mu       = new RoomMasterModel();
-            $masters  = $mu->getList(['room_id' => $param['room_id']]);
+            $rm       = new RoomMasterModel();
+            $masters  = $rm->getList(['room_id' => $param['room_id']]);
             $mids     = array_column($masters, 'uid');
             $mids     = array_merge([$room['uid']], $mids);
             $uids     = array_merge($uids, $mids);
@@ -1300,7 +1300,7 @@ class Api extends \think\Controller
                 echo json_encode(['status' => 22, 'info' => '游戏未开始，不能完成', 'data' => null]);exit;
             }
             $rm = new RoomMasterModel();
-            $rm->delByWhere(['room_id' => $room_id]);
+            $rm->modifyField('is_delete', 1, ['room_id' => $room_id]);
             $ch = new ChatModel();
             $ch->delByWhere(['room_id' => $room_id]);
             $cu = new ChatUserModel();
@@ -1458,7 +1458,7 @@ class Api extends \think\Controller
         $count = $r->getCount(['id' => $room_id, 'uid' => $uid]);
         if (!$count) {
             $rm  = new RoomMasterModel();
-            $res = $rm->delByWhere(['uid' => $uid, 'room_id' => $room_id]);
+            $res = $rm->modifyField('is_delete', 1, ['uid' => $uid, 'room_id' => $room_id]);
             if (!$res) {
                 echo json_encode(['status' => 3, 'info' => '您不是房主，无权关闭', 'data' => null]);exit;
             }
