@@ -987,7 +987,7 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,status', "$page,$pagesize", 'status');
+        $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status', "$page,$pagesize", 'status');
         if ($list) {
             $uids     = array_column($list, 'uid');
             $game_ids = array_column($list, 'game_id');
