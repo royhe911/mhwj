@@ -9,6 +9,7 @@ use app\common\model\LogModel;
 use app\common\model\MasterIncomeModel;
 use app\common\model\MasterMoneyLogModel;
 use app\common\model\MasterOrderModel;
+use app\common\model\MiniprogramModel;
 use app\common\model\PersonMasterOrderModel;
 use app\common\model\PersonOrderModel;
 use app\common\model\PersonRoomModel;
@@ -737,8 +738,8 @@ class Pay extends \think\Controller
         //     echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
         // }
         $u     = new UserModel();
-        $count = $u->getCount(['id' => $master_id, 'type' => 2, 'status' => 8]);
-        if (!$count) {
+        $muser = $u->getModel(['id' => $master_id, 'type' => 2]);
+        if (empty($muser) || $muser['status'] !== 8) {
             echo json_encode(['status' => 6, 'info' => '您还未认证成为陪玩师，请先认证', 'data' => null]);exit;
         }
         $po     = new PersonOrderModel();
@@ -780,9 +781,88 @@ class Pay extends \think\Controller
             } else {
                 $pr->modify($param, ['order_id' => $param['order_id']]);
             }
+            $addtime = date('Y年m月d日 H:i:s', $porder['addtime']);
+            $puser   = $u->getModel(['id' => $porder['uid']]);
+            $this->robb_notice($puser['openid'], $porder['form_id'], $porder['order_num'], $addtime, '成功', "您的订单已被陪玩师{$muser['nickname']}接到，请进入小程序让陪玩师带您玩");
             $msg = ['status' => 0, 'info' => '抢单成功', 'data' => ['order_id' => $param['order_id']]];
         }
         echo json_encode($msg);exit;
+    }
+
+    /**
+     * 抢单成功通知
+     * @author 贺强
+     * @time   2018-12-18 20:22:38
+     * @param  string $openid    玩家OPENID
+     * @param  string $form_id   FORMID
+     * @param  string $order_num 订单号
+     * @param  string $addtime   下单时间
+     * @param  string $status    状态描述
+     * @param  string $remark    备注
+     */
+    public function robb_notice($openid, $form_id, $order_num, $addtime, $status, $remark)
+    {
+        // $openid    = 'oq_7b4hmGx_-byyobN7JDUu2OQlU';
+        // $form_id   = 'baa61a981c0fb7d3069f06798a9164d6';
+        // $order_num = '1545120927781';
+        // $addtime   = '2018年12月18日 19:55:50';
+        // $status    = '成功';
+        // $remark    = '您的订制订单已被接，请进入小程序和陪玩师一起玩';
+        // 取得 access_token
+        $access_token = $this->get_access_token();
+        if ($access_token === false) {
+            // 记录日志
+        }
+        // API 地址
+        $url = 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send';
+        $url .= "?access_token=$access_token";
+        $data['touser'] = $openid;
+        // 下单成功模板ID
+        $data['template_id'] = 'NMtINU50FyGcoxytdA4nUh_lGf8_ND8V_4UiD12y4qI';
+        $data['form_id']     = $form_id;
+        $data['data']        = ['keyword1' => ['value' => $order_num], 'keyword2' => ['value' => $addtime], 'keyword3' => ['value' => $status], 'keyword4' => ['value' => $remark]];
+        // 处理逻辑
+        $data = json_encode($data);
+        $res  = $this->curl($url, $data);
+        $res  = json_decode($res, true);
+        if (!empty($res['errcode'])) {
+            // 记录日志
+        }
+    }
+
+    /**
+     * 取得 access_token
+     * @author 贺强
+     * @time   2018-12-18 20:32:15
+     */
+    public function get_access_token()
+    {
+        $mini    = new MiniprogramModel();
+        $appid   = config('APPID_PLAYER');
+        $program = $mini->getModel(['appid' => $appid]);
+        // 取 secret
+        $appsecret = config('APPSECRET_PLAYER');
+        if (!$program) {
+            $id = $mini->add(['appid' => $appid, 'appsecret' => $appsecret, 'name' => '游戏陪玩咖']);
+        } else {
+            $id = $program['id'];
+        }
+        if (!empty($program['access_token']) && $program['expires_out'] > time()) {
+            return $program['access_token'];
+        }
+        $url = 'https://api.weixin.qq.com/cgi-bin/token';
+        $url .= '?grant_type=client_credential';
+        $url .= "&appid=$appid";
+        $url .= "&secret=$appsecret";
+        $data = $this->curl($url);
+        if (!empty($data)) {
+            $data = json_decode($data, true);
+        }
+        if (!empty($data['errcode'])) {
+            return false;
+        }
+        $mini->modify(['access_token' => $data['access_token'], 'expires_out' => time() + $data['expires_in'] - 10]);
+        return $data['access_token'];
     }
 
     /**

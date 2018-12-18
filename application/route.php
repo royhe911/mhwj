@@ -116,6 +116,7 @@ return [
     '/api/pay/popay'      => 'api/Pay/person_ord_pay', // 订制预支付
     '/api/pay/tasks'      => 'api/Pay/person_task', // 任务订单
     '/api/pay/robb'       => 'api/Pay/robbing', // 陪玩师抢单
+    '/api/pay/robbnotice' => 'api/Pay/robb_notice', // 抢单成功通知
     '/api/pay/porder'     => 'api/Pay/get_person_order', // 获取玩家订制订单
     '/api/pay/coupons'    => 'api/Pay/get_user_coupon', // 获取玩家优惠卷
     '/api/pay/consume'    => 'api/Pay/get_consume_log', // 获取玩家消费记录

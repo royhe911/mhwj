@@ -191,6 +191,9 @@ class User extends \think\Controller
             } else {
                 $res = $u->modify($param, ['id' => $param['id']]);
                 if ($res) {
+                    $user    = $u->getModel(['id' => $param['id']]);
+                    $addtime = date('Y年m月d日 H:i:s', $user['addtime']);
+                    $this->shenhe_notice($user['openid'], $user['form_id'], $addtime, $user['nickname'], $content, '');
                     $data = ['type' => 1, 'uid' => $param['id'], 'title' => '系统消息', 'content' => $content, 'addtime' => time()];
                     $m->add($data);
                     return ['status' => 0, 'info' => '审核成功'];
@@ -198,6 +201,82 @@ class User extends \think\Controller
             }
             return ['status' => 4, 'info' => '审核失败'];
         }
+    }
+
+    /**
+     * 审核通知
+     * @author 贺强
+     * @time   2018-12-18 20:22:38
+     * @param  string $openid    陪玩师OPENID
+     * @param  string $form_id   FORMID
+     * @param  string $addtime   下单时间
+     * @param  string $nickanme  陪玩师昵称
+     * @param  string $status    状态描述
+     * @param  string $remark    备注
+     */
+    public function shenhe_notice($openid, $form_id, $addtime, $nickname, $status, $remark)
+    {
+        // $openid    = 'o67KK5TJtgBFX5URmiGYKlYbM0NQ';
+        // $form_id   = 'baa61a981c0fb7d3069f06798a9164d6';
+        // $order_num = '1545120927781';
+        // $addtime   = '2018年12月18日 19:55:50';
+        // $status    = '成功';
+        // $remark    = '您的订制订单已被接，请进入小程序和陪玩师一起玩';
+        // 取得 access_token
+        $access_token = $this->get_access_token();
+        if ($access_token === false) {
+            // 记录日志
+        }
+        // API 地址
+        $url = 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send';
+        $url .= "?access_token=$access_token";
+        $data['touser'] = $openid;
+        // 下单成功模板ID
+        $data['template_id'] = 'NMtINU50FyGcoxytdA4nUh_lGf8_ND8V_4UiD12y4qI';
+        $data['form_id']     = $form_id;
+        $data['data']        = ['keyword1' => ['value' => time()], 'keyword2' => ['value' => $nickname], 'keyword3' => ['value' => $addtime], 'keyword4' => ['value' => $remark]];
+        // 处理逻辑
+        $data = json_encode($data);
+        $res  = $this->curl($url, $data);
+        $res  = json_decode($res, true);
+        if (!empty($res['errcode'])) {
+            // 记录日志
+        }
+    }
+
+    /**
+     * 取得 access_token
+     * @author 贺强
+     * @time   2018-12-18 20:32:15
+     */
+    public function get_access_token()
+    {
+        $mini    = new MiniprogramModel();
+        $appid   = config('APPID_ACCOMPANY');
+        $program = $mini->getModel(['appid' => $appid]);
+        // 取 secret
+        $appsecret = config('APPSECRET_ACCOMPANY');
+        if (!$program) {
+            $id = $mini->add(['appid' => $appid, 'appsecret' => $appsecret, 'name' => '幕后玩家陪玩师']);
+        } else {
+            $id = $program['id'];
+        }
+        if (!empty($program['access_token']) && $program['expires_out'] > time()) {
+            return $program['access_token'];
+        }
+        $url = 'https://api.weixin.qq.com/cgi-bin/token';
+        $url .= '?grant_type=client_credential';
+        $url .= "&appid=$appid";
+        $url .= "&secret=$appsecret";
+        $data = $this->curl($url);
+        if (!empty($data)) {
+            $data = json_decode($data, true);
+        }
+        if (!empty($data['errcode'])) {
+            return false;
+        }
+        $mini->modify(['access_token' => $data['access_token'], 'expires_out' => time() + $data['expires_in'] - 10]);
+        return $data['access_token'];
     }
 
     /**
