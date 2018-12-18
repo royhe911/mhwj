@@ -1250,7 +1250,7 @@ class Pay extends \think\Controller
             $morder['play_type'] = '娱乐陪玩';
         }
         $uo      = new UserOrderModel();
-        $comment = $uo->getJoinList([['m_user_evaluate ue', 'a.id=ue.order_id']], ['type' => 1, 'a.room_id' => $morder['room_id']], ['ue.uid', 'ue.content', 'ue.score', 'ue.addtime']);
+        $comment = $uo->getJoinList([['m_user_evaluate ue', 'a.id=ue.order_id']], ['type' => 1, 'a.room_id' => $morder['room_id']], ['ue.uid', 'ue.content', 'ue.score', 'ue.addtime'], '', 'a.addtime desc');
         if ($comment) {
             $uids  = array_column($comment, 'uid');
             $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);

@@ -163,7 +163,7 @@ class CommonModel extends Model
         $count = Db::table($this->table)
             ->group($group)
             ->where($where)
-            // ->fetchSql(true)
+        // ->fetchSql(true)
             ->count();
         return $count;
     }
@@ -273,13 +273,14 @@ class CommonModel extends Model
      * @param string $alias 用于设置当前数据表的别名，默认别名为 a
      * @return array 返回查询结果(数组)，若不存在返回 null
      */
-    public function getJoinList($join, $where = null, $field = true, $page = null, $alias = 'a')
+    public function getJoinList($join, $where = null, $field = true, $page = null, $order = null, $alias = 'a')
     {
         $list = Db::table($this->table)
             ->alias($alias)
             ->field($field)
             ->join($join)
             ->where($where)
+            ->order($order)
             ->page($page)
         // ->fetchSql(true)
             ->select();
