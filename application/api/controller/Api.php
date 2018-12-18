@@ -389,7 +389,7 @@ class Api extends \think\Controller
             $is_master = 0;
         }
         if ($room) {
-            $rmdt = ['room_id' => $room['id'], 'room_name' => $room['name'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'], 'in_count' => $room['in_count'], 'status' => $room['status'], 'is_master' => $is_master];
+            $rmdt = ['room_id' => $room['id'], 'room_name' => $room['name'], 'master_avatar' => $user['avatar'], 'master_nickname' => $user['nickname'], 'master_count' => $room['master_count'], 'in_master_count' => $room['in_master_count'], 'count' => $room['count'] + $room['master_count'], 'in_count' => $room['in_count'] + $room['in_master_count'], 'status' => $room['status'], 'is_master' => $is_master];
             // 正在进行中的房间
             $data['room'] = $rmdt;
         } else {
@@ -1023,8 +1023,8 @@ class Api extends \think\Controller
                 $gcarr[$gci['game_id']][$gci['para']] = $gci['price'];
             }
             foreach ($list as &$item) {
-                $item['total_count']    = $item['count'] + $item['master_count'];
-                $item['in_total_count'] = $item['in_count'] + $item['in_master_count'];
+                $item['count']    = $item['count'] + $item['master_count'];
+                $item['in_count'] = $item['in_count'] + $item['in_master_count'];
                 if (!empty($jd_count[$item['uid']])) {
                     $item['jd_count'] = $jd_count[$item['uid']];
                 } else {
@@ -1074,7 +1074,7 @@ class Api extends \think\Controller
         $rou  = $ru->getModel(['uid' => $param['uid'], 'status' => ['in', '0,1,5,6']]);
         if (!empty($rou)) {
             $room = $r->getModel(['id' => $rou['room_id']]);
-            $user = ['id' => $room['id'], 'count' => $room['count'], 'in_count' => $room['in_count']];
+            $user = ['id' => $room['id'], 'count' => $room['count'] + $room['master_count'], 'in_count' => $room['in_count'] + $room['in_master_count']];
         }
         $po  = new PersonOrderModel();
         $pod = $po->getModel(['uid' => $param['uid'], 'status' => ['in', '7,8']], ['id']);
