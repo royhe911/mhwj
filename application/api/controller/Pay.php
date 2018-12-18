@@ -1338,7 +1338,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $c->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize");
+        $list = $c->getList($where, ['uid', 'money', 'addtime'], "$page,$pagesize", 'addtime desc');
         if ($list) {
             $u    = new UserModel();
             $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar']);

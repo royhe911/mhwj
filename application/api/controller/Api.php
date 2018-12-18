@@ -615,7 +615,7 @@ class Api extends \think\Controller
             $g     = new GameModel();
             $games = $g->getList(['is_delete' => 0], 'id,identify,`name`,url');
             $games = array_column($games, null, 'id');
-            foreach ($list as &$item) {
+            foreach ($list as $k => &$item) {
                 if (!empty($games[$item['game_id']])) {
                     $game              = $games[$item['game_id']];
                     $item['game_name'] = $game['name'];
@@ -626,9 +626,7 @@ class Api extends \think\Controller
                         $item['url'] = '';
                     }
                 } else {
-                    $item['game_name'] = '';
-                    $item['identify']  = '';
-                    $item['url']       = '';
+                    unset($list[$k]);
                 }
             }
             $msg = ['status' => 0, 'info' => '获取成功', 'data' => $list];
@@ -899,11 +897,11 @@ class Api extends \think\Controller
             if ($count) {
                 echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
             }
-            $mo    = new MasterOrderModel();
-            $count = $mo->getCount(['uid' => $param['uid'], 'status' => ['not in', [3, 9, 10]]]);
-            if ($count) {
-                echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
-            }
+            // $mo    = new MasterOrderModel();
+            // $count = $mo->getCount(['uid' => $param['uid'], 'status' => ['not in', [3, 9, 10]]]);
+            // if ($count) {
+            //     echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
+            // }
             $pmo   = new PersonMasterOrderModel();
             $count = $pmo->getCount(['master_id' => $param['uid'], 'status' => ['<>', 10]]);
             if ($count) {
