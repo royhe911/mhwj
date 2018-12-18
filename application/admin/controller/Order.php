@@ -460,13 +460,14 @@ class Order extends \think\Controller
             return ['status' => 5, 'info' => '用户不存在'];
         }
         $status = intval($param['status']);
-        $trans  = false;
-        if ($status === 8) {
-            $amount = floatval($log['money']) * 100;
-            // 测试提现金额
-            $amount = 1;
-            $trans  = $this->transfers($log['order_num'], $user['openid'], $log['realname'], $amount);
-        }
+        // $trans  = false;
+        $trans = true;
+        // if ($status === 8) {
+        //     $amount = floatval($log['money']) * 100;
+        //     // 测试提现金额
+        //     $amount = 1;
+        //     $trans  = $this->transfers($log['order_num'], $user['openid'], $log['realname'], $amount);
+        // }
         if ($trans !== true) {
             return ['status' => $trans, 'info' => '打款失败'];
         }
