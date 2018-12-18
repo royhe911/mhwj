@@ -1107,11 +1107,11 @@ class Api extends \think\Controller
                 if ($count) {
                     echo json_encode(['status' => 14, 'info' => '您已有正在进行中的房间', 'data' => null]);exit;
                 }
-                $rm    = new RoomMasterModel();
-                $count = $rm->getCount(['uid' => $uid, 'is_delete' => 0, 'room_id' => ['<>', $param['room_id']]]);
-                if ($count) {
-                    echo json_encode(['status' => 14, 'info' => '您已有正在进行中的房间', 'data' => null]);exit;
-                }
+                // $rm    = new RoomMasterModel();
+                // $count = $rm->getCount(['uid' => $uid, 'is_delete' => 0, 'room_id' => ['<>', $param['room_id']]]);
+                // if ($count) {
+                //     echo json_encode(['status' => 14, 'info' => '您已有正在进行中的房间', 'data' => null]);exit;
+                // }
                 $ua    = new UserAttrModel();
                 $count = $ua->getCount(['uid' => $uid, 'status' => 8, 'game_id' => $param['game_id']]);
                 if (!$count) {
