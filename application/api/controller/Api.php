@@ -756,11 +756,8 @@ class Api extends \think\Controller
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                 }
             }
-            $msg = ['status' => 0, 'info' => '获取成功', 'data' => $list];
-        } else {
-            $msg = ['status' => 4, 'info' => '该用户暂无消息', 'data' => null];
         }
-        echo json_encode($msg);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**
