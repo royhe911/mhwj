@@ -1023,6 +1023,8 @@ class Api extends \think\Controller
                 $gcarr[$gci['game_id']][$gci['para']] = $gci['price'];
             }
             foreach ($list as &$item) {
+                $item['total_count']    = $item['count'] + $item['master_count'];
+                $item['in_total_count'] = $item['in_count'] + $item['in_master_count'];
                 if (!empty($jd_count[$item['uid']])) {
                     $item['jd_count'] = $jd_count[$item['uid']];
                 } else {
