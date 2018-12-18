@@ -1,6 +1,7 @@
 <?php
 namespace app\common\crontab;
 
+use app\common\model\RoomModel;
 use app\common\model\UserModel;
 use app\common\model\UserOrderModel;
 use think\console\Command;
@@ -35,8 +36,12 @@ class RoomOrder extends Command
         $list = $uo->getList(['status' => 6, 'addtime' => ['lt', time() - 3 * 24 * 3600]], ['id', 'uid', 'order_money']);
         if ($list) {
             $u = new UserModel();
+            $r = new RoomModel();
             foreach ($list as $item) {
-                $u->increment('money', ['id' => $item['uid']], $item['order_money']);
+                $room = $r->getModel(['id' => $item['room_id']]);
+                if ($room) {
+                    $u->increment('money', ['id' => $room['uid']], $item['order_money']);
+                }
                 $uo->modifyField('status', 10, ['id' => $item['id']]);
             }
         }
