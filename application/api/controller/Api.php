@@ -231,19 +231,20 @@ class Api extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['id'])) {
-            echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
+            $msg = ['status' => 1, 'info' => '参数缺失', 'data' => null];
+        } elseif (empty($param['mobile'])) {
+            $msg = ['status' => 8, 'info' => '手机号不能为空', 'data' => null];
+        } elseif (empty($param['code'])) {
+            $msg = ['status' => 9, 'info' => '验证码不能为空', 'data' => null];
         }
-        if (empty($param['mobile'])) {
-            echo json_encode(['status' => 8, 'info' => '手机号不能为空', 'data' => null]);exit;
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
         }
         $mobile = $param['mobile'];
-        if (empty($param['code'])) {
-            echo json_encode(['status' => 9, 'info' => '验证码不能为空', 'data' => null]);exit;
-        }
-        $code  = $param['code'];
-        $msg   = [];
-        $v     = new VericodeModel();
-        $vcode = $v->getModel(['mobile' => "v_$mobile"]);
+        $code   = $param['code'];
+        $msg    = [];
+        $v      = new VericodeModel();
+        $vcode  = $v->getModel(['mobile' => "v_$mobile"]);
         if (empty($vcode)) {
             $msg = ['status' => 2, 'info' => '无效手机号', 'data' => null];
         } elseif ($vcode['vericode'] !== $code) {
@@ -256,29 +257,28 @@ class Api extends \think\Controller
             echo json_encode($msg);exit;
         }
         if (empty($param['avatar'])) {
-            echo json_encode(['status' => 2, 'info' => '头像不能为空', 'data' => null]);exit;
+            $msg = ['status' => 2, 'info' => '头像不能为空', 'data' => null];
+        } elseif (empty($param['nickname'])) {
+            $msg = ['status' => 3, 'info' => '昵称不能为空', 'data' => null];
+        } elseif (empty($param['sex'])) {
+            $msg = ['status' => 4, 'info' => '性别不能为空', 'data' => null];
+        } elseif (empty($param['birthday'])) {
+            $msg = ['status' => 5, 'info' => '生日不能为空', 'data' => null];
+        } elseif (empty($param['introduce'])) {
+            $msg = ['status' => 6, 'info' => '简介不能为空', 'data' => null];
+        } elseif (empty($param['tape'])) {
+            $msg = ['status' => 7, 'info' => '录音地址不能为空', 'data' => null];
         }
-        if (empty($param['nickname'])) {
-            echo json_encode(['status' => 3, 'info' => '昵称不能为空', 'data' => null]);exit;
-        }
-        if (empty($param['sex'])) {
-            echo json_encode(['status' => 4, 'info' => '性别不能为空', 'data' => null]);exit;
-        }
-        if (empty($param['birthday'])) {
-            echo json_encode(['status' => 5, 'info' => '生日不能为空', 'data' => null]);exit;
-        }
-        if (empty($param['introduce'])) {
-            echo json_encode(['status' => 6, 'info' => '简介不能为空', 'data' => null]);exit;
-        }
-        if (empty($param['tape'])) {
-            echo json_encode(['status' => 7, 'info' => '录音地址不能为空', 'data' => null]);exit;
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
         }
         $param['updatetime'] = time();
         $param['status']     = 1;
         // 修改信息
-        $res = $u->modify($param, ['id' => $param['id']]);
+        $id  = $param['id'];
+        $res = $u->modify($param, ['id' => $id]);
         if ($res !== false) {
-            $data = ['type' => 1, 'uid' => $param['id'], 'title' => '系统消息', 'content' => '正在审核，请稍后查看', 'addtime' => time()];
+            $data = ['type' => 1, 'uid' => $id, 'title' => '系统消息', 'content' => '正在审核，请稍后查看', 'addtime' => time()];
             $m    = new MessageModel();
             $m->add($data);
             $msg = ['status' => 0, 'info' => '提交成功', 'data' => null];
