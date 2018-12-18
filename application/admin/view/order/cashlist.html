@@ -42,6 +42,7 @@
                             <th>提现金额</th>
                             <th>申请时间</th>
                             <th>状态</th>
+                            <th>审核时间</th>
                             <th>不通过原因</th>
                             <th>操作</th>
                         </tr>
@@ -56,6 +57,7 @@
                             <td>{$item.money}</td>
                             <td>{$item.addtime}</td>
                             <td>{$item.status_txt}</td>
+                            <td>{$item.auditor_time}</td>
                             <td>{$item.reason}</td>
                             <td><a href="/order/cashdetail?id={$item.id}">详情</a></td>
                         </tr>
