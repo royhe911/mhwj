@@ -370,6 +370,9 @@ class Order extends \think\Controller
                 if (!empty($item['addtime'])) {
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                 }
+                if (!empty($item['auditor_time'])) {
+                    $item['auditor_time'] = date('Y-m-d H:i:s', $item['auditor_time']);
+                }
                 switch ($item['status']) {
                     case 1:
                         $item['status_txt'] = '申请中';
