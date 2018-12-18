@@ -1252,7 +1252,7 @@ class Api extends \think\Controller
             }
             $room['members'] = $members;
             $c               = new ChatModel();
-            $list            = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $room_id, 'c.uid' => $uid], ['a.uid', 'a.avatar', 'a.content']);
+            $list            = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $room_id, 'c.uid' => $uid], ['a.uid', 'a.avatar', 'a.content'], '', 'a.addtime desc');
             $room['chatlog'] = $list;
             $msg             = ['status' => 0, 'info' => '获取成功', 'data' => $room];
         } else {
@@ -1585,7 +1585,7 @@ class Api extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $list = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $param['room_id'], 'c.uid' => $param['uid']], ['a.uid', 'a.avatar', 'a.content']);
+        $list = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $param['room_id'], 'c.uid' => $param['uid']], ['a.uid', 'a.avatar', 'a.content'], '', 'a.addtime desc');
         if (!$list) {
             echo json_encode(['status' => 4, 'info' => '获取失败', 'data' => null]);exit;
         }

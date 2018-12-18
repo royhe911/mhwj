@@ -884,7 +884,7 @@ class Pay extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $pmo->getJoinList([['m_person_order po', ['a.order_id=po.id']]], $where, ['master_id', 'order_num', 'a.uid', 'game_id', 'play_type', 'order_money', 'a.addtime', 'a.status'], "$page,$pagesize");
+        $list = $pmo->getJoinList([['m_person_order po', ['a.order_id=po.id']]], $where, ['master_id', 'order_num', 'a.uid', 'game_id', 'play_type', 'order_money', 'a.addtime', 'a.status'], "$page,$pagesize", 'a.addtime desc');
         if ($list) {
             $uids   = array_column($list, 'uid');
             $u      = new UserModel();
@@ -1504,7 +1504,7 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $ru      = new RoomUserModel();
+        $ru = new RoomUserModel();
         $ru->modifyField('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
     }
