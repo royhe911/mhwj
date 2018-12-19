@@ -68,7 +68,7 @@ class Kanjia extends \think\Controller
             echo json_encode(['status' => 9, 'info' => '不能重复发起砍价', 'data' => null]);exit;
         }
         $num   = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
-        $task  = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time()];
+        $task  = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time(), 'form_id' => $param['form_id']];
         $lucky = explode(',', $goods['lucky']);
         if (in_array($goods['count'], $lucky)) {
             $task['is_lucky']  = 1;
@@ -149,10 +149,94 @@ class Kanjia extends \think\Controller
             }
             echo json_encode(['status' => $info, 'info' => $msg, 'data' => null]);exit;
         }
+        $status = $info['status'];
+        $info   = $info['info'];
         if (!empty($info['addtime'])) {
             $info['addtime'] = date('Y-m-d H:i:s', $info['addtime']);
         }
+        if ($status === 1) {
+            $u      = new UserModel();
+            $user   = $u->getModel(['id' => $task['uid']], ['openid']);
+            $g      = new GameModel();
+            $goods  = $g->getModel(['id' => $task['goods_id']], ['name']);
+            $remark = '恭喜您砍价成功，请在有效期内进入小程序领取';
+            $this->kj_notice($user['openid'], $task['form_id'], $goods['name'], $task['total_money'], '砍价成功', $task['knife_num'], $remark, $validdate);
+        }
         echo json_encode(['status' => 0, 'info' => '砍价成功', 'data' => $info]);exit;
+    }
+
+    /**
+     * 砍价成功通知
+     * @author 贺强
+     * @time   2018-12-19 16:13:46
+     * @param  string $openid     发起砍价者OPENID
+     * @param  string $form_id    FORMID
+     * @param  string $goods_name 商品名称
+     * @param  string $money      砍价金额
+     * @param  string $status     状态描述
+     * @param  int    $count      帮砍人数
+     * @param  string $remark     备注
+     * @param  string $validdate  领取奖品有效期限
+     */
+    public function kj_notice($openid, $form_id, $goods_name, $money, $status, $count, $remark, $validdate)
+    {
+        // 取得 access_token
+        $access_token = $this->get_access_token();
+        if ($access_token === false) {
+            // 记录日志
+        }
+        // API 地址
+        $url = 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send';
+        $url .= "?access_token=$access_token";
+        $data['touser'] = $openid;
+        // 下单成功模板ID
+        $data['template_id'] = 'udY_BaQtt4vS35evpPZ-8QDnKiBHAxfTGxTDjPBKiWI';
+        $data['form_id']     = $form_id;
+        $data['page']        = '/pages/welfare/welfare';
+        $data['data']        = ['keyword1' => ['value' => $goods_name], 'keyword2' => ['value' => $money], 'keyword3' => ['value' => $status], 'keyword4' => ['value' => $count], 'keyword5' => ['value' => $remark], 'keyword6' => ['value' => $validdate]];
+        // 处理逻辑
+        $data = json_encode($data);
+        $res  = $this->curl($url, $data);
+        $res  = json_decode($res, true);
+        if (!empty($res['errcode'])) {
+            // 记录日志
+        }
+        return true;
+    }
+
+    /**
+     * 取得 access_token
+     * @author 贺强
+     * @time   2018-12-19 15:54:40
+     */
+    public function get_access_token()
+    {
+        $mini    = new MiniprogramModel();
+        $appid   = config('APPID_PLAYER');
+        $program = $mini->getModel(['appid' => $appid]);
+        // 取 secret
+        $appsecret = config('APPSECRET_PLAYER');
+        if (!$program) {
+            $id = $mini->add(['appid' => $appid, 'appsecret' => $appsecret, 'name' => '游戏陪玩咖']);
+        } else {
+            $id = $program['id'];
+        }
+        if (!empty($program['access_token']) && $program['expires_out'] > time()) {
+            return $program['access_token'];
+        }
+        $url = 'https://api.weixin.qq.com/cgi-bin/token';
+        $url .= '?grant_type=client_credential';
+        $url .= "&appid=$appid";
+        $url .= "&secret=$appsecret";
+        $data = $this->curl($url);
+        if (!empty($data)) {
+            $data = json_decode($data, true);
+        }
+        if (!empty($data['errcode'])) {
+            // 写日志
+        }
+        $mini->modify(['access_token' => $data['access_token'], 'expires_out' => time() + $data['expires_in'] - 10], ['appid' => $appid]);
+        return $data['access_token'];
     }
 
     /**
