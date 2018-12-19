@@ -732,11 +732,6 @@ class Pay extends \think\Controller
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
         }
-        // $rm    = new RoomMasterModel();
-        // $count = $rm->getCount(['uid' => $master_id, 'is_delete' => 0]);
-        // if ($count) {
-        //     echo json_encode(['status' => 9, 'info' => '您已在房间游戏中', 'data' => null]);exit;
-        // }
         $u     = new UserModel();
         $muser = $u->getModel(['id' => $master_id, 'type' => 2]);
         if (empty($muser) || $muser['status'] !== 8) {
@@ -803,7 +798,7 @@ class Pay extends \think\Controller
     public function robb_notice($openid, $form_id, $order_num, $addtime, $status, $remark)
     {
         // $openid    = 'oq_7b4hmGx_-byyobN7JDUu2OQlU';
-        // $form_id   = 'baa61a981c0fb7d3069f06798a9164d6';
+        // $form_id   = 'd8ecfcb7c61f1f96a9017f707efdf32f';
         // $order_num = '1545120927781';
         // $addtime   = '2018年12月18日 19:55:50';
         // $status    = '成功';
@@ -828,6 +823,7 @@ class Pay extends \think\Controller
         if (!empty($res['errcode'])) {
             // 记录日志
         }
+        return true;
     }
 
     /**
@@ -859,7 +855,7 @@ class Pay extends \think\Controller
             $data = json_decode($data, true);
         }
         if (!empty($data['errcode'])) {
-            return false;
+            // 写日志
         }
         $mini->modify(['access_token' => $data['access_token'], 'expires_out' => time() + $data['expires_in'] - 10]);
         return $data['access_token'];
@@ -1648,11 +1644,9 @@ class Pay extends \think\Controller
         $res = xml2array($res);
         if (strval($res['return_code']) == 'FAIL') {
             return 2;
-            // var_dump($res['return_msg']);exit;
         }
         if (!empty($res['result_code']) && strval($res['result_code']) == 'FAIL') {
             return 2;
-            // var_dump($res['err_code_des']);exit;
         }
         $pay_data = ['appId' => config('APPID_PLAYER'), 'nonceStr' => $res['nonce_str'], 'package' => 'prepay_id=' . $res['prepay_id'], 'signType' => 'MD5', 'timeStamp' => time()];
         // 计算签名

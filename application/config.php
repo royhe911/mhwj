@@ -235,5 +235,5 @@ return [
     'PAY_MCHID'              => 1519826271, // 商户号
     'PRE_KEY'                => '32292XXYJ629LRPWWLHM127XWNMDGDHL', // 平台设置的密钥key
     'APPID_ACCOMPANY'     => 'wxecd6bfdba0623aa5', // 陪玩端 appid
-    'APPSECRET_ACCOMPANY' => '6478992f651e85bb966b8fd5db9c8771', // 小程序 appSecret
+    'APPSECRET_ACCOMPANY' => 'fe0bf34796bd39e83f2eff226372a4ff', // 小程序 appSecret
 ];

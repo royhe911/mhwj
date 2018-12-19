@@ -3,6 +3,7 @@ namespace app\admin\controller;
 
 use app\common\model\GameModel;
 use app\common\model\MessageModel;
+use app\common\model\MiniprogramModel;
 use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
 
@@ -193,7 +194,11 @@ class User extends \think\Controller
                 if ($res) {
                     $user    = $u->getModel(['id' => $param['id']]);
                     $addtime = date('Y年m月d日 H:i:s', $user['addtime']);
-                    $this->shenhe_notice($user['openid'], $user['form_id'], $addtime, $user['nickname'], $content, '');
+                    $status  = '审核通过';
+                    if (intval($param['status']) !== 8) {
+                        $status = '审核未通过';
+                    }
+                    $this->shenhe_notice($user['openid'], $user['form_id'], $addtime, $user['nickname'], $status, $content);
                     $data = ['type' => 1, 'uid' => $param['id'], 'title' => '系统消息', 'content' => $content, 'addtime' => time()];
                     $m->add($data);
                     return ['status' => 0, 'info' => '审核成功'];
@@ -209,9 +214,9 @@ class User extends \think\Controller
      * @time   2018-12-18 20:22:38
      * @param  string $openid    陪玩师OPENID
      * @param  string $form_id   FORMID
-     * @param  string $addtime   下单时间
+     * @param  string $addtime   申请时间
      * @param  string $nickanme  陪玩师昵称
-     * @param  string $status    状态描述
+     * @param  string $status    审核状态
      * @param  string $remark    备注
      */
     public function shenhe_notice($openid, $form_id, $addtime, $nickname, $status, $remark)
@@ -232,9 +237,9 @@ class User extends \think\Controller
         $url .= "?access_token=$access_token";
         $data['touser'] = $openid;
         // 下单成功模板ID
-        $data['template_id'] = 'NMtINU50FyGcoxytdA4nUh_lGf8_ND8V_4UiD12y4qI';
+        $data['template_id'] = 'KVSRU0TCSnf9yiJhrVnT4dJW5VvLxNXS4LqbmkPFNRM';
         $data['form_id']     = $form_id;
-        $data['data']        = ['keyword1' => ['value' => time()], 'keyword2' => ['value' => $nickname], 'keyword3' => ['value' => $addtime], 'keyword4' => ['value' => $remark]];
+        $data['data']        = ['keyword1' => ['value' => date('Y年m月d日 H:i:s')], 'keyword2' => ['value' => $nickname], 'keyword3' => ['value' => $status], 'keyword4' => ['value' => $addtime], 'keyword5' => ['value' => $remark]];
         // 处理逻辑
         $data = json_encode($data);
         $res  = $this->curl($url, $data);

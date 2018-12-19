@@ -140,11 +140,11 @@ class Api extends \think\Controller
             echo json_encode(['status' => 1, 'info' => 'js_code 参数不能为空', 'data' => null]);exit;
         }
         $js_code = $param['js_code'];
-        $appid   = 'wxe6f37de8e1e3225e';
-        $secret  = '357566bea005201ce062acaabd4a58e9';
+        $appid   = config('APPID_PLAYER');
+        $secret  = config('APPSECRET_PLAYER');
         if (!empty($param['type']) && intval($param['type']) === 2) {
-            $appid  = 'wxecd6bfdba0623aa5';
-            $secret = '8ff39ccfde133942cd8933b240a79960';
+            $appid  = config('APPID_ACCOMPANY');
+            $secret = config('APPSECRET_ACCOMPANY');
         }
         $url  = "https://api.weixin.qq.com/sns/jscode2session?appid={$appid}&secret={$secret}&js_code={$js_code}&grant_type=authorization_code";
         $data = $this->curl($url);
@@ -1077,7 +1077,9 @@ class Api extends \think\Controller
         $po  = new PersonOrderModel();
         $pod = $po->getModel(['uid' => $param['uid'], 'status' => ['in', '7,8']], ['id']);
         if (!empty($pod)) {
-            $user['porder'] = $pod['id'];
+            $user['porder']   = $pod['id'];
+            $user['count']    = 2;
+            $user['in_count'] = 2;
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['list' => $list, 'user' => $user]]);exit;
     }
