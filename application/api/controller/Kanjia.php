@@ -6,6 +6,7 @@ use app\common\model\GoodsModel;
 use app\common\model\GoodsSkinModel;
 use app\common\model\GoodsTaskInfoModel;
 use app\common\model\GoodsTaskModel;
+use app\common\model\MiniprogramModel;
 use app\common\model\UserModel;
 
 /**
@@ -92,6 +93,7 @@ class Kanjia extends \think\Controller
         } else {
             $gti  = new GoodsTaskInfoModel();
             $data = $gti->helpChop(['task_id' => $res['tid'], 'uid' => $uid, 'is_self' => 1]);
+            $data = $data['info'];
             $msg  = ['status' => 0, 'info' => '发起成功', 'data' => $data];
         }
         echo json_encode($msg);exit;
@@ -150,19 +152,20 @@ class Kanjia extends \think\Controller
             echo json_encode(['status' => $info, 'info' => $msg, 'data' => null]);exit;
         }
         $status = $info['status'];
-        $info   = $info['info'];
-        if (!empty($info['addtime'])) {
-            $info['addtime'] = date('Y-m-d H:i:s', $info['addtime']);
+        $data   = $info['info'];
+        if (!empty($data['addtime'])) {
+            $data['addtime'] = date('Y-m-d H:i:s', $data['addtime']);
         }
         if ($status === 1) {
-            $u      = new UserModel();
-            $user   = $u->getModel(['id' => $task['uid']], ['openid']);
-            $g      = new GameModel();
-            $goods  = $g->getModel(['id' => $task['goods_id']], ['name']);
-            $remark = '恭喜您砍价成功，请在有效期内进入小程序领取';
+            $u         = new UserModel();
+            $user      = $u->getModel(['id' => $task['uid']], ['openid']);
+            $g         = new GoodsModel();
+            $goods     = $g->getModel(['id' => $task['goods_id']], ['name']);
+            $remark    = '恭喜您砍价成功，请在有效期内进入小程序领取';
+            $validdate = date('Y-m-d H:i:s', strtotime('+7 day'));
             $this->kj_notice($user['openid'], $task['form_id'], $goods['name'], $task['total_money'], '砍价成功', $task['knife_num'], $remark, $validdate);
         }
-        echo json_encode(['status' => 0, 'info' => '砍价成功', 'data' => $info]);exit;
+        echo json_encode(['status' => 0, 'info' => '砍价成功', 'data' => $data]);exit;
     }
 
     /**
