@@ -1183,7 +1183,7 @@ class Pay extends \think\Controller
         }
         $porder = $po->getModel(['id' => $param['order_id']], ['status']);
         if ($porder) {
-            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['status' => $porder['status']]]);exit;
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['status' => $porder['status'], 'order_id' => $param['order_id']]]);exit;
         }
         echo json_encode(['status' => 4, 'info' => '订单不存在', 'data' => null]);exit;
     }
