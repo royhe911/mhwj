@@ -857,7 +857,7 @@ class Pay extends \think\Controller
         if (!empty($data['errcode'])) {
             // 写日志
         }
-        $mini->modify(['access_token' => $data['access_token'], 'expires_out' => time() + $data['expires_in'] - 10]);
+        $mini->modify(['access_token' => $data['access_token'], 'expires_out' => time() + $data['expires_in'] - 10], ['appid' => $appid]);
         return $data['access_token'];
     }
 
