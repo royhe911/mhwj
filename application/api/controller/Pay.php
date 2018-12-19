@@ -778,7 +778,7 @@ class Pay extends \think\Controller
             }
             $addtime = date('Y年m月d日 H:i:s', $porder['addtime']);
             $puser   = $u->getModel(['id' => $porder['uid']]);
-            $this->robb_notice($puser['openid'], $porder['form_id'], $porder['order_num'], $addtime, '成功', "您的订单已被陪玩师{$muser['nickname']}接到，请进入小程序让陪玩师带您玩");
+            $this->robb_notice($puser['openid'], $porder['form_id'], $porder['id'], $porder['order_num'], $addtime, '成功', "您的订单已被陪玩师{$muser['nickname']}接到，请进入小程序让陪玩师带您玩");
             $msg = ['status' => 0, 'info' => '抢单成功', 'data' => ['order_id' => $param['order_id']]];
         }
         echo json_encode($msg);exit;
@@ -790,12 +790,13 @@ class Pay extends \think\Controller
      * @time   2018-12-18 20:22:38
      * @param  string $openid    玩家OPENID
      * @param  string $form_id   FORMID
+     * @param  string $order_id  订单ID
      * @param  string $order_num 订单号
      * @param  string $addtime   下单时间
      * @param  string $status    状态描述
      * @param  string $remark    备注
      */
-    public function robb_notice($openid, $form_id, $order_num, $addtime, $status, $remark)
+    public function robb_notice($openid, $form_id, $order_id, $order_num, $addtime, $status, $remark)
     {
         // $openid    = 'oq_7b4hmGx_-byyobN7JDUu2OQlU';
         // $form_id   = 'd8ecfcb7c61f1f96a9017f707efdf32f';
@@ -815,6 +816,7 @@ class Pay extends \think\Controller
         // 下单成功模板ID
         $data['template_id'] = 'NMtINU50FyGcoxytdA4nUh_lGf8_ND8V_4UiD12y4qI';
         $data['form_id']     = $form_id;
+        $data['page']        = '/pages/customizationChat/customizationChat?id=' . $order_id;
         $data['data']        = ['keyword1' => ['value' => $order_num], 'keyword2' => ['value' => $addtime], 'keyword3' => ['value' => $status], 'keyword4' => ['value' => $remark]];
         // 处理逻辑
         $data = json_encode($data);
