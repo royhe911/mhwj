@@ -1243,7 +1243,7 @@ class Pay extends \think\Controller
         $pay_data = null;
         if ($uorder['status'] === 1) {
             $total_fee = $uorder['order_money'] * 100;
-            $pay_data  = ['nonceStr' => $uorder['nonceStr'], 'package' => $uorder['package'], 'signType' => $uorder['MD5'], 'paySign' => $uorder['paySign'], 'appId' => config('APPID_PLAYER'), 'timeStamp' => time(), 'order_num' => $order_num];
+            $pay_data  = ['nonceStr' => $uorder['nonceStr'], 'package' => $uorder['package'], 'signType' => $uorder['signType'], 'paySign' => $uorder['paySign'], 'appId' => $uorder['appId'], 'timeStamp' => $uorder['timeStamp'], 'order_num' => $order_num];
             // $pay_data  = $this->wxpay($uorder['uid'], $order_num, $total_fee);
             // if ($pay_data === false) {
             //     $msg = ['status' => 5, 'info' => '玩家不存在', 'data' => null];
@@ -1640,14 +1640,12 @@ class Pay extends \think\Controller
         if (!empty($res['result_code']) && strval($res['result_code']) == 'FAIL') {
             return 2;
         }
-        $pay_data = ['nonceStr' => $res['nonce_str'], 'package' => 'prepay_id=' . $res['prepay_id'], 'signType' => 'MD5'];
+        $pay_data = ['appId' => config('APPID_PLAYER'), 'nonceStr' => $res['nonce_str'], 'package' => 'prepay_id=' . $res['prepay_id'], 'signType' => 'MD5', 'timeStamp' => time()];
         // 计算签名
         $pay_data['paySign'] = $this->make_sign($pay_data);
         // 保存支付数据
         $uo = new UserOrderModel();
         $uo->modify($pay_data, ['order_num' => $order_num]);
-        $pay_data['appId']     = config('APPID_PLAYER');
-        $pay_data['timeStamp'] = time();
         $pay_data['order_num'] = $order_num;
         return $pay_data;
     }
