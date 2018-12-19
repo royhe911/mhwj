@@ -19,4 +19,5 @@ return [
     'app\common\crontab\PersonOrderexit',
     'app\common\crontab\Kjtask',
     'app\common\crontab\Goods',
+    'app\common\crontab\GoodsTask',
 ];
