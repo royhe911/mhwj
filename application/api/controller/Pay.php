@@ -769,13 +769,8 @@ class Pay extends \think\Controller
             $msg['info'] = '订单已取消';
         }
         if ($msg['status'] === true) {
-            $pr    = new PersonRoomModel();
-            $count = $pr->getCount(['order_id' => $param['order_id']]);
-            if (!$count) {
-                $pr->add($param);
-            } else {
-                $pr->modify($param, ['order_id' => $param['order_id']]);
-            }
+            $pr = new PersonRoomModel();
+            $pr->add($param);
             $addtime = date('Y年m月d日 H:i:s', $porder['addtime']);
             $puser   = $u->getModel(['id' => $porder['uid']]);
             $this->robb_notice($puser['openid'], $porder['form_id'], $porder['id'], $porder['order_num'], $addtime, '成功', "您的订单已被陪玩师{$muser['nickname']}接到，请进入小程序让陪玩师带您玩");
@@ -798,12 +793,6 @@ class Pay extends \think\Controller
      */
     public function robb_notice($openid, $form_id, $order_id, $order_num, $addtime, $status, $remark)
     {
-        // $openid    = 'oq_7b4hmGx_-byyobN7JDUu2OQlU';
-        // $form_id   = 'd8ecfcb7c61f1f96a9017f707efdf32f';
-        // $order_num = '1545120927781';
-        // $addtime   = '2018年12月18日 19:55:50';
-        // $status    = '成功';
-        // $remark    = '您的订制订单已被接，请进入小程序和陪玩师一起玩';
         // 取得 access_token
         $access_token = $this->get_access_token();
         if ($access_token === false) {

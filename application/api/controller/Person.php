@@ -58,20 +58,15 @@ class Person extends \think\Controller
         if (!$room) {
             echo json_encode(['status' => 5, 'info' => '房间已销毁', 'data' => null]);exit;
         }
-        $chatlog = null;
-        if ($room) {
-            $res     = $pr->modify($param, ['order_id' => $order_id]);
-            $pc      = new PersonChatModel();
-            $chatlog = $pc->getList(['order_id' => $order_id], ['avatar', 'content', 'author_type']);
-        } else {
-            $param['addtime'] = time();
-            $res              = $pr->add($param);
-        }
         $po     = new PersonOrderModel();
         $porder = $po->getModel(['id' => $order_id]);
-        if (!$porder) {
+        if (!$porder || $porder['status'] === 10) {
             echo json_encode(['status' => 5, 'info' => '房间已销毁', 'data' => null]);exit;
         }
+        $chatlog = null;
+        $res     = $pr->modify($param, ['order_id' => $order_id]);
+        $pc      = new PersonChatModel();
+        $chatlog = $pc->getList(['order_id' => $order_id], ['avatar', 'content', 'author_type']);
         $members = null;
         $u       = new UserModel();
         $users   = $u->getList(['id' => ['in', "{$room['uid']},{$room['master_id']}"]], ['id', 'nickname', 'avatar', 'qq', 'wx']);
@@ -90,7 +85,7 @@ class Person extends \think\Controller
             $members['users'] = null;
         }
         if ($res !== false) {
-            $msg = ['status' => 0, 'info' => '进入房间成功', 'data' => ['order' => ['order_num' => $porder['order_num'], 'region' => $porder['region']], 'members' => $members, 'chatlog' => $chatlog]];
+            $msg = ['status' => 0, 'info' => '进入房间成功', 'data' => ['order' => ['order_num' => $porder['order_num'], 'region' => $porder['region'], 'status' => $porder['status']], 'members' => $members, 'chatlog' => $chatlog]];
         } else {
             $msg = ['status' => 4, 'info' => '进入房间失败', 'data' => null];
         }
