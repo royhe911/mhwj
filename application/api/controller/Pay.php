@@ -816,7 +816,7 @@ class Pay extends \think\Controller
         // 下单成功模板ID
         $data['template_id'] = 'NMtINU50FyGcoxytdA4nUh_lGf8_ND8V_4UiD12y4qI';
         $data['form_id']     = $form_id;
-        $data['page']        = '/pages/customizationChat/customizationChat?id=' . $order_id;
+        $data['page']        = '/pages/customizationChat/customizationChat?id=' . $order_id . '&ts=1';
         $data['data']        = ['keyword1' => ['value' => $order_num], 'keyword2' => ['value' => $addtime], 'keyword3' => ['value' => $status], 'keyword4' => ['value' => $remark]];
         // 处理逻辑
         $data = json_encode($data);
