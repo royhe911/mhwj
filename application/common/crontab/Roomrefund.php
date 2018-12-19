@@ -45,8 +45,8 @@ class Roomrefund extends Command
                 $ordlist = $uo->getList(['room_id' => ['in', $ids], 'transaction_id' => ['<>', '']]);
                 foreach ($ordlist as $uord) {
                     // 退款
-                    $total_fee  = $uord['order_money'];
-                    $refund_fee = $uord['order_money'];
+                    $total_fee  = $uord['order_money'] * 100;
+                    $refund_fee = $uord['order_money'] * 100;
                     // 测试金额
                     // $total_fee  = 1;
                     // $refund_fee = 1;
