@@ -214,7 +214,7 @@ class Pay extends \think\Controller
             }
         }
         $total_fee = $last_money * 100;
-        $total_fee = 1;
+        // $total_fee = 1;
         // 调用微信预支付
         $pay_data = $this->wxpay($uid, $order_num, $total_fee);
         if ($pay_data === false) {
@@ -522,9 +522,9 @@ class Pay extends \think\Controller
         }
         $porder['last_money'] = $last_money;
         $po->modifyField('order_money', $last_money, ['order_num' => $order_num]);
-        // $total_fee    = floatval($last_money);
-        // $total_fee *= 100;
-        $total_fee = 1;
+        $total_fee    = floatval($last_money);
+        $total_fee *= 100;
+        // $total_fee = 1;
         // 调用微信预支付
         $pay_data = $this->wxpay($porder['uid'], $order_num, $total_fee);
         if ($pay_data === false) {
@@ -1136,7 +1136,7 @@ class Pay extends \think\Controller
         if ($porder['status'] === 1) {
             $po->modifyField('addtime', time(), ['id' => $porder['id']]);
             $total_fee = $porder['order_money'] * 100;
-            $total_fee = 1;
+            // $total_fee = 1;
             // 调用微信支付
             $pay_data = $this->wxpay($porder['uid'], $order_num, $total_fee);
             if ($pay_data === false) {

@@ -45,7 +45,12 @@ class Roomrefund extends Command
                 $ordlist = $uo->getList(['room_id' => ['in', $ids], 'transaction_id' => ['<>', '']]);
                 foreach ($ordlist as $uord) {
                     // 退款
-                    $this->exit_money($uord['order_num'], 1, 1, $uord['transaction_id'], $uord['uid']);
+                    $total_fee  = $uord['order_money'];
+                    $refund_fee = $uord['order_money'];
+                    // 测试金额
+                    // $total_fee  = 1;
+                    // $refund_fee = 1;
+                    $this->exit_money($uord['order_num'], $total_fee, $refund_fee, $uord['transaction_id'], $uord['uid']);
                     $uo->modifyField('status', 9, ['room_id' => ['in', $ids]]);
                 }
                 $rm = new RoomMasterModel();

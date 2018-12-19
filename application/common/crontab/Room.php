@@ -54,8 +54,12 @@ class Room extends Command
                     $uo->modifyField('status', 9, ['room_id' => ['in', $ids]]);
                     $uords = $uo->getList(['room_id' => ['in', $ids], 'transaction_id' => ['<>', '']], ['uid', 'order_num', 'order_money', 'transaction_id']);
                     foreach ($uords as $uord) {
+                        $total_fee  = $uord['order_money'] * 100;
+                        $refund_fee = $uord['order_money'] * 100;
                         // 退款测试1分
-                        $this->exit_money($uord['order_num'], 1, 1, $uord['transaction_id'], $uord['uid']);
+                        // $total_fee  = 1;
+                        // $refund_fee = 1;
+                        $this->exit_money($uord['order_num'], $total_fee, $refund_fee, $uord['transaction_id'], $uord['uid']);
                     }
                 }
             }
