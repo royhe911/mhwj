@@ -114,7 +114,8 @@ class User extends \think\Controller
                 } else {
                     $attr['status_txt'] = '未审核';
                 }
-                $urls = explode(',', $attr['level_url']);
+                $urls   = explode(',', $attr['level_url']);
+                $urls[] = $attr['logo'];
                 // 水平截图重新赋值
                 $attr['level_url'] = $urls;
             }
