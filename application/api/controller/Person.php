@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\GameModel;
 use app\common\model\PersonChatModel;
 use app\common\model\PersonOrderModel;
 use app\common\model\PersonRoomModel;
@@ -73,6 +74,7 @@ class Person extends \think\Controller
         foreach ($users as $user) {
             if ($user['id'] === $room['master_id']) {
                 $members['master'] = $user;
+                $master            = $user;
             }
             if ($user['id'] === $room['uid']) {
                 $members['users'] = $user;
@@ -80,12 +82,27 @@ class Person extends \think\Controller
         }
         if (empty($members['master'])) {
             $members['master'] = null;
+            $master            = ['id' => 0, 'nickname' => '', 'avatar' => '', 'qq' => '', 'wx' => ''];
         }
         if (empty($members['users'])) {
             $members['users'] = null;
         }
         if ($res !== false) {
-            $msg = ['status' => 0, 'info' => '进入房间成功', 'data' => ['order' => ['order_num' => $porder['order_num'], 'region' => $porder['region'], 'status' => $porder['status']], 'members' => $members, 'chatlog' => $chatlog]];
+            $gamename  = '';
+            $g         = new GameModel();
+            $game      = $g->getModel(['id' => $porder['game_id']]);
+            $play_type = '实力上分';
+            $addtime   = 0;
+            if ($game) {
+                $gamename = $game['name'];
+            }
+            if ($porder['play_type'] === 2) {
+                $play_type = '娱乐陪玩';
+            }
+            if (!empty($porder['addtime'])) {
+                $addtime = date('Y-m-d H:i:s', $porder['addtime']);
+            }
+            $msg = ['status' => 0, 'info' => '进入房间成功', 'data' => ['order' => ['order_num' => $porder['order_num'], 'region' => $porder['region'], 'gamename' => $gamename, 'play_type' => $play_type, 'addtime' => $addtime, 'order_money' => $porder['order_money'], 'master_nickname' => $master['nickname'], 'master_avatar' => $master['avatar'], 'status' => $porder['status']], 'members' => $members, 'chatlog' => $chatlog]];
         } else {
             $msg = ['status' => 4, 'info' => '进入房间失败', 'data' => null];
         }
