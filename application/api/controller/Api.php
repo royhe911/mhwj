@@ -1786,7 +1786,7 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $where = ['play_type' => 2, 'level_url' => ['<>', '']];
+        $where = ['status' => 8, 'play_type' => 2, 'level_url' => ['<>', '']];
         $count = $ua->getCount($where);
         $num   = ceil($count / $pagesize);
         $page  = mt_rand(1, $num);
