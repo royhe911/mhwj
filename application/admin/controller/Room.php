@@ -148,8 +148,11 @@ class Room extends \think\Controller
                 if ($item['identity'] === 'start_time') {
                     $start = $item['content'];
                 }
+                if ($item['identity'] === 'end_time') {
+                    $end = $item['content'];
+                }
             }
-            return $this->fetch('setlimit', ['list' => $start, 'end' => $end]);
+            return $this->fetch('setlimit', ['start' => $start, 'end' => $end]);
         }
     }
 }
