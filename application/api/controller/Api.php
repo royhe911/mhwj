@@ -860,7 +860,7 @@ class Api extends \think\Controller
      */
     public function add_room(RoomModel $r)
     {
-        limit();
+        // limit();
         $param = $this->param;
         if (empty($param['name'])) {
             $msg = ['status' => 8, 'info' => '房间名称不能为空', 'data' => null];
@@ -904,7 +904,7 @@ class Api extends \think\Controller
                 echo json_encode(['status' => 17, 'info' => '您还有未完成的订制订单', 'data' => null]);exit;
             }
             $u    = new UserModel();
-            $user = $u->getModel(['id' => $param['uid']], 'type,`status`');
+            $user = $u->getModel(['id' => $param['uid'], 'is_delete' => 0], 'type,`status`');
             if (!$user) {
                 $msg = ['status' => 6, 'info' => '陪玩师不存在', 'data' => null];
             } elseif ($user['type'] !== 2 || $user['status'] !== 8) {
@@ -982,7 +982,7 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status', "$page,$pagesize", 'status');
+        $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status', "$page,$pagesize", 'addtime desc,status');
         if ($list) {
             $uids     = array_column($list, 'uid');
             $game_ids = array_column($list, 'game_id');
@@ -1032,8 +1032,10 @@ class Api extends \think\Controller
                     $item['nickname'] = '';
                     $item['avatar']   = '';
                 }
-                if (!empty($gcarr[$item['game_id']]) && !empty($gcarr[$item['game_id']][$item['para_min']])) {
+                if ($item['type'] === 1 && !empty($gcarr[$item['game_id']]) && !empty($gcarr[$item['game_id']][$item['para_min']])) {
                     $item['price'] = $gcarr[$item['game_id']][$item['para_min']];
+                } elseif ($item['type'] === 2) {
+                    # code...
                 } else {
                     $item['price'] = 0;
                 }
