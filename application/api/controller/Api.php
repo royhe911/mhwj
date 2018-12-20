@@ -860,6 +860,7 @@ class Api extends \think\Controller
      */
     public function add_room(RoomModel $r)
     {
+        limit();
         $param = $this->param;
         if (empty($param['name'])) {
             $msg = ['status' => 8, 'info' => '房间名称不能为空', 'data' => null];

@@ -110,4 +110,21 @@ class Room extends \think\Controller
         $pages = ceil($count / $pagesize);
         return $this->fetch('list', ['list' => $list, 'pages' => $pages]);
     }
+
+    /**
+     * 设置活动开启结束时间
+     * @author 贺强
+     * @time   2018-12-20 10:42:26
+     */
+    public function set_limit()
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            config('START_TIME', $param['start']);
+            config('END_TIME', $param['end']);
+            return ['status' => 0, 'info' => '设置成功'];
+        } else {
+            return $this->fetch('setlimit', ['start' => config('START_TIME'), 'end' => config('END_TIME')]);
+        }
+    }
 }

@@ -435,6 +435,7 @@ class Pay extends \think\Controller
      */
     public function personal_preorder(PersonOrderModel $po)
     {
+        limit();
         $param = $this->param;
         if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '下单人不能为空', 'data' => null];

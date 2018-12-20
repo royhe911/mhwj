@@ -234,6 +234,8 @@ return [
     'APPSECRET_PLAYER'       => '357566bea005201ce062acaabd4a58e9', // 玩家端 appSecret
     'PAY_MCHID'              => 1519826271, // 商户号
     'PRE_KEY'                => '32292XXYJ629LRPWWLHM127XWNMDGDHL', // 平台设置的密钥key
-    'APPID_ACCOMPANY'     => 'wxecd6bfdba0623aa5', // 陪玩端 appid
-    'APPSECRET_ACCOMPANY' => 'fe0bf34796bd39e83f2eff226372a4ff', // 小程序 appSecret
+    'APPID_ACCOMPANY'        => 'wxecd6bfdba0623aa5', // 陪玩端 appid
+    'APPSECRET_ACCOMPANY'    => 'fe0bf34796bd39e83f2eff226372a4ff', // 小程序 appSecret
+    'START_TIME'             => '11:00', // 活动开启时间
+    'END_TIME'               => '12:00', // 活动结束时间
 ];
