@@ -2,8 +2,8 @@
 //配置文件
 return [
     'MD5_PARAM'           => 'douzhikeji',
-    'SDKAPPID'            => '1400158369',
-    'APPKEY'              => 'de4357e1435d09cb5880a2e1d4a22273', // 发短信用的 App 凭证
+    'SDKAPPID'            => '1400171452',
+    'APPKEY'              => '6ddc1e5cdca59f81e0c1b278c92dacdd', // 发短信用的 App 凭证
     'LOWERMONEY'          => 35, // 订单可使用优惠卷下限
     'COUPONTERM'          => 15, // 优惠卷期限
     'RATIO'               => 1, //陪玩师分钱比例

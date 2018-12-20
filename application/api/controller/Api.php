@@ -804,7 +804,7 @@ class Api extends \think\Controller
         }
         $vericode   = get_random_num($num);
         $sms        = new SmsSingleSender(config('SDKAPPID'), config('APPKEY'));
-        $templateId = 221888;
+        $templateId = 251787;
         $param      = [$vericode];
         $smsSign    = '';
         $res        = $sms->sendWithParam('86', $mobile, $templateId, $param, $smsSign, '', '');
