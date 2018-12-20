@@ -289,7 +289,7 @@ class Kanjia extends \think\Controller
      */
     public function knife_list(GoodsTaskModel $gt)
     {
-        $list = $gt->getList(['status' => 8], ['id task_id', 'uid', 'total_money', 'knife_num', 'addtime'], '1,10', 'knife_num');
+        $list = $gt->getList(['status' => ['in', [8, 10]]], ['id task_id', 'uid', 'total_money', 'knife_num', 'addtime'], '1,10', 'knife_num');
         if ($list) {
             $uids  = array_column($list, 'uid');
             $u     = new UserModel();
