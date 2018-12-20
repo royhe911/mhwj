@@ -986,8 +986,10 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status', "$page,$pagesize", 'addtime desc,status');
+        $count = 0;
+        $list  = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status', "$page,$pagesize", 'addtime desc,status');
         if ($list) {
+            $count    = $r->getCount($where);
             $uids     = array_column($list, 'uid');
             $game_ids = array_column($list, 'game_id');
             $jd_count = $r->getList(['uid' => ['in', $uids]], ['count(*) c,uid']);
@@ -1084,7 +1086,7 @@ class Api extends \think\Controller
             $user['count']    = 2;
             $user['in_count'] = 2;
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['list' => $list, 'user' => $user]]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['list' => $list, 'user' => $user], 'count' => $count]);exit;
     }
 
     /**
