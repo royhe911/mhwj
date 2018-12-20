@@ -177,7 +177,10 @@ class Controller
                 $start      = 'Y-m-d ' . $start_time . ':00';
             } elseif ($item['identity'] === 'end_time') {
                 $end_time = $item['content'];
-                $end      = 'Y-m-d ' . $end_time . ':00';
+                if ($end_time === '00:00') {
+                    $end = date('Y-m-d', strtotime('+1 day'));
+                }
+                $end = 'Y-m-d ' . $end_time . ':00';
             }
         }
         if (!empty($start) && !empty($end)) {
