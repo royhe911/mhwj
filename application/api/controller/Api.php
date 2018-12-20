@@ -860,7 +860,11 @@ class Api extends \think\Controller
      */
     public function add_room(RoomModel $r)
     {
-        // limit();
+        // 访问时间限制
+        $limit = $this->room_limit();
+        if ($limit) {
+            echo json_encode(['status' => 444, 'info' => "本活动将于{$limit['start_time']}-{$limit['end_time']}之间开启，点击预约！", 'data' => null]);exit;
+        }
         $param = $this->param;
         if (empty($param['name'])) {
             $msg = ['status' => 8, 'info' => '房间名称不能为空', 'data' => null];

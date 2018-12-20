@@ -3,6 +3,7 @@ namespace app\admin\controller;
 
 use app\common\model\GameModel;
 use app\common\model\RoomModel;
+use app\common\model\RoomSetModel;
 use app\common\model\UserModel;
 
 /**
@@ -120,11 +121,35 @@ class Room extends \think\Controller
     {
         if ($this->request->isAjax()) {
             $param = $this->request->post();
-            config('START_TIME', $param['start']);
-            config('END_TIME', $param['end']);
+            $rs    = new RoomSetModel();
+            if (!empty($param['start_time'])) {
+                $ros = $rs->getModel(['identity' => 'start_time']);
+                if ($ros) {
+                    $rs->modifyField('content', $param['start_time'], ['identity' => 'start_time']);
+                } else {
+                    $rs->add(['identity' => 'start_time', 'content' => $param['start_time']]);
+                }
+            }
+            if (!empty($param['end_time'])) {
+                $ros = $rs->getModel(['identity' => 'end_time']);
+                if ($ros) {
+                    $rs->modifyField('content', $param['end_time'], ['identity' => 'end_time']);
+                } else {
+                    $rs->add(['identity' => 'end_time', 'content' => $param['end_time']]);
+                }
+            }
             return ['status' => 0, 'info' => '设置成功'];
         } else {
-            return $this->fetch('setlimit', ['start' => config('START_TIME'), 'end' => config('END_TIME')]);
+            $rs    = new RoomSetModel();
+            $list  = $rs->getList();
+            $start = '';
+            $end   = '';
+            foreach ($list as $item) {
+                if ($item['identity'] === 'start_time') {
+                    $start = $item['content'];
+                }
+            }
+            return $this->fetch('setlimit', ['list' => $start, 'end' => $end]);
         }
     }
 }

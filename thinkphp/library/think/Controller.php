@@ -15,7 +15,7 @@ namespace think;
 
 use app\common\model\AdminModel;
 use app\common\model\MenuModel;
-use app\common\model\RoleModel;
+use app\common\model\RoomSetModel;
 use think\Exception;
 use think\exception\ValidateException;
 
@@ -155,6 +155,41 @@ class Controller
         }
         curl_close($curl);
         return $data;
+    }
+
+    /**
+     * 访问时间限制
+     * @author 贺强
+     * @time   2018-12-20 16:17:01
+     */
+    public function room_limit()
+    {
+        $rs    = new RoomSetModel();
+        $data  = $rs->getList();
+        $start = '';
+        $end   = '';
+        // 时间限制
+        $start_time = '';
+        $end_time   = '';
+        foreach ($data as $item) {
+            if ($item['identity'] === 'start_time') {
+                $start_time = $item['content'];
+                $start      = 'Y-m-d ' . $start_time . ':00';
+            } elseif ($item['identity'] === 'end_time') {
+                $end_time = $item['content'];
+                $end      = 'Y-m-d ' . $end_time . ':00';
+            }
+        }
+        if (!empty($start) && !empty($end)) {
+            $start = date($start);
+            $end   = date($end);
+            $start = strtotime($start);
+            $end   = strtotime($end);
+            if ($start < time() || $end > time()) {
+                return ['start_time' => $start_time, 'end_time' => $end_time];
+            }
+        }
+        return false;
     }
 
     /**

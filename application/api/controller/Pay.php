@@ -435,7 +435,11 @@ class Pay extends \think\Controller
      */
     public function personal_preorder(PersonOrderModel $po)
     {
-        // limit();
+        // 访问时间限制
+        $limit = $this->room_limit();
+        if ($limit) {
+            echo json_encode(['status' => 444, 'info' => "本活动将于{$limit['start_time']}-{$limit['end_time']}之间开启，点击预约！", 'data' => null]);exit;
+        }
         $param = $this->param;
         if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '下单人不能为空', 'data' => null];
@@ -523,7 +527,7 @@ class Pay extends \think\Controller
         }
         $porder['last_money'] = $last_money;
         $po->modifyField('order_money', $last_money, ['order_num' => $order_num]);
-        $total_fee    = floatval($last_money);
+        $total_fee = floatval($last_money);
         $total_fee *= 100;
         // $total_fee = 1;
         // 调用微信预支付
