@@ -862,6 +862,7 @@ class Api extends \think\Controller
     {
         // 访问时间限制
         $limit = $this->room_limit();
+        $limit = false;
         if ($limit) {
             echo json_encode(['status' => 444, 'info' => "本活动将于{$limit['start_time']}-{$limit['end_time']}之间开启，点击预约！", 'data' => null]);exit;
         }
@@ -1086,7 +1087,7 @@ class Api extends \think\Controller
             $user['count']    = 2;
             $user['in_count'] = 2;
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['list' => $list, 'user' => $user], 'count' => $count]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['list' => $list, 'user' => $user, 'count' => $count]]);exit;
     }
 
     /**
@@ -1796,7 +1797,7 @@ class Api extends \think\Controller
             $order = $uo->getList(['uid' => ['in', $uids], 'play_type' => 2], ['uid', 'count(*) c'], '', '', 'uid');
             $order = array_column($order, 'c', 'uid');
             $u     = new UserModel();
-            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = $u->getList(['id' => ['in', $uids], 'status' => 8], ['id', 'nickname', 'avatar']);
             $users = array_column($users, null, 'id');
             foreach ($list as $k => &$item) {
                 if (!empty($users[$item['uid']])) {

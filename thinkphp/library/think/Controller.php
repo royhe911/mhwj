@@ -174,18 +174,16 @@ class Controller
         foreach ($data as $item) {
             if ($item['identity'] === 'start_time') {
                 $start_time = $item['content'];
-                $start      = 'Y-m-d ' . $start_time . ':00';
+                $start      = date('Y-m-d ' . $start_time . ':00');
             } elseif ($item['identity'] === 'end_time') {
                 $end_time = $item['content'];
-                $end      = 'Y-m-d ' . $end_time . ':00';
+                $end      = date('Y-m-d ' . $end_time . ':00');
                 if ($end_time === '00:00') {
                     $end = date('Y-m-d', strtotime('+1 day'));
                 }
             }
         }
         if (!empty($start) && !empty($end)) {
-            $start = date($start);
-            $end   = date($end);
             $start = strtotime($start);
             $end   = strtotime($end);
             if ($start < time() || $end > time()) {
