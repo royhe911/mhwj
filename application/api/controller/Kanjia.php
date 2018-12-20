@@ -328,10 +328,7 @@ class Kanjia extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $task = $gt->getModel(['uid' => $param['uid']], true, 'addtime desc');
-        if (!$task) {
-            echo json_encode(['status' => 0, 'info' => '没有砍价', 'data' => ['is_kj' => 0]]);exit;
-        }
+        $task   = $gt->getModel(['uid' => $param['uid']], true, 'addtime desc');
         $g      = new GoodsModel();
         $goods  = $g->getModel(['id' => $task['goods_id']]);
         $winner = null;
@@ -360,6 +357,9 @@ class Kanjia extends \think\Controller
                 }
             }
             $winner = $distri;
+        }
+        if (!$task) {
+            echo json_encode(['status' => 0, 'info' => '没有砍价', 'data' => ['is_kj' => 0, 'winner' => $winner]]);exit;
         }
         $data = ['task_id' => $task['id'], 'starttime' => date('Y/m/d H:i:s'), 'endtime' => date('Y/m/d H:i:s', $task['addtime'] + 24 * 3600), 'has_cut_money' => $task['has_cut_money'], 'overplus' => $task['total_money'] - $task['has_cut_money'], 'box1' => $task['box1'], 'box2' => $task['box2'], 'status' => $task['status'], 'winner' => $winner];
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
