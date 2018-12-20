@@ -1251,7 +1251,7 @@ class Api extends \think\Controller
             }
             $room['members'] = $members;
             $c               = new ChatModel();
-            $list            = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $room_id, 'c.uid' => $uid], ['a.uid', 'a.avatar', 'a.content'], '', 'a.addtime desc');
+            $list            = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $room_id, 'c.uid' => $uid], ['a.uid', 'a.avatar', 'a.content'], '', 'c.addtime');
             $room['chatlog'] = $list;
             $msg             = ['status' => 0, 'info' => '获取成功', 'data' => $room];
         } else {

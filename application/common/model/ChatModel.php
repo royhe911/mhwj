@@ -40,6 +40,7 @@ class ChatModel extends CommonModel
             $ids      = array_merge($ids, $uid_list);
             foreach ($ids as &$id) {
                 $id['chat_id'] = $res;
+                $id['addtime'] = time();
             }
             $cu  = new ChatUserModel();
             $res = $cu->addArr($ids);
