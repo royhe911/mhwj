@@ -73,7 +73,7 @@ class GoodsTaskInfoModel extends CommonModel
                 return 20;
             }
             $gt->increment('has_cut_money', ['id' => $task_id], $data['price']);
-            $task   = $gt->getModel(['id' => $task_id], ['goods_id']);
+            $task   = $gt->getModel(['id' => $task_id], ['goods_id', 'total_money', 'has_cut_money']);
             $status = 0;
             if (!empty($task) && $task['total_money'] === $task['has_cut_money']) {
                 // 如果已砍完，则修改任务状态为已完成
