@@ -800,18 +800,21 @@ class Api extends \think\Controller
         $veric  = $v->getModel(['mobile' => "v_$mobile", 'is_used' => 0]);
         if ($veric) {
             $v->modifyField('addtime', time(), ['mobile' => "v_$mobile", 'addtime' => $veric['addtime']]);
-            echo json_encode(['status' => 0, 'info' => '发送成功', 'data' => $vericode]);exit;
         }
         $count = $v->getCount(['mobile' => "v_$mobile"]);
         if ($count >= 5) {
             echo json_encode(['status' => 11, 'info' => '同一个手机号一天只能接收5条短信', 'data' => null]);exit;
         }
         // $v->delByWhere(['mobile' => "v_$mobile"]);
-        $num = 4;
-        if (!empty($param['num'])) {
-            $num = intval($param['num']);
+        if ($veric) {
+            $vericode = $veric['vericode'];
+        } else {
+            $num = 4;
+            if (!empty($param['num'])) {
+                $num = intval($param['num']);
+            }
+            $vericode = get_random_num($num);
         }
-        $vericode   = get_random_num($num);
         $sms        = new SmsSingleSender(config('SDKAPPID'), config('APPKEY'));
         $templateId = 251806;
         $param      = [$vericode];
