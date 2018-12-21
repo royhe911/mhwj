@@ -244,14 +244,14 @@ class Api extends \think\Controller
         $code   = $param['code'];
         $msg    = [];
         $v      = new VericodeModel();
-        $vcode  = $v->getModel(['mobile' => "v_$mobile"]);
+        $vcode  = $v->getModel(['mobile' => "v_$mobile", 'is_used' => 0]);
         if (empty($vcode)) {
             $msg = ['status' => 2, 'info' => '无效手机号', 'data' => null];
         } elseif ($vcode['vericode'] !== $code) {
             $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
         } else {
             unset($param['code']);
-            $v->delByWhere(['mobile' => "v_$mobile"]);
+            // $v->delByWhere(['mobile' => "v_$mobile"]);
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -797,7 +797,11 @@ class Api extends \think\Controller
         }
         $v      = new VericodeModel();
         $mobile = $param['mobile'];
-        $v->delByWhere(['mobile' => "v_$mobile"]);
+        $count  = $v->getCount(['mobile' => "v_$mobile"]);
+        if ($count >= 5) {
+            echo json_encode(['status' => 11, 'info' => '同一个手机号一天只能接收5条短信', 'data' => null]);exit;
+        }
+        // $v->delByWhere(['mobile' => "v_$mobile"]);
         $num = 4;
         if (!empty($param['num'])) {
             $num = intval($param['num']);
@@ -830,16 +834,17 @@ class Api extends \think\Controller
             echo json_encode(['status' => 1, 'info' => '非法参数', 'data' => null]);exit;
         }
         $mobile = $param['mobile'];
-        $code   = $v->getModel(['mobile' => "v_$mobile"]);
+        $code   = $v->getModel(['mobile' => "v_$mobile", 'is_used' => 0]);
         if (empty($code)) {
             $msg = ['status' => 1, 'info' => '无效手机号', 'data' => null];
         } elseif (time() - $code['addtime'] > 300) {
-            $v->delByWhere(['mobile' => "v_$mobile"]);
+            // $v->delByWhere(['mobile' => "v_$mobile"]);
             $msg = ['status' => 2, 'info' => '验证码过期', 'data' => null];
         } elseif ($code["vericode"] !== $param['code']) {
             $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
         } else {
-            $v->delByWhere(['mobile' => "v_$mobile"]);
+            $v->modifyField('status', 1, ['mobile' => "v_$mobile"]);
+            // $v->delByWhere(['mobile' => "v_$mobile"]);
             $msg = ['status' => 0, 'info' => '验证成功', 'data' => null];
         }
         $u   = new UserModel();

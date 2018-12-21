@@ -20,4 +20,5 @@ return [
     'app\common\crontab\Kjtask',
     'app\common\crontab\Goods',
     'app\common\crontab\GoodsTask',
+    'app\common\crontab\Vericode',
 ];
