@@ -77,7 +77,7 @@ class GoodsTaskInfoModel extends CommonModel
             $status = 0;
             if (!empty($task) && $task['total_money'] === $task['has_cut_money']) {
                 // 如果已砍完，则修改任务状态为已完成
-                $res = $gt->modifyField(['status' => 8, 'valid_date' => time() + 7 * 24 * 3600 + 10], ['id' => $task_id]);
+                $res = $gt->modify(['status' => 8, 'valid_date' => time() + 7 * 24 * 3600 + 10], ['id' => $task_id]);
                 if (!$res) {
                     Db::rollback();
                     return 30;
