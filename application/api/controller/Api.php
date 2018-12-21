@@ -798,11 +798,11 @@ class Api extends \think\Controller
         }
         $v      = new VericodeModel();
         $mobile = $param['mobile'];
-        $count = $v->getCount(['mobile' => "v_$mobile"]);
+        $count  = $v->getCount(['mobile' => "v_$mobile", 'is_used' => 1]);
         if ($count >= 5) {
             echo json_encode(['status' => 11, 'info' => '同一个手机号一天只能接收5条短信', 'data' => null]);exit;
         }
-        $veric  = $v->getModel(['mobile' => "v_$mobile", 'is_used' => 0]);
+        $veric = $v->getModel(['mobile' => "v_$mobile", 'is_used' => 0]);
         if ($veric) {
             $v->modifyField('addtime', time(), ['mobile' => "v_$mobile", 'addtime' => $veric['addtime']]);
         }
