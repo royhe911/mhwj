@@ -1804,15 +1804,14 @@ class Api extends \think\Controller
         $page     = 1;
         $pagesize = 6;
         if (!empty($param['page'])) {
-            $page = $param['page'];
+            $page = intval($param['page']);
         }
         if (!empty($param['pagesize'])) {
-            $pagesize = $param['pagesize'];
+            $pagesize = intval($param['pagesize']);
         }
         $where = ['a.status' => 8, 'play_type' => 2, 'level_url' => ['<>', '']];
         $count = $ua->getJoinCount([['m_user u', 'a.uid=u.id']], $where);
         $num   = ceil($count / $pagesize);
-        $page  = mt_rand(1, $num);
         $list  = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'nickname', 'avatar'], "$page,$pagesize", 'u.is_recommend desc');
         if ($list) {
             $uids  = array_column($list, 'uid');
