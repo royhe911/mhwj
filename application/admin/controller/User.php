@@ -35,6 +35,11 @@ class User extends \think\Controller
         } else {
             $param['status'] = 0;
         }
+        if (!empty($param['nickname'])) {
+            $where['nickname'] = ['like', "%{$param['nickname']}%"];
+        } else {
+            $param['nickname'] = '';
+        }
         // 分页参数
         $page     = intval($this->request->get('page', 1));
         $pagesize = intval($this->request->get('pagesize', config('PAGESIZE')));

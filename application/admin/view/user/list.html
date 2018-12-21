@@ -43,6 +43,9 @@
                                     <option {if($param.status==8)}selected="selected" {/if}value="8">已审核</option>
                                 </select>
                             </td>
+                            <td class="ttd">
+                                <input type="text" placeholder="用户昵称" name="nickname">
+                            </td>
                             <td class="ttb"><input type="submit" class="btn btn-sm btn-primary" value="搜索"></td>
                             <td>
                                 <a href="javascript:;" data-action="del" data-type="multi">删除所选</a> &nbsp; <a href="javascript:;" data-action="recommend" data-type="multi">推荐</a> &nbsp; <a href="javascript:;" data-action="unrecommend" data-type="multi">取消推荐</a>

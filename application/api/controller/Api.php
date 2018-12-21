@@ -1321,6 +1321,10 @@ class Api extends \think\Controller
             if ($room['status'] !== 6) {
                 echo json_encode(['status' => 7, 'info' => '还有玩家未支付，不能开车', 'data' => null]);exit;
             }
+            //if ($room['type'] === 2) {
+            //    $uo = new UserOrderModel();
+            //    $uo->modifyField('status', 8, ['room_id' => $room_id]);
+            //}
             $morder = $mo->getModel(['room_id' => $room_id]);
             $rm     = new RoomMasterModel();
             $ms     = $rm->getList(['room_id' => $room_id], ['uid']);
@@ -1805,28 +1809,17 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $where = ['status' => 8, 'play_type' => 2, 'level_url' => ['<>', '']];
-        $count = $ua->getCount($where);
+        $where = ['a.status' => 8, 'play_type' => 2, 'level_url' => ['<>', '']];
+        $count = $ua->getJoinCount([['m_user u', 'a.uid=u.id']], $where);
         $num   = ceil($count / $pagesize);
         $page  = mt_rand(1, $num);
-        $list  = $ua->getList($where, ['uid', 'level_url'], "$page,$pagesize");
+        $list  = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'nickname', 'avatar'], "$page,$pagesize", 'u.is_recommend desc');
         if ($list) {
             $uids  = array_column($list, 'uid');
             $uo    = new UserOrderModel();
             $order = $uo->getList(['uid' => ['in', $uids], 'play_type' => 2], ['uid', 'count(*) c'], '', '', 'uid');
             $order = array_column($order, 'c', 'uid');
-            $u     = new UserModel();
-            $users = $u->getList(['id' => ['in', $uids], 'status' => 8], ['id', 'nickname', 'avatar']);
-            $users = array_column($users, null, 'id');
             foreach ($list as $k => &$item) {
-                if (!empty($users[$item['uid']])) {
-                    $user = $users[$item['uid']];
-                    // 属性赋值
-                    $item['nickname'] = $user['nickname'];
-                    $item['avatar']   = $user['avatar'];
-                } else {
-                    unset($list[$k]);
-                }
                 if (!empty($item['level_url'])) {
                     $level_url = explode(',', $item['level_url']);
                     foreach ($level_url as &$url) {
