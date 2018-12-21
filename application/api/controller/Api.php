@@ -1085,6 +1085,8 @@ class Api extends \think\Controller
                 }
                 if (!empty($logos[$item['uid']]) && !empty($logos[$item['uid']][$item['game_id']])) {
                     $item['logo'] = $logos[$item['uid']][$item['game_id']];
+                } elseif (!empty($item['level_url'])) {
+                    $item['logo'] = $item['level_url'];
                 } else {
                     $item['logo'] = '';
                 }
