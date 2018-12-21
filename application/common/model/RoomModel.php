@@ -84,8 +84,9 @@ class RoomModel extends CommonModel
     {
         Db::startTrans();
         try {
+            $room_id = $param['room_id'];
             // 进入房间锁定房间信息以免两个人同时进入
-            $sql  = "select id,uid,price,type,num,in_count,count,in_master_count,master_count,status from m_room where id={$param['room_id']} for update";
+            $sql  = "select id,uid,price,type,num,in_count,count,in_master_count,master_count,status from m_room where id={$room_id} for update";
             $data = Db::query($sql);
             if (!$data) {
                 Db::rollback();
@@ -102,9 +103,12 @@ class RoomModel extends CommonModel
                 return 12;
             }
             $type = intval($param['type']);
+            $uid  = $param['uid'];
+            $il   = new InroomLogModel();
+            $il->add(['room_id' => $room_id, 'uid' => $uid, 'type' => $type, 'addtime' => time()]);
             if ($type === 1) {
                 $ru    = new RoomUserModel();
-                $count = $ru->getCount(['room_id' => $data['id'], 'uid' => $param['uid']]);
+                $count = $ru->getCount(['room_id' => $data['id'], 'uid' => $uid]);
                 if ($count) {
                     return true;
                 }
@@ -116,7 +120,7 @@ class RoomModel extends CommonModel
                     } else {
                         $price = $data['price'];
                     }
-                    $in_data = ['room_id' => $data['id'], 'uid' => $param['uid'], 'addtime' => time(), 'price' => $price, 'num' => $data['num'], 'total_money' => $price * $data['num']];
+                    $in_data = ['room_id' => $data['id'], 'uid' => $uid, 'addtime' => time(), 'price' => $price, 'num' => $data['num'], 'total_money' => $price * $data['num']];
                     // 添加进入房间信息
                     $res = $ru->add($in_data);
                     if (!$res) {
@@ -135,18 +139,18 @@ class RoomModel extends CommonModel
                 }
             } elseif ($type === 2) {
                 $rm    = new RoomMasterModel();
-                $count = $rm->getCount(['room_id' => $data['id'], 'uid' => $param['uid']]);
+                $count = $rm->getCount(['room_id' => $data['id'], 'uid' => $uid]);
                 if ($count) {
-                    $rm->modifyField('is_delete', 0, ['room_id' => $data['id'], 'uid' => $param['uid']]);
+                    $rm->modifyField('is_delete', 0, ['room_id' => $data['id'], 'uid' => $uid]);
                     return true;
                 }
                 if ($data['in_master_count'] < $data['master_count']) {
                     $ua    = new UserAttrModel();
-                    $count = $ua->getCount(['uid' => $param['uid'], 'play_type' => 1]);
+                    $count = $ua->getCount(['uid' => $uid, 'play_type' => 1]);
                     if (!$count) {
                         return 5;
                     }
-                    $in_data = ['room_id' => $data['id'], 'uid' => $param['uid'], 'addtime' => time()];
+                    $in_data = ['room_id' => $data['id'], 'uid' => $uid, 'addtime' => time(), 'status' => 5];
                     $res     = $rm->add($in_data);
                     if (!$res) {
                         Db::rollback();
