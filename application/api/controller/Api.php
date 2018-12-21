@@ -251,6 +251,7 @@ class Api extends \think\Controller
             $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
         } else {
             unset($param['code']);
+            $v->modifyField('is_used', 1, ['mobile' => "v_$mobile"]);
             // $v->delByWhere(['mobile' => "v_$mobile"]);
         }
         if (!empty($msg)) {
