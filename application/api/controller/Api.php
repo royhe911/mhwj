@@ -1029,6 +1029,8 @@ class Api extends \think\Controller
                 $levels[$attr['uid']][$attr['game_id']] = $uurl;
                 if (!empty($attr['logo']) && strpos($attr['logo'], 'http://') === false && strpos($attr['logo'], 'https://') === false) {
                     $logos[$attr['uid']][$attr['game_id']] = config('WEBSITE') . $attr['logo'];
+                } else {
+                    $logos[$attr['uid']][$attr['game_id']] = $attr['logo'];
                 }
             }
             $gc     = new GameConfigModel();
