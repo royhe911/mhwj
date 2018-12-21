@@ -68,8 +68,12 @@ class Kanjia extends \think\Controller
         if ($count) {
             echo json_encode(['status' => 9, 'info' => '不能重复发起砍价', 'data' => null]);exit;
         }
-        $num   = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
-        $task  = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time(), 'form_id' => $param['form_id']];
+        $num     = mt_rand($goods['min_knife_num'], $goods['max_knife_num']);
+        $form_id = '';
+        if (!empty($param['form_id'])) {
+            $form_id = $param['form_id'];
+        }
+        $task  = ['uid' => $uid, 'goods_id' => $param['goods_id'], 'knife_num' => $num, 'total_money' => $goods['price'], 'addtime' => time(), 'form_id' => $form_id];
         $lucky = explode(',', $goods['lucky']);
         if (in_array($goods['count'], $lucky)) {
             $task['is_lucky']  = 1;
