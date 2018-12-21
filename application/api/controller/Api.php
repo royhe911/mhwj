@@ -1013,7 +1013,7 @@ class Api extends \think\Controller
             $users    = $u->getList(['is_delete' => 0, 'id' => ['in', $uids], 'type' => 2], 'id,nickname,avatar');
             $users    = array_column($users, null, 'id');
             $ua       = new UserAttrModel();
-            $attr_w   = ['status' => 8, 'uid' => ['in', $uids], 'game_id' => ['in', $game_ids], 'play_type' => $param['type']];
+            $attr_w   = ['status' => 8, 'uid' => ['in', $uids], 'game_id' => ['in', $game_ids]];
             $attrs    = $ua->getList($attr_w, ['uid', 'game_id', 'winning', 'level_url', 'logo']);
             $attr_arr = [];
             $levels   = [];
