@@ -1810,7 +1810,7 @@ class Api extends \think\Controller
             $pagesize = intval($param['pagesize']);
         }
         $where = ['a.status' => 8, 'play_type' => 2, 'level_url' => ['<>', '']];
-        $count = $ua->getJoinCount([['m_user u', 'a.uid=u.id']], $where);
+        // $count = $ua->getJoinCount([['m_user u', 'a.uid=u.id']], $where);
         $list  = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'nickname', 'avatar'], "$page,$pagesize", 'u.is_recommend desc');
         if ($list) {
             $uids  = array_column($list, 'uid');
@@ -1833,7 +1833,6 @@ class Api extends \think\Controller
                     $item['count'] = 0;
                 }
             }
-            shuffle($list);
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
