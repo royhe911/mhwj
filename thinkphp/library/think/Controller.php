@@ -186,7 +186,7 @@ class Controller
         if (!empty($start) && !empty($end)) {
             $start = strtotime($start);
             $end   = strtotime($end);
-            if ($start < time() || $end > time()) {
+            if ($start > time() || $end < time()) {
                 return ['start_time' => $start_time, 'end_time' => $end_time];
             }
         }
