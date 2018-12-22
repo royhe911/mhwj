@@ -876,6 +876,7 @@ class Api extends \think\Controller
     {
         // 访问时间限制
         $limit = $this->room_limit();
+        // $limit = false;
         if ($limit) {
             echo json_encode(['status' => 444, 'info' => "本活动将于{$limit['start_time']}-{$limit['end_time']}之间开启，点击预约！", 'data' => null]);exit;
         }
@@ -1026,8 +1027,12 @@ class Api extends \think\Controller
                     $uurl = config('WEBSITE') . $uurl;
                 }
                 $levels[$attr['uid']][$attr['game_id']] = $uurl;
-                if (!empty($attr['logo']) && strpos($attr['logo'], 'http://') === false && strpos($attr['logo'], 'https://') === false) {
-                    $logos[$attr['uid']][$attr['game_id']] = config('WEBSITE') . $attr['logo'];
+                if (!empty($attr['logo'])) {
+                    if (strpos($attr['logo'], 'http://') === false && strpos($attr['logo'], 'https://') === false) {
+                        $logos[$attr['uid']][$attr['game_id']] = config('WEBSITE') . $attr['logo'];
+                    } else {
+                        $logos[$attr['uid']][$attr['game_id']] = $attr['logo'];
+                    }
                 } else {
                     $logos[$attr['uid']][$attr['game_id']] = $attr['logo'];
                 }
@@ -1810,7 +1815,7 @@ class Api extends \think\Controller
         }
         $where = ['a.status' => 8, 'play_type' => 2, 'level_url' => ['<>', '']];
         // $count = $ua->getJoinCount([['m_user u', 'a.uid=u.id']], $where);
-        $list  = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'nickname', 'avatar'], "$page,$pagesize", 'u.is_recommend desc');
+        $list = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'nickname', 'avatar'], "$page,$pagesize", 'u.is_recommend desc');
         if ($list) {
             $uids  = array_column($list, 'uid');
             $uo    = new UserOrderModel();

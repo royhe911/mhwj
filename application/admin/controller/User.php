@@ -1,9 +1,12 @@
 <?php
 namespace app\admin\controller;
 
+use app\common\model\ChatUserModel;
 use app\common\model\GameModel;
 use app\common\model\MessageModel;
 use app\common\model\MiniprogramModel;
+use app\common\model\RoomMasterModel;
+use app\common\model\RoomModel;
 use app\common\model\UserAttrModel;
 use app\common\model\UserModel;
 
@@ -304,6 +307,19 @@ class User extends \think\Controller
         }
         if (empty($param['ids']) || !preg_match('/^0[\,\d+]+$/', $param['ids'])) {
             return ['status' => 2, 'info' => '非法参数'];
+        }
+        $ids = $param['ids'];
+        if ($param['type'] === 'del') {
+            $r = new RoomModel();
+            $r->delByWhere(['uid' => ['in', $ids]]);
+            $rm = new RoomMasterModel();
+            $rm->delByWhere(['uid' => ['in', $ids]]);
+            $cu = new ChatUserModel();
+            $cu->delByWhere(['uid' => ['in', $ids]]);
+            $res = $u->delByWhere(['id' => ['in', $ids]]);
+            if ($res) {
+                return ['status' => 0, 'info' => '删除成功'];
+            }
         }
         switch ($param['type']) {
             case 'del':
