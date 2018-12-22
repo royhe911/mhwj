@@ -275,6 +275,7 @@ class Api extends \think\Controller
         }
         $param['updatetime'] = time();
         $param['status']     = 1;
+        $param['type']       = 2;
         // 修改信息
         $id  = $param['id'];
         $res = $u->modify($param, ['id' => $id]);
