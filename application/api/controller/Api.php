@@ -142,7 +142,7 @@ class Api extends \think\Controller
         $js_code = $param['js_code'];
         $appid   = config('APPID_PLAYER');
         $secret  = config('APPSECRET_PLAYER');
-        if (!empty($param['type']) && intval($param['type']) === 2) {
+        if (!empty($param['xcx']) && intval($param['xcx']) === 2) {
             $appid  = config('APPID_ACCOMPANY');
             $secret = config('APPSECRET_ACCOMPANY');
         }
