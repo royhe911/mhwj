@@ -242,13 +242,6 @@ class User extends \think\Controller
      */
     public function shenhe_notice($openid, $form_id, $addtime, $nickname, $status, $remark)
     {
-        // $openid    = 'o67KK5TJtgBFX5URmiGYKlYbM0NQ';
-        // $form_id   = 'baa61a981c0fb7d3069f06798a9164d6';
-        // $order_num = '1545120927781';
-        // $addtime   = '2018年12月18日 19:55:50';
-        // $status    = '成功';
-        // $remark    = '您的订制订单已被接，请进入小程序和陪玩师一起玩';
-        // 取得 access_token
         $access_token = $this->get_access_token();
         if ($access_token === false) {
             // 记录日志
@@ -260,6 +253,7 @@ class User extends \think\Controller
         // 下单成功模板ID
         $data['template_id'] = 'KVSRU0TCSnf9yiJhrVnT4dJW5VvLxNXS4LqbmkPFNRM';
         $data['form_id']     = $form_id;
+        $data['page']        = '/pages/fast/fast';
         $data['data']        = ['keyword1' => ['value' => date('Y年m月d日 H:i:s')], 'keyword2' => ['value' => $nickname], 'keyword3' => ['value' => $status], 'keyword4' => ['value' => $addtime], 'keyword5' => ['value' => $remark]];
         // 处理逻辑
         $data = json_encode($data);
