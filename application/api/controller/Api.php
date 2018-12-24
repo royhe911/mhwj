@@ -1137,11 +1137,6 @@ class Api extends \think\Controller
                 if ($count) {
                     echo json_encode(['status' => 14, 'info' => '您已有正在进行中的房间', 'data' => null]);exit;
                 }
-                // $rm    = new RoomMasterModel();
-                // $count = $rm->getCount(['uid' => $uid, 'is_delete' => 0, 'room_id' => ['<>', $param['room_id']]]);
-                // if ($count) {
-                //     echo json_encode(['status' => 14, 'info' => '您已有正在进行中的房间', 'data' => null]);exit;
-                // }
                 $ua    = new UserAttrModel();
                 $count = $ua->getCount(['uid' => $uid, 'status' => 8, 'game_id' => $param['game_id']]);
                 if (!$count) {
@@ -1330,6 +1325,87 @@ class Api extends \think\Controller
             //    $uo = new UserOrderModel();
             //    $uo->modifyField('status', 8, ['room_id' => $room_id]);
             //}
+            $morder = $mo->getModel(['room_id' => $room_id]);
+            $rm     = new RoomMasterModel();
+            $ms     = $rm->getList(['room_id' => $room_id], ['uid']);
+            if (!empty($ms)) {
+                $mids = array_column($ms, 'uid');
+                $mny  = $morder['order_money'] / (count($mids) + 1);
+                $mo->modifyField('order_money', $mny, ['id' => $morder['id']]);
+                unset($morder['id']);
+                $mdat = [];
+                foreach ($mids as $md) {
+                    $morder['order_num'] = get_millisecond() . $md;
+                    $morder['uid']       = $md;
+                    // 订单金额和完成金额
+                    $morder['order_money']    = $mny;
+                    $morder['complete_money'] = 0;
+                    $mdat[]                   = $morder;
+                }
+                $mo->addArr($mdat);
+            }
+        }
+        if ($status === 10) {
+            if ($room['status'] !== 8) {
+                echo json_encode(['status' => 22, 'info' => '游戏未开始，不能完成', 'data' => null]);exit;
+            }
+            $rm = new RoomMasterModel();
+            $rm->modifyField('is_delete', 1, ['room_id' => $room_id]);
+            $ch = new ChatModel();
+            $ch->delByWhere(['room_id' => $room_id]);
+            $cu = new ChatUserModel();
+            $cu->delByWhere(['room_id' => $room_id]);
+        }
+        $res = $r->modifyField('status', $status, ['id' => $room_id]);
+        if ($res === false) {
+            echo json_encode(['status' => 40, 'info' => '修改失败', 'data' => null]);exit;
+        }
+        $mo->modifyField('status', $status, ['room_id' => $room_id]);
+        if ($status === 5) {
+            $ru->modifyField('status', 5, ['room_id' => $room_id]);
+        }
+        echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 修改房间状态
+     * @author 贺强
+     * @time   2018-11-20 09:40:58
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function modify_room_status_bak(RoomModel $r)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['status'])) {
+            $msg = ['status' => 3, 'info' => '要修改状态不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $room_id = $param['room_id'];
+        $room    = $r->getModel(['id' => $room_id]);
+        $status  = intval($param['status']);
+        if ($room['status'] === 5 && $status === 5) {
+            echo json_encode(['status' => 7, 'info' => '不能重复开始', 'data' => null]);exit;
+        }
+        $ru = new RoomUserModel();
+        if ($status === 5) {
+            $count = $ru->getCount(['room_id' => $room_id, 'status' => 0]);
+            if ($count) {
+                echo json_encode(['status' => 6, 'info' => '还有玩家未准备，不能开始', 'data' => null]);exit;
+            }
+        }
+        $mo = new MasterOrderModel();
+        if ($status === 8) {
+            if ($room['status'] !== 6) {
+                echo json_encode(['status' => 7, 'info' => '还有玩家未支付，不能开车', 'data' => null]);exit;
+            }
+            if ($room['type'] === 2) {
+                $uo = new UserOrderModel();
+                $uo->modifyField('status', 8, ['room_id' => $room_id]);
+            }
             $morder = $mo->getModel(['room_id' => $room_id]);
             $rm     = new RoomMasterModel();
             $ms     = $rm->getList(['room_id' => $room_id], ['uid']);

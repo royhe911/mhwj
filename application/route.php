@@ -89,6 +89,7 @@ return [
     '/api/roomlist'       => 'api/Api/get_room_list', // 房间列表
     '/api/roominfo'       => 'api/Api/get_room_info', // 房间信息
     '/api/roomsta'        => 'api/Api/modify_room_status', // 修改房间状态
+    '/api/roomsta_bak'    => 'api/Api/modify_room_status_bak', // 修改房间状态
     '/api/userlist'       => 'api/Api/get_user_list', // 用户列表
     '/api/inroom'         => 'api/Api/come_in_room', // 进入房间
     '/api/quitroom'       => 'api/Api/quit_room', // 退出房间
