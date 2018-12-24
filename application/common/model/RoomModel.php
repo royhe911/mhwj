@@ -121,6 +121,9 @@ class RoomModel extends CommonModel
                         $price = $data['price'];
                     }
                     $in_data = ['room_id' => $data['id'], 'uid' => $uid, 'addtime' => time(), 'price' => $price, 'num' => $data['num'], 'total_money' => $price * $data['num']];
+                    if (!empty($param['is_yule'])) {
+                        $in_data['status'] = 5;
+                    }
                     // 添加进入房间信息
                     $res = $ru->add($in_data);
                     if (!$res) {

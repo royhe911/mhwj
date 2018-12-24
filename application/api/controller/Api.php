@@ -1568,6 +1568,56 @@ class Api extends \think\Controller
     }
 
     /**
+     * 退出房间
+     * @author 贺强
+     * @time   2018-11-09 16:52:45
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function quit_room_bak(RoomModel $r)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 10, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 20, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $room_id = $param['room_id'];
+        $ru      = new RoomUserModel();
+        $rusr    = $ru->getModel(['room_id' => $room_id, 'uid' => $param['uid']]);
+        if (!empty($rusr)) {
+            // 房主踢人参数
+            if (!empty($param['is_kicking']) && intval($param['is_kicking']) === 1) {
+                $room = $r->getModel(['id' => $room_id]);
+                if ($room['type'] === 1 && $rusr['status'] > 4) {
+                    echo json_encode(['status' => 22, 'info' => '您已点开始，不能踢', 'data' => null]);exit;
+                } elseif ($room['type'] === 2 && $rusr['status'] > 5) {
+                    echo json_encode(['status' => 22, 'info' => '玩家已支付，不能踢', 'data' => null]);exit;
+                }
+            }
+            if ($rusr['status'] === 5) {
+                $msg = ['status' => 23, 'info' => '房主已点开始，不能退出', 'data' => null];
+            } elseif ($rusr['status'] === 6) {
+                $msg = ['status' => 23, 'info' => '您已付款，不能退出', 'data' => null];
+            }
+            if (!empty($msg)) {
+                echo json_encode($msg);exit;
+            }
+        }
+        $res = $r->quit_room($param['room_id'], $param['uid']);
+        if ($res !== true) {
+            $msg = '';
+            if ($res === 4) {
+                $msg = '游戏已开始，不能退出';
+            }
+            echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '退出成功', 'data' => null]);exit;
+    }
+
+    /**
      * 关闭/销毁房间
      * @author 贺强
      * @time   2018-11-12 10:02:20
