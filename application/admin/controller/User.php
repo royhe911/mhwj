@@ -35,6 +35,9 @@ class User extends \think\Controller
         }
         if (!empty($param['status'])) {
             $where .= " and type=2 and (`status`={$param['status']}";
+            if (intval($param['status']) === 1) {
+                $where .= " or `status`=0";
+            }
             $ua  = new UserAttrModel();
             $uas = $ua->getList(['status' => $param['status']], ['uid']);
             $ids = "0";
