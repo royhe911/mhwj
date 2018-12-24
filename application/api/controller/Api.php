@@ -1008,7 +1008,7 @@ class Api extends \think\Controller
             $count    = $r->getCount($where);
             $uids     = array_column($list, 'uid');
             $game_ids = array_column($list, 'game_id');
-            $jd_count = $r->getList(['uid' => ['in', $uids]], ['count(*) c,uid']);
+            $jd_count = $r->getList(['uid' => ['in', $uids]], ['count(*) c,uid'], null, '', 'uid');
             $jd_count = array_column($jd_count, 'c', 'uid');
             $u        = new UserModel();
             $users    = $u->getList(['is_delete' => 0, 'id' => ['in', $uids], 'type' => 2], 'id,nickname,avatar');
