@@ -423,7 +423,7 @@ class Api extends \think\Controller
             echo json_encode($msg);exit;
         }
         $uid    = $param['id'];
-        $master = $u->getModel(['id' => $uid], ['id', 'avatar', 'nickname', 'introduce', 'wx', 'qq']);
+        $master = $u->getModel(['id' => $uid], ['id', 'avatar', 'nickname', 'introduce', 'wx', 'qq', 'tape']);
         if ($master) {
             // 查询陪玩师的接单数
             $r     = new RoomModel();
@@ -432,6 +432,9 @@ class Api extends \think\Controller
             $master['number'] = 0;
             if ($count) {
                 $master['number'] = $count;
+            }
+            if (!empty($master['tape'])) {
+                $master['tape'] = config('WEBSITE') . $master['tape'];
             }
             // 查询计算陪玩师的好评率
             $ue    = new UserEvaluateModel();
