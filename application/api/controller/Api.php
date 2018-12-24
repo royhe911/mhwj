@@ -1597,7 +1597,7 @@ class Api extends \think\Controller
                     echo json_encode(['status' => 22, 'info' => '玩家已支付，不能踢', 'data' => null]);exit;
                 }
             }
-            if ($rusr['status'] === 5) {
+            if ($rusr['status'] === 5 && $room['type'] === 1) {
                 $msg = ['status' => 23, 'info' => '房主已点开始，不能退出', 'data' => null];
             } elseif ($rusr['status'] === 6) {
                 $msg = ['status' => 23, 'info' => '您已付款，不能退出', 'data' => null];
