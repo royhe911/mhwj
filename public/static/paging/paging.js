@@ -52,7 +52,7 @@ $(function() {
         if ($page + 3 <= $count) {
             $div.html($div.html() + '<a href="?page=' + $count + $params + '">尾页</a>');
         }
-        $div.html('共 ' + $count + ' 页 &nbsp; ' + $div.html());
+        $div.html($div.html() + ' &nbsp; 共 ' + $count + ' 页');
     }
     $.ajaxSetup({
         headers: {
