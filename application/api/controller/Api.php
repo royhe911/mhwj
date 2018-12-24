@@ -269,7 +269,7 @@ class Api extends \think\Controller
         } elseif (empty($param['tape'])) {
             $msg = ['status' => 7, 'info' => '录音地址不能为空', 'data' => null];
         } elseif (strpos($param['tape'], '/uploads/cli/mp3/') === false) {
-            $msg = ['status' => 7, 'info' => '请保存您的录音', 'data' => null];
+            $msg = ['status' => 7, 'info' => '请录制并保存您的录音', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
