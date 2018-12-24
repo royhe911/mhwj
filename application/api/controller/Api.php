@@ -812,7 +812,6 @@ class Api extends \think\Controller
         if ($veric) {
             $v->modifyField('addtime', time(), ['mobile' => "v_$mobile", 'addtime' => $veric['addtime']]);
         }
-        // $v->delByWhere(['mobile' => "v_$mobile"]);
         if ($veric) {
             $vericode = $veric['vericode'];
         } else {
@@ -829,7 +828,9 @@ class Api extends \think\Controller
         $res        = $sms->sendWithParam('86', $mobile, $templateId, $param, $smsSign, '', '');
         $res        = json_decode($res, true);
         if ($res['result'] === 0) {
-            $v->add(['mobile' => "v_$mobile", 'vericode' => $vericode, 'addtime' => time()]);
+            if (!$veric) {
+                $v->add(['mobile' => "v_$mobile", 'vericode' => $vericode, 'addtime' => time()]);
+            }
             $msg = ['status' => 0, 'info' => '发送成功', 'data' => $vericode];
         } else {
             $msg = ['status' => 4, 'info' => '发送失败', 'data' => null];
