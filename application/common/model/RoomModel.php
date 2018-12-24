@@ -197,6 +197,8 @@ class RoomModel extends CommonModel
             if ($room['count'] === 1) {
                 if ($is_yule === 1) {
                     $this->modify(['status' => 1, 'in_count' => 0], ['id' => $room_id]);
+                } else {
+                    $this->decrement('in_count', ['id' => $room_id]);
                 }
                 $mo = new MasterOrderModel();
                 $mo->modifyField('status', 0, ['room_id' => $room_id]);
