@@ -34,7 +34,7 @@ class User extends \think\Controller
             $param['type'] = 0;
         }
         if (!empty($param['status'])) {
-            $where .= " and (`status`={$param['status']}";
+            $where .= " and type=2 and (`status`={$param['status']}";
             $ua  = new UserAttrModel();
             $uas = $ua->getList(['status' => $param['status']], ['uid']);
             $ids = "0";
@@ -74,7 +74,11 @@ class User extends \think\Controller
             } elseif ($item['status'] === 4) {
                 $item['status_txt'] = '审核不通过';
             } else {
-                $item['status_txt'] = '普通玩家';
+                if ($item['type'] === 2) {
+                    $item['status_txt'] = '待审核';
+                } else {
+                    $item['status_txt'] = '普通玩家';
+                }
             }
             if (!empty($item['addtime'])) {
                 $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
