@@ -38,13 +38,17 @@ class Room extends Command
             $ru   = new RoomUserModel();
             $list = $ru->getList(['status' => 5, 'ready_time' => ['lt', time() - 120]], ['room_id']);
             if ($list) {
-                $ids = '0';
+                $r    = new RoomModel();
+                $yule = $r->getList(['status' => 5, 'type' => 2], ['id']);
+                $yid  = array_column($yule, 'id');
+                $ids  = [];
                 foreach ($list as $item) {
-                    $ids .= ",{$item['room_id']}";
+                    if (!in_array($item['room_id'], $yid)) {
+                        $ids[] = $item['room_id'];
+                    }
                 }
-                if ($ids !== '0') {
+                if ($ids) {
                     $ru->modifyField('status', 4, ['room_id' => ['in', $ids]]);
-                    $r = new RoomModel();
                     $r->modifyField('status', 9, ['id' => ['in', $ids]]);
                     $mo = new MasterOrderModel();
                     $mo->modifyField('status', 9, ['room_id' => ['in', $ids]]);
