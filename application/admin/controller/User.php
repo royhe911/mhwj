@@ -26,20 +26,32 @@ class User extends \think\Controller
      */
     public function lists(UserModel $u)
     {
-        $where = ['is_delete' => 0];
+        $where = 'is_delete=0';
         $param = $this->request->get();
         if (!empty($param['type'])) {
-            $where['type'] = $param['type'];
+            $where .= " and `type`={$param['type']}";
         } else {
             $param['type'] = 0;
         }
         if (!empty($param['status'])) {
-            $where['status'] = $param['status'];
+            $where .= " and (`status`={$param['status']}";
+            $ua  = new UserAttrModel();
+            $uas = $ua->getList(['status' => $param['status']], ['uid']);
+            $ids = "0";
+            if (!empty($uas)) {
+                foreach ($uas as $us) {
+                    $ids .= ",{$us['uid']}";
+                }
+            }
+            if ($ids !== "0") {
+                $where .= " or id in ($ids)";
+            }
+            $where .= ")";
         } else {
             $param['status'] = 0;
         }
         if (!empty($param['nickname'])) {
-            $where['nickname'] = ['like', "%{$param['nickname']}%"];
+            $where .= " and nickname like '%{$param['nickname']}%'";
         } else {
             $param['nickname'] = '';
         }
