@@ -1593,10 +1593,10 @@ class Api extends \think\Controller
         $room_id = $param['room_id'];
         $ru      = new RoomUserModel();
         $rusr    = $ru->getModel(['room_id' => $room_id, 'uid' => $param['uid']]);
+        $room    = $r->getModel(['id' => $room_id]);
         if (!empty($rusr)) {
             // 房主踢人参数
             if (!empty($param['is_kicking']) && intval($param['is_kicking']) === 1) {
-                $room = $r->getModel(['id' => $room_id]);
                 if ($room['type'] === 1 && $rusr['status'] > 4) {
                     echo json_encode(['status' => 22, 'info' => '您已点开始，不能踢', 'data' => null]);exit;
                 } elseif ($room['type'] === 2 && $rusr['status'] > 5) {
@@ -1612,7 +1612,7 @@ class Api extends \think\Controller
                 echo json_encode($msg);exit;
             }
         }
-        $res = $r->quit_room($param['room_id'], $param['uid']);
+        $res = $r->quit_room($param['room_id'], $param['uid'], $room['type']);
         if ($res !== true) {
             $msg = '';
             if ($res === 4) {

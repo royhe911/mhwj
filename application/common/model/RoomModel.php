@@ -184,9 +184,10 @@ class RoomModel extends CommonModel
      * @time   2018-11-09 16:51:36
      * @param  int  $room_id 房间ID
      * @param  int  $uid     用户ID
+     * @param  int  $is_yule 是否是娱乐房间
      * @return bool          返回是否退出成功
      */
-    public function quit_room($room_id, $uid)
+    public function quit_room($room_id, $uid, $is_yule = 1)
     {
         Db::startTrans();
         try {
@@ -194,16 +195,18 @@ class RoomModel extends CommonModel
             $ru   = new RoomUserModel();
             $room = $this->getModel(['id' => $room_id]);
             if ($room['count'] === 1) {
-                $this->modify(['status' => 1, 'in_count' => 0], ['id' => $room_id]);
+                if ($is_yule === 1) {
+                    $this->modify(['status' => 1, 'in_count' => 0], ['id' => $room_id]);
+                }
                 $mo = new MasterOrderModel();
                 $mo->modifyField('status', 0, ['room_id' => $room_id]);
-            }/* elseif ($room['status'] === 5) {
-                $ru->modifyField('status', 4, ['room_id' => $room_id]);
-                $this->modifyField('status', 7, ['id' => $room_id]);
-                $cu->delByWhere(['room_id' => $room_id]);
-                $c = new ChatModel();
-                $c->delByWhere(['room_id' => $room_id]);
-            }*/ else {
+            } /* elseif ($room['status'] === 5) {
+            $ru->modifyField('status', 4, ['room_id' => $room_id]);
+            $this->modifyField('status', 7, ['id' => $room_id]);
+            $cu->delByWhere(['room_id' => $room_id]);
+            $c = new ChatModel();
+            $c->delByWhere(['room_id' => $room_id]);
+            }*/else {
                 // 一旦有人退出，其它人取消准备
                 $ru->modifyField('status', 0, ['room_id' => $room_id, 'status' => ['<>', 6]]);
                 // 退出后房间已进入的人数减 1
