@@ -252,7 +252,6 @@ class Api extends \think\Controller
         } else {
             unset($param['code']);
             $v->modifyField('is_used', 1, ['mobile' => "v_$mobile"]);
-            // $v->delByWhere(['mobile' => "v_$mobile"]);
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -269,6 +268,8 @@ class Api extends \think\Controller
             $msg = ['status' => 6, 'info' => '简介不能为空', 'data' => null];
         } elseif (empty($param['tape'])) {
             $msg = ['status' => 7, 'info' => '录音地址不能为空', 'data' => null];
+        } elseif (strpos($param['tape'], '/uploads/cli/mp3/') === false) {
+            $msg = ['status' => 7, 'info' => '请保存您的录音', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -277,9 +278,10 @@ class Api extends \think\Controller
         $param['status']     = 1;
         $param['type']       = 2;
         // 修改信息
-        $id  = $param['id'];
+        $id = $param['id'];
+        file_put_contents('/www/wwwroot/wwwdragontangcom/log/tage_logs.log', json_encode($param));
         $res = $u->modify($param, ['id' => $id]);
-        if ($res !== false) {
+        if ($res) {
             $data = ['type' => 1, 'uid' => $id, 'title' => '系统消息', 'content' => '正在审核，请稍后查看', 'addtime' => time()];
             $m    = new MessageModel();
             $m->add($data);
