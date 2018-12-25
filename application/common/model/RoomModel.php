@@ -153,7 +153,7 @@ class RoomModel extends CommonModel
                     if (!$count) {
                         return 5;
                     }
-                    $in_data = ['room_id' => $data['id'], 'uid' => $uid, 'addtime' => time(), 'status' => 5];
+                    $in_data = ['room_id' => $data['id'], 'uid' => $uid, 'addtime' => time()];
                     $res     = $rm->add($in_data);
                     if (!$res) {
                         Db::rollback();
