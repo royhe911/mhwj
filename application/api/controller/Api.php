@@ -1139,7 +1139,7 @@ class Api extends \think\Controller
             $jd_count = $r->getList(['uid' => ['in', $uids]], ['count(*) c,uid'], null, '', 'uid');
             $jd_count = array_column($jd_count, 'c', 'uid');
             $u        = new UserModel();
-            $users    = $u->getList(['is_delete' => 0, 'id' => ['in', $uids], 'type' => 2], 'id,nickname,avatar');
+            $users    = $u->getList(['is_delete' => 0, 'id' => ['in', $uids], 'type' => 2], 'id,nickname,avatar,tape');
             $users    = array_column($users, null, 'id');
             $ua       = new UserAttrModel();
             $attr_w   = ['status' => 8, 'uid' => ['in', $uids], 'game_id' => ['in', $game_ids]];
@@ -1183,8 +1183,11 @@ class Api extends \think\Controller
                     $item['jd_count'] = 0;
                 }
                 if (!empty($users[$item['uid']])) {
-                    $item['nickname'] = $users[$item['uid']]['nickname'];
-                    $item['avatar']   = $users[$item['uid']]['avatar'];
+                    $user = $users[$item['uid']];
+                    // 属性赋值
+                    $item['nickname'] = $user['nickname'];
+                    $item['avatar']   = $user['avatar'];
+                    $item['tape']     = config('WEBSITE') . $user['tape'];
                 } else {
                     $item['nickname'] = '';
                     $item['avatar']   = '';
@@ -1967,7 +1970,7 @@ class Api extends \think\Controller
             // 房主踢人参数
             if (!empty($param['is_kicking']) && intval($param['is_kicking']) === 1) {
                 /*if ($room['type'] === 1 && $rusr['status'] > 4) {
-                    echo json_encode(['status' => 22, 'info' => '您已点开始，不能踢', 'data' => null]);exit;
+                echo json_encode(['status' => 22, 'info' => '您已点开始，不能踢', 'data' => null]);exit;
                 } else*/
                 // if ($room['type'] === 2 && $rusr['status'] > 5) {
                 if ($rusr['status'] > 5) {
@@ -1975,7 +1978,7 @@ class Api extends \think\Controller
                 }
             }
             /*if ($rusr['status'] === 5 && $room['type'] === 1) {
-                $msg = ['status' => 23, 'info' => '房主已点开始，不能退出', 'data' => null];
+            $msg = ['status' => 23, 'info' => '房主已点开始，不能退出', 'data' => null];
             } else*/
             if ($rusr['status'] === 6) {
                 $msg = ['status' => 23, 'info' => '您已付款，不能退出', 'data' => null];
