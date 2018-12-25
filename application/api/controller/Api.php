@@ -656,7 +656,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 1, 'info' => '游戏ID不能为空', 'data' => null]);exit;
         }
         $where = ['game_id' => $param['game_id']];
-        $list  = $gc->getList($where, ['game_id', 'para', 'para_des', 'price'], null, 'para', 'para');
+        $list  = $gc->getList($where, ['game_id', 'big_para', 'para', 'para_des', 'price'], null, 'para', 'para');
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
@@ -888,6 +888,11 @@ class Api extends \think\Controller
             echo json_encode(['status' => 444, 'info' => "本活动将于{$limit['start_time']}-{$limit['end_time']}之间开启，点击预约！", 'data' => null]);exit;
         }
         $param = $this->param;
+        if (!empty($param['big_para1']) && !empty($param['big_para2'])) {
+            if (abs(intval($param['big_para2']) - intval($param['big_para1'])) > 2) {
+                echo json_encode(['status' => 4, 'info' => '段位跨度不能超过2个段位', 'data' => null]);exit;
+            }
+        }
         if (empty($param['name'])) {
             $msg = ['status' => 8, 'info' => '房间名称不能为空', 'data' => null];
         } elseif (strlen($param['name']) > 24) {
@@ -945,6 +950,9 @@ class Api extends \think\Controller
                 }
             }
         }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
         if (intval($param['type']) === 2) {
             $param['count']        = 1;
             $param['master_count'] = 1;
@@ -955,9 +963,6 @@ class Api extends \think\Controller
         $param['addtime'] = time();
         if (intval($param['type']) === 2) {
             $param['total_money'] = $param['price'] * $param['num'];
-        }
-        if (!empty($msg)) {
-            echo json_encode($msg);exit;
         }
         $res = $r->add($param);
         if ($res) {
