@@ -1585,7 +1585,7 @@ class Pay extends \think\Controller
         }
         $uid     = $param['uid'];
         $room_id = $param['room_id'];
-        $room    = $r->getModel(['id' => $room_id], ['form_id', 'type']);
+        $room    = $r->getModel(['id' => $room_id], ['form_id', 'type', 'uid']);
         if ($room['type'] === 2) {
             $data = ['openid' => '', 'form_id' => '', 'data' => ['keyword1' => ['value' => 'order_num'], 'keyword2' => ['value' => 'nickname'], 'keyword3' => ['value' => 'addtime'], 'keyword4' => ['value' => 'money'], 'keyword5' => ['value' => 'pay_time'], 'keyword6' => ['value' => 'status']]];
             $user = $u->getModel(['id' => $room['uid']], ['openid']);
@@ -1595,10 +1595,11 @@ class Pay extends \think\Controller
                 $time = date('Y年m月d日 H:i:s', $uord['addtime']);
                 $ptim = date('Y年m月d日 H:i:s', $uord['pay_time']);
                 $data = ['openid' => $user['openid'], 'form_id' => $room['form_id'], 'data' => ['keyword1' => ['value' => $uord['order_num']], 'keyword2' => ['value' => $wanj['nickname']], 'keyword3' => ['value' => $time], 'keyword4' => ['value' => $uord['order_money']], 'keyword5' => ['value' => $ptim], 'keyword6' => ['value' => '支付成功']]];
+                $this->pay_notice($data);
             }
         }
         $ru = new RoomUserModel();
-        $ru->modifyField('status', 6, ['room_id' => $room_id, 'uid' => $param['uid']]);
+        $ru->modifyField('status', 6, ['room_id' => $room_id, 'uid' => $uid]);
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
     }
 
