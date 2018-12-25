@@ -967,10 +967,116 @@ class Api extends \think\Controller
         if (intval($param['type']) === 1) {
             $param['count'] = 5 - intval($param['master_count']);
         }
-        if (!empty($param['is_new'])) {
-            $param['count'] = 1;
+        $param['addtime'] = time();
+        if (intval($param['type']) === 2) {
+            $param['total_money'] = $param['price'] * $param['num'];
         }
-        unset($param['is_new']);
+        $res = $r->add($param);
+        if ($res) {
+            $mord = ['uid' => $param['uid'], 'room_id' => $res, 'play_type' => $param['type'], 'game_id' => $param['game_id'], 'region' => $param['region'], 'order_num' => get_millisecond(), 'addtime' => time()];
+            if (intval($param['type']) === 2) {
+                $mord['order_money'] = $param['price'] * $param['num'];
+            }
+            $mo = new MasterOrderModel();
+            $mo->add($mord);
+            $msg = ['status' => 0, 'info' => '创建成功', 'data' => ['id' => $res, 'count' => $param['count'], 'in_count' => 1]];
+        } else {
+            $msg = ['status' => 44, 'info' => '创建失败', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
+     * 创建房间
+     * @author 贺强
+     * @time   2018-11-05 16:51:21
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function add_room_bak(RoomModel $r)
+    {
+        // 访问时间限制
+        $limit = $this->room_limit();
+        // $limit = false;
+        if ($limit) {
+            echo json_encode(['status' => 444, 'info' => "本活动将于{$limit['start_time']}-{$limit['end_time']}之间开启，点击预约！", 'data' => null]);exit;
+        }
+        $param = $this->param;
+        if (!empty($param['big_para1']) && !empty($param['big_para2'])) {
+            if (abs(intval($param['big_para2']) - intval($param['big_para1'])) > 2) {
+                echo json_encode(['status' => 4, 'info' => '段位跨度不能超过2个段位', 'data' => null]);exit;
+            }
+            unset($param['big_para1'], $param['big_para2']);
+        }
+        if (empty($param['name'])) {
+            $msg = ['status' => 8, 'info' => '房间名称不能为空', 'data' => null];
+        } elseif (strlen($param['name']) > 24) {
+            $msg = ['status' => 9, 'info' => '名称过长', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
+        } elseif (empty($param['game_id'])) {
+            $msg = ['status' => 2, 'info' => '游戏ID不能为空', 'data' => null];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 3, 'info' => '房间类型不能为空', 'data' => null];
+        } elseif (intval($param['type']) === 1 && empty($param['para_min'])) {
+            $msg = ['status' => 12, 'info' => '最低服务段位不能为空', 'data' => null];
+        } elseif (intval($param['type']) === 1 && empty($param['para_max'])) {
+            $msg = ['status' => 13, 'info' => '最高服务段位不能为空', 'data' => null];
+        } elseif (intval($param['type']) === 1 && intval($param['para_min']) > intval($param['para_max'])) {
+            $msg = ['status' => 14, 'info' => '最低段位不能高于最高段位', 'data' => null];
+        } elseif (intval($param['type']) === 2 && empty($param['price'])) {
+            $msg = ['status' => 15, 'info' => '每小时价格不能为空', 'data' => null];
+        } elseif (intval($param['type']) === 2 && intval($param['price']) > 999) {
+            $msg = ['status' => 18, 'info' => '每小时价格只能是1-999', 'data' => null];
+        } elseif (empty($param['region'])) {
+            $msg = ['status' => 4, 'info' => '房间所属大区不能为空', 'data' => null];
+        } elseif (empty($param['master_count']) || intval($param['master_count']) < 1 || intval($param['master_count']) > 4) {
+            $msg = ['status' => 6, 'info' => '陪玩师人数只能为1-4人', 'data' => null];
+        } elseif (empty($param['num']) || intval($param['num']) < 1 || intval($param['num']) > 5 || (intval($param['type']) === 2 && intval($param['num']) > 3)) {
+            $str = '局数只能是1-5局';
+            if (intval($param['type']) === 2) {
+                $str = '小时数只能是1-3小时';
+            }
+            $msg = ['status' => 15, 'info' => $str, 'data' => null];
+        } else {
+            // 获取房间
+            $count = $r->getCount(['is_delete' => 0, 'uid' => $param['uid'], 'status' => ['not in', '4,9,10']]);
+            if ($count) {
+                echo json_encode(['status' => 16, 'info' => '一次只能创建一个房间']);exit;
+            }
+            $pmo   = new PersonMasterOrderModel();
+            $count = $pmo->getCount(['master_id' => $param['uid'], 'status' => ['<>', 10]]);
+            if ($count) {
+                echo json_encode(['status' => 17, 'info' => '您还有未完成的订制订单', 'data' => null]);exit;
+            }
+            $u    = new UserModel();
+            $user = $u->getModel(['id' => $param['uid'], 'is_delete' => 0], 'type,`status`');
+            if (!$user) {
+                $msg = ['status' => 6, 'info' => '陪玩师不存在', 'data' => null];
+            } elseif ($user['type'] !== 2 || $user['status'] !== 8) {
+                $msg = ['status' => 7, 'info' => '您还未认证成为陪玩师，现在就去认证', 'data' => null];
+            } elseif (intval($param['type']) === 1) {
+                $ua       = new UserAttrModel();
+                $userAttr = $ua->getModel(['uid' => $param['uid'], 'game_id' => $param['game_id'], 'play_type' => $param['type'], 'status' => 8], ['curr_para', 'play_type']);
+                if (!$userAttr) {
+                    $msg = ['status' => 10, 'info' => '您的审核还未通过，不能陪玩此游戏', 'data' => null];
+                } elseif ($userAttr['play_type'] === 1 && $userAttr['curr_para'] < $param['para_min']) {
+                    $msg = ['status' => 11, 'info' => '您的等级不够陪玩的等级', 'data' => null];
+                }
+            } elseif (intval($param['type']) === 2) {
+                $ua    = new UserAttrModel();
+                $count = $ua->getCount(['uid' => $param['uid'], 'game_id' => $param['game_id'], 'status' => 8]);
+                if (!$count) {
+                    $msg = ['status' => 21, 'info' => '您还未认证此游戏或审核未通过，不能陪玩', 'data' => null];
+                }
+            }
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $param['count'] = 1;
+        if (intval($param['type']) === 2) {
+            $param['master_count'] = 1;
+        }
         $param['addtime'] = time();
         if (intval($param['type']) === 2) {
             $param['total_money'] = $param['price'] * $param['num'];
@@ -1424,10 +1530,10 @@ class Api extends \think\Controller
             if ($room['status'] !== 6) {
                 echo json_encode(['status' => 7, 'info' => '还有玩家未支付，不能开车', 'data' => null]);exit;
             }
-            if ($room['type'] === 2) {
-                $uo = new UserOrderModel();
-                $uo->modifyField('status', 8, ['room_id' => $room_id]);
-            }
+            // 修改订单状态为已开车
+            $uo = new UserOrderModel();
+            $uo->modifyField('status', 8, ['room_id' => $room_id]);
+
             $morder = $mo->getModel(['room_id' => $room_id]);
             $rm     = new RoomMasterModel();
             $ms     = $rm->getList(['room_id' => $room_id], ['uid']);
@@ -1613,15 +1719,18 @@ class Api extends \think\Controller
         if (!empty($rusr)) {
             // 房主踢人参数
             if (!empty($param['is_kicking']) && intval($param['is_kicking']) === 1) {
-                if ($room['type'] === 1 && $rusr['status'] > 4) {
+                /*if ($room['type'] === 1 && $rusr['status'] > 4) {
                     echo json_encode(['status' => 22, 'info' => '您已点开始，不能踢', 'data' => null]);exit;
-                } elseif ($room['type'] === 2 && $rusr['status'] > 5) {
+                } else*/
+                // if ($room['type'] === 2 && $rusr['status'] > 5) {
+                if ($rusr['status'] > 5) {
                     echo json_encode(['status' => 22, 'info' => '玩家已支付，不能踢', 'data' => null]);exit;
                 }
             }
-            if ($rusr['status'] === 5 && $room['type'] === 1) {
+            /*if ($rusr['status'] === 5 && $room['type'] === 1) {
                 $msg = ['status' => 23, 'info' => '房主已点开始，不能退出', 'data' => null];
-            } elseif ($rusr['status'] === 6) {
+            } else*/
+            if ($rusr['status'] === 6) {
                 $msg = ['status' => 23, 'info' => '您已付款，不能退出', 'data' => null];
             }
             if (!empty($msg)) {
