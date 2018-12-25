@@ -80,7 +80,7 @@ class RoomModel extends CommonModel
      * @param  array $param 进入的房间用户数据
      * @return bool         是否进入成功
      */
-    public function in_room($param)
+    public function in_room($param, $is_new = null)
     {
         Db::startTrans();
         try {
@@ -121,7 +121,7 @@ class RoomModel extends CommonModel
                         $price = $data['price'];
                     }
                     $in_data = ['room_id' => $data['id'], 'uid' => $uid, 'addtime' => time(), 'price' => $price, 'num' => $data['num'], 'total_money' => $price * $data['num']];
-                    if (!empty($param['is_yule'])) {
+                    if ($is_new === 1) {
                         $in_data['status'] = 5;
                     }
                     // 添加进入房间信息

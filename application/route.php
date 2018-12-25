@@ -93,6 +93,7 @@ return [
     '/api/roomsta_bak'    => 'api/Api/modify_room_status_bak', // 修改房间状态
     '/api/userlist'       => 'api/Api/get_user_list', // 用户列表
     '/api/inroom'         => 'api/Api/come_in_room', // 进入房间
+    '/api/inroom_bak'     => 'api/Api/come_in_room_bak', // 进入房间
     '/api/quitroom'       => 'api/Api/quit_room', // 退出房间
     '/api/quitroom_bak'   => 'api/Api/quit_room_bak', // 退出房间
     '/api/closeroom'      => 'api/Api/close_room', // 关闭房间

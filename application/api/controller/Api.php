@@ -1652,6 +1652,81 @@ class Api extends \think\Controller
     }
 
     /**
+     * 进入房间
+     * @author 贺强
+     * @time   2018-11-09 10:27:20
+     * @param  bool $is_share 是否是分享进入
+     */
+    public function come_in_room_bak($is_share = false)
+    {
+        $param = $this->param;
+        $res   = true;
+        if (empty($param['room_id'])) {
+            $res = 10;
+            echo json_encode(['status' => 10, 'info' => '房间ID不能为空', 'data' => null]);exit;
+        }
+        $ru   = new RoomUserModel();
+        $r    = new RoomModel();
+        $room = $r->getModel(['id' => $param['room_id']], ['type']);
+        if (empty($room)) {
+            echo json_encode(['status' => 10, 'info' => '房间不存在', 'data' => null]);exit;
+        }
+        if (empty($param['uid'])) {
+            $res = 20;
+            $msg = ['status' => 20, 'info' => '用户ID不能为空', 'data' => null];
+        } elseif (empty($param['type'])) {
+            $res = 30;
+            $msg = ['status' => 30, 'info' => '用户类型不能为空', 'data' => null];
+        } elseif ($room['type'] === 1 && intval($param['type']) === 1 && empty($param['para_str'])) {
+            $res = 40;
+            $msg = ['status' => 40, 'info' => '段位不能为空', 'data' => null];
+        } elseif (!empty($param['para_str'])) {
+            $count = $ru->getCount(['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+            if ($count) {
+                $msg = ['status' => 41, 'info' => '不能重复选择段位', 'data' => null];
+            }
+        }
+        if (!empty($msg) && !$is_share) {
+            echo json_encode($msg);exit;
+        }
+        $uo    = new UserOrderModel();
+        $count = $uo->getCount(['room_id' => $param['room_id'], 'uid' => $param['uid'], 'status' => 10]);
+        if ($count) {
+            echo json_encode(['status' => 12, 'info' => '您已完成该房间任务，详情请查看订单', 'data' => null]);exit;
+        }
+        $count = $ru->getCount(['room_id' => ['<>', $param['room_id']], 'uid' => $param['uid'], 'status' => ['not in', '4,10']]);
+        if ($count) {
+            echo json_encode(['status' => 21, 'info' => '不能同时进两个房间', 'data' => null]);exit;
+        }
+        $po    = new PersonOrderModel();
+        $count = $po->getCount(['uid' => $param['uid'], 'status' => ['in', '1,6,7']]);
+        if ($count) {
+            echo json_encode(['status' => 22, 'info' => '您有订制订单未完成，请先完成订制订单', 'data' => null]);exit;
+        }
+        $r   = new RoomModel();
+        $res = $r->in_room($param, 1);
+        if ($is_share) {
+            return $res;
+        }
+        if ($res !== true) {
+            $msg = '进入房间失败';
+            if ($res === 3) {
+                $msg = '房间人数已满';
+            } elseif ($res === 4) {
+                $msg = '房间不存在';
+            } elseif ($res === 11) {
+                $msg = '游戏已结束';
+            } elseif ($res === 12) {
+                $msg = '有玩家未付款，房间已销毁，若您已付款，会在3个工作日内原路退还';
+            } elseif ($res === 5) {
+                $msg = '您还没有认证实力上分';
+            }
+            echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '进入房间成功', 'data' => null]);exit;
+    }
+
+    /**
      * 退出房间
      * @author 贺强
      * @time   2018-11-09 16:52:45
