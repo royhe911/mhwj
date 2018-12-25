@@ -967,6 +967,10 @@ class Api extends \think\Controller
         if (intval($param['type']) === 1) {
             $param['count'] = 5 - intval($param['master_count']);
         }
+        if (!empty($param['is_new'])) {
+            $param['count'] = 1;
+        }
+        unset($param['is_new']);
         $param['addtime'] = time();
         if (intval($param['type']) === 2) {
             $param['total_money'] = $param['price'] * $param['num'];
