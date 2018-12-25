@@ -206,6 +206,9 @@ class RoomModel extends CommonModel
                 Db::rollback();
                 return 2;
             }
+            // 删除退出房间的玩家订单
+            $uo = new UserOrderModel();
+            $uo->delByWhere(['uid' => $uid]);
             // 删除退出房间的玩家
             $res = $ru->delByWhere(['room_id' => $room_id, 'uid' => $uid]);
             if (!$res) {

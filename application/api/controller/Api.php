@@ -1984,7 +1984,7 @@ class Api extends \think\Controller
                 echo json_encode($msg);exit;
             }
         }
-        $res = $r->quit_room($param['room_id'], $param['uid'], $room['type']);
+        $res = $r->quit_room($param['room_id'], $param['uid'], 2);
         if ($res !== true) {
             $msg = '';
             if ($res === 4) {
