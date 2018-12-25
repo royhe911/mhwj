@@ -949,6 +949,12 @@ class Api extends \think\Controller
                 } elseif ($userAttr['play_type'] === 1 && $userAttr['curr_para'] < $param['para_min']) {
                     $msg = ['status' => 11, 'info' => '您的等级不够陪玩的等级', 'data' => null];
                 }
+            } elseif (intval($param['type']) === 2) {
+                $ua    = new UserAttrModel();
+                $count = $ua->getCount(['uid' => $param['uid'], 'game_id' => $param['game_id'], 'status' => 8]);
+                if (!$count) {
+                    $msg = ['status' => 21, 'info' => '您还未认证此游戏或审核未通过，不能陪玩', 'data' => null];
+                }
             }
         }
         if (!empty($msg)) {
