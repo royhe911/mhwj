@@ -38,12 +38,11 @@ class Room extends Command
             $ru   = new RoomUserModel();
             $list = $ru->getList(['status' => 5, 'ready_time' => ['lt', time() - 120]], ['room_id']);
             if ($list) {
-                $r    = new RoomModel();
-                $yule = $r->getList(['status' => 5, 'type' => 2], ['id']);
-                $yid  = array_column($yule, 'id');
-                $ids  = [];
+                $ids = [];
+                $r   = new RoomModel();
                 foreach ($list as $item) {
-                    if (!in_array($item['room_id'], $yid)) {
+                    $count = $r->getCount(['id' => $item['room_id'], 'type' => 1]);
+                    if ($count) {
                         $ids[] = $item['room_id'];
                     }
                 }
