@@ -1415,6 +1415,178 @@ class Api extends \think\Controller
     }
 
     /**
+     * 获取房间信息
+     * @author 贺强
+     * @time   2018-11-09 10:59:17
+     * @param  RoomModel $r RoomModel 实例
+     */
+    public function get_room_info_bak(RoomModel $r)
+    {
+        $param = $this->param;
+        $type  = intval($param['type']);
+        if (!empty($param['is_share']) && intval($param['is_share']) === 1) {
+            $uid = $param['uid'];
+            if ($type === 1) {
+                $ru    = new RoomUserModel();
+                $count = $ru->getCount(['room_id' => $param['room_id'], 'uid' => $uid]);
+                if (!$count) {
+                    echo json_encode(['status' => 14, 'info' => '选择段位', 'data' => null]);exit;
+                }
+            } elseif ($type === 2) {
+                $count = $r->getCount(['id' => ['<>', $param['room_id']], 'uid' => $uid, 'status' => ['in', '0,1,5,6,8']]);
+                if ($count) {
+                    echo json_encode(['status' => 14, 'info' => '您已有正在进行中的房间', 'data' => null]);exit;
+                }
+                $ua    = new UserAttrModel();
+                $count = $ua->getCount(['uid' => $uid, 'status' => 8, 'game_id' => $param['game_id']]);
+                if (!$count) {
+                    echo json_encode(['status' => 14, 'info' => '您还未认证此游戏，不能陪玩', 'data' => null]);exit;
+                }
+                $pm    = new PersonMasterOrderModel();
+                $count = $pm->getCount(['master_id' => $uid, 'status' => ['<>', 10]]);
+                if ($count) {
+                    echo json_encode(['status' => 16, 'info' => '您还有未完成的订制订单', 'data' => null]);exit;
+                }
+            }
+            $state = $this->come_in_room_bak(true);
+            if ($state !== true) {
+                echo json_encode(['status' => $state, 'info' => '进入房间失败', 'data' => null]);exit;
+            }
+        }
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 2, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $room_id = $param['room_id'];
+        $uid     = intval($param['uid']);
+        $ru      = new RoomUserModel();
+        if ($type === 1) {
+            $count = $ru->getCount(['room_id' => $room_id, 'uid' => $uid]);
+            if (!$count) {
+                echo json_encode(['status' => 11, 'info' => '您还未进入房间', 'data' => null]);exit;
+            }
+        }
+        $room = $r->getModel(['id' => $room_id], 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status room_status');
+        if ($room) {
+            $roomuser = $ru->getList(['room_id' => $room_id]);
+            $uids     = array_column($roomuser, 'uid');
+            $rm       = new RoomMasterModel();
+            $masters  = $rm->getList(['room_id' => $room_id]);
+            $mids     = array_column($masters, 'uid');
+            $mids     = array_merge([$room['uid']], $mids);
+            $uids     = array_merge($uids, $mids);
+            if ($room['room_status'] === 10) {
+                $msg = ['status' => 3, 'info' => '陪玩师已确认订单，房间已销毁，请到订单列表完成订单', 'data' => null];
+            } elseif ($room['room_status'] === 9 || $room['room_status'] === 7) {
+                $msg = ['status' => 5, 'info' => '有玩家未付款，房间已销毁，您的付款会在3个工作日内原路退还', 'data' => null];
+            } elseif ($room['count'] === $room['in_count']) {
+                if (!in_array($uid, $uids)) {
+                    $msg = ['status' => 6, 'info' => '房间人数已满', 'data' => null];
+                }
+            }
+            if (!empty($msg)) {
+                echo json_encode($msg);exit;
+            }
+            $g    = new GameModel();
+            $game = $g->getModel(['id' => $room['game_id']], ['name', 'url']);
+            if ($game) {
+                $gameurl = $game['url'];
+                if (strpos($gameurl, 'http://') === false && strpos($gameurl, 'https://') === false) {
+                    $gameurl = config('WEBSITE') . $gameurl;
+                }
+                $room['game_name'] = $game['name'];
+                $room['game_url']  = $gameurl;
+            } else {
+                $room['game_name'] = '';
+                $room['game_url']  = '';
+            }
+            if ($room['type'] === 1) {
+                $room['type'] = '实力上分';
+            } else {
+                $room['type'] = '娱乐陪玩';
+            }
+            if ($room['region'] === 1) {
+                $room['region'] = 'QQ';
+            } elseif ($room['region'] === 2) {
+                $room['region'] = '微信';
+            }
+            $gc     = new GameConfigModel();
+            $gclist = $gc->getList(['game_id' => $room['game_id'], 'para_id' => ['in', [$room['para_min'], $room['para_max']]]], 'para_id,para_str');
+            foreach ($gclist as $gci) {
+                if ($room['para_min'] === $gci['para_id']) {
+                    $room['para_min_str'] = $gci['para_str'];
+                } elseif ($room['para_max'] === $gci['para_id']) {
+                    $room['para_max_str'] = $gci['para_str'];
+                }
+            }
+            $u       = new UserModel();
+            $users   = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar', 'wx', 'qq']);
+            $members = [];
+            // 获取房间里玩家的状态
+            $ustatus     = $ru->getList(['room_id' => $room_id, 'uid' => ['in', $uids]], 'uid,status,price,total_money');
+            $total_money = 0;
+            $price       = 0;
+            foreach ($ustatus as $utta) {
+                $total_money += $utta['total_money'];
+                $price += $utta['price'];
+            }
+            $total_money /= count($mids);
+            $price /= count($mids);
+            $ustatarr = array_column($ustatus, null, 'uid');
+            foreach ($users as $user) {
+                if (!empty($ustatarr[$user['id']])) {
+                    $usta       = $ustatarr[$user['id']];
+                    $status_txt = '';
+                    if ($usta['status'] === 0) {
+                        $status_txt = '未准备';
+                    } elseif ($usta['status'] === 1) {
+                        $status_txt = '已准备';
+                    } elseif ($usta['status'] === 6) {
+                        $status_txt = '已支付';
+                    }
+                }
+                if ($user['id'] === $uid) {
+                    if (in_array($user['id'], $mids)) {
+                        $room['total_money'] = $total_money;
+                        $room['price']       = $price;
+                    } else {
+                        $room['total_money'] = $usta['total_money'];
+                        $room['price']       = $usta['price'];
+                        $room['status']      = $usta['status'];
+                        $room['status_txt']  = $status_txt;
+                    }
+                }
+                if (in_array($user['id'], $mids)) {
+                    if ($user['id'] === $room['uid']) {
+                        $user['master'] = 1;
+                    } else {
+                        $user['master'] = 0;
+                    }
+                    $members['master'][] = $user;
+                } else {
+                    if (!empty($usta)) {
+                        $user['status']     = $usta['status'];
+                        $user['status_txt'] = $status_txt;
+                    }
+                    $members['users'][] = $user;
+                }
+            }
+            $room['members'] = $members;
+            $c               = new ChatModel();
+            $list            = $c->getJoinList([['m_chat_user c', 'a.id=c.chat_id']], ['a.room_id' => $room_id, 'c.uid' => $uid], ['a.uid', 'a.avatar', 'a.content'], '', 'c.addtime');
+            $room['chatlog'] = $list;
+            $msg             = ['status' => 0, 'info' => '获取成功', 'data' => $room];
+        } else {
+            $msg = ['status' => 4, 'info' => '房间不存在', 'data' => null];
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
      * 修改房间状态
      * @author 贺强
      * @time   2018-11-20 09:40:58
