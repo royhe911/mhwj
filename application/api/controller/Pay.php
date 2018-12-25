@@ -1594,7 +1594,7 @@ class Pay extends \think\Controller
             if ($room && $user && $wanj && $uord) {
                 $time = date('Y年m月d日 H:i:s', $uord['addtime']);
                 $ptim = date('Y年m月d日 H:i:s', $uord['pay_time']);
-                $data = ['openid' => $user['openid'], 'form_id' => $room['form_id'], 'data' => ['keyword1' => ['value' => $uord['order_num']], 'keyword2' => ['value' => $wanj['nickname']], 'keyword3' => ['value' => $time], 'keyword4' => ['value' => $uord['order_money']], 'keyword5' => ['value' => $ptim], 'keyword6' => ['value' => '支付成功']]];
+                $data = ['openid' => $user['openid'], 'form_id' => $room['form_id'], 'order_num' => $uord['order_num'], 'nickname' => $wanj['nickname'], 'addtime' => $time, 'money' => $uord['order_money'], 'pay_time' => $ptim, 'status' => '支付成功'];
                 $this->pay_notice($data);
             }
         }
@@ -1621,7 +1621,7 @@ class Pay extends \think\Controller
         $url .= "?access_token=$access_token";
         $data['touser'] = $param['openid'];
         // 下单成功模板ID
-        $data['template_id'] = 'QEsEoJPi6NgkC5O34DlFY3rlghNCv0tcVSuhoQf-6zg';
+        $data['template_id'] = 'mi5J6-CTqNSZ0EqTKy2LMj8SCgr_1egFTC7RIOwBOGA';
         $data['form_id']     = $param['form_id'];
         $data['page']        = '/pages/fast/fast';
         $data['data']        = ['keyword1' => ['value' => $param['order_num']], 'keyword2' => ['value' => $param['nickname']], 'keyword3' => ['value' => $param['addtime']], 'keyword4' => ['value' => $param['money']], 'keyword5' => ['value' => $param['pay_time']], 'keyword6' => ['value' => $param['status']]];
