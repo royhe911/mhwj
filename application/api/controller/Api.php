@@ -1005,8 +1005,8 @@ class Api extends \think\Controller
             if (abs(intval($param['big_para2']) - intval($param['big_para1'])) > 2) {
                 echo json_encode(['status' => 4, 'info' => '段位跨度不能超过2个段位', 'data' => null]);exit;
             }
-            unset($param['big_para1'], $param['big_para2']);
         }
+        unset($param['big_para1'], $param['big_para2']);
         if (empty($param['name'])) {
             $msg = ['status' => 8, 'info' => '房间名称不能为空', 'data' => null];
         } elseif (strlen($param['name']) > 24) {
