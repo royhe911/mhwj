@@ -828,13 +828,18 @@ class Pay extends \think\Controller
      * @author 贺强
      * @time   2018-12-18 20:32:15
      */
-    public function get_access_token()
+    public function get_access_token($is_master = false)
     {
-        $mini    = new MiniprogramModel();
-        $appid   = config('APPID_PLAYER');
-        $program = $mini->getModel(['appid' => $appid]);
+        $mini = new MiniprogramModel();
+        // 取得 appid
+        $appid = config('APPID_PLAYER');
         // 取 secret
         $appsecret = config('APPSECRET_PLAYER');
+        if ($is_master) {
+            $appid     = config('APPID_ACCOMPANY');
+            $appsecret = config('APPSECRET_ACCOMPANY');
+        }
+        $program = $mini->getModel(['appid' => $appid]);
         if (!$program) {
             $id = $mini->add(['appid' => $appid, 'appsecret' => $appsecret, 'name' => '游戏陪玩咖']);
         } else {
@@ -1566,7 +1571,7 @@ class Pay extends \think\Controller
      * @author 贺强
      * @time   2018-12-13 15:06:08
      */
-    public function pay_callback()
+    public function pay_callback(RoomModel $r, UserModel $u, UserOrderModel $uo)
     {
         $param = $this->param;
         if (empty($param['room_id'])) {
@@ -1578,9 +1583,55 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $uid     = $param['uid'];
+        $room_id = $param['room_id'];
+        $room    = $r->getModel(['id' => $room_id], ['form_id', 'type']);
+        if ($room['type'] === 2) {
+            $data = ['openid' => '', 'form_id' => '', 'data' => ['keyword1' => ['value' => 'order_num'], 'keyword2' => ['value' => 'nickname'], 'keyword3' => ['value' => 'addtime'], 'keyword4' => ['value' => 'money'], 'keyword5' => ['value' => 'pay_time'], 'keyword6' => ['value' => 'status']]];
+            $user = $u->getModel(['id' => $room['uid']], ['openid']);
+            $wanj = $u->getModel(['id' => $uid], ['nickname']);
+            $uord = $uo->getModel(['room_id' => $room_id, 'uid' => $uid]);
+            if ($room && $user && $wanj && $uord) {
+                $time = date('Y年m月d日 H:i:s', $uord['addtime']);
+                $ptim = date('Y年m月d日 H:i:s', $uord['pay_time']);
+                $data = ['openid' => $user['openid'], 'form_id' => $room['form_id'], 'data' => ['keyword1' => ['value' => $uord['order_num']], 'keyword2' => ['value' => $wanj['nickname']], 'keyword3' => ['value' => $time], 'keyword4' => ['value' => $uord['order_money']], 'keyword5' => ['value' => $ptim], 'keyword6' => ['value' => '支付成功']]];
+            }
+        }
         $ru = new RoomUserModel();
-        $ru->modifyField('status', 6, ['room_id' => $param['room_id'], 'uid' => $param['uid']]);
+        $ru->modifyField('status', 6, ['room_id' => $room_id, 'uid' => $param['uid']]);
         echo json_encode(['status' => 0, 'info' => '修改成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 支付通知
+     * @author 贺强
+     * @time   2018-12-25 18:30:48
+     * @param  array $param 通知参数
+     */
+    public function pay_notice($param)
+    {
+        // 取得 access_token
+        $access_token = $this->get_access_token(true);
+        if ($access_token === false) {
+            // 记录日志
+        }
+        // API 地址
+        $url = 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send';
+        $url .= "?access_token=$access_token";
+        $data['touser'] = $param['openid'];
+        // 下单成功模板ID
+        $data['template_id'] = 'QEsEoJPi6NgkC5O34DlFY3rlghNCv0tcVSuhoQf-6zg';
+        $data['form_id']     = $param['form_id'];
+        $data['page']        = '/pages/fast/fast';
+        $data['data']        = ['keyword1' => ['value' => $param['order_num']], 'keyword2' => ['value' => $param['nickname']], 'keyword3' => ['value' => $param['addtime']], 'keyword4' => ['value' => $param['money']], 'keyword5' => ['value' => $param['pay_time']], 'keyword6' => ['value' => $param['status']]];
+        // 处理逻辑
+        $data = json_encode($data);
+        $res  = $this->curl($url, $data);
+        $res  = json_decode($res, true);
+        if (!empty($res['errcode'])) {
+            // 记录日志
+        }
+        return true;
     }
 
     /**
