@@ -1355,7 +1355,7 @@ class Api extends \think\Controller
                 }
             }
             $u       = new UserModel();
-            $users   = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar', 'wx', 'qq']);
+            $users   = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar', 'wx', 'qq', 'introduce']);
             $members = [];
             // 获取房间里玩家的状态
             $ustatus     = $ru->getList(['room_id' => $room_id, 'uid' => ['in', $uids]], 'uid,status,price,total_money');
