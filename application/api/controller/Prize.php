@@ -147,7 +147,7 @@ class Prize extends \think\Controller
         $prize_id = $param['prize_id'];
         $uid      = $param['uid'];
         $pu       = new PrizeUserModel();
-        $count    = $pu->getCount(['prize_id' => $prize_id, 'uid' => $uid, 'share_uid' => 0]);
+        $count    = $pu->getCount(['prize_id' => $prize_id, 'uid' => $uid]);
         if ($count) {
             echo json_encode(['status' => 5, 'info' => '您已参与过此奖品的抽奖了', 'data' => null]);exit;
         }
@@ -224,5 +224,39 @@ class Prize extends \think\Controller
             // 记录日志
         }
         return true;
+    }
+
+    /**
+     * 我的抽奖码
+     * @author 贺强
+     * @time   2018-12-27 17:04:43
+     * @param  PrizeUserModel $pu PrizeUserModel 实例
+     */
+    public function my_prize_code(PrizeUserModel $pu)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid   = $param['uid'];
+        $where = ['uid' => $uid];
+        $list  = $pu->getList($where, ['uid', 'code', 'prize_id', 'is_winners']);
+        if ($list) {
+            $p    = new PrizeModel();
+            $pids = array_column($list, 'prize_id');
+            $plis = $p->getList(['id' => ['in', $pids]], ['id', 'name']);
+            $plis = array_column($plis, 'name', 'id');
+            foreach ($list as &$item) {
+                if (!empty($plis[$item['prize_id']])) {
+                    $item['prize_name'] = $plis[$item['prize_id']];
+                } else {
+                    $item['prize_name'] = '';
+                }
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 }
