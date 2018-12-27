@@ -7,16 +7,13 @@
     <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
     <!-- Data Tables -->
-    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/iCheck/custom.css">
     <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
     <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
     <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
     <style type="text/css">
         .form-control{width: 200px;}
-        #preview,#preview_demo1,#preview_demo2,#preview_demo3{max-width: 120px;max-height: 120px;display: none;}
-        .para_id{width: 80px;}
-        .reduce,.plus{cursor: pointer;}
+        #preview{max-width: 120px;max-height: 120px;display: none;}
     </style>
 </head>
 <body class="gray-bg">
@@ -77,7 +74,7 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">奖品描述</label>
                             <div class="col-sm-10">
-                                <textarea id="desc" rows="5" cols="50"></textarea>
+                                <script id="editor" type="text/plain" style="width:800px;height:300px;"></script>
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
@@ -95,15 +92,18 @@
 </div>
 </body>
 <script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
-<script type="text/javascript" src="/static/h+/js/plugins/iCheck/icheck.min.js"></script>
 <script type="text/javascript" src="/static/layer/layer.js"></script>
 <script type="text/javascript" src="/static/uploadifive/jquery.uploadifive.js"></script>
+<script type="text/javascript" src="/static/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="/static/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript" src="/static/ueditor/lang/zh-cn/zh-cn.js"></script>
 <script type="text/javascript">
     $(function(){
+        var ue = UE.getEditor('editor');
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'save') {
-                var name = $('#name'), urll = $('#urll').val(), type = $('#type').val(), count = $('#count'), desc = $('#desc');
+                var name = $('#name'), urll = $('#urll').val(), type = $('#type').val(), count = $('#count'), desc = ue.getContent();
                 if (name.val() == '') {
                     layer.msg('奖品名称不能为空', {icon: 5, time: 1000}, function(){name.focus()});
                     return false
@@ -120,14 +120,16 @@
                     layer.msg('开奖人数不能为空', {icon: 5,time: 1000});
                     return false
                 }
-                if (desc.val() == '') {
-                    layer.msg('奖品描述不能为空', {icon: 5, time: 1000});
+                if (desc == '') {
+                    layer.msg('奖品描述不能为空', {icon: 5, time: 1000}, function(){
+                        ue.focus()
+                    });
                     return false
                 }
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
                     url: '/prize/add',
-                    data: {'name': name.val(), 'url': urll, 'desc': desc.val(), 'type': type, 'count': count.val()},
+                    data: {'name': name.val(), 'url': urll, 'desc': desc, 'type': type, 'count': count.val()},
                     success: function(data){
                         if (data.status == 0) {
                             // layer.msg(data.info, {icon: 6, time: 1000});

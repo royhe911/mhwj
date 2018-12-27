@@ -247,13 +247,19 @@ class Prize extends \think\Controller
         if ($list) {
             $p    = new PrizeModel();
             $pids = array_column($list, 'prize_id');
-            $plis = $p->getList(['id' => ['in', $pids]], ['id', 'name']);
-            $plis = array_column($plis, 'name', 'id');
+            $plis = $p->getList(['id' => ['in', $pids]], ['id', 'name', 'url', 'desc']);
+            $plis = array_column($plis, null, 'id');
             foreach ($list as &$item) {
                 if (!empty($plis[$item['prize_id']])) {
-                    $item['prize_name'] = $plis[$item['prize_id']];
+                    $prize = $plis[$item['prize_id']];
+                    // 属性赋值
+                    $item['name'] = $prize['name'];
+                    $item['url']  = $prize['url'];
+                    $item['desc'] = $prize['desc'];
                 } else {
-                    $item['prize_name'] = '';
+                    $item['name'] = '';
+                    $item['url']  = '';
+                    $item['desc'] = '';
                 }
             }
         }
