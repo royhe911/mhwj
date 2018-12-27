@@ -43,6 +43,9 @@ class PrizeModel extends CommonModel
                     Db::rollback();
                     return 30;
                 }
+            } else {
+                Db::rollback();
+                return 20;
             }
             if ($count + 1 >= $data['count']) {
                 $luck = $this->luck_draw($prize_id);
