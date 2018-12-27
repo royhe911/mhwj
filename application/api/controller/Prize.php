@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\PrizeDistributeModel;
 use app\common\model\PrizeModel;
 use app\common\model\PrizeUserModel;
 
@@ -244,6 +245,45 @@ class Prize extends \think\Controller
         $uid   = $param['uid'];
         $where = ['uid' => $uid];
         $list  = $pu->getList($where, ['uid', 'code', 'prize_id', 'is_winners']);
+        if ($list) {
+            $p    = new PrizeModel();
+            $pids = array_column($list, 'prize_id');
+            $plis = $p->getList(['id' => ['in', $pids]], ['id', 'name', 'url', 'desc']);
+            $plis = array_column($plis, null, 'id');
+            foreach ($list as &$item) {
+                if (!empty($plis[$item['prize_id']])) {
+                    $prize = $plis[$item['prize_id']];
+                    // 属性赋值
+                    $item['name'] = $prize['name'];
+                    $item['url']  = $prize['url'];
+                    $item['desc'] = $prize['desc'];
+                } else {
+                    $item['name'] = '';
+                    $item['url']  = '';
+                    $item['desc'] = '';
+                }
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 我的奖品
+     * @author 贺强
+     * @time   2018-12-27 18:47:33
+     * @param  PrizeDistributeModel $pd PrizeDistributeModel 实例
+     */
+    public function my_prizes(PrizeDistributeModel $pd)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid  = $param['uid'];
+        $list = $pd->getList(['uid' => $uid], ['id', 'uid', 'prize_id', 'addtime', 'grant_time']);
         if ($list) {
             $p    = new PrizeModel();
             $pids = array_column($list, 'prize_id');
