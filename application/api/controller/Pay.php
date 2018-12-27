@@ -9,7 +9,6 @@ use app\common\model\LogModel;
 use app\common\model\MasterIncomeModel;
 use app\common\model\MasterMoneyLogModel;
 use app\common\model\MasterOrderModel;
-use app\common\model\MiniprogramModel;
 use app\common\model\PersonMasterOrderModel;
 use app\common\model\PersonOrderModel;
 use app\common\model\PersonRoomModel;
@@ -821,46 +820,6 @@ class Pay extends \think\Controller
             // 记录日志
         }
         return true;
-    }
-
-    /**
-     * 取得 access_token
-     * @author 贺强
-     * @time   2018-12-18 20:32:15
-     */
-    public function get_access_token($is_master = false)
-    {
-        $mini = new MiniprogramModel();
-        // 取得 appid
-        $appid = config('APPID_PLAYER');
-        // 取 secret
-        $appsecret = config('APPSECRET_PLAYER');
-        if ($is_master) {
-            $appid     = config('APPID_ACCOMPANY');
-            $appsecret = config('APPSECRET_ACCOMPANY');
-        }
-        $program = $mini->getModel(['appid' => $appid]);
-        if (!$program) {
-            $id = $mini->add(['appid' => $appid, 'appsecret' => $appsecret, 'name' => '游戏陪玩咖']);
-        } else {
-            $id = $program['id'];
-        }
-        if (!empty($program['access_token']) && $program['expires_out'] > time()) {
-            return $program['access_token'];
-        }
-        $url = 'https://api.weixin.qq.com/cgi-bin/token';
-        $url .= '?grant_type=client_credential';
-        $url .= "&appid=$appid";
-        $url .= "&secret=$appsecret";
-        $data = $this->curl($url);
-        if (!empty($data)) {
-            $data = json_decode($data, true);
-        }
-        if (!empty($data['errcode'])) {
-            // 写日志
-        }
-        $mini->modify(['access_token' => $data['access_token'], 'expires_out' => time() + $data['expires_in'] - 10], ['appid' => $appid]);
-        return $data['access_token'];
     }
 
     /**

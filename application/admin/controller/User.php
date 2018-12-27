@@ -4,7 +4,6 @@ namespace app\admin\controller;
 use app\common\model\ChatUserModel;
 use app\common\model\GameModel;
 use app\common\model\MessageModel;
-use app\common\model\MiniprogramModel;
 use app\common\model\RoomMasterModel;
 use app\common\model\RoomModel;
 use app\common\model\UserAttrModel;
@@ -249,7 +248,7 @@ class User extends \think\Controller
      */
     public function shenhe_notice($openid, $form_id, $addtime, $nickname, $status, $remark)
     {
-        $access_token = $this->get_access_token();
+        $access_token = $this->get_access_token(true);
         if ($access_token === false) {
             // 记录日志
         }
@@ -269,41 +268,6 @@ class User extends \think\Controller
         if (!empty($res['errcode'])) {
             // 记录日志
         }
-    }
-
-    /**
-     * 取得 access_token
-     * @author 贺强
-     * @time   2018-12-18 20:32:15
-     */
-    public function get_access_token()
-    {
-        $mini    = new MiniprogramModel();
-        $appid   = config('APPID_ACCOMPANY');
-        $program = $mini->getModel(['appid' => $appid]);
-        // 取 secret
-        $appsecret = config('APPSECRET_ACCOMPANY');
-        if (!$program) {
-            $id = $mini->add(['appid' => $appid, 'appsecret' => $appsecret, 'name' => '幕后玩家陪玩师']);
-        } else {
-            $id = $program['id'];
-        }
-        if (!empty($program['access_token']) && $program['expires_out'] > time()) {
-            return $program['access_token'];
-        }
-        $url = 'https://api.weixin.qq.com/cgi-bin/token';
-        $url .= '?grant_type=client_credential';
-        $url .= "&appid=$appid";
-        $url .= "&secret=$appsecret";
-        $data = $this->curl($url);
-        if (!empty($data)) {
-            $data = json_decode($data, true);
-        }
-        if (!empty($data['errcode'])) {
-            return false;
-        }
-        $mini->modify(['access_token' => $data['access_token'], 'expires_out' => time() + $data['expires_in'] - 10], ['appid' => $appid]);
-        return $data['access_token'];
     }
 
     /**

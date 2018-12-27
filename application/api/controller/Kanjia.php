@@ -6,7 +6,6 @@ use app\common\model\GoodsModel;
 use app\common\model\GoodsSkinModel;
 use app\common\model\GoodsTaskInfoModel;
 use app\common\model\GoodsTaskModel;
-use app\common\model\MiniprogramModel;
 use app\common\model\UserModel;
 
 /**
@@ -209,41 +208,6 @@ class Kanjia extends \think\Controller
             // 记录日志
         }
         return true;
-    }
-
-    /**
-     * 取得 access_token
-     * @author 贺强
-     * @time   2018-12-19 15:54:40
-     */
-    public function get_access_token()
-    {
-        $mini    = new MiniprogramModel();
-        $appid   = config('APPID_PLAYER');
-        $program = $mini->getModel(['appid' => $appid]);
-        // 取 secret
-        $appsecret = config('APPSECRET_PLAYER');
-        if (!$program) {
-            $id = $mini->add(['appid' => $appid, 'appsecret' => $appsecret, 'name' => '游戏陪玩咖']);
-        } else {
-            $id = $program['id'];
-        }
-        if (!empty($program['access_token']) && $program['expires_out'] > time()) {
-            return $program['access_token'];
-        }
-        $url = 'https://api.weixin.qq.com/cgi-bin/token';
-        $url .= '?grant_type=client_credential';
-        $url .= "&appid=$appid";
-        $url .= "&secret=$appsecret";
-        $data = $this->curl($url);
-        if (!empty($data)) {
-            $data = json_decode($data, true);
-        }
-        if (!empty($data['errcode'])) {
-            // 写日志
-        }
-        $mini->modify(['access_token' => $data['access_token'], 'expires_out' => time() + $data['expires_in'] - 10], ['appid' => $appid]);
-        return $data['access_token'];
     }
 
     /**

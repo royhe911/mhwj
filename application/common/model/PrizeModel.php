@@ -25,8 +25,9 @@ class PrizeModel extends CommonModel
     {
         Db::startTrans();
         try {
+            $prize_id = $param['prize_id'];
             // 锁定行查询
-            $sql  = "select * from m_prize where id={$param['prize_id']} for update";
+            $sql  = "select * from m_prize where id=$prize_id for update";
             $data = Db::query($sql);
             if (!$data) {
                 Db::rollback();
@@ -34,15 +35,24 @@ class PrizeModel extends CommonModel
             }
             $data = $data[0];
             $pu   = new PrizeUserModel();
-            $user = $pu->getList(['prize_id' => $param['prize_id']], ['distinct uid']);
-            if (count($user) >= $data['count']) {
-                Db::rollback();
-                return 20;
+            $user = $pu->getList(['prize_id' => $prize_id], ['distinct uid']);
+            if (count($user) < $data['count']) {
+                $res = $pu->add($param);
+                if (!$res) {
+                    Db::rollback();
+                    return 30;
+                }
+            } else {
+                $luck = $this->luck_draw($prize_id);
             }
-            $res = $pu->add($param);
-            if (!$res) {
-                Db::rollback();
-                return 30;
+            if (!empty($luck)) {
+                if (is_array($luck)) {
+                    $luck['prize_name'] = $data['name'];
+                    Db::column();
+                } else {
+                    Db::rollback();
+                }
+                return $luck;
             }
             Db::commit();
             return true;
@@ -50,5 +60,32 @@ class PrizeModel extends CommonModel
             Db::rollback();
             return 44;
         }
+    }
+
+    /**
+     * 执行抽奖
+     * @author 贺强
+     * @time   2018-12-27 10:59:16
+     * @param  integer $prize_id 奖品ID
+     */
+    public function luck_draw($prize_id)
+    {
+        $pd    = new PrizeDistributeModel();
+        $count = $pd->getCount(['prize_id' => $prize_id]);
+        if ($count) {
+            return 11;
+        }
+        $pu     = new PrizeUserModel();
+        $data   = $pu->getList(['prize_id' => $prize_id], ['uid', 'code', 'form_id']);
+        $index  = mt_rand(0, count($data) - 1);
+        $lucker = $data[$index];
+        $ldata  = ['uid' => $lucker['uid'], 'prize_id' => $prize_id, 'addtime' => time()];
+        $res    = $pd->add($ldata);
+        if (!$res) {
+            return 21;
+        }
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $lucker['uid']], ['openid']);
+        return ['openid' => $user['openid'], 'code' => $lucker['code'], 'form_id' => $lucker['form_id']];
     }
 }

@@ -98,20 +98,30 @@ class Prize extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $code = $this->get_prize_code($param['prize_id']);
+        $prize_id = $param['prize_id'];
+        $uid      = $param['uid'];
+        $pu       = new PrizeUserModel();
+        $count    = $pu->getCount(['prize_id' => $prize_id, 'uid' => $uid]);
+        if ($count) {
+            echo json_encode(['status' => 5, 'info' => '您已参与过此奖品的抽奖了', 'data' => null]);exit;
+        }
+        $code = $this->get_prize_code($prize_id);
         // 添加插入字段
         $param['code']    = $code;
         $param['addtime'] = time();
         // 调用插入参与抽奖方法
         $res = $p->joinPrize($param);
-        if ($res !== true) {
-            $msg = '参与失败';
-            if ($res === 20) {
-                $msg = '参与抽奖人数已满';
+        if ($res === true || is_array($res)) {
+            if (is_array($res)) {
+                $this->luck_notice($res);
             }
-            echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
+            echo json_encode(['status' => 0, 'info' => '参与成功', 'data' => ['code' => $code]]);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '参与成功', 'data' => ['code' => $code]]);exit;
+        $msg = '参与失败';
+        if ($res === 20) {
+            $msg = '参与抽奖人数已满';
+        }
+        echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
     }
 
     /**
@@ -131,5 +141,37 @@ class Prize extends \think\Controller
             $this->get_code($prize_id, $num);
         }
         return $code;
+    }
+
+    /**
+     * 发送抽奖结果通知
+     * @author 贺强
+     * @time   2018-12-27 11:32:45
+     * @param  array $param 通知参数
+     */
+    public function luck_notice($param)
+    {
+        // 取得 access_token
+        $access_token = $this->get_access_token();
+        if ($access_token === false) {
+            // 记录日志
+        }
+        // API 地址
+        $url = 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send';
+        $url .= "?access_token=$access_token";
+        $data['touser'] = $param['openid'];
+        // 下单成功模板ID
+        $data['template_id'] = '5_VTzsMzU2C5G0qOQLnTq5PWYtwQKrBwHi7ffWqWXjA';
+        $data['form_id']     = $param['form_id'];
+        $data['page']        = '/pages/welfare/welfare';
+        $data['data']        = ['keyword1' => ['value' => $param['prize_name']], 'keyword2' => ['value' => '恭喜您被抽中，中奖码为：' . $param['code']]];
+        // 处理逻辑
+        $data = json_encode($data);
+        $res  = $this->curl($url, $data);
+        $res  = json_decode($res, true);
+        if (!empty($res['errcode'])) {
+            // 记录日志
+        }
+        return true;
     }
 }
