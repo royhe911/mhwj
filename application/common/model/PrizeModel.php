@@ -33,22 +33,24 @@ class PrizeModel extends CommonModel
                 Db::rollback();
                 return 10;
             }
-            $data = $data[0];
-            $pu   = new PrizeUserModel();
-            $user = $pu->getList(['prize_id' => $prize_id], ['distinct uid']);
-            if (count($user) < $data['count']) {
+            $data  = $data[0];
+            $pu    = new PrizeUserModel();
+            $user  = $pu->getList(['prize_id' => $prize_id], ['distinct uid']);
+            $count = count($user);
+            if ($count < $data['count']) {
                 $res = $pu->add($param);
                 if (!$res) {
                     Db::rollback();
                     return 30;
                 }
-            } else {
+            }
+            if ($count + 1 >= $data['count']) {
                 $luck = $this->luck_draw($prize_id);
             }
             if (!empty($luck)) {
                 if (is_array($luck)) {
                     $luck['prize_name'] = $data['name'];
-                    Db::column();
+                    Db::commit();
                 } else {
                     Db::rollback();
                 }
