@@ -63,6 +63,13 @@ return [
     '/goods/editknife'    => 'admin/Goods/editknife', // 修改需刀数
     '/goods/prizes'       => 'admin/Goods/prizes', // 砍价成功列表
     '/goods/ffjp'         => 'admin/Goods/ffjp', // 发放奖品
+    '/prize/list'         => 'admin/Prize/lists', // 奖品列表
+    '/prize/add'          => 'admin/Prize/add', // 添加奖品
+    '/prize/del'          => 'admin/Prize/del', // 删除奖品
+    '/prize/edit'         => 'admin/Prize/edit', // 修改奖品
+    '/prize/editcount'    => 'admin/Prize/editcount', // 修改奖品
+    '/prize/users'        => 'admin/Prize/users', // 中奖者列表
+    '/prize/ffjp'         => 'admin/Prize/ffjp', // 发放奖品
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图
@@ -162,5 +169,10 @@ return [
     '/api/kj/kjinfo'      => 'api/Kanjia/get_kj_info', // 砍价信息
     '/api/kj/knifelist'   => 'api/Kanjia/knife_list', // 快刀榜
     '/api/kj/kjlist'      => 'api/Kanjia/get_kj_list', // 砍价榜
+    /*--------   砍价 api 结束  --------*/
+    /*--------   抽奖 api 开始  --------*/
+    '/api/pz/prizes'      => 'api/Prize/get_prizes', // 奖品列表
+    '/api/pz/joinprize'   => 'api/Prize/join_prize', // 参与抽奖
+    '/api/pz/prizecode'   => 'api/Prize/get_prize_code', // 获取抽奖码
     /*--------   砍价 api 结束  --------*/
 ];
