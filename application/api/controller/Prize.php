@@ -255,7 +255,11 @@ class Prize extends \think\Controller
                     $prize = $plis[$item['prize_id']];
                     // 属性赋值
                     $item['name'] = $prize['name'];
-                    $item['url']  = $prize['url'];
+                    $url          = $item['url'];
+                    if (strpos($url, 'http://') === false && strpos($url, 'https://') === false) {
+                        $url = config('WEBSITE') . $url;
+                    }
+                    $item['url']  = $url;
                     $item['desc'] = $prize['desc'];
                 } else {
                     $item['name'] = '';
@@ -294,7 +298,11 @@ class Prize extends \think\Controller
                     $prize = $plis[$item['prize_id']];
                     // 属性赋值
                     $item['name'] = $prize['name'];
-                    $item['url']  = $prize['url'];
+                    $url          = $item['url'];
+                    if (strpos($url, 'http://') === false && strpos($url, 'https://') === false) {
+                        $url = config('WEBSITE') . $url;
+                    }
+                    $item['url']  = $url;
                     $item['desc'] = $prize['desc'];
                 } else {
                     $item['name'] = '';
