@@ -35,8 +35,8 @@ class PrizeModel extends CommonModel
             }
             $data  = $data[0];
             $pu    = new PrizeUserModel();
-            $user  = $pu->getList(['prize_id' => $prize_id], ['distinct uid']);
-            $count = count($user);
+            $user  = $pu->getModel(['prize_id' => $prize_id], ['count(distinct uid) count']);
+            $count = $user['count'];
             if ($count < $data['count']) {
                 $res = $pu->add($param);
                 if (!$res) {
@@ -46,6 +46,13 @@ class PrizeModel extends CommonModel
             } else {
                 Db::rollback();
                 return 20;
+            }
+            if (!empty($param['share_uid'])) {
+                $share_uid = $param['share_uid'];
+                $puser     = $pu->getModel(['prize_id' => $prize_id, 'uid' => $share_uid], ['form_id']);
+                if ($puser) {
+                    $pu->add(['prize_id' => $prize_id, 'uid' => $share_uid, 'share_uid' => $param['uid'], 'code' => $param['code'], 'addtime' => time(), 'form_id' => $puser['form_id']]);
+                }
             }
             if ($count + 1 >= $data['count']) {
                 $luck = $this->luck_draw($prize_id);
