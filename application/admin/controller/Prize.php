@@ -126,7 +126,7 @@ class Prize extends \think\Controller
         $where    = [];
         $page     = $this->request->get('page', 1);
         $pagesize = $this->request->get('pagesize', config('PAGESIZE'));
-        $list     = $p->getList($where, true, "$page,$pagesize");
+        $list     = $p->getList($where, true, "$page,$pagesize", 'addtime desc');
         foreach ($list as &$item) {
             if (!empty($item['url'])) {
                 $url = $item['url'];
