@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发放奖品</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/iCheck/custom.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
+    <style type="text/css">
+        .form-control{width: 200px;}
+        .avatar{max-height: 150px;max-width: 150px;border-radius: 10px;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>发放奖品</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal" onsubmit="return false">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">中奖者</label>
+                            <div class="col-sm-10">
+                                <img src="{$data.avatar}" class="avatar">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">奖品</label>
+                            <div class="col-sm-10"><input class="form-control" value="{$data.prize.name}" style="border: none;"></div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">中奖者微信</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="wx">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">中奖者手机</label>
+                            <div class="col-sm-10">
+                                <input type="tel" class="form-control" value="{$data.mobile}" id="mobile">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">收货地址</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="address" placeholder="选填">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <input class="btn btn-primary" type="button" data-action="save" value="保存内容">
+                                <input class="btn btn-white" type="button" data-action="cancel" value="取消">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/h+/js/plugins/iCheck/icheck.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript" src="/static/uploadifive/jquery.uploadifive.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $('input[data-action]').click(function(){
+            $action = $(this).data('action');
+            if ($action == 'save') {
+                var wx = $('#wx'), mobile = $('#mobile')
+                if (wx.val() == '') {
+                    layer.msg('中奖者微信不能为空', {icon: 5, time: 1000}, function(){wx.focus()});
+                    return false
+                }
+                if (mobile.val() == '') {
+                    layer.msg('中奖者手机不能为空', {icon: 5, time: 1000}, function(){mobile.focus()});
+                    return false
+                }
+                $.ajax({
+                    type: 'post', cache: false, dataType: 'json',
+                    url: '/prize/ffjp',
+                    data: {'id': {$data.id}, 'uid': {$data.uid},'wx': wx.val(), 'mobile': mobile.val(), 'address': $('#address').val(), 'prize_id': {$data.prize.id}},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg('发放成功', {icon: 6, time: 2000}, function(){
+                                location.href = '/prize/users'
+                            })
+                        }else{
+                            layer.msg(data.info, {icon: 5, time: 1000});
+                        }
+                    }
+                })
+            } else if ($action == 'cancel') {
+                location.href = '/prize/users'
+            }
+        });
+    });
+</script>
+</html>

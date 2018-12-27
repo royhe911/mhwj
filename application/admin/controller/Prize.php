@@ -206,4 +206,44 @@ class Prize extends \think\Controller
         $pages = ceil($count / $pagesize);
         return $this->fetch('users', ['list' => $list, 'pages' => $pages]);
     }
+
+    /**
+     * 发放奖品
+     * @author 贺强
+     * @time   2018-12-13 17:26:47
+     * @param  PrizeDistributeModel $pd PrizeDistributeModel 实例
+     */
+    public function ffjp(PrizeDistributeModel $pd)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['uid'])) {
+                return ['status' => 1, 'info' => '中奖者ID不能为空'];
+            }
+            if (empty($param['wx'])) {
+                return ['status' => 3, 'info' => '中奖者微信不能为空'];
+            }
+            if (empty($param['mobile'])) {
+                return ['status' => 7, 'info' => '中奖者手机不能为空'];
+            }
+            $param['grant_time'] = time();
+            // 添加发放记录
+            $res = $pd->modify($param, ['id' => $param['id']]);
+            if ($res) {
+                return ['status' => 0, 'info' => '发放成功'];
+            } else {
+                return ['status' => 4, 'info' => '发放失败'];
+            }
+        } else {
+            $id    = $this->request->get('id');
+            $pd    = new PrizeDistributeModel();
+            $dist  = $pd->getModel(['id' => $id]);
+            $p     = new PrizeModel();
+            $prize = $p->getModel(['id' => $dist['prize_id']]);
+            $u     = new UserModel();
+            $user  = $u->getModel(['id' => $dist['uid']]);
+            $data  = ['id' => $id, 'uid' => $dist['uid'], 'prize' => $prize, 'mobile' => $user['mobile'], 'avatar' => $user['avatar']];
+            return $this->fetch('ffjp', ['data' => $data]);
+        }
+    }
 }

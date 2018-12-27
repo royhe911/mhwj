@@ -44,11 +44,6 @@ class PrizeModel extends CommonModel
                 Db::rollback();
                 return 30;
             }
-            $res = $this->increment('count', ['id' => $data['id']]);
-            if (!$res) {
-                Db::rollback();
-                return 40;
-            }
             Db::commit();
             return true;
         } catch (\Exception $e) {

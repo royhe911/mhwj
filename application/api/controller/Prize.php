@@ -55,7 +55,7 @@ class Prize extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $order = 'sort';
-        $list  = $p->getList($where, true, "$page,$pagesize", $order);
+        $list  = $p->getList($where, ['id', 'name', 'url', 'desc', 'count'], "$page,$pagesize", $order);
         if ($list) {
             foreach ($list as &$item) {
                 if (!empty($item['url'])) {
@@ -93,7 +93,11 @@ class Prize extends \think\Controller
         // 调用插入参与抽奖方法
         $res = $p->joinPrize($param);
         if ($res !== true) {
-            echo json_encode(['status' => $res, 'info' => '参与失败', 'data' => null]);exit;
+            $msg = '参与失败';
+            if ($res === 20) {
+                $msg = '参与抽奖人数已满';
+            }
+            echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '参与成功', 'data' => ['code' => $code]]);exit;
     }
