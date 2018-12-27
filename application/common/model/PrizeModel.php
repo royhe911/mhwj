@@ -45,7 +45,7 @@ class PrizeModel extends CommonModel
                         $pu->add(['prize_id' => $prize_id, 'uid' => $share_uid, 'share_uid' => $param['uid'], 'code' => $param['share_code'], 'addtime' => time(), 'form_id' => $puser['form_id']]);
                     }
                 }
-                unset($param['share_code']);
+                unset($param['share_code'], $param['share_uid']);
                 $res = $pu->add($param);
                 if (!$res) {
                     Db::rollback();
