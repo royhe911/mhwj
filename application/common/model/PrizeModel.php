@@ -51,7 +51,7 @@ class PrizeModel extends CommonModel
                 $share_uid = $param['share_uid'];
                 $puser     = $pu->getModel(['prize_id' => $prize_id, 'uid' => $share_uid], ['form_id']);
                 if ($puser) {
-                    $pu->add(['prize_id' => $prize_id, 'uid' => $share_uid, 'share_uid' => $param['uid'], 'code' => $param['code'], 'addtime' => time(), 'form_id' => $puser['form_id']]);
+                    $pu->add(['prize_id' => $prize_id, 'uid' => $share_uid, 'share_uid' => $param['uid'], 'code' => $param['share_code'], 'addtime' => time(), 'form_id' => $puser['form_id']]);
                 }
             }
             if ($count + 1 >= $data['count']) {

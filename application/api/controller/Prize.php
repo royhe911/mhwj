@@ -152,6 +152,9 @@ class Prize extends \think\Controller
             echo json_encode(['status' => 5, 'info' => '您已参与过此奖品的抽奖了', 'data' => null]);exit;
         }
         $code = $this->get_prize_code($prize_id);
+        if (!empty($param['share_uid'])) {
+            $param['share_code'] = $this->get_prize_code($prize_id);
+        }
         // 添加插入字段
         $param['code']    = $code;
         $param['addtime'] = time();
