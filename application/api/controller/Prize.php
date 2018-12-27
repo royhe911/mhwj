@@ -70,11 +70,11 @@ class Prize extends \think\Controller
                     if (strpos($url, 'http://') === false && strpos($url, 'https://') === false) {
                         $item['url'] = config('WEBSITE') . $url;
                     }
-                    if (in_array($item['id'], $plis)) {
-                        $item['is_join'] = 1;
-                    } else {
-                        $item['is_join'] = 0;
-                    }
+                }
+                if (in_array($item['id'], $plis)) {
+                    $item['is_join'] = 1;
+                } else {
+                    $item['is_join'] = 0;
                 }
             }
         }
