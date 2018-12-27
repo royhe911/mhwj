@@ -48,12 +48,19 @@ class Prize extends \think\Controller
         $page     = 1;
         $pagesize = 10;
         $param    = $this->param;
+        if (empty($param['uid'])) {
+            echo json_encode(['status' => 1, 'info' => '用户ID不能为空', 'data' => null]);exit;
+        }
         if (!empty($param['page'])) {
             $page = $param['page'];
         }
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
+        $uid   = $param['uid'];
+        $pu    = new PrizeUserModel();
+        $plis  = $pu->getList(['uid' => $uid], ['prize_id']);
+        $plis  = array_column($plis, 'prize_id');
         $order = 'sort';
         $list  = $p->getList($where, ['id', 'name', 'url', 'desc', 'count'], "$page,$pagesize", $order);
         if ($list) {
@@ -62,6 +69,11 @@ class Prize extends \think\Controller
                     $url = $item['url'];
                     if (strpos($url, 'http://') === false && strpos($url, 'https://') === false) {
                         $item['url'] = config('WEBSITE') . $url;
+                    }
+                    if (in_array($item['id'], $plis)) {
+                        $item['is_join'] = 1;
+                    } else {
+                        $item['is_join'] = 0;
                     }
                 }
             }
