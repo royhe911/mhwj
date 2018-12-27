@@ -227,6 +227,7 @@ class Prize extends \think\Controller
                 return ['status' => 7, 'info' => '中奖者手机不能为空'];
             }
             $param['grant_time'] = time();
+            $param['is_grant']   = 1;
             // 添加发放记录
             $res = $pd->modify($param, ['id' => $param['id']]);
             if ($res) {
