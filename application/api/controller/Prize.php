@@ -120,7 +120,7 @@ class Prize extends \think\Controller
         $msg = '参与失败';
         if ($res === 20) {
             $msg = '参与抽奖人数已满';
-        } elseif ($res === 1) {
+        } elseif ($res === 11) {
             $msg = '抽奖已结束';
         }
         echo json_encode(['status' => $res, 'info' => $msg, 'data' => null]);exit;
