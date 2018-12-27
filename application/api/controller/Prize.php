@@ -58,18 +58,26 @@ class Prize extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $uid   = $param['uid'];
-        $pu    = new PrizeUserModel();
-        $plis  = $pu->getList(['uid' => $uid], ['prize_id']);
-        $plis  = array_column($plis, 'prize_id');
         $order = 'sort';
         $list  = $p->getList($where, ['id', 'name', 'url', 'desc', 'count'], "$page,$pagesize", $order);
         if ($list) {
+            $pu    = new PrizeUserModel();
+            $plis  = $pu->getList(['uid' => $uid], ['prize_id']);
+            $plis  = array_column($plis, 'prize_id');
+            $pids  = array_column($list, 'id');
+            $joins = $pu->getList(['prize_id' => ['in', $pids]], ['prize_id', 'count(distinct uid) count'], [], '', 'prize_id');
+            $joins = array_column($joins, 'count', 'prize_id');
             foreach ($list as &$item) {
                 if (!empty($item['url'])) {
                     $url = $item['url'];
                     if (strpos($url, 'http://') === false && strpos($url, 'https://') === false) {
                         $item['url'] = config('WEBSITE') . $url;
                     }
+                }
+                if (!empty($joins[$item['id']])) {
+                    $item['joins'] = $joins[$item['id']];
+                } else {
+                    $item['joins'] = 0;
                 }
                 if (in_array($item['id'], $plis)) {
                     $item['is_join'] = 1;
@@ -79,6 +87,44 @@ class Prize extends \think\Controller
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);
+    }
+
+    /**
+     * 奖品详情
+     * @author 贺强
+     * @time   2018-12-27 15:19:02
+     * @param  PrizeModel $p PrizeModel 实例
+     */
+    public function prize_info(PrizeModel $p)
+    {
+        $param = $this->param;
+        if (empty($param['prize_id'])) {
+            $msg = ['status' => 1, 'info' => '奖品ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $prize_id = $param['prize_id'];
+        $uid      = $param['uid'];
+        $prize    = $p->getModel(['id' => $prize_id], ['id', 'name', 'url', 'desc', 'count']);
+        if ($prize) {
+            $pu    = new PrizeUserModel();
+            $count = $pu->getCount(['prize_id' => $prize_id, 'uid' => $uid]);
+            if ($count) {
+                $prize['is_join'] = 1;
+            } else {
+                $prize['is_join'] = 0;
+            }
+            $joins = $pu->getList(['prize_id' => $prize_id], ['count(distinct uid) count']);
+            if ($joins) {
+                $prize['joins'] = $joins[0]['count'];
+            } else {
+                $prize['joins'] = 0;
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $prize]);exit;
     }
 
     /**

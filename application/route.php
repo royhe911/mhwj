@@ -174,5 +174,6 @@ return [
     '/api/pz/prizes'      => 'api/Prize/get_prizes', // 奖品列表
     '/api/pz/joinprize'   => 'api/Prize/join_prize', // 参与抽奖
     '/api/pz/prizecode'   => 'api/Prize/get_prize_code', // 获取抽奖码
+    '/api/pz/prizeinfo'   => 'api/Prize/prize_info', // 奖品详情
     /*--------   砍价 api 结束  --------*/
 ];
