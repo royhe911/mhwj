@@ -43,6 +43,12 @@
                                     <option {if($param.status==8)}selected="selected" {/if}value="8">已审核</option>
                                 </select>
                             </td>
+                            <td>
+                                <select name="is_recommend" class="form-control">
+                                    <option value="">是否推荐</option>
+                                    <option {if($param.is_recommend==1)}selected="selected"{/if} value="1">是</option>
+                                </select>
+                            </td>
                             <td class="ttd">
                                 <input type="text" placeholder="用户昵称" name="nickname">
                             </td>

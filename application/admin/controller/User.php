@@ -32,6 +32,11 @@ class User extends \think\Controller
         } else {
             $param['type'] = 0;
         }
+        if (!empty($param['is_recommend']) && intval($param['is_recommend']) === 1) {
+            $where .= " and is_recommend=1";
+        } else {
+            $param['is_recommend'] = '';
+        }
         if (!empty($param['status'])) {
             $where .= " and type=2 and (`status`={$param['status']}";
             if (intval($param['status']) === 1) {
