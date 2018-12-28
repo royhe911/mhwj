@@ -1,6 +1,7 @@
 <?php
 namespace app\common\crontab;
 
+use app\common\model\MiniprogramModel;
 use app\common\model\PrizeUserModel;
 use think\console\Command;
 use think\console\Input;
@@ -34,6 +35,7 @@ class Prize extends Command
         $list = $pu->getJoinList([['m_prize p', 'a.prize_id=p.id'], ['m_user u', 'u.id=a.uid']], ['a.is_notice' => 0, 'p.status' => 44], ['a.id', 'a.form_id', 'p.name', 'u.openid']);
         if ($list) {
             $ids = [];
+            $access_token = $this->get_access_token();
             // API 地址
             $url = 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send';
             $url .= "?access_token=$access_token";
@@ -54,6 +56,44 @@ class Prize extends Command
             }
             $pu->modifyField('is_notice', 1, ['id' => ['in', $ids]]);
         }
+    }
+
+    /**
+     * 取得 access_token
+     * @author 贺强
+     * @time   2018-12-27 11:36:27
+     * @param  boolean $is_master 是否是陪玩端
+     */
+    public function get_access_token()
+    {
+        $mini = new MiniprogramModel();
+        // 取得 appid
+        $appid = 'wxe6f37de8e1e3225e';
+        // 取 secret
+        $appsecret = '357566bea005201ce062acaabd4a58e9';
+        $program = $mini->getModel(['appid' => $appid]);
+        if (!$program) {
+            $id = $mini->add(['appid' => $appid, 'appsecret' => $appsecret, 'name' => '游戏陪玩咖']);
+        } else {
+            $id = $program['id'];
+        }
+        if (!empty($program['access_token']) && $program['expires_out'] > time()) {
+            return $program['access_token'];
+        }
+        $url = 'https://api.weixin.qq.com/cgi-bin/token';
+        $url .= '?grant_type=client_credential';
+        $url .= "&appid=$appid";
+        $url .= "&secret=$appsecret";
+        $data = $this->curl($url);
+        if (!empty($data)) {
+            $data = json_decode($data, true);
+        }
+        if (!empty($data['errcode'])) {
+            // 写日志
+            return false;
+        }
+        $mini->modify(['access_token' => $data['access_token'], 'expires_out' => time() + $data['expires_in'] - 10], ['appid' => $appid]);
+        return $data['access_token'];
     }
 
     /**
