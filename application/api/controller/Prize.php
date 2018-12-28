@@ -113,12 +113,16 @@ class Prize extends \think\Controller
         $prize    = $p->getModel(['id' => $prize_id], ['id', 'name', 'url', 'desc', 'count', 'status']);
         if ($prize) {
             $pu    = new PrizeUserModel();
-            $puser = $pu->getModel(['prize_id' => $prize_id, 'uid' => $uid]);
-            if ($puser) {
-                $prize['is_join']    = 1;
-                $prize['is_winners'] = $puser['is_winners'];
+            $count = $pu->getCount(['prize_id' => $prize_id, 'uid' => $uid]);
+            if ($count) {
+                $prize['is_join'] = 1;
             } else {
-                $prize['is_join']    = 0;
+                $prize['is_join'] = 0;
+            }
+            $count = $pu->getCount(['prize_id' => $prize_id, 'uid' => $uid, 'is_winners' => 1]);
+            if ($count) {
+                $prize['is_winners'] = 1;
+            } else {
                 $prize['is_winners'] = 0;
             }
             $joins = $pu->getModel(['prize_id' => $prize_id], ['count(distinct uid) count']);

@@ -888,7 +888,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 444, 'info' => "本活动将于{$limit['start_time']}-{$limit['end_time']}之间开启，点击预约！", 'data' => null]);exit;
         }
         $param = $this->param;
-        if (!empty($param['big_para1']) && !empty($param['big_para2'])) {
+        if (intval($param['type']) === 1 && !empty($param['big_para1']) && !empty($param['big_para2'])) {
             if (abs(intval($param['big_para2']) - intval($param['big_para1'])) > 2) {
                 echo json_encode(['status' => 4, 'info' => '段位跨度不能超过2个段位', 'data' => null]);exit;
             }
@@ -1001,7 +1001,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 444, 'info' => "本活动将于{$limit['start_time']}-{$limit['end_time']}之间开启，点击预约！", 'data' => null]);exit;
         }
         $param = $this->param;
-        if (!empty($param['big_para1']) && !empty($param['big_para2'])) {
+        if (intval($param['type']) === 1 && !empty($param['big_para1']) && !empty($param['big_para2'])) {
             if (abs(intval($param['big_para2']) - intval($param['big_para1'])) > 2) {
                 echo json_encode(['status' => 4, 'info' => '段位跨度不能超过2个段位', 'data' => null]);exit;
             }
