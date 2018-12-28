@@ -211,21 +211,33 @@ class Prize extends \think\Controller
         if ($access_token === false) {
             // 记录日志
         }
+        $prize_id = $param['prize_id'];
         // API 地址
         $url = 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send';
         $url .= "?access_token=$access_token";
-        $data['touser'] = $param['openid'];
-        // 下单成功模板ID
-        $data['template_id'] = '5_VTzsMzU2C5G0qOQLnTq5PWYtwQKrBwHi7ffWqWXjA';
-        $data['form_id']     = $param['form_id'];
-        $data['page']        = '/pages/welfare/welfare';
-        $data['data']        = ['keyword1' => ['value' => $param['prize_name']], 'keyword2' => ['value' => '斗汁科技 发起的抽奖正在开奖，点击查看中奖名单']];
-        // 处理逻辑
-        $data = json_encode($data);
-        $res  = $this->curl($url, $data);
-        $res  = json_decode($res, true);
-        if (!empty($res['errcode'])) {
-            // 记录日志
+        $pu    = new PrizeUserModel();
+        $plis  = $pu->getList(['prize_id' => $prize_id], ['distinct uid', 'form_id']);
+        $uids  = array_column($plis, 'uid');
+        $u     = new UserModel();
+        $users = $u->getList(['id' = ['in', $uids]], ['id', 'openid']);
+        $users = array_column($users, 'openid', 'id');
+        foreach ($plis as $item) {
+            if (empty($users[$item['uid']])) {
+                continue;
+            }
+            $data['touser'] = $users[$item['uid']];
+            // 下单成功模板ID
+            $data['template_id'] = '5_VTzsMzU2C5G0qOQLnTq5PWYtwQKrBwHi7ffWqWXjA';
+            $data['form_id']     = $item['form_id'];
+            $data['page']        = "/pages/luckDraw/luckDetail/luckDetail?id=$prize_id";
+            $data['data']        = ['keyword1' => ['value' => $param['prize_name']], 'keyword2' => ['value' => '斗汁科技 发起的抽奖正在开奖，点击查看中奖名单']];
+            // 处理逻辑
+            $data = json_encode($data);
+            $res  = $this->curl($url, $data);
+            $res  = json_decode($res, true);
+            if (!empty($res['errcode'])) {
+                // 记录日志
+            }
         }
         return true;
     }

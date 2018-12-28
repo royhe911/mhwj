@@ -104,8 +104,6 @@ class PrizeModel extends CommonModel
         $p = new PrizeModel();
         $p->modifyField('status', 44, ['id' => $prize_id]);
         $pu->modifyField('is_winners', 1, ['id' => $lucker['id']]);
-        $u    = new UserModel();
-        $user = $u->getModel(['id' => $lucker['uid']], ['openid']);
-        return ['openid' => $user['openid'], 'code' => $lucker['code'], 'form_id' => $lucker['form_id']];
+        return ['prize_id' => $prize_id];
     }
 }
