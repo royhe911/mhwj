@@ -293,7 +293,7 @@ class Prize extends \think\Controller
             echo json_encode($msg);exit;
         }
         $uid  = $param['uid'];
-        $list = $pd->getList(['uid' => $uid], ['id', 'uid', 'prize_id', 'addtime', 'grant_time']);
+        $list = $pd->getList(['uid' => $uid], ['id', 'uid', 'prize_id', 'code', 'addtime', 'grant_time']);
         if ($list) {
             $p    = new PrizeModel();
             $pids = array_column($list, 'prize_id');
