@@ -90,14 +90,17 @@ class PrizeModel extends CommonModel
         }
         $pu     = new PrizeUserModel();
         $data   = $pu->getList(['prize_id' => $prize_id], ['id', 'uid', 'code', 'form_id']);
+        shuffle($data);
         $index  = mt_rand(0, count($data) - 1);
         $lucker = $data[$index];
-        $ldata  = ['code' => $data['code'], 'uid' => $lucker['uid'], 'prize_id' => $prize_id, 'addtime' => time()];
+        $ldata  = ['code' => $lucker['code'], 'uid' => $lucker['uid'], 'prize_id' => $prize_id, 'addtime' => time()];
         $res    = $pd->add($ldata);
         if (!$res) {
             return 21;
         }
-        $pu->modifyField('is_winners', 1, ['id' => $data['id']]);
+        $p = new PrizeModel();
+        $p->modifyField('status', 44, ['id' => $prize_id]);
+        $pu->modifyField('is_winners', 1, ['id' => $lucker['id']]);
         $u    = new UserModel();
         $user = $u->getModel(['id' => $lucker['uid']], ['openid']);
         return ['openid' => $user['openid'], 'code' => $lucker['code'], 'form_id' => $lucker['form_id']];

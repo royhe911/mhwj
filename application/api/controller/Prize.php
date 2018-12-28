@@ -44,7 +44,7 @@ class Prize extends \think\Controller
     public function get_prizes(PrizeModel $p)
     {
         // 查询条件
-        $where = [];
+        $where = ['status' => ['<>', 44]];
         // 分页参数
         $page     = 1;
         $pagesize = 10;
@@ -109,8 +109,11 @@ class Prize extends \think\Controller
         }
         $prize_id = $param['prize_id'];
         $uid      = $param['uid'];
-        $prize    = $p->getModel(['id' => $prize_id], ['id', 'name', 'url', 'desc', 'count']);
+        $prize    = $p->getModel(['id' => $prize_id], ['id', 'name', 'url', 'desc', 'count', 'status']);
         if ($prize) {
+            if ($prize['status'] === 44) {
+                echo json_encode(['status' => 44, 'info' => '本次抽奖已结束', 'data' => null]);exit;
+            }
             $pu    = new PrizeUserModel();
             $count = $pu->getCount(['prize_id' => $prize_id, 'uid' => $uid]);
             if ($count) {
@@ -321,5 +324,10 @@ class Prize extends \think\Controller
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    public function test(PrizeModel $p)
+    {
+        $p->luck_draw(1);
     }
 }
