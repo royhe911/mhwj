@@ -166,9 +166,6 @@ class Prize extends \think\Controller
         // 调用插入参与抽奖方法
         $res = $p->joinPrize($param);
         if ($res === true || is_array($res)) {
-            if (is_array($res)) {
-                $this->luck_notice($res);
-            }
             echo json_encode(['status' => 0, 'info' => '参与成功', 'data' => ['code' => $code]]);exit;
         }
         $msg = '参与失败，请重试';
@@ -197,49 +194,6 @@ class Prize extends \think\Controller
             $this->get_code($prize_id, $num);
         }
         return $code;
-    }
-
-    /**
-     * 发送抽奖结果通知
-     * @author 贺强
-     * @time   2018-12-27 11:32:45
-     * @param  array $param 通知参数
-     */
-    public function luck_notice($param)
-    {
-        // 取得 access_token
-        $access_token = $this->get_access_token();
-        if ($access_token === false) {
-            // 记录日志
-        }
-        $prize_id = $param['prize_id'];
-        // API 地址
-        $url = 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send';
-        $url .= "?access_token=$access_token";
-        $pu    = new PrizeUserModel();
-        $plis  = $pu->getList(['prize_id' => $prize_id], ['distinct uid', 'form_id']);
-        $uids  = array_column($plis, 'uid');
-        $u     = new UserModel();
-        $users = $u->getList(['id' => ['in', $uids]], ['id', 'openid']);
-        $users = array_column($users, 'openid', 'id');
-        foreach ($plis as $item) {
-            if (!empty($users[$item['uid']])) {
-                $data['touser'] = $users[$item['uid']];
-                // 下单成功模板ID
-                $data['template_id'] = '5_VTzsMzU2C5G0qOQLnTq5PWYtwQKrBwHi7ffWqWXjA';
-                $data['form_id']     = $item['form_id'];
-                $data['page']        = "/pages/luckDraw/luckDetail/luckDetail?id=$prize_id";
-                $data['data']        = ['keyword1' => ['value' => $param['prize_name']], 'keyword2' => ['value' => '斗汁科技 发起的抽奖正在开奖，点击查看中奖名单']];
-                // 处理逻辑
-                $data = json_encode($data);
-                $res  = $this->curl($url, $data);
-                $res  = json_decode($res, true);
-                if (!empty($res['errcode'])) {
-                    // 记录日志
-                }
-            }
-        }
-        return true;
     }
 
     /**
