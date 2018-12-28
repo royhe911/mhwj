@@ -2321,7 +2321,7 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = intval($param['pagesize']);
         }
-        $where = ['a.status' => 8, 'play_type' => 2, 'level_url' => ['<>', '']];
+        $where = ['a.status' => 8, 'play_type' => 2, 'level_url' => ['<>', ''], 'u.is_recommend' => 1];
         // $count = $ua->getJoinCount([['m_user u', 'a.uid=u.id']], $where);
         $list = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'nickname', 'avatar'], "$page,$pagesize", 'u.is_recommend desc');
         if ($list) {
