@@ -92,7 +92,7 @@ class PrizeModel extends CommonModel
         $data   = $pu->getList(['prize_id' => $prize_id], ['id', 'uid', 'code', 'form_id']);
         $index  = mt_rand(0, count($data) - 1);
         $lucker = $data[$index];
-        $ldata  = ['uid' => $lucker['uid'], 'prize_id' => $prize_id, 'addtime' => time()];
+        $ldata  = ['code' => $data['code'], 'uid' => $lucker['uid'], 'prize_id' => $prize_id, 'addtime' => time()];
         $res    = $pd->add($ldata);
         if (!$res) {
             return 21;
