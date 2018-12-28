@@ -2321,9 +2321,9 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = intval($param['pagesize']);
         }
-        $where = ['a.status' => 8, 'play_type' => 2, 'level_url' => ['<>', ''], 'u.is_recommend' => 1];
+        $where = ['a.status' => 8, 'level_url' => ['<>', ''], 'u.is_recommend' => 1];
         // $count = $ua->getJoinCount([['m_user u', 'a.uid=u.id']], $where);
-        $list = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'nickname', 'avatar'], "$page,$pagesize", 'u.is_recommend desc');
+        $list = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'logo', 'nickname', 'avatar', 'play_type'], "$page,$pagesize", 'u.is_recommend desc');
         if ($list) {
             $uids  = array_column($list, 'uid');
             $uo    = new UserOrderModel();
@@ -2338,6 +2338,13 @@ class Api extends \think\Controller
                         }
                     }
                     $item['level_url'] = $level_url;
+                }
+                if ($item['play_type'] === 1) {
+                    $logo = $item['logo'];
+                    if (strpos($logo, 'http://') === false && strpos($logo, 'https://') === false) {
+                        $logo = config('WEBSITE') . $logo;
+                    }
+                    $item['level_url'] = [$logo];
                 }
                 if (!empty($order[$item['uid']])) {
                     $item['count'] = $order[$item['uid']];
