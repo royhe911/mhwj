@@ -4,6 +4,7 @@ namespace app\api\controller;
 use app\common\model\PrizeDistributeModel;
 use app\common\model\PrizeModel;
 use app\common\model\PrizeUserModel;
+use app\common\model\UserModel;
 
 /**
  * 抽奖-控制器
@@ -222,21 +223,20 @@ class Prize extends \think\Controller
         $users = $u->getList(['id' => ['in', $uids]], ['id', 'openid']);
         $users = array_column($users, 'openid', 'id');
         foreach ($plis as $item) {
-            if (empty($users[$item['uid']])) {
-                continue;
-            }
-            $data['touser'] = $users[$item['uid']];
-            // 下单成功模板ID
-            $data['template_id'] = '5_VTzsMzU2C5G0qOQLnTq5PWYtwQKrBwHi7ffWqWXjA';
-            $data['form_id']     = $item['form_id'];
-            $data['page']        = "/pages/luckDraw/luckDetail/luckDetail?id=$prize_id";
-            $data['data']        = ['keyword1' => ['value' => $param['prize_name']], 'keyword2' => ['value' => '斗汁科技 发起的抽奖正在开奖，点击查看中奖名单']];
-            // 处理逻辑
-            $data = json_encode($data);
-            $res  = $this->curl($url, $data);
-            $res  = json_decode($res, true);
-            if (!empty($res['errcode'])) {
-                // 记录日志
+            if (!empty($users[$item['uid']])) {
+                $data['touser'] = $users[$item['uid']];
+                // 下单成功模板ID
+                $data['template_id'] = '5_VTzsMzU2C5G0qOQLnTq5PWYtwQKrBwHi7ffWqWXjA';
+                $data['form_id']     = $item['form_id'];
+                $data['page']        = "/pages/luckDraw/luckDetail/luckDetail?id=$prize_id";
+                $data['data']        = ['keyword1' => ['value' => $param['prize_name']], 'keyword2' => ['value' => '斗汁科技 发起的抽奖正在开奖，点击查看中奖名单']];
+                // 处理逻辑
+                $data = json_encode($data);
+                $res  = $this->curl($url, $data);
+                $res  = json_decode($res, true);
+                if (!empty($res['errcode'])) {
+                    // 记录日志
+                }
             }
         }
         return true;
