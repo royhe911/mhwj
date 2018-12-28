@@ -223,6 +223,7 @@ class Prize extends \think\Controller
         $users = $u->getList(['id' => ['in', $uids]], ['id', 'openid']);
         $users = array_column($users, 'openid', 'id');
         foreach ($plis as $item) {
+            sleep(5);
             if (!empty($users[$item['uid']])) {
                 $data['touser'] = $users[$item['uid']];
                 // 下单成功模板ID
