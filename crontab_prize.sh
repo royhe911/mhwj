@@ -2,9 +2,9 @@
 PATH=/usr/local/php/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 cd /www/wwwroot/wwwdragontangcom/   #进入项目的根目录下，保证可以运行php think的命令
-step=5 #间隔的秒数，不能大于60  
+step=3 #间隔的秒数，不能大于60  
 
-for ((i = 0; i < 12; i=(i+step)));
+for ((i = 0; i < 20; i=(i+step)));
 do
     php think prize
     sleep $step
