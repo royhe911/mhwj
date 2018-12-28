@@ -3,6 +3,7 @@ namespace app\admin\controller;
 
 use app\common\model\PrizeDistributeModel;
 use app\common\model\PrizeModel;
+use app\common\model\PrizeUserModel;
 use app\common\model\UserModel;
 
 /**
@@ -246,5 +247,68 @@ class Prize extends \think\Controller
             $data  = ['id' => $id, 'uid' => $dist['uid'], 'prize' => $prize, 'mobile' => $user['mobile'], 'avatar' => $user['avatar']];
             return $this->fetch('ffjp', ['data' => $data]);
         }
+    }
+
+    /**
+     * 参与抽奖列表
+     * @author 贺强
+     * @time   2018-12-28 09:52:23
+     * @param  PrizeUserModel $pu PrizeUserModel 实例
+     */
+    public function jackpot(PrizeUserModel $pu)
+    {
+        $page     = $this->request->get('page', 1);
+        $pagesize = $this->request->get('pagesize', config('PAGESIZE'));
+        $pages    = 0;
+        $prize_id = $this->request->get('prize_id');
+        $nickname = $this->request->get('nickname');
+        $where    = [];
+        if ($prize_id) {
+            $where = ['prize_id' => $prize_id];
+        }
+        $u = new UserModel();
+        if (!empty($nickname)) {
+            $ulis = $u->getList(['nickname' => ['like', "%$nickname%"]], ['id']);
+            $uuid = array_column($ulis, 'id');
+            if ($uuid) {
+                $where['uid'] = ['in', $uuid];
+            }
+        }
+        $p     = new PrizeModel();
+        $prizs = $p->getList([], ['id', 'name']);
+        $prizs = array_column($prizs, 'name', 'id');
+        $list  = $pu->getList($where, true, "$page,$pagesize");
+        if ($list) {
+            $uids  = array_column($list, 'uid');
+            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
+            foreach ($list as &$item) {
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                if ($item['is_winners'] === 1) {
+                    $item['is_winners'] = '是';
+                } else {
+                    $item['is_winners'] = '否';
+                }
+                if (!empty($users[$item['uid']])) {
+                    $user = $users[$item['uid']];
+                    // 属性赋值
+                    $item['nickname'] = $user['nickname'];
+                    $item['avatar']   = $user['avatar'];
+                } else {
+                    $item['nickname'] = '';
+                    $item['avatar']   = '';
+                }
+                if (!empty($prizs[$item['prize_id']])) {
+                    $item['name'] = $prizs[$item['prize_id']];
+                } else {
+                    $item['name'] = '';
+                }
+            }
+            $count = $pu->getCount($where);
+            $pages = ceil($count / $pagesize);
+        }
+        return $this->fetch('jackpot', ['list' => $list, 'pages' => $pages, 'prizs' => $prizs, 'prize_id' => $prize_id, 'nickname' => $nickname]);
     }
 }

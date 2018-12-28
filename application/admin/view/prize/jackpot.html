@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奖池列表</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/dataTables/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/paging/paging.css">
+    <style type="text/css">
+        .form-control{width: 220px;}
+        .ttd{width: 250px;text-align: center;}
+        .ttb{width: 80px;text-align: center;}
+        .avatar{width: 64px;height: 64px;border-radius: 32px;}
+        .sort{width: 80px;}
+        .count{width: 120px;}
+        .sort_i,.max_knife_num_i,.min_knife_num_i{width: 50px;display: none;}
+        .count_i{width: 100px;display: none;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form action="/prize/jackpot" method="get">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td class="ttd">
+                                <select class="form-control" name="prize_id">
+                                    <option value="">…选择奖品…</option>
+                                    {if(!empty($prizs))}
+                                    {foreach($prizs as $k=>$v)}
+                                    <option {if($k==$prize_id)}selected="selected" {/if}value="{$k}">{$v}</option>}
+                                    option
+                                    {/foreach}
+                                    {/if}
+                                </select>
+                            </td>
+                            <td class="ttd">
+                                <input type="text" placeholder="用户昵称" name="nickname" value="{$nickname}">
+                            </td>
+                            <td class="ttb"><input type="submit" class="btn btn-sm btn-primary" value="搜索"></td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    </table>
+                    </form>
+                </div>
+                <div class="ibox-content">
+                    <table class="table table-striped table-bordered table-hover dataTables-example">
+                        <thead>
+                        <tr>
+                            <!-- <th>排序</th> -->
+                            <th>奖品名称</th>
+                            <th>抽奖码</th>
+                            <th>抽奖者昵称</th>
+                            <th>抽奖者头像</th>
+                            <th>抽奖时间</th>
+                            <th>是否中奖</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {foreach $list as $k=>$item}
+                        <tr class="gradeX">
+                            <td>{$item.name}</td>
+                            <td>{$item.code}</td>
+                            <td>{$item.nickname}</td>
+                            <td><img src="{$item.avatar}" class="avatar" onerror="this.style.display='none'"></td>
+                            <td>{$item.addtime}</td>
+                            <td>{$item.is_winners}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                        <footer>
+                            <tr>
+                                <td colspan="100"><div class="dataTables_paginate paging_simple_numbers paging_page">{$pages}</div></td>
+                            </tr>
+                        </footer>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript" src="/static/paging/paging-min.js"></script>
+<script>
+    $(function () {
+    });
+</script>
+</html>

@@ -70,6 +70,7 @@ return [
     '/prize/editcount'    => 'admin/Prize/editcount', // 修改奖品
     '/prize/users'        => 'admin/Prize/users', // 中奖者列表
     '/prize/ffjp'         => 'admin/Prize/ffjp', // 发放奖品
+    '/prize/jackpot'      => 'admin/Prize/jackpot', // 奖池
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图

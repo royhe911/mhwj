@@ -244,13 +244,16 @@ class Prize extends \think\Controller
         }
         $uid   = $param['uid'];
         $where = ['uid' => $uid];
-        $list  = $pu->getList($where, ['uid', 'code', 'prize_id', 'is_winners']);
+        $list  = $pu->getList($where, ['uid', 'code', 'prize_id', 'is_winners', 'addtime']);
         if ($list) {
             $p    = new PrizeModel();
             $pids = array_column($list, 'prize_id');
             $plis = $p->getList(['id' => ['in', $pids]], ['id', 'name', 'url', 'desc']);
             $plis = array_column($plis, null, 'id');
             foreach ($list as &$item) {
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
                 if (!empty($plis[$item['prize_id']])) {
                     $prize = $plis[$item['prize_id']];
                     // 属性赋值
@@ -294,6 +297,12 @@ class Prize extends \think\Controller
             $plis = $p->getList(['id' => ['in', $pids]], ['id', 'name', 'url', 'desc']);
             $plis = array_column($plis, null, 'id');
             foreach ($list as &$item) {
+                if (!empty($item['addtime'])) {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                if (!empty($item['grant_time'])) {
+                    $item['grant_time'] = date('Y-m-d H:i:s', $item['grant_time']);
+                }
                 if (!empty($plis[$item['prize_id']])) {
                     $prize = $plis[$item['prize_id']];
                     // 属性赋值
