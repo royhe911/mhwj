@@ -53,6 +53,7 @@ class Prize extends Command
                 if ($res['errcode'] === 0 && $res['errmsg'] === 'ok') {
                     $pu->modifyField('is_notice', 1, ['id' => $item['id']]);
                 }
+                break;
             }
         }
     }
