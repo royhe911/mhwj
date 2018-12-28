@@ -140,10 +140,7 @@ class Prize extends \think\Controller
             }
             switch ($item['status']) {
                 case 0:
-                    $item['status'] = '未开始';
-                    break;
-                case 1:
-                    $item['status'] = '已开始';
+                    $item['status'] = '进行中';
                     break;
                 default:
                     $item['status'] = '已结束';
