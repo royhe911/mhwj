@@ -219,7 +219,7 @@ class Prize extends \think\Controller
         $plis  = $pu->getList(['prize_id' => $prize_id], ['distinct uid', 'form_id']);
         $uids  = array_column($plis, 'uid');
         $u     = new UserModel();
-        $users = $u->getList(['id' = ['in', $uids]], ['id', 'openid']);
+        $users = $u->getList(['id' => ['in', $uids]], ['id', 'openid']);
         $users = array_column($users, 'openid', 'id');
         foreach ($plis as $item) {
             if (empty($users[$item['uid']])) {
