@@ -170,7 +170,7 @@ class Prize extends \think\Controller
             }
             echo json_encode(['status' => 0, 'info' => '参与成功', 'data' => ['code' => $code]]);exit;
         }
-        $msg = '参与失败';
+        $msg = '参与失败，请重试';
         if ($res === 20) {
             $msg = '参与抽奖人数已满';
         } elseif ($res === 11) {

@@ -33,7 +33,10 @@ class PrizeModel extends CommonModel
                 Db::rollback();
                 return 10;
             }
-            $data  = $data[0];
+            $data = $data[0];
+            if ($data['status'] === 44) {
+                return 11;
+            }
             $pu    = new PrizeUserModel();
             $user  = $pu->getModel(['prize_id' => $prize_id], ['count(distinct uid) count']);
             $count = $user['count'];
@@ -88,8 +91,8 @@ class PrizeModel extends CommonModel
         if ($count) {
             return 11;
         }
-        $pu     = new PrizeUserModel();
-        $data   = $pu->getList(['prize_id' => $prize_id], ['id', 'uid', 'code', 'form_id']);
+        $pu   = new PrizeUserModel();
+        $data = $pu->getList(['prize_id' => $prize_id], ['id', 'uid', 'code', 'form_id']);
         shuffle($data);
         $index  = mt_rand(0, count($data) - 1);
         $lucker = $data[$index];
