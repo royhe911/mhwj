@@ -112,11 +112,8 @@ class Prize extends \think\Controller
         $uid      = $param['uid'];
         $prize    = $p->getModel(['id' => $prize_id], ['id', 'name', 'url', 'desc', 'count', 'status']);
         if ($prize) {
-            if ($prize['status'] === 44) {
-                echo json_encode(['status' => 44, 'info' => '本次抽奖已结束', 'data' => null]);exit;
-            }
             $pu    = new PrizeUserModel();
-            $count = $pu->getCount(['prize_id' => $prize_id, 'uid' => $uid]);
+            $puser = $pu->getModel(['prize_id' => $prize_id, 'uid' => $uid]);
             if ($count) {
                 $prize['is_join'] = 1;
             } else {

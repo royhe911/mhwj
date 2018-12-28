@@ -32,9 +32,9 @@ class Prize extends Command
     protected function execute(Input $input, Output $output)
     {
         $pu   = new PrizeUserModel();
-        $list = $pu->getJoinList([['m_prize p', 'a.prize_id=p.id'], ['m_user u', 'u.id=a.uid']], ['a.is_notice' => 0, 'p.status' => 44], ['a.id', 'a.form_id', 'p.name', 'u.openid']);
+        $list = $pu->getJoinList([['m_prize p', 'a.prize_id=p.id'], ['m_user u', 'u.id=a.uid']], ['a.is_notice' => 0, 'p.status' => 44], ['a.id', 'a.prize_id', 'a.form_id', 'p.name', 'u.openid']);
         if ($list) {
-            $ids = [];
+            $ids          = [];
             $access_token = $this->get_access_token();
             // API 地址
             $url = 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send';
@@ -44,17 +44,16 @@ class Prize extends Command
                 // 下单成功模板ID
                 $data['template_id'] = '5_VTzsMzU2C5G0qOQLnTq5PWYtwQKrBwHi7ffWqWXjA';
                 $data['form_id']     = $item['form_id'];
-                $data['page']        = "/pages/luckDraw/luckDetail/luckDetail?id=$prize_id";
+                $data['page']        = "/pages/luckDraw/luckDetail/luckDetail?id={$item['prize_id']}";
                 $data['data']        = ['keyword1' => ['value' => $item['name']], 'keyword2' => ['value' => '斗汁科技 发起的抽奖正在开奖，点击查看中奖名单']];
                 // 处理逻辑
                 $data = json_encode($data);
                 $res  = $this->curl($url, $data);
                 $res  = json_decode($res, true);
                 if ($res['errcode'] === 0 && $res['errmsg'] === 'ok') {
-                    $ids[] = $item['id'];
+                    $pu->modifyField('is_notice', 1, ['id' => $item['id']]);
                 }
             }
-            $pu->modifyField('is_notice', 1, ['id' => ['in', $ids]]);
         }
     }
 
@@ -71,7 +70,7 @@ class Prize extends Command
         $appid = 'wxe6f37de8e1e3225e';
         // 取 secret
         $appsecret = '357566bea005201ce062acaabd4a58e9';
-        $program = $mini->getModel(['appid' => $appid]);
+        $program   = $mini->getModel(['appid' => $appid]);
         if (!$program) {
             $id = $mini->add(['appid' => $appid, 'appsecret' => $appsecret, 'name' => '游戏陪玩咖']);
         } else {
