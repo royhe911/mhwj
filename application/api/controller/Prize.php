@@ -219,7 +219,7 @@ class Prize extends \think\Controller
         $data['template_id'] = '5_VTzsMzU2C5G0qOQLnTq5PWYtwQKrBwHi7ffWqWXjA';
         $data['form_id']     = $param['form_id'];
         $data['page']        = '/pages/welfare/welfare';
-        $data['data']        = ['keyword1' => ['value' => $param['prize_name']], 'keyword2' => ['value' => '恭喜您被抽中，中奖码为：' . $param['code']]];
+        $data['data']        = ['keyword1' => ['value' => $param['prize_name']], 'keyword2' => ['value' => '斗汁科技 发起的抽奖正在开奖，点击查看中奖名单']];
         // 处理逻辑
         $data = json_encode($data);
         $res  = $this->curl($url, $data);
