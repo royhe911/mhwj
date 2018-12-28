@@ -45,7 +45,7 @@ class Prize extends \think\Controller
     public function get_prizes(PrizeModel $p)
     {
         // 查询条件
-        $where = ['status' => ['<>', 44]];
+        $where = [];
         // 分页参数
         $page     = 1;
         $pagesize = 10;
@@ -61,7 +61,7 @@ class Prize extends \think\Controller
         }
         $uid   = $param['uid'];
         $order = 'sort';
-        $list  = $p->getList($where, ['id', 'name', 'url', 'desc', 'count'], "$page,$pagesize", $order);
+        $list  = $p->getList($where, ['id', 'name', 'url', 'desc', 'count', 'status'], "$page,$pagesize", $order);
         if ($list) {
             $pu    = new PrizeUserModel();
             $plis  = $pu->getList(['uid' => $uid], ['prize_id']);
@@ -223,7 +223,6 @@ class Prize extends \think\Controller
         $users = $u->getList(['id' => ['in', $uids]], ['id', 'openid']);
         $users = array_column($users, 'openid', 'id');
         foreach ($plis as $item) {
-            sleep(5);
             if (!empty($users[$item['uid']])) {
                 $data['touser'] = $users[$item['uid']];
                 // 下单成功模板ID
@@ -264,7 +263,7 @@ class Prize extends \think\Controller
         if ($list) {
             $p    = new PrizeModel();
             $pids = array_column($list, 'prize_id');
-            $plis = $p->getList(['id' => ['in', $pids]], ['id', 'name', 'url', 'desc']);
+            $plis = $p->getList(['id' => ['in', $pids]], ['id', 'name', 'url', 'desc', 'status']);
             $plis = array_column($plis, null, 'id');
             foreach ($list as &$item) {
                 if (!empty($item['addtime'])) {
@@ -280,6 +279,9 @@ class Prize extends \think\Controller
                     }
                     $item['url']  = $url;
                     $item['desc'] = $prize['desc'];
+                    if ($prize['status'] === 0) {
+                        $item['is_winners'] = 2;
+                    }
                 } else {
                     $item['name'] = '';
                     $item['url']  = '';
