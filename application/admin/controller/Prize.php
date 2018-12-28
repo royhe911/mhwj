@@ -277,7 +277,7 @@ class Prize extends \think\Controller
         $p     = new PrizeModel();
         $prizs = $p->getList([], ['id', 'name']);
         $prizs = array_column($prizs, 'name', 'id');
-        $list  = $pu->getList($where, true, "$page,$pagesize");
+        $list  = $pu->getList($where, true, "$page,$pagesize", 'addtime desc');
         if ($list) {
             $uids  = array_column($list, 'uid');
             $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
