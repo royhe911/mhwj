@@ -17,10 +17,8 @@
         .ttd{width: 250px;text-align: center;}
         .ttb{width: 80px;text-align: center;}
         .avatar{width: 64px;height: 64px;border-radius: 32px;}
-        .sort{width: 80px;}
-        .count{width: 120px;}
-        .sort_i,.max_knife_num_i,.min_knife_num_i{width: 50px;display: none;}
-        .count_i{width: 100px;display: none;}
+        .sort,.count{width: 80px;}
+        .sort_i,.count_i{width: 50px;display: none;}
     </style>
 </head>
 <body class="gray-bg">
@@ -50,6 +48,7 @@
                             <th>状态</th>
                             <th>名称</th>
                             <th>图片</th>
+                            <th>排序</th>
                             <th>开奖人数</th>
                             <th>添加时间</th>
                             <th>操作</th>
@@ -63,6 +62,7 @@
                             <td>{$item.status}</td>
                             <td>{$item.name}</td>
                             <td><img src="{$item.url}" class="avatar" onerror="this.style.display='none'"></td>
+                            <td class="sort"><span class="sort_p">{$item.sort}</span><input type="text" class="sort_i" value="{$item.sort}" data-id="{$item.id}" data-sort="{$item.sort}"></td>
                             <td class="count"><span class="count_p">{$item.count}</span><input type="text" class="count_i" value="{$item.count}" data-id="{$item.id}" data-count="{$item.count}"></td>
                             <td>{$item.addtime}</td>
                             <td><a href="/prize/edit?id={$item.id}">编辑</a> | <a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a></td>
@@ -105,6 +105,18 @@
                 edit_count($(this))
             }
         })
+        $('.sort').click(function(){
+            $(this).find('.sort_p').css('display', 'none');
+            $(this).find('.sort_i').css('display', 'block').focus().select();
+        });
+        $('.sort_i').blur(function(){
+            edit_sort($(this))
+        })
+        $('.sort_i').keypress(function(obj){
+            if (obj.keyCode == 13) {
+                edit_sort($(this))
+            }
+        })
         $('a[data-action]').click(function(){
             var $action = $(this).data('action'), $id = $(this).data('id');
             var $ids = '0';
@@ -119,6 +131,34 @@
             }
             operation($ids)
         });
+
+        /**
+         * 修改排序
+         * @author 贺强
+         * @time   2018-12-29 12:26:00
+         */
+        function edit_sort($this) {
+            if ($this.val() == $this.data('sort')) {
+                $this.css('display', 'none');
+                $this.prev('.sort_p').css('display', 'block');
+            }else{
+                $id = $this.data('id'), $sort = $this.val();
+                $.ajax({
+                    type: 'post', dataType: 'json', cache: false,
+                    url: '/prize/editsort',
+                    data: {'id': $id, 'sort': $sort},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.info, {icon: 5, time: 2000})
+                        }
+                    }
+                })
+            }
+        }
 
         /**
          * 修改开奖人数

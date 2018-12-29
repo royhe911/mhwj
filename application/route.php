@@ -68,6 +68,7 @@ return [
     '/prize/del'          => 'admin/Prize/del', // 删除奖品
     '/prize/edit'         => 'admin/Prize/edit', // 修改奖品
     '/prize/editcount'    => 'admin/Prize/editcount', // 修改奖品
+    '/prize/editsort'     => 'admin/Prize/editsort', // 修改排序
     '/prize/users'        => 'admin/Prize/users', // 中奖者列表
     '/prize/ffjp'         => 'admin/Prize/ffjp', // 发放奖品
     '/prize/jackpot'      => 'admin/Prize/jackpot', // 奖池

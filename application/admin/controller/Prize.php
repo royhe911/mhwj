@@ -117,6 +117,28 @@ class Prize extends \think\Controller
     }
 
     /**
+     * 修改排序
+     * @author 贺强
+     * @time   2018-12-29 12:30:23
+     * @param  PrizeModel $g PrizeModel 实例
+     */
+    public function editsort(PrizeModel $g)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['id']) || empty($param['sort'])) {
+                return ['status' => 1, 'info' => '非法参数'];
+            }
+            $sort = $param['sort'];
+            $res  = $g->modifyField('sort', $sort, ['id' => $param['id']]);
+            if ($res === false) {
+                return ['status' => 2, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        }
+    }
+
+    /**
      * 奖品列表
      * @author 贺强
      * @time   2018-12-26 18:12:23
@@ -127,7 +149,7 @@ class Prize extends \think\Controller
         $where    = [];
         $page     = $this->request->get('page', 1);
         $pagesize = $this->request->get('pagesize', config('PAGESIZE'));
-        $list     = $p->getList($where, true, "$page,$pagesize", 'addtime desc');
+        $list     = $p->getList($where, true, "$page,$pagesize", 'sort desc');
         foreach ($list as &$item) {
             if (!empty($item['url'])) {
                 $url = $item['url'];
