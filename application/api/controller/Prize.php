@@ -67,8 +67,8 @@ class Prize extends \think\Controller
             $plis  = $pu->getList(['uid' => $uid], ['prize_id']);
             $plis  = array_column($plis, 'prize_id');
             $pids  = array_column($list, 'id');
-            $joins = $pu->getList(['prize_id' => ['in', $pids]], ['prize_id', 'count(distinct uid) count'], '', '', 'prize_id');
-            $joins = array_column($joins, 'count', 'prize_id');
+            // $joins = $pu->getList(['prize_id' => ['in', $pids]], ['prize_id', 'count(distinct uid) count'], '', '', 'prize_id');
+            // $joins = array_column($joins, 'count', 'prize_id');
             foreach ($list as &$item) {
                 if (!empty($item['url'])) {
                     $url = $item['url'];
@@ -81,11 +81,11 @@ class Prize extends \think\Controller
                 } else {
                     $item['is_join'] = 0;
                 }
-                if (!empty($joins[$item['id']])) {
-                    $item['joins'] = $joins[$item['id']];
-                } else {
-                    $item['joins'] = 0;
-                }
+                // if (!empty($joins[$item['id']])) {
+                //     $item['joins'] = $joins[$item['id']];
+                // } else {
+                //     $item['joins'] = 0;
+                // }
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);
