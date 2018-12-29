@@ -60,7 +60,7 @@ class Prize extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $uid   = $param['uid'];
-        $order = 'sort';
+        $order = 'sort desc';
         $list  = $p->getList($where, ['id', 'name', 'url', 'desc', 'count', 'status'], "$page,$pagesize", $order);
         if ($list) {
             $pu    = new PrizeUserModel();
