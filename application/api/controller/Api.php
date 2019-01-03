@@ -186,7 +186,7 @@ class Api extends \think\Controller
             $data['login_time'] = time();
             $id                 = $u->add($data);
             if ($id) {
-                $cdata = ['uid' => $id, 'type' => 1, 'money' => 5, 'over_time' => time() + config('COUPONTERM') * 20 * 3600, 'addtime' => time()];
+                $cdata = ['uid' => $id, 'type' => 1, 'money' => 5, 'over_time' => time() + config('COUPONTERM') * 24 * 3600, 'addtime' => time()];
                 $c     = new CouponModel();
                 $c->add($cdata);
                 $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $id, 'mobile' => '', 'is_certified' => 0]];

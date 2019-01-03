@@ -251,9 +251,13 @@ class Pay extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $where = ['uid' => $param['uid'], 'status' => ['in', '1,6,10']];
+        $where = ['uid' => $param['uid'], 'status' => ['in', '1,6,8,10']];
         if (!empty($param['status']) && $param['status'] != 'all') {
-            $where['status'] = $param['status'];
+            if ($param['status'] == 6) {
+                $where['status'] = ['in', [6, 8]];
+            } else {
+                $where['status'] = $param['status'];
+            }
         }
         // 分页参数
         $page     = 1;

@@ -33,7 +33,7 @@ class RoomOrder extends Command
     protected function execute(Input $input, Output $output)
     {
         $uo   = new UserOrderModel();
-        $list = $uo->getList(['status' => 6, 'addtime' => ['lt', time() - 3 * 24 * 3600]], ['id', 'uid', 'order_money', 'room_id']);
+        $list = $uo->getList(['status' => 8, 'addtime' => ['lt', time() - 3 * 24 * 3600]], ['id', 'uid', 'order_money', 'room_id']);
         if ($list) {
             $u = new UserModel();
             $r = new RoomModel();
