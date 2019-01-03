@@ -94,16 +94,28 @@ class PrizeModel extends CommonModel
         $pu   = new PrizeUserModel();
         $data = $pu->getList(['prize_id' => $prize_id], ['id', 'uid', 'code', 'form_id']);
         shuffle($data);
+        $num    = count($data) / 2;
         $index  = mt_rand(0, count($data) - 1);
         $lucker = $data[$index];
-        $ldata  = ['code' => $lucker['code'], 'uid' => $lucker['uid'], 'prize_id' => $prize_id, 'addtime' => time()];
-        $res    = $pd->add($ldata);
+        unset($data[$index]);
+        $ldata = ['code' => $lucker['code'], 'uid' => $lucker['uid'], 'prize_id' => $prize_id, 'addtime' => time()];
+        $res   = $pd->add($ldata);
         if (!$res) {
             return 21;
         }
         $p = new PrizeModel();
         $p->modifyField('status', 44, ['id' => $prize_id]);
         $pu->modifyField('is_winners', 1, ['id' => $lucker['id']]);
+        $ludt = [];
+        for ($i = 0; $i < $num; $i++) {
+            $index  = mt_rand(0, count($data) - 1);
+            $ludt[] = ['uid' => $data[$index]['uid'], 'type' => 2, 'prize_id' => $prize_id, 'money' => 5, 'addtime' => time(), 'over_time' => time() + 15 * 24 * 3600];
+            unset($data[$index]);
+            $data = array_merge($data);
+            shuffle($data);
+        }
+        $c = new CouponModel();
+        $c->addArr($ludt);
         return ['prize_id' => $prize_id];
     }
 }

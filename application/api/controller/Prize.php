@@ -127,7 +127,13 @@ class Prize extends \think\Controller
             if ($count) {
                 $prize['is_winners'] = 1;
             } else {
-                $prize['is_winners'] = 0;
+                $c     = new CouponModel();
+                $count = $c->getCount(['type' => 2, 'prize_id' => $prize_id, 'uid' => $uid]);
+                if ($count) {
+                    $prize['is_winners'] = 2;
+                } else {
+                    $prize['is_winners'] = 0;
+                }
             }
             $joins = $pu->getModel(['prize_id' => $prize_id], ['count(distinct uid) count']);
             if ($joins) {
