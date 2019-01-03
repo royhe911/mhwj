@@ -74,6 +74,7 @@ class PrizeModel extends CommonModel
             return true;
         } catch (\Exception $e) {
             Db::rollback();
+            var_dump($e->getMessage());
             return 44;
         }
     }
@@ -94,10 +95,11 @@ class PrizeModel extends CommonModel
         $pu   = new PrizeUserModel();
         $data = $pu->getList(['prize_id' => $prize_id], ['id', 'uid', 'code', 'form_id']);
         shuffle($data);
-        $num    = count($data) / 2;
+        $num    = intval(count($data) / 2);
         $index  = mt_rand(0, count($data) - 1);
         $lucker = $data[$index];
         unset($data[$index]);
+        $data  = array_merge($data);
         $ldata = ['code' => $lucker['code'], 'uid' => $lucker['uid'], 'prize_id' => $prize_id, 'addtime' => time()];
         $res   = $pd->add($ldata);
         if (!$res) {
