@@ -1237,7 +1237,7 @@ class Api extends \think\Controller
                     if ($distance <= 1) {
                         $item['distance'] = '一公里内';
                     } else {
-                        $item['distance'] = $distance . '公里';
+                        $item['distance'] = $distance . 'KM';
                     }
                 } else {
                     $item['distance'] = '';
