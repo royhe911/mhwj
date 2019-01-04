@@ -41,6 +41,7 @@ return [
     '/user/detail'        => 'admin/User/detail', // 用户详情
     '/user/auditor'       => 'admin/User/auditor', // 审核用户
     '/user/operate'       => 'admin/User/operate', // 设置用户
+    '/user/editsort'      => 'admin/User/editsort', // 修改排序
     '/room/list'          => 'admin/Room/lists', // 房间列表
     '/room/operate'       => 'admin/Room/operate', // 设置房间
     '/room/setlimit'      => 'admin/Room/set_limit', // 设置活动开始结束时间

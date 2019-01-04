@@ -2329,8 +2329,8 @@ class Api extends \think\Controller
     public function get_yule_list(UserAttrModel $ua)
     {
         $param    = $this->param;
-        $page     = 1;
-        $pagesize = 100;
+        // $page     = 1;
+        // $pagesize = 100;
         // if (!empty($param['page'])) {
         //     $page = intval($param['page']);
         // }
@@ -2339,7 +2339,7 @@ class Api extends \think\Controller
         // }
         $where = ['a.status' => 8, 'level_url' => ['<>', ''], 'u.is_recommend' => 1];
         // $count = $ua->getJoinCount([['m_user u', 'a.uid=u.id']], $where);
-        $list = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'logo', 'nickname', 'avatar', 'play_type'], "$page,$pagesize", 'u.is_recommend desc');
+        $list = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'logo', 'nickname', 'avatar', 'play_type'], null, 'u.is_recommend desc,u.sort desc');
         $list = array_column($list, null, 'uid');
         $list = array_merge($list);
         if ($list) {

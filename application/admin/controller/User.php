@@ -241,6 +241,28 @@ class User extends \think\Controller
     }
 
     /**
+     * 修改排序
+     * @author 贺强
+     * @time   2019-01-04 16:45:55
+     * @param  UserModel $u UserModel 实例
+     */
+    public function editsort(UserModel $u)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['id']) || empty($param['sort'])) {
+                return ['status' => 1, 'info' => '非法参数'];
+            }
+            $sort = $param['sort'];
+            $res  = $u->modifyField('sort', $sort, ['id' => $param['id']]);
+            if ($res === false) {
+                return ['status' => 2, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        }
+    }
+
+    /**
      * 审核通知
      * @author 贺强
      * @time   2018-12-18 20:22:38

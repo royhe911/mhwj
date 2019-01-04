@@ -17,6 +17,8 @@
         .ttd{width: 250px;text-align: center;}
         .ttb{width: 80px;text-align: center;}
         .avatar{width: 64px;height: 64px;border-radius: 32px;}
+        .sort{width: 80px;}
+        .sort_i{width: 50px;display: none;}
     </style>
 </head>
 <body class="gray-bg">
@@ -72,6 +74,7 @@
                             <th>头像</th>
                             <th>手机号</th>
                             <th>性别</th>
+                            <th>排序</th>
                             <th>入驻时间</th>
                             <th>登录次数</th>
                             <th>余额</th>
@@ -89,6 +92,7 @@
                             <td><img src="{$item.avatar}" class="avatar" onerror="this.style.display='none'"></td>
                             <td>{$item.mobile}</td>
                             <td>{$item.sex}</td>
+                            <td class="sort"><span class="sort_p">{$item.sort}</span><input type="text" class="sort_i" value="{$item.sort}" data-id="{$item.id}" data-sort="{$item.sort}"></td>
                             <td>{$item.addtime}</td>
                             <td>{$item.count}</td>
                             <td>{$item.money}</td>
@@ -134,6 +138,48 @@
             }
             operate($ids, $(this).data('action'))
         });
+
+        // 修改排序
+        $('.sort').click(function(){
+            $(this).find('.sort_p').css('display', 'none');
+            $(this).find('.sort_i').css('display', 'block').focus().select();
+        });
+        $('.sort_i').blur(function(){
+            edit_sort($(this))
+        })
+        $('.sort_i').keypress(function(obj){
+            if (obj.keyCode == 13) {
+                edit_sort($(this))
+            }
+        })
+
+        /**
+         * 修改排序
+         * @author 贺强
+         * @time   2019-01-04 16:43:19
+         */
+        function edit_sort($this) {
+            if ($this.val() == $this.data('sort')) {
+                $this.css('display', 'none');
+                $this.prev('.sort_p').css('display', 'block');
+            }else{
+                $id = $this.data('id'), $sort = $this.val();
+                $.ajax({
+                    type: 'post', dataType: 'json', cache: false,
+                    url: '/user/editsort',
+                    data: {'id': $id, 'sort': $sort},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.info, {icon: 5, time: 2000})
+                        }
+                    }
+                })
+            }
+        }
 
         function operate($ids, $type) {
             var $msg = '', $tip = '';
