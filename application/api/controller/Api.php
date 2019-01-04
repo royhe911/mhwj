@@ -2330,13 +2330,13 @@ class Api extends \think\Controller
     {
         $param    = $this->param;
         $page     = 1;
-        $pagesize = 6;
-        if (!empty($param['page'])) {
-            $page = intval($param['page']);
-        }
-        if (!empty($param['pagesize'])) {
-            $pagesize = intval($param['pagesize']);
-        }
+        $pagesize = 100;
+        // if (!empty($param['page'])) {
+        //     $page = intval($param['page']);
+        // }
+        // if (!empty($param['pagesize'])) {
+        //     $pagesize = intval($param['pagesize']);
+        // }
         $where = ['a.status' => 8, 'level_url' => ['<>', ''], 'u.is_recommend' => 1];
         // $count = $ua->getJoinCount([['m_user u', 'a.uid=u.id']], $where);
         $list = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'logo', 'nickname', 'avatar', 'play_type'], "$page,$pagesize", 'u.is_recommend desc');
@@ -2348,6 +2348,10 @@ class Api extends \think\Controller
             $order = $uo->getList(['uid' => ['in', $uids], 'play_type' => 2], ['uid', 'count(*) c'], '', '', 'uid');
             $order = array_column($order, 'c', 'uid');
             foreach ($list as $k => &$item) {
+                if ($k > 5) {
+                    unset($list[$k]);
+                    continue;
+                }
                 if (!empty($item['level_url'])) {
                     $level_url = explode(',', $item['level_url']);
                     foreach ($level_url as &$url) {
