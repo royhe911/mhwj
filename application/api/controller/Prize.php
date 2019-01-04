@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\CouponModel;
 use app\common\model\PrizeDistributeModel;
 use app\common\model\PrizeModel;
 use app\common\model\PrizeUserModel;
