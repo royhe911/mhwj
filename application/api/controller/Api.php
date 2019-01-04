@@ -2340,6 +2340,8 @@ class Api extends \think\Controller
         $where = ['a.status' => 8, 'level_url' => ['<>', ''], 'u.is_recommend' => 1];
         // $count = $ua->getJoinCount([['m_user u', 'a.uid=u.id']], $where);
         $list = $ua->getJoinList([['m_user u', 'a.uid=u.id']], $where, ['uid', 'level_url', 'logo', 'nickname', 'avatar', 'play_type'], "$page,$pagesize", 'u.is_recommend desc');
+        $list = array_column($list, null, 'uid');
+        $list = array_merge($list);
         if ($list) {
             $uids  = array_column($list, 'uid');
             $uo    = new UserOrderModel();
