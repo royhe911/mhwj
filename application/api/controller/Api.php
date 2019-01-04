@@ -1130,8 +1130,14 @@ class Api extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $count = 0;
-        $list  = $r->getList($where, 'id,uid,name,game_id,type,para_min,para_max,price,num,total_money,region,in_count,count,in_master_count,master_count,status', "$page,$pagesize", 'addtime desc,status');
+        $longitude = 0;
+        $latitude  = 0;
+        $count     = 0;
+        if (!empty($param['latitude']) && !empty($param['longitude'])) {
+            $longitude = $param['longitude'];
+            $latitude  = $param['latitude'];
+        }
+        $list = $r->getList($where, ['id', 'uid', 'name', 'game_id', 'type', 'para_min', 'para_max', 'price', 'num', 'total_money', 'region', 'in_count', 'count', 'in_master_count', 'master_count', 'status', 'latitude', 'longitude'], "$page,$pagesize", 'addtime desc,status');
         if ($list) {
             $count    = $r->getCount($where);
             $uids     = array_column($list, 'uid');
@@ -1225,6 +1231,16 @@ class Api extends \think\Controller
                     $item['logo'] = $item['level_url'];
                 } else {
                     $item['logo'] = '';
+                }
+                if ($latitude !== 0 && $longitude !== 0 && !empty($item['latitude']) && !empty($item['longitude'])) {
+                    $distance = getDistance($item['longitude'], $item['latitude'], $longitude, $latitude, 2, 2);
+                    if ($distance <= 1) {
+                        $item['distance'] = '一公里内';
+                    } else {
+                        $item['distance'] = $distance . '公里';
+                    }
+                } else {
+                    $item['distance'] = '';
                 }
             }
         }
