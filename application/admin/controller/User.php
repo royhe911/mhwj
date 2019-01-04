@@ -65,7 +65,7 @@ class User extends \think\Controller
         // 分页参数
         $page     = intval($this->request->get('page', 1));
         $pagesize = intval($this->request->get('pagesize', config('PAGESIZE')));
-        $list     = $u->getList($where, true, "$page,$pagesize");
+        $list     = $u->getList($where, true, "$page,$pagesize",'addtime desc,sort desc');
         foreach ($list as &$item) {
             if ($item['type'] === 1) {
                 $item['type_txt'] = '玩家';
