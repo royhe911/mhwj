@@ -202,3 +202,70 @@ function getDistance($longitude1, $latitude1, $longitude2, $latitude2, $unit = 1
 
     return round($distance, $decimal);
 }
+/**
+ * [getRealyAddress 获取具体位置]
+ * @author sunlq 2018-02-28
+ * @param  [type] $lat [纬度]
+ * @param  [type] $lng [经度]
+ * @return [type]      [description]
+ */
+function getRealyAddress($lat, $lng)
+{
+    $address = '';
+    if ($lat && $lng) {
+        $arr     = changeToBaidu($lat, $lng);
+        $url     = 'http://api.map.baidu.com/geocoder/v2/?callback=&location=' . $arr['y'] . ',' . $arr['x'] . '.&output=json&pois=1&ak=fKvpmBXsoCcx8AMGqOThmd2ZEXHpniVq';
+        $content = file_get_contents($url);
+        $place   = json_decode($content, true);
+        $address = $place['result']['formatted_address'];
+    }
+
+    return $address;
+}
+/**
+ * [changeToBaidu 转换为百度经纬度]
+ * @author sunlq 2018-05-28
+ * @param  [type] $lat [description]
+ * @param  [type] $lng [description]
+ * @return [type]      [description]
+ */
+function changeToBaidu($lat, $lng)
+{
+    $apiurl   = 'http://api.map.baidu.com/geoconv/v1/?coords=' . $lng . ',' . $lat . '&from=1&to=5&ak=fKvpmBXsoCcx8AMGqOThmd2ZEXHpniVq';
+    $file     = file_get_contents($apiurl);
+    $arrpoint = json_decode($file, true);
+    return $arrpoint['result'][0];
+}
+
+/**
+ * 获取地理位置信息
+ * @author 贺强
+ * @time   2019-01-05 10:35:18
+ * @param  string $latlng 经纬度
+ * @param  string $place  要获取的信息,all/location/formatted_address/city/province/district/direction/distance/street/street_number
+ * @param  string $type   返回数据格式
+ */
+function getAddressInfo($latlng, $place = 'all', $type = 'json')
+{
+    $url  = "http://api.map.baidu.com/geocoder?location=30.990998,103.645966&output=json&key=28bcdd84fae25699606ffad27f8da77b";
+    $url  = "http://api.map.baidu.com/geocoder?location={$latlng}&output={$type}&key=28bcdd84fae25699606ffad27f8da77b";
+    $info = file_get_contents($url);
+    if ($place === 'all') {
+        return $info;
+    } else {
+        $info = json_decode($info, true);
+        $info = $info['result'];
+        if ($place === 'location' || $place === 'formatted_address') {
+            if (empty($info[$place])) {
+                return '';
+            }
+            return $info[$place];
+        } else {
+            $info = $info['addressComponent'];
+            if (empty($info[$place])) {
+                return '';
+            }
+            return $info[$place];
+        }
+    }
+}

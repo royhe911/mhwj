@@ -1233,11 +1233,17 @@ class Api extends \think\Controller
                     $item['logo'] = '';
                 }
                 if ($latitude !== 0 && $longitude !== 0 && !empty($item['latitude']) && !empty($item['longitude'])) {
-                    $distance = getDistance($item['longitude'], $item['latitude'], $longitude, $latitude, 2, 2);
-                    if ($distance <= 1) {
-                        $item['distance'] = '一公里内';
+                    $uaddr = getAddressInfo("$latitude,$longitude", 'city');
+                    $maddr = getAddressInfo("{$item['latitude']},{$item['longitude']}", 'city');
+                    if ($uaddr != $maddr) {
+                        $item['distance'] = $maddr;
                     } else {
-                        $item['distance'] = $distance . 'KM';
+                        $distance = getDistance($item['longitude'], $item['latitude'], $longitude, $latitude, 2);
+                        if ($distance <= 1) {
+                            $item['distance'] = '1km内';
+                        } else {
+                            $item['distance'] = $distance . 'km';
+                        }
                     }
                 } else {
                     $item['distance'] = '';
@@ -2328,7 +2334,7 @@ class Api extends \think\Controller
      */
     public function get_yule_list(UserAttrModel $ua)
     {
-        $param    = $this->param;
+        $param = $this->param;
         // $page     = 1;
         // $pagesize = 100;
         // if (!empty($param['page'])) {
