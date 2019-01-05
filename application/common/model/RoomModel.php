@@ -206,6 +206,11 @@ class RoomModel extends CommonModel
                 Db::rollback();
                 return 2;
             }
+            $res = $this->modifyField('is_tip', 0, ['id' => $room_id]);
+            if (!$res) {
+                Db::rollback();
+                return 3;
+            }
             // 删除退出房间的玩家订单
             $uo = new UserOrderModel();
             $uo->delByWhere(['uid' => $uid]);
