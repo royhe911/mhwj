@@ -155,4 +155,14 @@ class Room extends \think\Controller
             return $this->fetch('setlimit', ['start' => $start, 'end' => $end]);
         }
     }
+
+    /**
+     * 房管
+     * @author 贺强
+     * @time   2019-01-06 10:29:25]
+     */
+    public function house()
+    {
+        return $this->fetch('house');
+    }
 }

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>房管</title>
+</head>
+<body>
+<textarea rows="20" cols="80" id="msg"></textarea>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript">
+    var url = 'wss://hkqgg.cn:3999';
+    // var websocket = null;
+    function init() {
+        websocket = new WebSocket(url); 
+        websocket.onopen = function(evt){
+            doSend('{"type": "login", "roomid": "notice"}')
+        };
+        websocket.onmessage = function(evt){
+            onMessage(evt)
+        };
+    }
+    function doSend(message){
+        websocket.send(message)
+    }
+    function onMessage(evt){
+        // console.log(evt)
+        if (evt.data != '') {
+            $msg = $.parseJSON(evt.data);
+            if ($msg.type == 'notice' && $msg.content != '') {
+                $('#msg').val($('#msg').val() + $msg.content + '\n');
+                document.getElementById('msg').scrollTop = document.getElementById('msg').scrollHeight;
+            }
+        }
+    }
+    init();
+    setInterval(function(){
+        doSend('{"type": "notice"}')
+    }, 5000);
+</script>
+</html>

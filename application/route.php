@@ -45,6 +45,7 @@ return [
     '/room/list'          => 'admin/Room/lists', // 房间列表
     '/room/operate'       => 'admin/Room/operate', // 设置房间
     '/room/setlimit'      => 'admin/Room/set_limit', // 设置活动开始结束时间
+    '/room/house'         => 'admin/Room/house', // 房管
     '/order/uorders'      => 'admin/Order/uorders', // 房间订单
     '/order/udetail'      => 'admin/Order/udetail', // 房间订单详情
     '/order/porders'      => 'admin/Order/porders', // 房间订单
