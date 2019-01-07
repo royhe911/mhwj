@@ -90,6 +90,7 @@ return [
     '/api/addgame'        => 'api/Api/add_game', // 添加游戏
     '/api/examine'        => 'api/Api/user_examine', // 获取服务段位
     '/api/systip'         => 'api/Api/user_tip', // 系统消息
+    '/api/test'           => 'api/Api/test', // 测试
     '/api/feedback'       => 'api/Api/user_feedback', //用户反馈
     '/api/usergames'      => 'api/Api/get_user_games', // 用户游戏列表
     '/api/editgame'       => 'api/Api/edit_game', // 获取修改的游戏

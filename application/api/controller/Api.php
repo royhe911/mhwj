@@ -2384,4 +2384,21 @@ class Api extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
-}
+    public function test()
+    {
+        $u     = new UserModel();
+        $users = $u->getList(['type' => 2], ['id'], "0,200");
+        $data  = [];
+        foreach ($users as $user) {
+            $data[] = ['type' => 1, 'uid' => $user['id'], 'title' => '系统消息', 'content' => '亲爱的陪玩师 由于版本升级和更新的原因，希望大家在‘我的’→‘信息编辑’中补充完善个人资料（特别是微信号和qq号，方便平台在接单时跟你联系），感谢您的配合，给您造成的不便请见谅。 幕后玩家陪玩端', 'addtime' => time()];
+        }
+        $m = new MessageModel();
+        if (!empty($data)) {
+            $res = $m->addArr($data);
+        }
+        if ($res) {
+            echo json_encode(['status' => 0, 'info' => '成功', 'data' => null];exit;
+            }
+        }
+
+    }
