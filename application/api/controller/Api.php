@@ -2397,7 +2397,7 @@ class Api extends \think\Controller
             $res = $m->addArr($data);
         }
         if ($res) {
-            echo json_encode(['status' => 0, 'info' => '成功', 'data' => null];exit;
+            echo json_encode(['status' => 0, 'info' => '成功', 'data' => null]);exit;
             }
         }
 
