@@ -13,7 +13,7 @@ class CommonModel extends Model
      * @author 贺强
      * @time   2016-11-16 15:57:17
      * @param array $data 要添加的数据 形如：['name'=>'think', 'sex'=>'男', ……]
-     * @return int 返回添加成功后的 ID
+     * @return int 返回添加成功后的 ID，若没有自增ID则返回 true
      */
     public function add($data)
     {
@@ -21,6 +21,9 @@ class CommonModel extends Model
         // ->fetchSql(true)
             ->insertGetId($data);
         // $id = db($this->table)->insertGetId($data);
+        if ($id === 0) {
+            $id = true;
+        }
         return $id;
     }
 
