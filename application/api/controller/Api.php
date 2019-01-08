@@ -2259,7 +2259,7 @@ class Api extends \think\Controller
             $users = array_column($users, null, 'id');
             foreach ($list as &$item) {
                 if (!empty($item['addtime'])) {
-                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                    $item['addtime'] = date('Y/m/d H:i:s', $item['addtime']);
                 }
                 if (!empty($users[$item['uid']])) {
                     $user = $users[$item['uid']];
