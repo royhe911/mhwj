@@ -306,7 +306,7 @@ class Api extends \think\Controller
         if (empty($param['id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失']);exit;
         }
-        $user = $u->getModel(['id' => $param['id']], 'id,nickname,`type`,avatar,contribution');
+        $user = $u->getModel(['id' => $param['id']], 'id,nickname,`type`,avatar,contribution,praise');
         if ($user) {
             $msg = ['status' => 0, 'info' => '获取成功', 'data' => $user];
         } else {

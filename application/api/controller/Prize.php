@@ -88,7 +88,7 @@ class Prize extends \think\Controller
                     $item['joins'] = 0;
                 }
                 if ($item['joins'] < ($item['count'] * 2 / 3)) {
-                    $join_count = intval($item['joins'] * (1 - $item['joins'] / $item['count'])) + $item['count'] * 0.35;
+                    $join_count = intval($item['joins'] * (1 - $item['joins'] / $item['count'])) + $item['count'] * 0.45;
                     $item['joins'] += $join_count;
                 }
             }
@@ -143,7 +143,7 @@ class Prize extends \think\Controller
                 $prize['joins'] = 0;
             }
             if ($prize['joins'] < ($prize['count'] * 2 / 3)) {
-                $join_count = intval($prize['joins'] * (1 - $prize['joins'] / $prize['count'])) + $prize['count'] * 0.35;
+                $join_count = intval($prize['joins'] * (1 - $prize['joins'] / $prize['count'])) + $prize['count'] * 0.45;
                 $prize['joins'] += $join_count;
             }
         }
