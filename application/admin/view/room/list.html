@@ -16,8 +16,6 @@
         .form-control{width: 220px;}
         .ttd{width: 250px;text-align: center;}
         .ttb{width: 80px;text-align: center;}
-        .avatar{width: 64px;height: 64px;border-radius: 32px;}
-        .sort_i{width: 50px;display: none;}
     </style>
 </head>
 <body class="gray-bg">
@@ -26,9 +24,20 @@
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <form action="/admin/lists" method="post">
+                    <form action="/room/list" method="get">
                     <table cellpadding="0" cellspacing="0" border="0">
                         <tr>
+                            <td class="ttd">
+                                <select class="form-control" name="status">
+                                    <option value="">房间状态</option>
+                                    <option {if($param.status==1)}selected="selected" {/if}value="1">待进人</option>
+                                    <option {if($param.status==5)}selected="selected" {/if}value="5">待玩家支付</option>
+                                    <option {if($param.status==8)}selected="selected" {/if}value="8">正在游戏</option>
+                                    <option {if($param.status==44)}selected="selected" {/if}value="44">被禁用</option>
+                                </select>
+                            </td>
+                            <td class="ttb"><input type="submit" class="btn btn-sm btn-primary" value="搜索"></td>
+                            <td>
                             <td><a href="javascript:;" data-type="multi" data-action="disable">禁用所选</a> &nbsp; <a href="javascript:;" data-type="multi" data-action="relieve">解禁所选</a>
                             </td>
                             <td>&nbsp;</td>
@@ -107,29 +116,6 @@
             }
             operate($ids, $action)
         });
-
-        function edit_sort($this) {
-            if ($this.val() == $this.data('sort')) {
-                $this.css('display', 'none');
-                $this.prev('.sort_p').css('display', 'block');
-            }else{
-                $id = $this.data('id'), $sort = $this.val();
-                $.ajax({
-                    type: 'post', dataType: 'json', cache: false,
-                    url: '/game/editsort',
-                    data: {'id': $id, 'sort': $sort},
-                    success: function(data){
-                        if (data.status == 0) {
-                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
-                                location.reload();
-                            });
-                        } else {
-                            layer.msg(data.info, {icon: 5, time: 2000})
-                        }
-                    }
-                })
-            }
-        }
 
         function operate($ids, $type) {
             var $msg = '', $tip = '';

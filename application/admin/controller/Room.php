@@ -48,10 +48,20 @@ class Room extends \think\Controller
     public function lists(RoomModel $r)
     {
         $where = ['is_delete' => 0];
+        $param = $this->request->get();
         // 分页参数
         $page     = intval($this->request->get('page', 1));
         $pagesize = intval($this->request->get('pagesize', config('PAGESIZE')));
-        $list     = $r->getList($where, true, "$page,$pagesize");
+        if (!empty($param['status'])) {
+            if (intval($param['status']) === 1) {
+                $where['status'] = ['in', [0, 1]];
+            } else {
+                $where['status'] = $param['status'];
+            }
+        } else {
+            $param['status'] = '';
+        }
+        $list = $r->getList($where, true, "$page,$pagesize", 'status');
         if ($list) {
             $uids     = array_column($list, 'uid');
             $game_ids = array_column($list, 'game_id');
@@ -87,8 +97,6 @@ class Room extends \think\Controller
                 }
                 switch ($item['status']) {
                     case 0:
-                        $item['status_txt'] = '已创建';
-                        break;
                     case 1:
                         $item['status_txt'] = '待进人';
                         break;
@@ -109,7 +117,7 @@ class Room extends \think\Controller
         }
         $count = $r->getCount($where);
         $pages = ceil($count / $pagesize);
-        return $this->fetch('list', ['list' => $list, 'pages' => $pages]);
+        return $this->fetch('list', ['list' => $list, 'pages' => $pages, 'param' => $param]);
     }
 
     /**
