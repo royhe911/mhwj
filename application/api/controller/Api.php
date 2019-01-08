@@ -308,6 +308,8 @@ class Api extends \think\Controller
         }
         $user = $u->getModel(['id' => $param['id']], 'id,nickname,`type`,avatar,contribution,praise');
         if ($user) {
+            $user['praise'] *= 10;
+            // 输出
             $msg = ['status' => 0, 'info' => '获取成功', 'data' => $user];
         } else {
             $msg = ['status' => 4, 'info' => '获取失败', 'data' => null];
@@ -468,6 +470,7 @@ class Api extends \think\Controller
                 }
             }
             $master['is_praise'] = $is_praise;
+            $master['praise'] *= 10;
             // 取陪玩师属性
             $ua   = new UserAttrModel();
             $attr = $ua->getModel(['uid' => $master['id']]);
@@ -2226,6 +2229,26 @@ class Api extends \think\Controller
             echo json_encode(['status' => 40, 'info' => '评论失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '评论成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 获取陪玩师评论
+     * @author 贺强
+     * @time   2019-01-08 14:16:55
+     * @param  UserEvaluateModel $ue UserEvaluateModel 实例
+     * @param  UserModel         $u  UserModel 实例
+     */
+    public function get_comment(UserEvaluateModel $ue, UserModel $u)
+    {
+        $param = $this->param;
+        if (empty($param['master_id'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $mid    = $param['master_id'];
+        $master = $u->getModel(['id' => $mid], ['id', 'avatar', 'nickname', 'score']);
     }
 
     /**
