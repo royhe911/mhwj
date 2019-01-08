@@ -234,7 +234,11 @@ class Prize extends \think\Controller
         if (!empty($param['prize_id'])) {
             $where['prize_id'] = $param['prize_id'];
         }
-        $list = $pu->getList($where, ['uid', 'code', 'prize_id', 'is_winners', 'addtime']);
+        if (empty($param['prize_id'])) {
+            $list = $pu->getList($where, ['uid', 'group_concat(code) code', 'prize_id', 'is_winners', 'addtime'], null, '', 'prize_id');
+        } else {
+            $list = $pu->getList($where, ['uid', 'code', 'prize_id', 'is_winners', 'addtime']);
+        }
         if ($list) {
             $p    = new PrizeModel();
             $pids = array_column($list, 'prize_id');
