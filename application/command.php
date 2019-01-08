@@ -23,4 +23,5 @@ return [
     'app\common\crontab\GoodsTask',
     'app\common\crontab\Vericode',
     'app\common\crontab\Prize',
+    'app\common\crontab\MasterScore',
 ];

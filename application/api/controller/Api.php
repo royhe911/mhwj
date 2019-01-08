@@ -2249,6 +2249,29 @@ class Api extends \think\Controller
         }
         $mid    = $param['master_id'];
         $master = $u->getModel(['id' => $mid], ['id', 'avatar', 'nickname', 'score']);
+        if (!$master) {
+            echo json_encode(['status' => 4, 'info' => '陪玩师不存在', 'data' => null]);exit;
+        }
+        $list = $ue->getList(['master_id' => $mid], ['uid', 'addtime', 'score', 'content']);
+        if ($list) {
+            $uids  = array_column($list, 'uid');
+            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
+            $users = array_column($users, null, 'id');
+            foreach ($list as &$item) {
+                if (!empty($users[$item['uid']])) {
+                    $user = $users[$item['uid']];
+                    // 属性赋值
+                    $item['nickname'] = $user['nickname'];
+                    $item['avatar']   = $user['avatar'];
+                } else {
+                    $item['nickname'] = '';
+                    $item['avatar']   = '';
+                }
+            }
+        }
+        $master['comment'] = $list;
+        // print_r($master);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $master]);exit;
     }
 
     /**
