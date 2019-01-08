@@ -119,6 +119,7 @@ return [
     '/api/praiselist'     => 'api/Api/get_praise_list', // 好评榜
     '/api/yulelist'       => 'api/Api/get_yule_list', // 娱乐榜
     '/api/comment'        => 'api/Api/user_comment', // 玩家评论陪玩师
+    '/api/praise'         => 'api/Api/praise', // 给陪玩师点赞
     /*--------   api 结束  --------*/
     /*--------   支付 api 开始  --------*/
     '/api/pay/morder'     => 'api/Pay/add_master_order', // 房主下单

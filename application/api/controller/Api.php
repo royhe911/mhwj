@@ -12,6 +12,7 @@ use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
 use app\common\model\PersonMasterOrderModel;
 use app\common\model\PersonOrderModel;
+use app\common\model\PraiseMasterModel;
 use app\common\model\RoomMasterModel;
 use app\common\model\RoomModel;
 use app\common\model\RoomUserModel;
@@ -425,7 +426,7 @@ class Api extends \think\Controller
             echo json_encode($msg);exit;
         }
         $uid    = $param['id'];
-        $master = $u->getModel(['id' => $uid], ['id', 'avatar', 'nickname', 'introduce', 'wx', 'qq', 'tape']);
+        $master = $u->getModel(['id' => $uid], ['id', 'avatar', 'nickname', 'introduce', 'wx', 'qq', 'tape', 'praise']);
         if ($master) {
             // 查询陪玩师的接单数
             $r     = new RoomModel();
@@ -455,6 +456,18 @@ class Api extends \think\Controller
             $master['ratio']   = $ratio;
             // 查询陪玩师的认证图
             $master['album'] = null;
+            // 当前用户今日是否赞过此陪玩师
+            $is_praise = 0;
+            if (!empty($param['uid'])) {
+                $start = strtotime(date('Y-m-d'));
+                $end   = strtotime(date('Y-m-d', strtotime('+1 day')));
+                $pm    = new PraiseMasterModel();
+                $count = $pm->getCount(['master_id' => $uid, 'uid' => $param['uid'], 'addtime' => ['between', [$start, $end]]]);
+                if ($count) {
+                    $is_praise = 1;
+                }
+            }
+            $master['is_praise'] = $is_praise;
             // 取陪玩师属性
             $ua   = new UserAttrModel();
             $attr = $ua->getModel(['uid' => $master['id']]);
@@ -2216,6 +2229,38 @@ class Api extends \think\Controller
     }
 
     /**
+     * 给陪玩师点赞
+     * @author 贺强
+     * @time   2019-01-08 10:17:16
+     * @param  UserModel $u UserModel 实例
+     */
+    public function praise(UserModel $u)
+    {
+        $param = $this->param;
+        if (empty($param['master_id'])) {
+            $msg = ['status' => 1, 'info' => '陪玩师ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '用户ID不能为空', 'data' => null];
+        } else {
+            $pm    = new PraiseMasterModel();
+            $start = strtotime(date('Y-m-d'));
+            $end   = strtotime(date('Y-m-d', strtotime('+1 day')));
+            $count = $pm->getCount(['master_id' => $param['master_id'], 'uid' => $param['uid'], 'addtime' => ['between', [$start, $end]]]);
+            if ($count > 19) {
+                $msg = ['status' => 5, 'info' => '一天最多赞 20 次', 'data' => null];
+            }
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $res = $u->praise($param);
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '点赞失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '点赞成功', 'data' => null]);exit;
+    }
+
+    /**
      * 获取玩家土豪榜
      * @author 贺强
      * @time   2018-11-20 10:18:04
@@ -2398,7 +2443,7 @@ class Api extends \think\Controller
         }
         if ($res) {
             echo json_encode(['status' => 0, 'info' => '成功', 'data' => null]);exit;
-            }
         }
-
     }
+
+}

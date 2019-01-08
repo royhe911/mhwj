@@ -1,8 +1,6 @@
 <?php
 namespace app\common\model;
 
-use think\Db;
-
 /**
  * GoodsTaskModel类
  * @author 贺强
