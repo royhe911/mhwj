@@ -470,7 +470,6 @@ class Api extends \think\Controller
                 }
             }
             $master['is_praise'] = $is_praise;
-            $master['praise'] *= 10;
             // 取陪玩师属性
             $ua   = new UserAttrModel();
             $attr = $ua->getModel(['uid' => $master['id']]);
