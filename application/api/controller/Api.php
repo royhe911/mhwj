@@ -1068,7 +1068,7 @@ class Api extends \think\Controller
                 echo json_encode(['status' => 17, 'info' => '您还有未完成的订制订单', 'data' => null]);exit;
             }
             $u    = new UserModel();
-            $user = $u->getModel(['id' => $param['uid'], 'is_delete' => 0], 'type,`status`');
+            $user = $u->getModel(['id' => $param['uid'], 'is_delete' => 0], ['type', 'is_anchor', 'status']);
             if (!$user) {
                 $msg = ['status' => 6, 'info' => '陪玩师不存在', 'data' => null];
             } elseif ($user['type'] !== 2 || $user['status'] !== 8) {
@@ -1088,6 +1088,7 @@ class Api extends \think\Controller
                     $msg = ['status' => 21, 'info' => '您还未认证此游戏或审核未通过，不能陪玩', 'data' => null];
                 }
             }
+            $is_anchor = $user['is_anchor'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -1095,6 +1096,8 @@ class Api extends \think\Controller
         $param['count'] = 1;
         if (intval($param['type']) === 2) {
             $param['master_count'] = 1;
+        } elseif (intval($param['type']) === 1 && $is_anchor) {
+            $param['count'] = 5 - intval($param['master_count']);
         }
         $param['addtime'] = time();
         if (intval($param['type']) === 2) {
