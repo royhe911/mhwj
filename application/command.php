@@ -24,4 +24,5 @@ return [
     'app\common\crontab\Vericode',
     'app\common\crontab\Prize',
     'app\common\crontab\MasterScore',
+    'app\common\crontab\RoomNotice',
 ];
