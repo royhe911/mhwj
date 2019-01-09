@@ -35,7 +35,7 @@ class RoomModel extends CommonModel
                 return 4;
             }
             $data = $data[0];
-            if ($data['status'] === 10 || $data['status'] === 8 || $data['status'] === 5 || $data['status'] === 6) {
+            if ($data['status'] === 10 || $data['status'] === 8 || $data['status'] === 5) {
                 return 10;
             }
             if ($data['type'] === 2) {
@@ -60,8 +60,8 @@ class RoomModel extends CommonModel
                 if ($data['count'] + $data['master_count'] === 5) {
                     return 3;
                 }
-                $ru = new RoomUserModel();
-                $ru->modifyField('status', 0, ['room_id' => $room_id]);
+                // $ru = new RoomUserModel();
+                // $ru->modifyField('status', 0, ['room_id' => $room_id]);
                 $dida = ['count' => $data['count'] + 1, 'total_money' => $total_money, 'status' => 0];
             }
             $mo->modifyField('order_money', $total_money, ['room_id' => $room_id]);
