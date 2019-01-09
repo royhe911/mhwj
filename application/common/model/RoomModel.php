@@ -48,7 +48,12 @@ class RoomModel extends CommonModel
                 if ($data['count'] === 1) {
                     return 2;
                 }
-                $dida = ['count' => $data['count'] - 1, 'total_money' => $total_money];
+                $dida  = ['count' => $data['count'] - 1, 'total_money' => $total_money];
+                $ru    = new RoomUserModel();
+                $count = $ru->getCount(['room_id' => $room_id, 'status' => 6]);
+                if ($dida['count'] === $count) {
+                    $dida['status'] = 6;
+                }
             }
             if ($type === 2) {
                 $total_money = $data['total_money'] + $data['num'] * $data['price'];
@@ -57,7 +62,7 @@ class RoomModel extends CommonModel
                 }
                 $ru = new RoomUserModel();
                 $ru->modifyField('status', 0, ['room_id' => $room_id]);
-                $dida = ['count' => $data['count'] + 1, 'total_money' => $total_money];
+                $dida = ['count' => $data['count'] + 1, 'total_money' => $total_money, 'status' => 0];
             }
             $mo->modifyField('order_money', $total_money, ['room_id' => $room_id]);
             $res = $this->modify($dida, $where);

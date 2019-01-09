@@ -1608,9 +1608,13 @@ class Api extends \think\Controller
                     }
                 }
                 if (in_array($user['id'], $mids)) {
-                    if ($user['id'] === $room['uid']) {
-                        $user['master']    = 1;
+                    if ($uid === $room['uid']) {
                         $room['is_anchor'] = $user['is_anchor'];
+                    } else {
+                        $room['is_anchor'] = 0;
+                    }
+                    if ($user['id'] === $room['uid']) {
+                        $user['master'] = 1;
                     } else {
                         $user['master'] = 0;
                     }

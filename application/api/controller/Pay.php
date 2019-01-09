@@ -1548,12 +1548,17 @@ class Pay extends \think\Controller
         }
         $uid     = $param['uid'];
         $room_id = $param['room_id'];
-        $room    = $r->getModel(['id' => $room_id], ['form_id', 'type', 'uid']);
+        $room    = $r->getModel(['id' => $room_id], ['form_id', 'type', 'uid', 'count']);
         $data    = ['openid' => '', 'form_id' => '', 'data' => ['keyword1' => ['value' => 'order_num'], 'keyword2' => ['value' => 'nickname'], 'keyword3' => ['value' => 'addtime'], 'keyword4' => ['value' => 'money'], 'keyword5' => ['value' => 'pay_time'], 'keyword6' => ['value' => 'status']]];
         $user    = $u->getModel(['id' => $room['uid']], ['openid']);
         $wanj    = $u->getModel(['id' => $uid], ['nickname']);
         $uord    = $uo->getModel(['room_id' => $room_id, 'uid' => $uid]);
         if ($room && $user && $wanj && $uord) {
+            $ru    = new RoomUserModel();
+            $count = $ru->getCount(['room_id' => $room_id, 'status' => 6]);
+            if ($count === $room['count']) {
+                $r->modifyField('status', 6, ['id' => $room_id]);
+            }
             $time = date('Y年m月d日 H:i:s', $uord['addtime']);
             $ptim = date('Y年m月d日 H:i:s', $uord['pay_time']);
             $data = ['openid' => $user['openid'], 'form_id' => $room['form_id'], 'order_num' => $uord['order_num'], 'nickname' => $wanj['nickname'], 'addtime' => $time, 'money' => $uord['order_money'], 'pay_time' => $ptim, 'status' => '支付成功'];
