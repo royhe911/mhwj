@@ -209,7 +209,7 @@ class Prize extends \think\Controller
         $pu    = new PrizeUserModel();
         $count = $pu->getCount(['prize_id' => $prize_id, 'code' => $code]);
         if ($count) {
-            $this->get_prize_code($prize_id, $num);
+            $code = $this->get_prize_code($prize_id, $num);
         }
         return $code;
     }
