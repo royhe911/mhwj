@@ -3,6 +3,7 @@ namespace app\admin\controller;
 
 use app\common\model\GameModel;
 use app\common\model\RoomModel;
+use app\common\model\RoomNoticeModel;
 use app\common\model\RoomSetModel;
 use app\common\model\UserModel;
 
@@ -169,8 +170,18 @@ class Room extends \think\Controller
      * @author 贺强
      * @time   2019-01-06 10:29:25]
      */
-    public function house()
+    public function house(RoomNoticeModel $rn)
     {
-        return $this->fetch('house');
+        $time = strtotime(date('Y-m-d H:i:s', strtotime('-12 hour')));
+        $list = $rn->getList(['addtime' => ['gt', $time]], ['msg'], null, '', 'addtime desc');
+        $str  = '';
+        foreach ($list as $item) {
+            if ($str === '') {
+                $str = $item['msg'];
+            } else {
+                $str .= "\n{$item['msg']}";
+            }
+        }
+        return $this->fetch('house', ['str' => $str]);
     }
 }

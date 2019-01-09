@@ -176,7 +176,7 @@
                 <img class="gbi" src="/static/h+/img/close.jpg">
             </div>
             <div class="midside"></div>
-            <span class="cont">@Evans &nbsp;的房间{您你的手机}, 进人了 &nbsp; &nbsp; &nbsp; 2019-01-09 11:34:20</span>
+            <span class="cont"></span>
         </div>
     </div>
 </body>
@@ -193,7 +193,6 @@
 <script type="text/javascript" src="/static/h+/js/plugins/pace/pace.min.js"></script>
 <script type="text/javascript">
     var url = 'wss://hkqgg.cn:3999';
-    // var websocket = null;
     function init() {
         websocket = new WebSocket(url); 
         websocket.onopen = function(evt){
@@ -211,7 +210,9 @@
         if (evt.data != '') {
             $msg = $.parseJSON(evt.data);
             if ($msg.type == 'notice' && $msg.content != '') {
-                $('.cont').val($msg.content.replace(' ', '&nbsp;')).css('display', '');
+                $msg = $msg.content;
+                $('.cont').html($msg.replace(' ', '&nbsp;'));
+                $('#notice').css('display', 'block')
             }
         }
     }
