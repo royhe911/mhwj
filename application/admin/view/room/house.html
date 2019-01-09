@@ -26,7 +26,7 @@
         if (evt.data != '') {
             $msg = $.parseJSON(evt.data);
             if ($msg.type == 'notice' && $msg.content != '') {
-                $('#msg').val($msg.content + $('#msg').val() + '\n');
+                $('#msg').val($msg.content + '\n' + $('#msg').val());
                 document.getElementById('msg').scrollTop = document.getElementById('msg').scrollHeight;
             }
         }
