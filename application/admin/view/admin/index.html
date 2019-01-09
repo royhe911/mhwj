@@ -12,7 +12,7 @@
     <link href="/static/h+/css/style.min862f.css?v=4.1.0" rel="stylesheet">
     <style type="text/css">
         .img-circle{width: 64px;height: 64px;}
-        #notice{position: absolute;width: 800px;height: 100px;top: 30%;left: 35%;background: #c9daf8;text-align: center;color: #f00;display: 'none';}
+        #notice{position: absolute;width: 800px;height: 100px;top: 30%;left: 35%;background: #c9daf8;text-align: center;color: #f00;display: none;}
         .upside{width: 100%;height: 30px;line-height: 30px;text-align: right;background: #666;}
         .midside{width: 100%;height: 20px;}
         .gbi{width: 30px;height: 30px;cursor: pointer;}
@@ -176,7 +176,7 @@
                 <img class="gbi" src="/static/h+/img/close.jpg">
             </div>
             <div class="midside"></div>
-            @Evans &nbsp;的房间{您你的手机}, 进人了 &nbsp; &nbsp; &nbsp; 2019-01-09 11:34:20
+            <span class="cont">@Evans &nbsp;的房间{您你的手机}, 进人了 &nbsp; &nbsp; &nbsp; 2019-01-09 11:34:20</span>
         </div>
     </div>
 </body>
@@ -211,7 +211,7 @@
         if (evt.data != '') {
             $msg = $.parseJSON(evt.data);
             if ($msg.type == 'notice' && $msg.content != '') {
-                $('#notice').val($msg.content.replace(' ', '&nbsp;')).css('display', '');
+                $('.cont').val($msg.content.replace(' ', '&nbsp;')).css('display', '');
             }
         }
     }
