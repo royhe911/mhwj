@@ -1609,16 +1609,19 @@ class Api extends \think\Controller
                 }
                 if (in_array($user['id'], $mids)) {
                     if ($user['id'] === $room['uid']) {
-                        $user['master'] = 1;
+                        $user['master']    = 1;
+                        $room['is_anchor'] = $user['is_anchor'];
                     } else {
                         $user['master'] = 0;
                     }
+                    unset($user['is_anchor']);
                     $members['master'][] = $user;
                 } else {
                     if (!empty($usta)) {
                         $user['status']     = $usta['status'];
                         $user['status_txt'] = $status_txt;
                     }
+                    unset($user['is_anchor']);
                     $members['users'][] = $user;
                 }
             }
