@@ -874,7 +874,7 @@ class Api extends \think\Controller
         } elseif ($code["vericode"] !== $param['code']) {
             $msg = ['status' => 3, 'info' => '验证码错误', 'data' => null];
         } else {
-            $v->modifyField('status', 1, ['mobile' => "v_$mobile"]);
+            $v->modifyField('is_used', 1, ['mobile' => "v_$mobile"]);
             // $v->delByWhere(['mobile' => "v_$mobile"]);
             $msg = ['status' => 0, 'info' => '验证成功', 'data' => null];
         }

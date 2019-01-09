@@ -207,7 +207,7 @@ class RoomModel extends CommonModel
                 return 2;
             }
             $res = $this->modifyField('is_tip', 0, ['id' => $room_id]);
-            if ($res !== false) {
+            if ($res === false) {
                 Db::rollback();
                 return 3;
             }
