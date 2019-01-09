@@ -1152,7 +1152,7 @@ class Api extends \think\Controller
             $longitude = $param['longitude'];
             $latitude  = $param['latitude'];
         }
-        $list = $r->getList($where, ['id', 'uid', 'name', 'game_id', 'type', 'para_min', 'para_max', 'price', 'num', 'total_money', 'region', 'in_count', 'count', 'in_master_count', 'master_count', 'status', 'latitude', 'longitude'], "$page,$pagesize", 'addtime desc,status');
+        $list = $r->getList($where, ['id', 'uid', 'name', 'game_id', 'type', 'para_min', 'para_max', 'price', 'num', 'total_money', 'region', 'in_count', 'count', 'in_master_count', 'master_count', 'status', 'latitude', 'longitude', 'is_win'], "$page,$pagesize", 'addtime desc,status');
         if ($list) {
             $count    = $r->getCount($where);
             $uids     = array_column($list, 'uid');
