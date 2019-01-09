@@ -32,6 +32,6 @@ class RoomNotice extends Command
     {
         $rn   = new RoomNoticeModel();
         $time = strtotime(date('Y-m-d'));
-        $rn->delByWhere(['addtime' => ['lt', $itme]]);
+        $rn->delByWhere(['addtime' => ['lt', $time]]);
     }
 }
