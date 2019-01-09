@@ -12,6 +12,11 @@
     <link href="/static/h+/css/style.min862f.css?v=4.1.0" rel="stylesheet">
     <style type="text/css">
         .img-circle{width: 64px;height: 64px;}
+        #notice{position: absolute;width: 800px;height: 100px;top: 30%;left: 35%;background: #c9daf8;text-align: center;color: #f00;display: 'none';}
+        .upside{width: 100%;height: 30px;line-height: 30px;text-align: right;background: #666;}
+        .midside{width: 100%;height: 20px;}
+        .gbi{width: 30px;height: 30px;cursor: pointer;}
+        .cont{width: 100px;height: 70px;text-align: center;}
     </style>
 </head>
 <body class="fixed-sidebar full-height-layout gray-bg" style="overflow:hidden">
@@ -166,17 +171,56 @@
             </div>
         </div>
         <!--右侧边栏结束-->
+        <div id="notice">
+            <div class="upside">
+                <img class="gbi" src="/static/h+/img/close.jpg">
+            </div>
+            <div class="midside"></div>
+            @Evans &nbsp;的房间{您你的手机}, 进人了 &nbsp; &nbsp; &nbsp; 2019-01-09 11:34:20
+        </div>
     </div>
-    <script type="text/javascript">
-        var menu_str = {$menu_str};
-    </script>
-    <script type="text/javascript" src="/static/h+/js/jquery.min.js?v=2.1.4"></script>
-    <script type="text/javascript" src="/static/h+/js/bootstrap.min.js?v=3.3.6"></script>
-    <script type="text/javascript" src="/static/h+/js/plugins/metisMenu/jquery.metisMenu.js"></script>
-    <script type="text/javascript" src="/static/h+/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-    <script type="text/javascript" src="/static/h+/js/plugins/layer/layer.min.js"></script>
-    <script type="text/javascript" src="/static/h+/js/hplus.min.js?v=4.1.0"></script>
-    <script type="text/javascript" src="/static/h+/js/contabs.min.js"></script>
-    <script type="text/javascript" src="/static/h+/js/plugins/pace/pace.min.js"></script>
 </body>
+<script type="text/javascript">
+    var menu_str = {$menu_str};
+</script>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js?v=2.1.4"></script>
+<script type="text/javascript" src="/static/h+/js/bootstrap.min.js?v=3.3.6"></script>
+<script type="text/javascript" src="/static/h+/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+<script type="text/javascript" src="/static/h+/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+<script type="text/javascript" src="/static/h+/js/plugins/layer/layer.min.js"></script>
+<script type="text/javascript" src="/static/h+/js/hplus.min.js?v=4.1.0"></script>
+<script type="text/javascript" src="/static/h+/js/contabs.min.js"></script>
+<script type="text/javascript" src="/static/h+/js/plugins/pace/pace.min.js"></script>
+<script type="text/javascript">
+    var url = 'wss://hkqgg.cn:3999';
+    // var websocket = null;
+    function init() {
+        websocket = new WebSocket(url); 
+        websocket.onopen = function(evt){
+            doSend('{"type": "login", "roomid": "notice"}')
+        };
+        websocket.onmessage = function(evt){
+            onMessage(evt)
+        };
+    }
+    function doSend(message){
+        websocket.send(message)
+    }
+    function onMessage(evt){
+        // console.log(evt)
+        if (evt.data != '') {
+            $msg = $.parseJSON(evt.data);
+            if ($msg.type == 'notice' && $msg.content != '') {
+                $('#notice').val($msg.content.replace(' ', '&nbsp;')).css('display', '');
+            }
+        }
+    }
+    init();
+    setInterval(function(){
+        doSend('{"type": "notice"}')
+    }, 5000);
+    $('.gbi').click(function(){
+        $('#notice').css('display', 'none')
+    })
+</script>
 </html>
