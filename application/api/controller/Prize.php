@@ -248,6 +248,7 @@ class Prize extends \think\Controller
                 if (!empty($item['addtime'])) {
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                 }
+                $item['code'] = explode(',', $item['code']);
                 if (!empty($plis[$item['prize_id']])) {
                     $prize = $plis[$item['prize_id']];
                     // 属性赋值
