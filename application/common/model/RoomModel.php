@@ -62,7 +62,7 @@ class RoomModel extends CommonModel
                 }
                 // $ru = new RoomUserModel();
                 // $ru->modifyField('status', 0, ['room_id' => $room_id]);
-                $dida = ['count' => $data['count'] + 1, 'total_money' => $total_money, 'status' => 0];
+                $dida = ['count' => $data['count'] + 1, 'total_money' => $total_money, 'status' => 5];
             }
             $mo->modifyField('order_money', $total_money, ['room_id' => $room_id]);
             $res = $this->modify($dida, $where);
