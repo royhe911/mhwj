@@ -35,7 +35,7 @@ class RoomModel extends CommonModel
                 return 4;
             }
             $data = $data[0];
-            if ($data['status'] === 10 || $data['status'] === 8 || $data['status'] === 5) {
+            if ($data['status'] === 10 || $data['status'] === 8) {
                 return 10;
             }
             if ($data['type'] === 2) {
