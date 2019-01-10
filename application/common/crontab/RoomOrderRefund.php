@@ -2,6 +2,7 @@
 namespace app\common\crontab;
 
 use app\common\model\RoomModel;
+use app\common\model\UserModel;
 use app\common\model\UserOrderModel;
 use think\console\Command;
 use think\console\Input;
@@ -38,8 +39,11 @@ class RoomOrderRefund extends Command
             foreach ($list as $item) {
                 $ids[] = $item['room_id'];
             }
-            $r = new RoomModel();
-            $r->modifyField('status', 7, ['id' => ['in', $ids]]);
+            $u     = new UserModel();
+            $users = $u->getList(['is_anchor' => 1], ['id']);
+            $uids  = array_column($users, 'id');
+            $r     = new RoomModel();
+            $r->modifyField('status', 7, ['id' => ['in', $ids], 'uid' => ['not in', $uids]]);
         }
     }
 }
