@@ -238,4 +238,7 @@ return [
     'APPSECRET_ACCOMPANY'    => 'fe0bf34796bd39e83f2eff226372a4ff', // 小程序 appSecret
     'START_TIME'             => '11:00', // 活动开启时间
     'END_TIME'               => '12:00', // 活动结束时间
+    'GIFT_TYPE'              => [
+        1 => '普通礼物',
+    ], // 礼物类别
 ];

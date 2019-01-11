@@ -255,8 +255,8 @@ class Game extends \think\Controller
     {
         $where = [];
         // 分页参数
-        $page     = intval($this->request->get('page', 1));
-        $pagesize = intval($this->request->get('pagesize', config('PAGESIZE')));
+        $page     = $this->request->get('page', 1);
+        $pagesize = $this->request->get('pagesize', config('PAGESIZE'));
         $list     = $g->getList($where, true, "$page,$pagesize", 'sort');
         foreach ($list as &$item) {
             if (!empty($item['url']) && strpos($item['url'], 'https://') === false) {

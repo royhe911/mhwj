@@ -74,6 +74,11 @@ return [
     '/prize/users'        => 'admin/Prize/users', // 中奖者列表
     '/prize/ffjp'         => 'admin/Prize/ffjp', // 发放奖品
     '/prize/jackpot'      => 'admin/Prize/jackpot', // 奖池
+    '/gift/add'           => 'admin/Gift/add', // 添加礼物
+    '/gift/list'          => 'admin/Gift/lists', // 礼物列表
+    '/gift/edit'          => 'admin/Gift/edit', // 修改礼物
+    '/gift/del'           => 'admin/Gift/del', // 删除礼物
+    '/gift/editsort'      => 'admin/Gift/editsort', // 修改礼物排序
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图
