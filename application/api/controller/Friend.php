@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\FriendCommentModel;
 use app\common\model\FriendMoodModel;
 use app\common\model\FriendTopicModel;
 use app\common\model\FriendZanModel;
@@ -79,6 +80,37 @@ class Friend extends \think\Controller
             echo json_encode(['status' => 40, 'info' => '发布失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '发布成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 评论/回复
+     * @author 贺强
+     * @time   2019-01-11 15:46:00
+     * @param  FriendCommentModel $fc FriendCommentModel 实例
+     */
+    public function comment(FriendCommentModel $fc)
+    {
+        $param = $this->param;
+        if (empty($param['obj_id'])) {
+            $msg = ['status' => 1, 'info' => '心情或评论ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '评论者ID不能为空', 'data' => null];
+        } elseif (empty($param['content'])) {
+            $msg = ['status' => 5, 'info' => '评论内容不能为空', 'data' => null];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 7, 'info' => '消息类型不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $param['addtime'] = time();
+        // 添加
+        $res = $fc->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 40, 'info' => '评论失败', 'data' => null]);exit;
+        } else {
+            echo json_encode(['status' => 0, 'info' => '评论成功', 'data' => null]);exit;
+        }
     }
 
     /**

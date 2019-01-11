@@ -200,5 +200,6 @@ return [
     '/api/friend/topics'  => 'api/Friend/get_topic', // 获取心情主题
     '/api/friend/release' => 'api/Friend/release', // 发布心情
     '/api/friend/zan'     => 'api/Friend/zan', // 点赞
+    '/api/friend/comment' => 'api/Friend/comment', // 评论或者回复
     /*--------   朋友圈 api 结束  --------*/
 ];
