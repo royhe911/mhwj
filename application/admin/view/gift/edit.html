@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修改礼物</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
+    <style type="text/css">
+        .form-control{width: 200px;}
+        #preview{max-width: 120px;max-height: 120px;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>修改礼物</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal" onsubmit="return false">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">礼物类别</label>
+                            <div class="col-sm-10">
+                                <select id="type" class="form-control">
+                                    <option value="">…礼物类别…</option>
+                                    {foreach $types as $k=>$t}
+                                    <option {if($gift.type==$k)}selected="selected"{/if} value="{$k}">{$t}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">礼物名称</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="name" value="{$gift.name}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">礼物图片</label>
+                            <div class="col-sm-10">
+                                <table width="100%">
+                                    <tr>
+                                        <td valign="top" width="120px"><input id="file_upload" name="file_upload" type="file"></td>
+                                        <td valign="top"><input class="btn btn-primary" type="button" data-action="upload" value="上传"></td>
+                                    </tr>
+                                    <tr><td colspan="2"><div id="progress"></div><input type="hidden" id="logo" value="{$gift.logo}"></td></tr>
+                                    <tr><td colspan="2"><img id="preview" src="{$gift.logo1}"></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">礼物价格</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="price" value="{$gift.price}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">排序</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="sort" value="{$gift.sort}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">描述</label>
+                            <div class="col-sm-10">
+                                <textarea id="desc" rows="8" cols="50" placeholder="礼物描述">{$gift.desc}</textarea>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <input class="btn btn-primary" type="button" data-action="save" value="保存内容">
+                                <input class="btn btn-white" type="button" data-action="cancel" value="取消">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript" src="/static/uploadifive/jquery.uploadifive.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $('input[data-action]').click(function(){
+            $action = $(this).data('action');
+            if ($action == 'save') {
+                var type = $('#type').val(), name = $('#name'), logo = $('#logo').val(), price = $('#price');
+                if (type == '') {
+                    layer.msg('请选择礼物类别', {icon: 5, time: 1000});
+                    return false
+                }
+                if (name.val() == '') {
+                    layer.msg('礼物名称不能为空', {icon: 5, time: 1000}, function(){name.focus()});
+                    return false
+                }
+                if (logo == '') {
+                    layer.msg('请上传礼物图片', {icon: 5, time: 1000});
+                    return false
+                }
+                if (price.val() == '') {
+                    layer.msg('请填写礼物价格', {icon: 5, time: 1000}, function(){price.focus()});
+                    return false
+                }
+                $.ajax({
+                    type: 'post', cache: false, dataType: 'json',
+                    url: '/gift/edit',
+                    data: {'id': {$gift.id}, 'type': type, 'name': name.val(), 'logo': logo, 'price': price.val(), 'sort': $('#sort').val(), 'desc': $('#desc').val()},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 6, time: 1000}, function(){location.href = '/gift/list'});
+                        }else{
+                            layer.msg(data.info, {icon: 5, time: 1000});
+                        }
+                    }
+                })
+            } else if ($action == 'cancel') {
+                location.href = '/gift/list'
+            } else if ($action == 'upload') {
+                $('#file_upload').uploadifive('upload')
+            }
+        });
+        $('#file_upload').uploadifive({
+            'auto'             : false,
+            'buttonText'       : '选择图片',
+            'queueID'          : 'progress',
+            'fileTypeDesc'     : 'Image Files',
+            'fileTypeExts'     : '*.jpg;*.gif;*.png',
+            'multi'            : false,
+            'removeCompleted'  : true,
+            'formData'         : {
+                'timestamp' : '{$time}',
+                'token'     : '{$token}'
+            },
+            'uploadScript'     : '/upload',
+            'onUploadComplete' : function(file, data) {
+                // data = eval('(' + data + ')');
+                data = JSON.parse(data);
+                $('#logo').val(data.path);
+            }
+        });
+    });
+</script>
+</html>
