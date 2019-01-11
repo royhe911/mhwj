@@ -201,5 +201,6 @@ return [
     '/api/friend/release' => 'api/Friend/release', // 发布心情
     '/api/friend/zan'     => 'api/Friend/zan', // 点赞
     '/api/friend/comment' => 'api/Friend/comment', // 评论或者回复
+    '/api/friend/moods'   => 'api/Friend/get_moods', // 心情列表
     /*--------   朋友圈 api 结束  --------*/
 ];
