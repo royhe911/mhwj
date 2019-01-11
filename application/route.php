@@ -79,6 +79,11 @@ return [
     '/gift/edit'          => 'admin/Gift/edit', // 修改礼物
     '/gift/del'           => 'admin/Gift/del', // 删除礼物
     '/gift/editsort'      => 'admin/Gift/editsort', // 修改礼物排序
+    '/friend/addtopic'    => 'admin/Friend/addtopic', // 添加主题
+    '/friend/topiclist'   => 'admin/Friend/topic_list', // 主题列表
+    '/friend/editsort'    => 'admin/Friend/editsort', // 修改排序
+    '/friend/edittitle'   => 'admin/Friend/edittitle', // 修改主题
+    '/friend/operate'     => 'admin/Friend/operate', // 操作主题
 
     /*--------   api 开始   --------*/
     '/api/carousel'       => 'api/Api/get_carousel', // 获取轮播轮播图
@@ -191,4 +196,9 @@ return [
     '/api/pz/myprizes'    => 'api/Prize/my_prizes', // 我的抽奖码
     '/api/pz/test'        => 'api/Prize/test', // 测试
     /*--------   砍价 api 结束  --------*/
+    /*--------   朋友圈 api 开始  --------*/
+    '/api/friend/topics'  => 'api/Friend/get_topic', // 获取心情主题
+    '/api/friend/release' => 'api/Friend/release', // 发布心情
+    '/api/friend/zan'     => 'api/Friend/zan', // 点赞
+    /*--------   朋友圈 api 结束  --------*/
 ];

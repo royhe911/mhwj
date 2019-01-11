@@ -177,16 +177,16 @@ class CommonModel extends \think\Model
      * @param array|string $where 查询条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
      * @param array|string $field 要查询的字段，形如：['id', 'name', ……]或者'id, name, ……'，默认显式的获取数据表的所有字段列表
      * @param array|string $order 按某(些)字段排序，形如：['order','id'=>'desc']或者'order, id desc'，默认按数据库中原顺序
-     * @param array|string $whereOr 查询 or 条件，形如：['name'=>'think', 'id'=>['>', 3], ……]或者 SQL 原生字符串，默认为空
+     * @param boolean $lock 是否加锁
      * @return array 返回查询结果(数组)，若不存在返回 null
      */
-    public function getModel($where = null, $field = true, $order = '', $whereOr = null)
+    public function getModel($where = null, $field = true, $order = '', $lock = false)
     {
         $model = Db::table($this->table)
             ->field($field)
             ->order($order)
             ->where($where)
-            ->whereOr($whereOr)
+            ->lock($lock)
         // ->fetchSql(true)
             ->find();
         // $model = db($this->table)->where($where)->find();
