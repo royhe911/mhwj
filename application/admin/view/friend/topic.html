@@ -78,6 +78,13 @@
 <script type="text/javascript" src="/static/paging/paging-min.js"></script>
 <script>
     $(function () {
+        $('#selAll').click(function(){
+            if ($(this).is(':checked')) {
+                $('.check').prop('checked', true);
+            }else{
+                $('.check').prop('checked', false);
+            }
+        });
         $('.sort').click(function(){
             $(this).find('.sort_p').css('display', 'none');
             $(this).find('.sort_i').css('display', 'block').focus().select();
