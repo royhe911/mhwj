@@ -233,7 +233,7 @@ class Friend extends \think\Controller
             $u    = new UserModel();
             $diff = time() - $mood['addtime'];
             if ($diff < 60) {
-                $mood['addtime'] = '刚刚';
+                $mood['addtime'] = $diff . '秒前';
             } elseif ($diff < 3600) {
                 $mood['addtime'] = intval($diff / 60) . '分钟前';
             } elseif ($diff < 86400) {
@@ -244,7 +244,8 @@ class Friend extends \think\Controller
             $fc   = new FriendCommentModel();
             $list = $fc->getList(['mood_id' => $param['moodid'], 'type' => 1], ['id', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
             if ($list) {
-                $cos = $fc->getList(['mood_id' => $moodid, 'type' => 2], ['id', 'nickname', 'sex', 'content', 'zan_count', 'addtime']);
+                $cos = $fc->getList(['mood_id' => $moodid], ['id', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'zan_count', 'addtime', 'type'], null, 'addtime desc');
+                $rpl = array_column($cos, null, 'id');
                 foreach ($list as &$item) {
                     $diff = time() - $item['addtime'];
                     if ($diff < 60) {
@@ -256,7 +257,11 @@ class Friend extends \think\Controller
                     } else {
                         $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                     }
-                    foreach ($cos as &$hf) {
+                    foreach ($cos as $k => &$hf) {
+                        if ($hf['type'] === 1) {
+                            unset($cos[$k]);
+                            continue;
+                        }
                         $diff = time() - $hf['addtime'];
                         if ($diff < 60) {
                             $hf['addtime'] = '刚刚';
@@ -267,6 +272,12 @@ class Friend extends \think\Controller
                         } else {
                             $hf['addtime'] = date('Y-m-d H:i:s', $hf['addtime']);
                         }
+                        if (!empty($rpl[$hf['obj_id']])) {
+                            $rpy = $rpl[$hf['obj_id']];
+                            // 属性赋值
+                            $hf['rid']       = $rpy['uid'];
+                            $hf['rnickname'] = $rpy['nickname'];
+                        }
                         $item['reply'][] = $hf;
                     }
                 }
@@ -274,5 +285,47 @@ class Friend extends \think\Controller
             $mood['comment'] = $list;
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $mood]);exit;
+    }
+
+    /**
+     * 删除心情/评论/回复
+     * @author 贺强
+     * @time   2019-01-14 16:08:06]
+     */
+    public function del_mood()
+    {
+        $param = $this->param;
+        if (empty($param['id'])) {
+            $msg = ['status' => 1, 'info' => '要删除的ID不能为空', 'data' => null];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 3, 'info' => '要删除的类型不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $id   = $param['id'];
+        $zw   = ['id' => $id];
+        $type = intval($param['type']);
+        switch ($type) {
+            case 1:
+                $m  = new FriendMoodModel();
+                $cw = ['mood_id' => $id];
+                break;
+            case 2:
+                $m = new FriendCommentModel();
+                break;
+            default:
+                $m = new FriendCommentModel();
+                break;
+        }
+        $res = $m->delById($id);
+        if (!$res) {
+            echo json_encode(['status' => 40, 'info' => '删除失败', 'data' => null]);exit;
+        }
+        if (!empty($cw)) {
+            $fc = new FriendCommentModel();
+            $fc->delByWhere($cw);
+        }
+        echo json_encode(['status' => 0, 'info' => '删除成功', 'data' => null]);exit;
     }
 }
