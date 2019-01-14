@@ -213,6 +213,23 @@ class Friend extends \think\Controller
         $moodid = $param['moodid'];
         $mood   = $fm->getModel(['id' => $moodid]);
         if ($mood) {
+            $ft    = new FriendTopicModel;
+            $topic = $ft->getList([], ['id', 'title']);
+            $topic = array_column($topic, 'title', 'id');
+            foreach ($topic as &$tc) {
+                if (strpos($tc, '#') === false) {
+                    $tc = '#' . $tc;
+                }
+            }
+            if (!empty($mood['topic1']) && !empty($topic[$mood['topic1']])) {
+                $mood['topic1'] = $topic[$mood['topic1']];
+            }
+            if (!empty($mood['topic2']) && !empty($topic[$mood['topic2']])) {
+                $mood['topic2'] = $topic[$mood['topic2']];
+            }
+            if (!empty($mood['topic3']) && !empty($topic[$mood['topic3']])) {
+                $mood['topic3'] = $topic[$mood['topic3']];
+            }
             $u    = new UserModel();
             $diff = time() - $mood['addtime'];
             if ($diff < 60) {

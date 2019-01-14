@@ -213,7 +213,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
         }
         $l = new LogModel();
-        $l->add(['type' => 2, 'info' => json_encode($param) . '同步用户信息'], 'addtime' => time());
+        $l->add(['type' => 2, 'info' => json_encode($param) . '同步用户信息', 'addtime' => time()]);
         $param['updatetime'] = time();
         // 修改信息
         $res = $u->modify($param, ['id' => $param['id']]);
@@ -1820,7 +1820,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 10, 'info' => '房间ID不能为空', 'data' => null]);exit;
         }
         $l = new LogModel();
-        $l->add(['type' => 1, 'content' => $param['uid'] . '|' . $param['type'] . '进入房间'], 'addtime' => time());
+        $l->add(['type' => 1, 'content' => $param['uid'] . '|' . $param['type'] . '进入房间', 'addtime' => time()]);
         $ru   = new RoomUserModel();
         $r    = new RoomModel();
         $room = $r->getModel(['id' => $param['room_id']], ['type']);
