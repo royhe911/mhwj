@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use app\common\model\FriendCommentModel;
+use app\common\model\FriendModel;
 use app\common\model\FriendMoodModel;
 use app\common\model\FriendTopicModel;
 use app\common\model\FriendZanModel;
@@ -160,6 +161,21 @@ class Friend extends \think\Controller
             $where['is_recommend'] = 1;
             $order                 = 'sort';
         }
+        if (!empty($param['uid'])) {
+            $f    = new FriendModel();
+            $fris = $f->getList("(uid1={$param['uid']} and follow1=1) or (uid2={$param['uid']} and follow2=1)", ['uid1', 'uid2']);
+            $id1s = array_column($fris, 'uid1');
+            $id1s = array_unique($id1s);
+            // print_r($id1s);
+            $id2s = array_column($fris, 'uid2');
+            $id2s = array_unique($id2s);
+            // print_r($id2s);
+            $ids = array_merge($id1s, $id2s);
+            $ids = array_unique($ids);
+            // 查询条件
+            $where['uid'] = ['in', $ids];
+        }
+        // print_r($where);exit;
         $page = 1;
         if (!empty($param['page'])) {
             $page = $param['page'];
