@@ -7,6 +7,7 @@ use app\common\model\CouponModel;
 use app\common\model\FeedbackModel;
 use app\common\model\GameConfigModel;
 use app\common\model\GameModel;
+use app\common\model\LogModel;
 use app\common\model\MasterOrderModel;
 use app\common\model\MessageModel;
 use app\common\model\NoticeModel;
@@ -1816,6 +1817,8 @@ class Api extends \think\Controller
             $res = 10;
             echo json_encode(['status' => 10, 'info' => '房间ID不能为空', 'data' => null]);exit;
         }
+        $l = new LogModel();
+        $l->add(['type' => 1, 'content' => $param['uid'] . '|' . $param['type'] . '进入房间'], 'addtime' => time());
         $ru   = new RoomUserModel();
         $r    = new RoomModel();
         $room = $r->getModel(['id' => $param['room_id']], ['type']);
