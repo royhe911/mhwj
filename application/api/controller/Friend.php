@@ -172,8 +172,11 @@ class Friend extends \think\Controller
             // print_r($id2s);
             $ids = array_merge($id1s, $id2s);
             $ids = array_unique($ids);
-            // 查询条件
-            $where['uid'] = ['in', $ids];
+            if (!empty($ids)) {
+                $where['uid'] = ['in', $ids];
+            } else {
+                echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => null]);exit;
+            }
         }
         // print_r($where);exit;
         $page = 1;
