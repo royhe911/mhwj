@@ -168,12 +168,8 @@ class Friend extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $fm->getList($where, ['id', 'uid', 'content', 'pic', 'topic1', 'topic2', 'topic3', 'zan_count', 'pl_count', 'addtime']);
+        $list = $fm->getList($where, ['id', 'uid', 'nickname', 'avatar', 'content', 'pic', 'topic1', 'topic2', 'topic3', 'zan_count', 'pl_count', 'addtime']);
         if ($list) {
-            $uids  = array_column($list, 'uid');
-            $u     = new UserModel();
-            $users = $u->getList(['id' => ['in', $uids]], ['id', 'nickname', 'avatar']);
-            $users = array_column($users, null, 'id');
             foreach ($list as &$item) {
                 $diff = time() - $item['addtime'];
                 if ($diff < 60) {
@@ -184,15 +180,6 @@ class Friend extends \think\Controller
                     $item['addtime'] = intval($diff / 3600) . '小时前';
                 } else {
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
-                }
-                if (!empty($users[$item['uid']])) {
-                    $user = $users[$item['uid']];
-                    // 属性赋值
-                    $item['nickname'] = $user['nickname'];
-                    $item['avatar']   = $user['avatar'];
-                } else {
-                    $item['nickname'] = '';
-                    $item['avatar']   = '';
                 }
                 if (!empty($item['pic'])) {
                     $pics = explode($item['pic'], ',');
@@ -206,5 +193,69 @@ class Friend extends \think\Controller
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 获取心情详情
+     * @author 贺强
+     * @time   2019-01-14 11:22:44
+     * @param  FriendMoodModel $fm FriendMoodModel 实例
+     */
+    public function get_mood_info(FriendMoodModel $fm)
+    {
+        $param = $this->param;
+        if (empty($param['moodid'])) {
+            $msg = ['status' => 1, 'info' => 'ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $moodid = $param['moodid'];
+        $mood   = $fm->getModel(['id' => $moodid]);
+        if ($mood) {
+            $u    = new UserModel();
+            $diff = time() - $mood['addtime'];
+            if ($diff < 60) {
+                $mood['addtime'] = '刚刚';
+            } elseif ($diff < 3600) {
+                $mood['addtime'] = intval($diff / 60) . '分钟前';
+            } elseif ($diff < 86400) {
+                $mood['addtime'] = intval($diff / 3600) . '小时前';
+            } else {
+                $mood['addtime'] = date('Y-m-d H:i:s', $mood['addtime']);
+            }
+            $fc   = new FriendCommentModel();
+            $list = $fc->getList(['mood_id' => $param['moodid'], 'type' => 1], true, null, 'addtime desc');
+            if ($list) {
+                $cos = $fc->getList(['mood_id' => $moodid, 'type' => 2], ['id', 'nickname', 'content', 'zan_count', 'addtime']);
+                foreach ($list as &$item) {
+                    $diff = time() - $item['addtime'];
+                    if ($diff < 60) {
+                        $item['addtime'] = '刚刚';
+                    } elseif ($diff < 3600) {
+                        $item['addtime'] = intval($diff / 60) . '分钟前';
+                    } elseif ($diff < 86400) {
+                        $item['addtime'] = intval($diff / 3600) . '小时前';
+                    } else {
+                        $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                    }
+                    foreach ($cos as &$hf) {
+                        $diff = time() - $hf['addtime'];
+                        if ($diff < 60) {
+                            $hf['addtime'] = '刚刚';
+                        } elseif ($diff < 3600) {
+                            $hf['addtime'] = intval($diff / 60) . '分钟前';
+                        } elseif ($diff < 86400) {
+                            $hf['addtime'] = intval($diff / 3600) . '小时前';
+                        } else {
+                            $hf['addtime'] = date('Y-m-d H:i:s', $hf['addtime']);
+                        }
+                        $item['reply'][] = $hf;
+                    }
+                }
+            }
+            $mood['comment'] = $list;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $mood]);exit;
     }
 }
