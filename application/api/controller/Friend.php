@@ -194,6 +194,15 @@ class Friend extends \think\Controller
                     $item['nickname'] = '';
                     $item['avatar']   = '';
                 }
+                if (!empty($item['pic'])) {
+                    $pics = explode($item['pic'], ',');
+                    foreach ($pics as &$pic) {
+                        if (strpos($pic, 'http://') === false && strpos($pic, 'https://') === false) {
+                            $pic = config('WEBSITE') . $pic;
+                        }
+                    }
+                    $item['pic'] = $pics;
+                }
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;

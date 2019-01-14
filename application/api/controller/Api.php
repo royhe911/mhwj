@@ -1675,10 +1675,10 @@ class Api extends \think\Controller
             if ($room['status'] !== 6) {
                 echo json_encode(['status' => 7, 'info' => '还有玩家未支付，不能开车', 'data' => null]);exit;
             }
-            //if ($room['type'] === 2) {
-            //    $uo = new UserOrderModel();
-            //    $uo->modifyField('status', 8, ['room_id' => $room_id]);
-            //}
+            // 修改订单状态为已开车
+            $uo = new UserOrderModel();
+            $uo->modifyField('status', 8, ['room_id' => $room_id]);
+
             $morder = $mo->getModel(['room_id' => $room_id]);
             $rm     = new RoomMasterModel();
             $ms     = $rm->getList(['room_id' => $room_id], ['uid']);
