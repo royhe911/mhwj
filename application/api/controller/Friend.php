@@ -225,9 +225,9 @@ class Friend extends \think\Controller
                 $mood['addtime'] = date('Y-m-d H:i:s', $mood['addtime']);
             }
             $fc   = new FriendCommentModel();
-            $list = $fc->getList(['mood_id' => $param['moodid'], 'type' => 1], true, null, 'addtime desc');
+            $list = $fc->getList(['mood_id' => $param['moodid'], 'type' => 1], ['id', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
             if ($list) {
-                $cos = $fc->getList(['mood_id' => $moodid, 'type' => 2], ['id', 'nickname', 'content', 'zan_count', 'addtime']);
+                $cos = $fc->getList(['mood_id' => $moodid, 'type' => 2], ['id', 'nickname', 'sex', 'content', 'zan_count', 'addtime']);
                 foreach ($list as &$item) {
                     $diff = time() - $item['addtime'];
                     if ($diff < 60) {
