@@ -158,12 +158,15 @@ class Friend extends \think\Controller
      */
     public function get_moods(FriendMoodModel $fm)
     {
-        $where = [];
+        $where = '1';
         $order = 'addtime desc';
         $param = $this->param;
         if (!empty($param['is_recommend'])) {
-            $where['is_recommend'] = 1;
-            $order                 = 'sort';
+            $where .= ' and is_recommend=1';
+            $order = 'sort';
+        }
+        if (!empty($param['topic'])) {
+            $where .= " and find_in_set({$param['topic']},topic)";
         }
         if (!empty($param['uid'])) {
             $f    = new FriendModel();
@@ -177,7 +180,7 @@ class Friend extends \think\Controller
             $ids = array_merge($id1s, $id2s);
             $ids = array_unique($ids);
             if (!empty($ids)) {
-                $where['uid'] = ['in', $ids];
+                $where .= " and uid in ($ids)";
             } else {
                 echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => null]);exit;
             }
