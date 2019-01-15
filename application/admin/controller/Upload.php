@@ -56,7 +56,7 @@ class Upload extends \think\Controller
     public function upload()
     {
         $root_path  = ROOT_PATH . 'public';
-        $file_types = ['mp3', 'jpg', 'jpeg', 'gif', 'png'];
+        $file_types = ['mp3', 'mp4', 'jpg', 'jpeg', 'gif', 'png'];
         $file       = $_FILES['Filedata'];
         if (empty($file)) {
             echo json_encode(['status' => 1, 'info' => '请选择上传文件']);exit;
