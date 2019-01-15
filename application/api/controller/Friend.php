@@ -366,10 +366,12 @@ class Friend extends \think\Controller
      * 获取热门话题
      * @author 贺强
      * @time   2019-01-15 11:14:47
-     * @param  FriendMoodModel $fm FriendMoodModel 实例
+     * @param  FriendTopicModel $fm FriendTopicModel 实例
      */
-    public function hot_topic(FriendMoodModel $fm)
+    public function hot_topic(FriendTopicModel $ft)
     {
-        
+        $where = ['status' => 1];
+        $list  = $ft->getList($where, ['id', 'title', 'count'], "1,3", "count desc");
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 }
