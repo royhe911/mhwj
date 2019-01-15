@@ -112,11 +112,10 @@ class Friend extends \think\Controller
         $res = $fc->add($param);
         if (!$res) {
             echo json_encode(['status' => 40, 'info' => '评论失败', 'data' => null]);exit;
-        } else {
-            $fm = new FriendMoodModel();
-            $fm->increment('pl_count', ['id' => $param['mood_id']]);
-            echo json_encode(['status' => 0, 'info' => '评论成功', 'data' => null]);exit;
         }
+        $fm = new FriendMoodModel();
+        $fm->increment('pl_count', ['id' => $param['mood_id']]);
+        echo json_encode(['status' => 0, 'info' => '评论成功', 'data' => null]);exit;
     }
 
     /**
