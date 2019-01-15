@@ -191,11 +191,6 @@ class Friend extends \think\Controller
             $ft    = new FriendTopicModel;
             $topic = $ft->getList([], ['id', 'title']);
             $topic = array_column($topic, 'title', 'id');
-            foreach ($topic as &$tc) {
-                if (strpos($tc, '#') === false) {
-                    $tc = '#' . $tc;
-                }
-            }
             foreach ($list as &$item) {
                 $tps = [];
                 if (!empty($item['topic'])) {
@@ -251,11 +246,6 @@ class Friend extends \think\Controller
             $ft    = new FriendTopicModel;
             $topic = $ft->getList([], ['id', 'title']);
             $topic = array_column($topic, 'title', 'id');
-            foreach ($topic as &$tc) {
-                if (strpos($tc, '#') === false) {
-                    $tc = '#' . $tc;
-                }
-            }
             $tps = [];
             if (!empty($mood['topic'])) {
                 $topics = explode(',', $mood['topic']);
