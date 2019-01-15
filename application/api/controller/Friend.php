@@ -111,6 +111,8 @@ class Friend extends \think\Controller
         // 添加
         $res = $fc->add($param);
         if (!$res) {
+            $fm = new FriendMoodModel();
+            $fm->increment('pl_count', ['id' => $param['mood_id']])
             echo json_encode(['status' => 40, 'info' => '评论失败', 'data' => null]);exit;
         } else {
             echo json_encode(['status' => 0, 'info' => '评论成功', 'data' => null]);exit;
@@ -234,14 +236,14 @@ class Friend extends \think\Controller
     public function get_mood_info(FriendMoodModel $fm)
     {
         $param = $this->param;
-        if (empty($param['moodid'])) {
+        if (empty($param['mood_id'])) {
             $msg = ['status' => 1, 'info' => 'ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $moodid = $param['moodid'];
-        $mood   = $fm->getModel(['id' => $moodid]);
+        $mood_id = $param['mood_id'];
+        $mood    = $fm->getModel(['id' => $mood_id]);
         if ($mood) {
             $ft    = new FriendTopicModel;
             $topic = $ft->getList([], ['id', 'title']);
@@ -266,9 +268,9 @@ class Friend extends \think\Controller
                 $mood['addtime'] = date('Y-m-d H:i:s', $mood['addtime']);
             }
             $fc   = new FriendCommentModel();
-            $list = $fc->getList(['mood_id' => $param['moodid'], 'type' => 1], ['id', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
+            $list = $fc->getList(['mood_id' => $param['mood_id'], 'type' => 1], ['id', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
             if ($list) {
-                $cos = $fc->getList(['mood_id' => $moodid], ['id', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'zan_count', 'addtime', 'type'], null, 'addtime desc');
+                $cos = $fc->getList(['mood_id' => $mood_id], ['id', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'zan_count', 'addtime', 'type'], null, 'addtime desc');
                 $rpl = array_column($cos, null, 'id');
                 foreach ($list as &$item) {
                     $diff = time() - $item['addtime'];
