@@ -186,7 +186,7 @@ class Friend extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $fm->getList($where, ['id', 'uid', 'nickname', 'avatar', 'content', 'pic', 'topic', 'zan_count', 'pl_count', 'addtime']);
+        $list = $fm->getList($where, ['id', 'uid', 'nickname', 'avatar', 'content', 'pic', 'topic', 'zan_count', 'pl_count', 'addtime'], "$page,$pagesize", $order);
         if ($list) {
             $ft    = new FriendTopicModel;
             $topic = $ft->getList([], ['id', 'title']);
@@ -246,7 +246,7 @@ class Friend extends \think\Controller
             $ft    = new FriendTopicModel;
             $topic = $ft->getList([], ['id', 'title']);
             $topic = array_column($topic, 'title', 'id');
-            $tps = [];
+            $tps   = [];
             if (!empty($mood['topic'])) {
                 $topics = explode(',', $mood['topic']);
                 foreach ($topics as $t) {
