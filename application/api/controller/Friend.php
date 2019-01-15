@@ -132,7 +132,7 @@ class Friend extends \think\Controller
         if (empty($param['obj_id'])) {
             $msg = ['status' => 1, 'info' => '心情或评论ID不能为空', 'data' => null];
         } elseif (empty($param['uid'])) {
-            $msg = ['status' => 3, 'info' => '用户ID不空', 'data' => null];
+            $msg = ['status' => 3, 'info' => '用户ID不能为空', 'data' => null];
         } elseif (empty($param['type'])) {
             $msg = ['status' => 5, 'info' => '类型不能为空', 'data' => null];
         }
@@ -370,20 +370,22 @@ class Friend extends \think\Controller
     public function follow(FriendModel $f)
     {
         $param = $this->param;
-        if (empty($param['uid'])) {
+        if (empty($param['uid1'])) {
             $msg = ['status' => 1, 'info' => '关注者ID不能为空', 'data' => null];
-        } elseif (empty($param['follow_uid'])) {
+        } elseif (empty($param['uid2'])) {
             $msg = ['status' => 3, 'info' => '被关注者ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $uid1  = intval($param['uid']);
-        $uid2  = intval($param['follow_uid']);
-        $where = "(uid1={$param['uid']} and uid2={$param['follow_uid']}) or (uid1={$param['follow_uid']} and uid2={$param['uid']})";
+        $uid1  = intval($param['uid1']);
+        $uid2  = intval($param['uid2']);
+        $where = "(uid1=$uid1 and uid2=$uid2) or (uid1=$uid2} and uid2=$uid1)";
         $fnd   = $f->getModel($where);
         if (empty($fnd)) {
-            $res = $f->add(['uid1' => $uid1, 'uid2' => $uid2, 'follow1' => 1]);
+            $param['follow1'] = 1;
+            // 添加
+            $res = $f->add($param);
         } else {
             $id    = $fnd['id'];
             $where = ['id' => $id];
@@ -425,5 +427,68 @@ class Friend extends \think\Controller
             echo json_encode(['status' => 40, 'info' => '关注失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 获取我的关注/粉丝/朋友
+     * @author 贺强
+     * @time   2019-01-15 16:04:39
+     * @param  FriendModel $f FriendModel 实例
+     */
+    public function friends(FriendModel $f)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 3, 'info' => '类型不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid  = intval($param['uid']);
+        $type = intval($param['type']);
+        switch ($type) {
+            case 1:
+                $where = "(uid1=$uid and follow1=1) or (uid2=$uid and follow2=1)";
+                break;
+            case 2:
+                $where = "(uid1=$uid and follow2=1) or (uid2=$uid and follow1=1)";
+                break;
+            default:
+                $where = ['uid1|uid2' => $uid, 'is_friend' => 1];
+                break;
+        }
+        if (!empty($param['is_count'])) {
+            $count = $f->getCount($where);
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $count]);
+        } else {
+            $page = 1;
+            if (!empty($param['page'])) {
+                $page = $param['page'];
+            }
+            $pagesize = 10;
+            if (!empty($param['pagesize'])) {
+                $pagesize = $param['pagesize'];
+            }
+            $list = $f->getList($where, ['uid1', 'nickname1', 'avatar1', 'uid2', 'nickname2', 'avatar2', 'is_friend'], "$page,$pagesize");
+            foreach ($list as &$item) {
+                // 过滤掉本人只取好友信息
+                if ($item['uid1'] === $uid) {
+                    unset($item['uid1'], $item['nickname1'], $item['avatar1']);
+                    $item['uid']      = $item['uid2'];
+                    $item['nickname'] = $item['nickname2'];
+                    $item['avatar']   = $item['avatar2'];
+                    unset($item['uid2'], $item['nickname2'], $item['avatar2']);
+                } elseif ($item['uid2'] === $uid) {
+                    unset($item['uid2'], $item['nickname2'], $item['avatar2']);
+                    $item['uid']      = $item['uid1'];
+                    $item['nickname'] = $item['nickname1'];
+                    $item['avatar2']  = $item['avatar1'];
+                    unset($item['uid1'], $item['nickname1'], $item['avatar1']);
+                }
+            }
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+        }
     }
 }
