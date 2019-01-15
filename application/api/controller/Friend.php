@@ -377,4 +377,70 @@ class Friend extends \think\Controller
         $list  = $ft->getList($where, ['id', 'title', 'count'], "1,3", "count desc");
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
+
+    /**
+     * 关注/取消关注
+     * @author 贺强
+     * @time   2019-01-15 12:05:28
+     * @param  FriendModel $f FriendModel 实例
+     */
+    public function follow(FriendModel $f)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '关注者ID不能为空', 'data' => null];
+        } elseif (empty($param['follow_uid'])) {
+            $msg = ['status' => 3, 'info' => '被关注者ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid1  = intval($param['uid']);
+        $uid2  = intval($param['follow_uid']);
+        $where = "(uid1={$param['uid']} and uid2={$param['follow_uid']}) or (uid1={$param['follow_uid']} and uid2={$param['uid']})";
+        $fnd   = $f->getModel($where);
+        if (empty($fnd)) {
+            $res = $f->add(['uid1' => $uid1, 'uid2' => $uid2, 'follow1' => 1]);
+        } else {
+            $id    = $fnd['id'];
+            $where = ['id' => $id];
+            if ($fnd['uid1'] === $uid1) {
+                // 如果之前已关注
+                if ($fnd['follow1']) {
+                    // 如果对方已经关注了他，则取消关注
+                    if ($fnd['follow2']) {
+                        $data = ['follow1' => 0, 'is_friend' => 0, 'friend_time' => 0];
+                        $res  = $f->modify($data, $where);
+                    } else {
+                        // 如果对方没有关注，则删除此数据
+                        $res = $f->delById($id);
+                    }
+                } else {
+                    // 如果之前没关注则关注对方并成为好友
+                    $data = ['follow1' => 1, 'is_friend' => 1, 'friend_time' => time()];
+                    $res  = $f->modify($data, $where);
+                }
+            } elseif ($fnd['uid2'] === $uid1) {
+                // 如果之前已关注
+                if ($fnd['follow2']) {
+                    // 如果对方已经关注了他，则取消关注
+                    if ($fnd['follow1']) {
+                        $data = ['follow2' => 0, 'is_friend' => 0, 'friend_time' => 0];
+                        $res  = $f->modify($data, $where);
+                    } else {
+                        // 如果对方没有关注，则删除此数据
+                        $res = $f->delById($id);
+                    }
+                } else {
+                    // 如果之前没关注则关注对方并成为好友
+                    $data = ['follow2' => 1, 'is_friend' => 1, 'friend_time' => time()];
+                    $res  = $f->modify($data, $where);
+                }
+            }
+        }
+        if (!$res) {
+            echo json_encode(['status' => 40, 'info' => '关注失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '成功', 'data' => null]);exit;
+    }
 }
