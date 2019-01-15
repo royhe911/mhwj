@@ -6,7 +6,6 @@ use app\common\model\FriendModel;
 use app\common\model\FriendMoodModel;
 use app\common\model\FriendTopicModel;
 use app\common\model\FriendZanModel;
-use app\common\model\UserModel;
 
 /**
  * FriendApi-控制器
@@ -187,9 +186,26 @@ class Friend extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $fm->getList($where, ['id', 'uid', 'nickname', 'avatar', 'content', 'pic', 'topic1', 'topic2', 'topic3', 'zan_count', 'pl_count', 'addtime']);
+        $list = $fm->getList($where, ['id', 'uid', 'nickname', 'avatar', 'content', 'pic', 'topic', 'zan_count', 'pl_count', 'addtime']);
         if ($list) {
+            $ft    = new FriendTopicModel;
+            $topic = $ft->getList([], ['id', 'title']);
+            $topic = array_column($topic, 'title', 'id');
+            foreach ($topic as &$tc) {
+                if (strpos($tc, '#') === false) {
+                    $tc = '#' . $tc;
+                }
+            }
             foreach ($list as &$item) {
+                $tps = [];
+                if (!empty($item['topic'])) {
+                    $topics = explode(',', $item['topic']);
+                    foreach ($topics as $t) {
+                        $tps[] = [$t => $topic[$t]];
+                    }
+                }
+                $item['topic'] = $tps;
+                // 显示发布时间
                 $diff = time() - $item['addtime'];
                 if ($diff < 60) {
                     $item['addtime'] = '刚刚';
@@ -201,7 +217,7 @@ class Friend extends \think\Controller
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                 }
                 if (!empty($item['pic'])) {
-                    $pics = explode($item['pic'], ',');
+                    $pics = explode(',', $item['pic']);
                     foreach ($pics as &$pic) {
                         if (strpos($pic, 'http://') === false && strpos($pic, 'https://') === false) {
                             $pic = config('WEBSITE') . $pic;
@@ -240,16 +256,15 @@ class Friend extends \think\Controller
                     $tc = '#' . $tc;
                 }
             }
-            if (!empty($mood['topic1']) && !empty($topic[$mood['topic1']])) {
-                $mood['topic1'] = $topic[$mood['topic1']];
+            $tps = [];
+            if (!empty($mood['topic'])) {
+                $topics = explode(',', $mood['topic']);
+                foreach ($topics as $t) {
+                    $tps[] = [$t => $topic[$t]];
+                }
             }
-            if (!empty($mood['topic2']) && !empty($topic[$mood['topic2']])) {
-                $mood['topic2'] = $topic[$mood['topic2']];
-            }
-            if (!empty($mood['topic3']) && !empty($topic[$mood['topic3']])) {
-                $mood['topic3'] = $topic[$mood['topic3']];
-            }
-            $u    = new UserModel();
+            $mood['topic'] = $tps;
+            // 显示发布时间
             $diff = time() - $mood['addtime'];
             if ($diff < 60) {
                 $mood['addtime'] = $diff . '秒前';
