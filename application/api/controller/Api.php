@@ -213,7 +213,7 @@ class Api extends \think\Controller
             echo json_encode(['status' => 1, 'info' => '参数缺失', 'data' => null]);exit;
         }
         $l = new LogModel();
-        $l->add(['type' => 2, 'info' => json_encode($param) . '同步用户信息', 'addtime' => time()]);
+        $l->add(['type' => 2, 'content' => json_encode($param) . '同步用户信息', 'addtime' => time()]);
         $param['updatetime'] = time();
         // 修改信息
         $res = $u->modify($param, ['id' => $param['id']]);
