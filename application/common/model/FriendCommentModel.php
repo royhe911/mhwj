@@ -30,13 +30,48 @@ class FriendCommentModel extends CommonModel
                 Db::rollback();
                 return 10;
             }
-            $type = $param['type'];
-            if (intval($type) === 1) {
-                $res = $this->increment('pl_count', ['id' => $param['obj_id']]);
-                if (!$res) {
-                    Db::rollback();
-                    return 20;
-                }
+            $fm  = new FriendMoodModel();
+            $res = $fm->increment('pl_count', ['id' => $param['mood_id']]);
+            if (!$res) {
+                Db::rollback();
+                return 20;
+            }
+            Db::commit();
+            return true;
+        } catch (\Exception $e) {
+            Db::rollback();
+            return 44;
+        }
+    }
+
+    /**
+     * 删除评论
+     * @author 贺强
+     * @time   2019-01-15 14:42:45
+     * @param  integer $id 要删除的评论ID
+     */
+    public function del_comment($id)
+    {
+        Db::startTrans();
+        try {
+            // 查询数据是否存在
+            $comm = $this->getModel(['id' => $id]);
+            if (!$comm) {
+                Db::rollback();
+                return 10;
+            }
+            // 删除评论
+            $res = $this->delById($id);
+            if (!$res) {
+                Db::rollback();
+                return 20;
+            }
+            $fm = new FriendMoodModel();
+            // 相应心情的评论数减 1
+            $res = $fm->decrement('pl_count', ['id' => $comm['mood_id']]);
+            if (!$res) {
+                Db::rollback();
+                return 30;
             }
             Db::commit();
             return true;

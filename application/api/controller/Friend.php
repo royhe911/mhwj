@@ -112,13 +112,11 @@ class Friend extends \think\Controller
             echo json_encode($msg);exit;
         }
         $param['addtime'] = time();
-        // 添加
-        $res = $fc->add($param);
-        if (!$res) {
-            echo json_encode(['status' => 40, 'info' => '评论失败', 'data' => null]);exit;
+        // 评论
+        $res = $fc->do_comment($param);
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '评论失败', 'data' => null]);exit;
         }
-        $fm = new FriendMoodModel();
-        $fm->increment('pl_count', ['id' => $param['mood_id']]);
         echo json_encode(['status' => 0, 'info' => '评论成功', 'data' => null]);exit;
     }
 
@@ -336,31 +334,16 @@ class Friend extends \think\Controller
             echo json_encode($msg);exit;
         }
         $id   = $param['id'];
-        $zw   = ['id' => $id];
         $type = intval($param['type']);
-        switch ($type) {
-            case 1:
-                $m  = new FriendMoodModel();
-                $cw = ['mood_id' => $id];
-                break;
-            case 2:
-                $m = new FriendCommentModel();
-                break;
-            default:
-                $m = new FriendCommentModel();
-                break;
-        }
-        $res = $m->delById($id);
-        if (!$res) {
-            echo json_encode(['status' => 40, 'info' => '删除失败', 'data' => null]);exit;
-        }
-        if (!empty($cw)) {
-            $fc = new FriendCommentModel();
-            $fc->delByWhere($cw);
-        }
         if ($type === 1) {
-            $ft = new FriendTopicModel();
-            $ft->decrement('count', ['id' => $id]);
+            $fm  = new FriendMoodModel();
+            $res = $fm->del_mood($id);
+        } else {
+            $fc  = new FriendCommentModel();
+            $res = $fc->del_comment($id);
+        }
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '删除失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '删除成功', 'data' => null]);exit;
     }

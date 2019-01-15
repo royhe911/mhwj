@@ -36,7 +36,7 @@ class FriendZanModel extends CommonModel
                 Db::rollback();
                 return 10;
             }
-            $where = ['obj_id' => $id, 'type' => $type, 'uid' => $param['uid']];
+            $where = ['obj_id' => $id, 'uid' => $param['uid'], 'type' => $type];
             $count = $this->getCount($where);
             if (!$count) {
                 $res = $model->increment('zan_count', ['id' => $id]);
