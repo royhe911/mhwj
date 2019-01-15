@@ -204,5 +204,6 @@ return [
     '/api/friend/moods'    => 'api/Friend/get_moods', // 心情列表
     '/api/friend/moodinfo' => 'api/Friend/get_mood_info', // 心情详情
     '/api/friend/del'      => 'api/Friend/del_mood', // 删除心情/评论/回复
+    '/api/friend/hot'      => 'api/Friend/hot_topic', // 热门话题
     /*--------   朋友圈 api 结束  --------*/
 ];

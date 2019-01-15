@@ -78,6 +78,10 @@ class Friend extends \think\Controller
             echo json_encode($msg);exit;
         }
         $param['addtime'] = time();
+        if (!empty($param['topic'])) {
+            $ft = new FriendTopicModel();
+            $ft->increment('count', ['id' => ['in', $param['topic']]]);
+        }
         // 添加
         $res = $fm->add($param);
         if (!$res) {
@@ -351,6 +355,21 @@ class Friend extends \think\Controller
             $fc = new FriendCommentModel();
             $fc->delByWhere($cw);
         }
+        if ($type === 1) {
+            $ft = new FriendTopicModel();
+            $ft->decrement('count', ['id' => $id]);
+        }
         echo json_encode(['status' => 0, 'info' => '删除成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 获取热门话题
+     * @author 贺强
+     * @time   2019-01-15 11:14:47
+     * @param  FriendMoodModel $fm FriendMoodModel 实例
+     */
+    public function hot_topic(FriendMoodModel $fm)
+    {
+        
     }
 }
