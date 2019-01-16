@@ -279,12 +279,11 @@ function getAddressInfo($latlng, $place = 'all', $type = 'json')
  * @author 贺强
  * @time   2019-01-16 09:47:14
  * @param  string  $file   视频文件路径
- * @param  string  $size   缩略图尺寸
+ * @param  integer $s      指定从什么时间开始截取，单位秒
  * @param  boolean $is_win 是否是 windows 系统
- * @param  float   $time   截取视频的某个时间点画面
- * @return [type]          [description]
+ * @return string          返回截取的图片保存路径
  */
-function getVideoCover($file, $size = '300x200', $time = 1, $is_win = false)
+function getVideoCover($file, $s = 11, $is_win = false)
 {
     $ffmpeg = 'ffmpeg';
     $root   = ROOT_PATH . 'public';
@@ -297,7 +296,7 @@ function getVideoCover($file, $size = '300x200', $time = 1, $is_win = false)
     }
     $path .= '/' . get_millisecond() . '.jpg';
     $strlen = strlen($file);
-    $str    = "{$ffmpeg} -i {$file} -y -f mjpeg -ss 3 -t {$time} -s {$size} {$root}{$path}";
+    $str    = "{$ffmpeg} -i {$file} -ss {$s} {$root}{$path}";
     system($str);
     return $path;
 }

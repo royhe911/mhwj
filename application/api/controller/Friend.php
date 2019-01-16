@@ -524,4 +524,10 @@ class Friend extends \think\Controller
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
         }
     }
+
+    public function test()
+    {
+        $res = getVideoCover('https://hkqgg.cn/uploads/cli/img/2019/01/15/1547524052443.mp4', 11, true);
+        var_dump($res);exit;
+    }
 }
