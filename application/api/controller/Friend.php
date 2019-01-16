@@ -199,7 +199,7 @@ class Friend extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $fm->getList($where, ['id', 'uid', 'nickname', 'avatar', 'content', 'pic', 'topic', 'zan_count', 'pl_count', 'addtime'], "$page,$pagesize", $order);
+        $list = $fm->getList($where, ['id', 'uid', 'nickname', 'avatar', 'content', 'type', 'pic', 'topic', 'zan_count', 'pl_count', 'addtime'], "$page,$pagesize", $order);
         if ($list) {
             $f     = new FriendModel();
             $fnds  = $this->friends($uid);
@@ -265,10 +265,13 @@ class Friend extends \think\Controller
         $param = $this->param;
         if (empty($param['mood_id'])) {
             $msg = ['status' => 1, 'info' => 'ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '用户ID不能为空', 'date' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $uid     = $param['uid'];
         $mood_id = $param['mood_id'];
         $mood    = $fm->getModel(['id' => $mood_id]);
         if ($mood) {
@@ -283,6 +286,27 @@ class Friend extends \think\Controller
                 }
             }
             $mood['topic'] = $tps;
+            $zan_arr       = [];
+            // 获取当前用户是否关注此用户
+            $f     = new FriendModel();
+            $where = "(uid1=$uid and follow1=1 and uid2={$mood['uid']}) or (uid2=$uid and follow2=1 and uid1={$mood['uid']})";
+            $count = $f->getCount($where);
+            if ($count) {
+                $mood['is_follow'] = 1;
+            } else {
+                $mood['is_follow'] = 0;
+            }
+            // 取得当前用户赞过的
+            $fz   = new FriendZanModel();
+            $zans = $fz->getList(['uid' => $uid], ['obj_id', 'type', 'uid']);
+            foreach ($zans as $z) {
+                $zan_arr[$z['type'] . '_' . $z['obj_id']] = $z;
+            }
+            if (!empty($zan_arr["1_{$mood['id']}"])) {
+                $mood['is_zan'] = 1;
+            } else {
+                $mood['is_zan'] = 0;
+            }
             // 显示发布时间
             $diff = time() - $mood['addtime'];
             if ($diff < 60) {
@@ -300,6 +324,12 @@ class Friend extends \think\Controller
                 $cos = $fc->getList(['mood_id' => $mood_id], ['id', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'zan_count', 'addtime', 'type'], null, 'addtime desc');
                 $rpl = array_column($cos, null, 'id');
                 foreach ($list as &$item) {
+                    // 判断是否赞过
+                    if (!empty($zan_arr["2_{$item['id']}"])) {
+                        $item['is_zan'] = 1;
+                    } else {
+                        $item['is_zan'] = 0;
+                    }
                     $diff = time() - $item['addtime'];
                     if ($diff < 60) {
                         $item['addtime'] = '刚刚';
@@ -310,6 +340,7 @@ class Friend extends \think\Controller
                     } else {
                         $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                     }
+                    $item['reply'] = [];
                     foreach ($cos as $k => &$hf) {
                         if ($hf['type'] === 1) {
                             unset($cos[$k]);
