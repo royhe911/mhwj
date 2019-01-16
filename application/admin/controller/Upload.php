@@ -61,7 +61,7 @@ class Upload extends \think\Controller
     public function upload()
     {
         $root_path  = ROOT_PATH . 'public';
-        $file_types = ['mp3', 'mp4', 'jpg', 'jpeg', 'gif', 'png'];
+        $file_types = ['mp3', 'mp4', 'avi', 'mov', 'wmv', '3gp', 'jpg', 'jpeg', 'gif', 'png'];
         $file       = $_FILES['Filedata'];
         if (empty($file)) {
             echo json_encode(['status' => 1, 'info' => '请选择上传文件']);exit;
@@ -74,8 +74,8 @@ class Upload extends \think\Controller
         $is_pic   = false;
         $thumb_w  = 100;
         $thumb_h  = 100;
-        if ($type === 'mp4') {
-            $path  = 'mp4';
+        if ($type === 'mp4' || $type === 'avi' || $type === 'mov' || $type === 'wmv' || $type === '3gp') {
+            $path  = 'video';
             $thumb = getVideoCover($tmp_file);
         } elseif ($type === 'mp3') {
             $path = 'mp3';
