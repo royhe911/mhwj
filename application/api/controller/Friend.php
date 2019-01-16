@@ -156,9 +156,15 @@ class Friend extends \think\Controller
      */
     public function get_moods(FriendMoodModel $fm)
     {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
         $where = '1';
         $order = 'addtime desc';
-        $param = $this->param;
         if (!empty($param['is_recommend'])) {
             $where .= ' and is_recommend=1';
             $order = 'sort';
@@ -166,9 +172,10 @@ class Friend extends \think\Controller
         if (!empty($param['topic'])) {
             $where .= " and find_in_set({$param['topic']},topic)";
         }
-        if (!empty($param['uid'])) {
+        $uid = $param['uid'];
+        if (!empty($param['is_follow'])) {
             $f    = new FriendModel();
-            $fris = $f->getList("(uid1={$param['uid']} and follow1=1) or (uid2={$param['uid']} and follow2=1)", ['uid1', 'uid2']);
+            $fris = $f->getList("(uid1={$uid} and follow1=1) or (uid2={$uid} and follow2=1)", ['uid1', 'uid2']);
             $id1s = array_column($fris, 'uid1');
             $id1s = array_unique($id1s);
             // print_r($id1s);
@@ -194,6 +201,12 @@ class Friend extends \think\Controller
         }
         $list = $fm->getList($where, ['id', 'uid', 'nickname', 'avatar', 'content', 'pic', 'topic', 'zan_count', 'pl_count', 'addtime'], "$page,$pagesize", $order);
         if ($list) {
+            $f     = new FriendModel();
+            $fnds  = $this->friends($uid);
+            $fnds  = array_column($fnds, 'nickname', 'uid');
+            $fz    = new FriendZanModel();
+            $zans  = $fz->getList(['uid' => $uid, 'type' => 1], ['obj_id', 'uid']);
+            $zans  = array_column($zans, 'uid', 'obj_id');
             $ft    = new FriendTopicModel;
             $topic = $ft->getList([], ['id', 'title']);
             $topic = array_column($topic, 'title', 'id');
@@ -206,6 +219,16 @@ class Friend extends \think\Controller
                     }
                 }
                 $item['topic'] = $tps;
+                if (!empty($fnds[$item['uid']])) {
+                    $item['is_follow'] = 1;
+                } else {
+                    $item['is_follow'] = 0;
+                }
+                if (!empty($zans[$item['id']])) {
+                    $item['is_zan'] = 1;
+                } else {
+                    $item['is_zan'] = 0;
+                }
                 // 显示发布时间
                 $diff = time() - $item['addtime'];
                 if ($diff < 60) {
@@ -435,9 +458,15 @@ class Friend extends \think\Controller
      * @time   2019-01-15 16:04:39
      * @param  FriendModel $f FriendModel 实例
      */
-    public function friends(FriendModel $f)
+    public function friends($uid = 0)
     {
         $param = $this->param;
+        $self  = false;
+        if ($uid) {
+            $param['uid']  = $uid;
+            $param['type'] = 1;
+            $self          = true;
+        }
         if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
         } elseif (empty($param['type'])) {
@@ -459,6 +488,7 @@ class Friend extends \think\Controller
                 $where = ['uid1|uid2' => $uid, 'is_friend' => 1];
                 break;
         }
+        $f = new FriendModel();
         if (!empty($param['is_count'])) {
             $count = $f->getCount($where);
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $count]);
@@ -487,6 +517,9 @@ class Friend extends \think\Controller
                     $item['avatar2']  = $item['avatar1'];
                     unset($item['uid1'], $item['nickname1'], $item['avatar1']);
                 }
+            }
+            if ($self) {
+                return $list;
             }
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
         }
