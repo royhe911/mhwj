@@ -202,12 +202,14 @@ function getDistance($longitude1, $latitude1, $longitude2, $latitude2, $unit = 1
 
     return round($distance, $decimal);
 }
+
 /**
- * [getRealyAddress 获取具体位置]
- * @author sunlq 2018-02-28
- * @param  [type] $lat [纬度]
- * @param  [type] $lng [经度]
- * @return [type]      [description]
+ * 获取具体位置
+ * @author 贺强
+ * @time   2019-01-16 09:22:55
+ * @param  float  $lat 纬度
+ * @param  float  $lng 经度
+ * @return string      返回位置信息
  */
 function getRealyAddress($lat, $lng)
 {
@@ -222,12 +224,14 @@ function getRealyAddress($lat, $lng)
 
     return $address;
 }
+
 /**
- * [changeToBaidu 转换为百度经纬度]
- * @author sunlq 2018-05-28
- * @param  [type] $lat [description]
- * @param  [type] $lng [description]
- * @return [type]      [description]
+ * 转换为百度经纬度
+ * @author 贺强
+ * @time   2019-01-16 09:21:52
+ * @param  float $lat 纬度
+ * @param  float $lng 经度
+ * @return float      百度经纬度
  */
 function changeToBaidu($lat, $lng)
 {
@@ -268,4 +272,32 @@ function getAddressInfo($latlng, $place = 'all', $type = 'json')
             return $info[$place];
         }
     }
+}
+
+/**
+ * 获取视频文件的缩略图
+ * @author 贺强
+ * @time   2019-01-16 09:47:14
+ * @param  string  $file   视频文件路径
+ * @param  string  $size   缩略图尺寸
+ * @param  boolean $is_win 是否是 windows 系统
+ * @param  float   $time   截取视频的某个时间点画面
+ * @return [type]          [description]
+ */
+function getVideoCover($file, $size = '300x200', $time = 1, $is_win = false)
+{
+    $ffmpeg = 'ffmpeg';
+    $root   = ROOT_PATH . 'public';
+    if ($is_win) {
+        $ffmpeg = 'D:/ffmpeg/bin/ffmpeg.exe';
+    }
+    $path = '/uploads/cli/mp4/' . date('Y') . '/' . date('m') . '/' . date('d');
+    if (!is_dir($root . $path)) {
+        @mkdir($root . $path, 0755, true);
+    }
+    $path .= '/' . get_millisecond() . '.jpg';
+    $strlen = strlen($file);
+    $str    = "{$ffmpeg} -i {$file} -y -f mjpeg -ss 3 -t {$time} -s {$size} {$root}{$path}";
+    system($str);
+    return $path;
 }

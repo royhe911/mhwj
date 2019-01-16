@@ -64,15 +64,21 @@ class Upload extends \think\Controller
         $file     = (array) $file;
         $fileinfo = pathinfo($file['name']);
         $tmp_file = $file['tmp_name'];
+        $type     = strtolower($fileinfo['extension']);
         $path     = $this->request->post('path');
-        if (empty($path)) {
+        if ($type === 'mp4') {
+            $path  = 'mp4';
+            $thumb = getVideoCover($tmp_file);
+        } elseif ($type === 'mp3') {
+            $path = 'mp3';
+        } elseif (empty($path)) {
             $path = 'img';
         }
         $upload_dir = "/uploads/cli/$path/" . date('Y') . '/' . date('m') . '/' . date('d');
         if (!is_dir($root_path . $upload_dir)) {
             @mkdir($root_path . $upload_dir, 0755, true);
         }
-        if (!in_array(strtolower($fileinfo['extension']), $file_types)) {
+        if (!in_array($type, $file_types)) {
             echo json_encode(['status' => 3, 'info' => '文件类型不合法']);exit;
         }
         $filename    = '/' . get_millisecond() . '.' . $fileinfo['extension'];
@@ -80,7 +86,11 @@ class Upload extends \think\Controller
         // 上传
         $res = move_uploaded_file($tmp_file, $target_file);
         if ($res) {
-            echo json_encode(['status' => 0, 'info' => '上传成功', 'path' => $upload_dir . $filename]);
+            $msg = ['status' => 0, 'info' => '上传成功', 'path' => $upload_dir . $filename];
+            if (!empty($thumb)) {
+                $msg['thumb'] = $thumb;
+            }
+            echo json_encode($msg);
         } else {
             echo json_encode(['status' => 4, 'info' => '上传失败']);
         }

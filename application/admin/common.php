@@ -198,3 +198,31 @@ function curl($url, $post = '', $charset = 'utf-8')
         return false;
     }
 }
+
+/**
+ * 获取视频文件的缩略图
+ * @author 贺强
+ * @time   2019-01-16 09:47:14
+ * @param  string  $file   视频文件路径
+ * @param  string  $size   缩略图尺寸
+ * @param  boolean $is_win 是否是 windows 系统
+ * @param  float   $time   截取视频的某个时间点画面
+ * @return [type]          [description]
+ */
+function getVideoCover($file, $size = '300x200', $time = 1, $is_win = false)
+{
+    $ffmpeg = 'ffmpeg';
+    $root   = ROOT_PATH . 'public';
+    if ($is_win) {
+        $ffmpeg = 'D:/ffmpeg/bin/ffmpeg.exe';
+    }
+    $path = '/uploads/cli/mp4/' . date('Y') . '/' . date('m') . '/' . date('d');
+    if (!is_dir($root . $path)) {
+        @mkdir($root . $path, 0755, true);
+    }
+    $path .= '/' . get_millisecond() . '.jpg';
+    $strlen = strlen($file);
+    $str    = "{$ffmpeg} -i {$file} -y -f mjpeg -ss 3 -t {$time} -s {$size} {$root}{$path}";
+    system($str);
+    return $path;
+}
