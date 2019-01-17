@@ -6,7 +6,9 @@ use app\common\model\FriendCommentModel;
 use app\common\model\FriendModel;
 use app\common\model\FriendMoodModel;
 use app\common\model\FriendTopicModel;
+use app\common\model\FriendUroomModel;
 use app\common\model\FriendZanModel;
+use app\common\model\UserModel;
 
 /**
  * FriendApi-控制器
@@ -278,7 +280,7 @@ class Friend extends \think\Controller
         if (empty($param['mood_id'])) {
             $msg = ['status' => 1, 'info' => 'ID不能为空', 'data' => null];
         } elseif (empty($param['uid'])) {
-            $msg = ['status' => 3, 'info' => '用户ID不能为空', 'date' => null];
+            $msg = ['status' => 3, 'info' => '用户ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -461,16 +463,27 @@ class Friend extends \think\Controller
         if (empty($param['uid1'])) {
             $msg = ['status' => 1, 'info' => '关注者ID不能为空', 'data' => null];
         } elseif (empty($param['uid2'])) {
-            $msg = ['status' => 3, 'info' => '被关注者ID不能为空', 'data' => null];
+            $msg = ['status' => 7, 'info' => '被关注者ID不能为空', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $u     = new UserModel();
         $uid1  = intval($param['uid1']);
         $uid2  = intval($param['uid2']);
-        $where = "(uid1=$uid1 and uid2=$uid2) or (uid1=$uid2} and uid2=$uid1)";
+        $where = "(uid1=$uid1 and uid2=$uid2) or (uid1=$uid2 and uid2=$uid1)";
         $fnd   = $f->getModel($where);
         if (empty($fnd)) {
+            $users = $u->getList(['id' => ['in', [$uid1, $uid2]]], ['id', 'nickname', 'avatar']);
+            foreach ($users as $user) {
+                if ($user['id'] === $uid1) {
+                    $param['nickname1'] = $user['nickname'];
+                    $param['avatar1']   = $user['avatar'];
+                } elseif ($user['id'] === $uid2) {
+                    $param['nickname2'] = $user['nickname'];
+                    $param['avatar2']   = $user['avatar'];
+                }
+            }
             $param['follow1'] = 1;
             // 添加
             $res = $f->add($param);
@@ -591,6 +604,24 @@ class Friend extends \think\Controller
     }
 
     /**
+     * 添加私聊房间
+     * @author 贺强
+     * @time   2019-01-17 10:19:22
+     * @param  FriendUroomModel $fu FriendUroomModel 实例
+     */
+    public function add_room(FriendUroomModel $fu)
+    {
+        $param = $this->param;
+        if (empty($param['uid1']) || empty($param['uid2'])) {
+            $msg = ['status' => 1, 'info' => '聊天者ID不能为空', 'data' => null];
+        } elseif (empty($param['nickname1']) || empty($param['nickname2'])) {
+            $msg = ['status' => 3, 'info' => '聊天者昵称不能为空', 'data' => null];
+        } elseif (empty($param['avatar1']) || empty($param['avatar2'])) {
+            # code...
+        }
+    }
+
+    /**
      * 对话(私聊)
      * @author 贺强
      * @time   2019-01-17 09:48:37
@@ -600,8 +631,25 @@ class Friend extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['room_id'])) {
-            # code...
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '说话者ID不能为空', 'data' => null];
+        } elseif (empty($param['nickname'])) {
+            $msg = ['status' => 5, 'info' => '说话者昵称不能为空', 'data' => null];
+        } elseif (empty($param['avatar'])) {
+            $msg = ['status' => 7, 'info' => '说话者头像不能为空', 'data' => null];
+        } elseif (empty($param['content'])) {
+            $msg = ['status' => 9, 'info' => '说话内容不能为空', 'data' => null];
         }
+        $param['addtime'] = time();
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $res = $fc->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 40, 'info' => '添加失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '添加成功', 'data' => null]);exit;
     }
 
     public function test()
