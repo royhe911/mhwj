@@ -197,6 +197,7 @@ return [
     '/api/pz/test'         => 'api/Prize/test', // 测试
     /*--------   砍价 api 结束  --------*/
     /*--------   朋友圈 api 开始  --------*/
+    '/api/friend/test'     => 'api/Friend/test', // 测试
     '/api/friend/topics'   => 'api/Friend/get_topic', // 获取心情主题
     '/api/friend/release'  => 'api/Friend/release', // 发布心情
     '/api/friend/zan'      => 'api/Friend/zan', // 点赞
@@ -207,7 +208,9 @@ return [
     '/api/friend/hot'      => 'api/Friend/hot_topic', // 热门话题
     '/api/friend/follow'   => 'api/Friend/follow', // 关注
     '/api/friend/friends'  => 'api/Friend/friends', // 获取我的关注/粉丝/朋友
-    '/api/friend/addroom'  => 'api/Friend/add_room', // 添加房间
-    '/api/friend/test'     => 'api/Friend/test', // 测试
+    '/api/friend/addroom'  => 'api/Friend/add_room', // 添加私聊房间
+    '/api/friend/delroom'  => 'api/Friend/del_room', // 删除未聊过天的房间
+    '/api/friend/chat'     => 'api/Friend/friend_chat', // 对话(聊天)
+    '/api/friend/chats'    => 'api/Friend/get_chats', // 获取对话列表
     /*--------   朋友圈 api 结束  --------*/
 ];

@@ -218,7 +218,7 @@ class Friend extends \think\Controller
                 if (!empty($item['topic'])) {
                     $topics = explode(',', $item['topic']);
                     foreach ($topics as $t) {
-                        $tps[] = [$t => $topic[$t]];
+                        $tps[] = ['id' => $t, 'title' => $topic[$t]];
                     }
                 }
                 $item['topic'] = $tps;
@@ -296,7 +296,7 @@ class Friend extends \think\Controller
             if (!empty($mood['topic'])) {
                 $topics = explode(',', $mood['topic']);
                 foreach ($topics as $t) {
-                    $tps[] = [$t => $topic[$t]];
+                    $tps[] = ['id' => $t, 'title' => $topic[$t]];
                 }
             }
             $mood['topic'] = $tps;
@@ -614,11 +614,64 @@ class Friend extends \think\Controller
         $param = $this->param;
         if (empty($param['uid1']) || empty($param['uid2'])) {
             $msg = ['status' => 1, 'info' => '聊天者ID不能为空', 'data' => null];
-        } elseif (empty($param['nickname1']) || empty($param['nickname2'])) {
-            $msg = ['status' => 3, 'info' => '聊天者昵称不能为空', 'data' => null];
-        } elseif (empty($param['avatar1']) || empty($param['avatar2'])) {
-            # code...
         }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid1  = intval($param['uid1']);
+        $uid2  = intval($param['uid2']);
+        $name  = "room_{$uid1}_{$uid2}";
+        $name2 = "room_{$uid2}_{$uid1}";
+        $count = $fu->getCount(['name' => ['in', [$name, $name2]]]);
+        if ($count) {
+            echo json_encode(['status' => 0, 'info' => '添加成功1', 'data' => null]);exit;
+        }
+        $u     = new UserModel();
+        $users = $u->getList(['id' => ['in', [$uid1, $uid2]]], ['id', 'nickname', 'avatar']);
+        $users = array_column($users, null, 'id');
+        foreach ($users as $user) {
+            if ($user['id'] === $uid1) {
+                $param['nickname1'] = $user['nickname'];
+                $param['avatar1']   = $user['avatar'];
+            } elseif ($user['id'] === $uid2) {
+                $param['nickname2'] = $user['nickname'];
+                $param['avatar2']   = $user['avatar'];
+            }
+        }
+        $param['name']    = $name;
+        $param['addtime'] = time();
+        // 添加
+        $res = $fu->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 40, 'info' => '添加失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '添加成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 删除未聊过天的房间
+     * @author 贺强
+     * @time   2019-01-17 11:59:48
+     * @param  FriendUroomModel $fu FriendUroomModel 实例
+     */
+    public function del_room(FriendUroomModel $fu)
+    {
+        $param = $this->param;
+        if (empty($param['uid1']) || empty($param['uid2'])) {
+            $msg = ['status' => 1, 'info' => '聊天者ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid1  = intval($param['uid1']);
+        $uid2  = intval($param['uid2']);
+        $name  = "room_{$uid1}_{$uid2}";
+        $name2 = "room_{$uid2}_{$uid1}";
+        $room  = $fu->getModel(['name' => ['in', [$name, $name2]], 'chat_time' => 0, 'content' => ''], ['id']);
+        if ($room) {
+            $fu->delById($room['id']);
+        }
+        echo json_encode(['status' => 0, 'info' => '成功', 'data' => null]);exit;
     }
 
     /**
@@ -634,22 +687,70 @@ class Friend extends \think\Controller
             $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
         } elseif (empty($param['uid'])) {
             $msg = ['status' => 3, 'info' => '说话者ID不能为空', 'data' => null];
-        } elseif (empty($param['nickname'])) {
-            $msg = ['status' => 5, 'info' => '说话者昵称不能为空', 'data' => null];
-        } elseif (empty($param['avatar'])) {
-            $msg = ['status' => 7, 'info' => '说话者头像不能为空', 'data' => null];
         } elseif (empty($param['content'])) {
-            $msg = ['status' => 9, 'info' => '说话内容不能为空', 'data' => null];
+            $msg = ['status' => 5, 'info' => '说话内容不能为空', 'data' => null];
         }
-        $param['addtime'] = time();
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $uid  = $param['uid'];
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar']);
+        if (!empty($user)) {
+            $param['nickname'] = $user['nickname'];
+            $param['avatar']   = $user['avatar'];
+        }
+        $param['addtime'] = time();
+        // 添加
         $res = $fc->add($param);
         if (!$res) {
             echo json_encode(['status' => 40, 'info' => '添加失败', 'data' => null]);exit;
         }
+        $fu = new FriendUroomModel();
+        $fu->modify(['content' => $param['content'], 'chat_time' => time()], ['id' => $param['room_id']]);
         echo json_encode(['status' => 0, 'info' => '添加成功', 'data' => null]);exit;
+    }
+
+    /**
+     * 获取用户对话列表
+     * @author 贺强
+     * @time   2019-01-17 11:38:47
+     * @param  FriendUroomModel $fu FriendUroomModel 实例
+     */
+    public function get_chats(FriendUroomModel $fu)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $page = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $uid  = intval($param['uid']);
+        $list = $fu->getList(['uid1|uid2' => $uid], ['id', 'uid1', 'uid2', 'nickname1', 'nickname2', 'avatar1', 'avatar2', 'content', 'chat_time'], "$page,$pagesize", 'chat_time desc');
+        $data = [];
+        foreach ($list as $item) {
+            $chat_time = $item['chat_time'];
+            if ($chat_time > strtotime(date('Y-m-d'))) {
+                $chat_time = date('H:i', $chat_time);
+            } else {
+                $chat_time = date('Y-m-d', $chat_time);
+            }
+            if ($item['uid1'] === $uid) {
+                $data[] = ['nickname' => $item['nickname2'], 'avatar' => $item['avatar2'], 'content' => $item['content'], 'chat_time' => $chat_time];
+            } elseif ($item['uid2'] === $uid) {
+                $data[] = ['nickname' => $item['nickname1'], 'avatar' => $item['avatar1'], 'content' => $item['content'], 'chat_time' => $chat_time];
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
     }
 
     public function test()
