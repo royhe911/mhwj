@@ -322,9 +322,9 @@ class Friend extends \think\Controller
                 $mood['addtime'] = date('Y-m-d H:i:s', $mood['addtime']);
             }
             $fc   = new FriendCommentModel();
-            $list = $fc->getList(['mood_id' => $param['mood_id'], 'type' => 1], ['id', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
+            $list = $fc->getList(['mood_id' => $param['mood_id'], 'type' => 1], ['id', 'uid', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
             if ($list) {
-                $cos = $fc->getList(['mood_id' => $mood_id], ['id', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'zan_count', 'addtime', 'type'], null, 'addtime desc');
+                $cos = $fc->getList(['mood_id' => $mood_id], ['id', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'addtime', 'type'], null, 'addtime desc');
                 $rpl = array_column($cos, null, 'id');
                 foreach ($list as &$item) {
                     // 判断是否赞过
@@ -349,6 +349,7 @@ class Friend extends \think\Controller
                             unset($cos[$k]);
                             continue;
                         }
+                        unset($hf['type']);
                         $diff = time() - $hf['addtime'];
                         if ($diff < 60) {
                             $hf['addtime'] = '刚刚';
@@ -362,7 +363,7 @@ class Friend extends \think\Controller
                         if (!empty($rpl[$hf['obj_id']])) {
                             $rpy = $rpl[$hf['obj_id']];
                             // 属性赋值
-                            $hf['rid']       = $rpy['uid'];
+                            $hf['ruid']      = $rpy['uid'];
                             $hf['rnickname'] = $rpy['nickname'];
                         }
                         $item['reply'][] = $hf;
