@@ -202,7 +202,7 @@ class Friend extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $fm->getList($where, ['id', 'uid', 'nickname', 'avatar', 'content', 'type', 'thumb', 'pic', 'topic', 'zan_count', 'pl_count', 'addtime'], "$page,$pagesize", $order);
+        $list = $fm->getList($where, ['id', 'uid', 'nickname', 'avatar', 'content', 'origin', 'type', 'thumb', 'pic', 'topic', 'zan_count', 'pl_count', 'addtime'], "$page,$pagesize", $order);
         if ($list) {
             $f     = new FriendModel();
             $fnds  = $this->friends($uid);
