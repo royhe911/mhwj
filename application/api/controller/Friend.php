@@ -622,9 +622,9 @@ class Friend extends \think\Controller
         $uid2  = intval($param['uid2']);
         $name  = "room_{$uid1}_{$uid2}";
         $name2 = "room_{$uid2}_{$uid1}";
-        $count = $fu->getCount(['name' => ['in', [$name, $name2]]]);
-        if ($count) {
-            echo json_encode(['status' => 0, 'info' => '添加成功1', 'data' => null]);exit;
+        $room  = $fu->getModel(['name' => ['in', [$name, $name2]]], ['id']);
+        if ($room) {
+            echo json_encode(['status' => 0, 'info' => '添加成功1', 'data' => $room['id']]);exit;
         }
         $u     = new UserModel();
         $users = $u->getList(['id' => ['in', [$uid1, $uid2]]], ['id', 'nickname', 'avatar']);
@@ -643,7 +643,7 @@ class Friend extends \think\Controller
         // 添加
         $res = $fu->add($param);
         if (!$res) {
-            echo json_encode(['status' => 40, 'info' => '添加失败', 'data' => null]);exit;
+            echo json_encode(['status' => 40, 'info' => '添加失败', 'data' => $res]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '添加成功', 'data' => null]);exit;
     }
@@ -735,7 +735,7 @@ class Friend extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $uid  = intval($param['uid']);
-        $list = $fu->getList(['uid1|uid2' => $uid], ['id', 'uid1', 'uid2', 'nickname1', 'nickname2', 'avatar1', 'avatar2', 'content', 'chat_time'], "$page,$pagesize", 'chat_time desc');
+        $list = $fu->getList(['uid1|uid2' => $uid, 'chat_time' => ['>', 0], 'content' => ['<>', '']], ['id', 'uid1', 'uid2', 'nickname1', 'nickname2', 'avatar1', 'avatar2', 'content', 'chat_time'], "$page,$pagesize", 'chat_time desc');
         $data = [];
         foreach ($list as $item) {
             $chat_time = $item['chat_time'];
