@@ -84,6 +84,10 @@ return [
     '/friend/editsort'     => 'admin/Friend/editsort', // 修改排序
     '/friend/edittitle'    => 'admin/Friend/edittitle', // 修改主题
     '/friend/operate'      => 'admin/Friend/operate', // 操作主题
+    '/friend/addmood'      => 'admin/Friend/addmood', // 添加心情
+    '/friend/editmsort'    => 'admin/Friend/editmsort', // 修改心情排序
+    '/friend/operatem'     => 'admin/Friend/operatem', // 操作心情
+    '/friend/moodlist'     => 'admin/Friend/moodlist', // 官方心情列表
 
     /*--------   api 开始   --------*/
     '/api/carousel'        => 'api/Api/get_carousel', // 获取轮播轮播图

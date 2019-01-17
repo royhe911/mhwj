@@ -886,7 +886,8 @@ function imgPreview(fileDom, preview){
     var imageType = /^image\//;
     //是否是图片
     if (!imageType.test(file.type)) {
-        alert("请选择图片！");
+        // alert("请选择图片！");
+        $("#" + preview).css('display', 'none')
         return false;
     }
     //读取完成
