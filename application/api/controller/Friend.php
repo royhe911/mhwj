@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\FriendChatModel;
 use app\common\model\FriendCommentModel;
 use app\common\model\FriendModel;
 use app\common\model\FriendMoodModel;
@@ -212,9 +213,6 @@ class Friend extends \think\Controller
             $topic = array_column($topic, 'title', 'id');
             foreach ($list as &$item) {
                 $tps = [];
-                if (!empty($item['thumb'])) {
-                    $item['thumb'] = config('WEBSITE') . $item['thumb'];
-                }
                 if (!empty($item['topic'])) {
                     $topics = explode(',', $item['topic']);
                     foreach ($topics as $t) {
@@ -397,6 +395,7 @@ class Friend extends \think\Controller
                             $hf['ruid']      = $rpy['uid'];
                             $hf['rnickname'] = $rpy['nickname'];
                         }
+                        unset($hf['obj_id']);
                         $item['reply'][] = $hf;
                     }
                 }
@@ -588,6 +587,20 @@ class Friend extends \think\Controller
                 return $list;
             }
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+        }
+    }
+
+    /**
+     * 对话(私聊)
+     * @author 贺强
+     * @time   2019-01-17 09:48:37
+     * @param  FriendChatModel $fc FriendChatModel 实例
+     */
+    public function friend_chat(FriendChatModel $fc)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            # code...
         }
     }
 
