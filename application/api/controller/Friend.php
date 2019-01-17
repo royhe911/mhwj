@@ -243,6 +243,17 @@ class Friend extends \think\Controller
                 } else {
                     $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                 }
+                $thumbs = [];
+                if (!empty($item['thumb'])) {
+                    $thumbs = explode(',', $item['thumb']);
+                    foreach ($thumbs as &$thumb) {
+                        if (strpos($thumb, 'http://') === false && strpos($thumb, 'https://') === false) {
+                            $thumb = config('WEBSITE') . $thumb;
+                        }
+                    }
+                }
+                $item['thumb'] = $thumbs;
+                $pics          = [];
                 if (!empty($item['pic'])) {
                     $pics = explode(',', $item['pic']);
                     foreach ($pics as &$pic) {
@@ -250,8 +261,8 @@ class Friend extends \think\Controller
                             $pic = config('WEBSITE') . $pic;
                         }
                     }
-                    $item['pic'] = $pics;
                 }
+                $item['pic'] = $pics;
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
@@ -299,6 +310,26 @@ class Friend extends \think\Controller
             } else {
                 $mood['is_follow'] = 0;
             }
+            $thumbs = [];
+            if (!empty($mood['thumb'])) {
+                $thumbs = explode(',', $mood['thumb']);
+                foreach ($thumbs as &$thumb) {
+                    if (strpos($thumb, 'http://') === false && strpos($thumb, 'https://') === false) {
+                        $thumb = config('WEBSITE') . $thumb;
+                    }
+                }
+            }
+            $mood['thumb'] = $thumbs;
+            $pics          = [];
+            if (!empty($mood['pic'])) {
+                $pics = explode(',', $mood['pic']);
+                foreach ($pics as &$pic) {
+                    if (strpos($pic, 'http://') === false && strpos($pic, 'https://') === false) {
+                        $pic = config('WEBSITE') . $pic;
+                    }
+                }
+            }
+            $mood['pic'] = $pics;
             // 取得当前用户赞过的
             $fz   = new FriendZanModel();
             $zans = $fz->getList(['uid' => $uid], ['obj_id', 'type', 'uid']);
