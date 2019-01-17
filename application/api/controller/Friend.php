@@ -355,8 +355,30 @@ class Friend extends \think\Controller
             $fc   = new FriendCommentModel();
             $list = $fc->getList(['mood_id' => $param['mood_id'], 'type' => 1], ['id', 'uid', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
             if ($list) {
-                $cos = $fc->getList(['mood_id' => $mood_id], ['id', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'addtime', 'type'], null, 'addtime desc');
-                $rpl = array_column($cos, null, 'id');
+                $cos = $fc->getList(['mood_id' => $mood_id, 'type' => 2], ['id', 'mood_id', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'addtime', 'type']);
+                $rpl = [];
+                $rpy = array_column($cos, null, 'id');
+                foreach ($cos as &$cs) {
+                    $diff2 = time() - $cs['addtime'];
+                    if ($diff2 < 60) {
+                        $cs['addtime'] = '刚刚';
+                    } elseif ($diff2 < 3600) {
+                        $cs['addtime'] = intval($diff2 / 60) . '分钟前';
+                    } elseif ($diff2 < 86400) {
+                        $cs['addtime'] = intval($diff2 / 3600) . '小时前';
+                    } else {
+                        $cs['addtime'] = date('Y-m-d H:i:s', $cs['addtime']);
+                    }
+                    if (!empty($rpy[$cs['obj_id']])) {
+                        $ry = $rpy[$cs['obj_id']];
+                        // 赋值
+                        $cs['ruid']      = $ry['uid'];
+                        $cs['rnickname'] = $ry['nickname'];
+                    } else {
+                        $cs['ruid']      = 0;
+                        $cs['rnickname'] = '';
+                    }
+                }
                 foreach ($list as &$item) {
                     // 判断是否赞过
                     if (!empty($zan_arr["2_{$item['id']}"])) {
@@ -374,37 +396,32 @@ class Friend extends \think\Controller
                     } else {
                         $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                     }
-                    $item['reply'] = [];
-                    foreach ($cos as $k => &$hf) {
-                        if ($hf['type'] === 1) {
-                            unset($cos[$k]);
-                            continue;
-                        }
-                        unset($hf['type']);
-                        $diff = time() - $hf['addtime'];
-                        if ($diff < 60) {
-                            $hf['addtime'] = '刚刚';
-                        } elseif ($diff < 3600) {
-                            $hf['addtime'] = intval($diff / 60) . '分钟前';
-                        } elseif ($diff < 86400) {
-                            $hf['addtime'] = intval($diff / 3600) . '小时前';
-                        } else {
-                            $hf['addtime'] = date('Y-m-d H:i:s', $hf['addtime']);
-                        }
-                        if (!empty($rpl[$hf['obj_id']])) {
-                            $rpy = $rpl[$hf['obj_id']];
-                            // 属性赋值
-                            $hf['ruid']      = $rpy['uid'];
-                            $hf['rnickname'] = $rpy['nickname'];
-                        }
-                        unset($hf['obj_id']);
-                        $item['reply'][] = $hf;
-                    }
+                    $rdata = [];
+                    $this->get_reply($item['id'], $cos, $rdata);
+                    $item['reply'] = $rdata;
                 }
             }
             $mood['comment'] = $list;
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $mood]);exit;
+    }
+
+    /**
+     * 获取回复信息
+     * @author 贺强
+     * @time   2019-01-17 19:01:40
+     * @param  integer $fid 评论ID
+     * @param  array   $arr 回复数组
+     */
+    private function get_reply($fid, $arr, &$rdata = [])
+    {
+        foreach ($arr as $k => $ar) {
+            if ($ar['obj_id'] === $fid) {
+                $rdata[] = $ar;
+                unset($arr[$k]);
+                $this->get_reply($ar['id'], $arr, $rdata);
+            }
+        }
     }
 
     /**
