@@ -26,10 +26,11 @@ class FriendCommentModel extends CommonModel
         Db::startTrans();
         try {
             $u    = new UserModel();
-            $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar']);
+            $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'sex']);
             if (!empty($user)) {
                 $param['nickname'] = $user['nickname'];
                 $param['avatar']   = $user['avatar'];
+                $param['sex']      = $user['sex'];
             }
             $res = $this->add($param);
             if (!$res) {
