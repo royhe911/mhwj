@@ -80,6 +80,13 @@ class Friend extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'sex']);
+        if (!empty($user)) {
+            $param['nickname'] = $user['nickname'];
+            $param['avatar']   = $user['avatar'];
+            $param['sex']      = $user['sex'];
+        }
         $param['addtime'] = time();
         if (!empty($param['topic'])) {
             $ft = new FriendTopicModel();
