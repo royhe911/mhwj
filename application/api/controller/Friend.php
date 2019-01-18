@@ -777,6 +777,114 @@ class Friend extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
     }
 
+    /**
+     * 个人信息
+     * @author 贺强
+     * @time   2019-01-18 11:22:44
+     */
+    public function userinfo()
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+        } elseif (empty($param['tid'])) {
+            $msg = ['status' => 3, 'info' => '浏览者ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid   = $param['uid'];
+        $tid   = $param['tid'];
+        $u     = new UserModel();
+        $user  = $u->getModel(['id' => $uid], ['id', 'nickname', 'avatar']);
+        $f     = new FriendModel();
+        $w1    = "(uid1=$tid and follow1=1 and uid2=$uid) or (uid2=$tid and follow2=1 and uid1=$uid)";
+        $count = $f->getCount($w1);
+        // 是否关注
+        $user['is_follow'] = 0;
+        if ($count) {
+            $user['is_follow'] = 1;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $user]);exit;
+    }
+
+    /**
+     * 获取用户动态
+     * @author 贺强
+     * @time   2019-01-18 11:38:04
+     * @param  FriendMoodModel $fm FriendMoodModel 实例
+     */
+    public function dynamic(FriendMoodModel $fm)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $page = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $uid   = $param['uid'];
+        $where = ['uid' => $uid];
+        $list  = $fm->getList($where, ['id', 'addtime', 'zan_count', 'pl_count', 'thumb', 'pic', 'topic'], "$page,$pagesize", 'addtime desc');
+        if ($list) {
+            $ft    = new FriendTopicModel();
+            $topic = $ft->getList([], ['id', 'title']);
+            $topic = array_column($topic, 'title', 'id');
+            foreach ($list as &$item) {
+                $diff = time() - $item['addtime'];
+                if ($diff < 60) {
+                    $item['addtime'] = '刚刚';
+                } elseif ($diff < 3600) {
+                    $item['addtime'] = intval($diff / 60) . '分钟前';
+                } elseif ($diff < 86400) {
+                    $item['addtime'] = intval($diff / 3600) . '小时前';
+                } else {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                $tps = [];
+                if (!empty($item['topic'])) {
+                    $topics = explode(',', $item['topic']);
+                    foreach ($topics as $t) {
+                        $tps[] = ['id' => $t, 'title' => $topic[$t]];
+                    }
+                }
+                $item['topic'] = $tps;
+                // 缩略图
+                $thumbs = [];
+                if (!empty($item['thumb'])) {
+                    $thumbs = explode(',', $item['thumb']);
+                    foreach ($thumbs as &$thumb) {
+                        if (strpos($thumb, 'http://') === false && strpos($thumb, 'https://') === false) {
+                            $thumb = config('WEBSITE') . $thumb;
+                        }
+                    }
+                }
+                $item['thumb'] = $thumbs;
+                // 原图
+                $pics = [];
+                if (!empty($item['pic'])) {
+                    $pics = explode(',', $item['pic']);
+                    foreach ($pics as &$pic) {
+                        if (strpos($pic, 'http://') === false && strpos($pic, 'https://') === false) {
+                            $pic = config('WEBSITE') . $pic;
+                        }
+                    }
+                }
+                $item['pic'] = $pics;
+            }
+        }
+        $sum = $fm->getModel($where, ['count(*)' => 'count', 'sum(zan_count)' => 'total_zan']);
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['dynamic' => $list, 'sum' => $sum]]);exit;
+    }
+
     public function test()
     {
         $res = getVideoCover('https://hkqgg.cn/uploads/cli/img/2019/01/15/1547524052443.mp4', 11, true);

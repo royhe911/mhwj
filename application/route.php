@@ -217,5 +217,7 @@ return [
     '/api/friend/delroom'  => 'api/Friend/del_room', // 删除未聊过天的房间
     '/api/friend/chat'     => 'api/Friend/friend_chat', // 对话(聊天)
     '/api/friend/chats'    => 'api/Friend/get_chats', // 获取对话列表
+    '/api/friend/userinfo' => 'api/Friend/userinfo', // 主页
+    '/api/friend/dynamic'  => 'api/Friend/dynamic', // 动态
     /*--------   朋友圈 api 结束  --------*/
 ];

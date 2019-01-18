@@ -215,7 +215,7 @@ function getVideoCover($file, $s = 11, $is_win = false)
     if ($is_win) {
         $ffmpeg = 'D:/ffmpeg/bin/ffmpeg.exe';
     }
-    $path = '/uploads/cli/mp4/' . date('Y') . '/' . date('m') . '/' . date('d');
+    $path = '/uploads/cli/video/' . date('Y') . '/' . date('m') . '/' . date('d');
     if (!is_dir($root . $path)) {
         @mkdir($root . $path, 0755, true);
     }
