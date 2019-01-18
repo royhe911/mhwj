@@ -950,8 +950,10 @@ class Friend extends \think\Controller
             $time    = strtotime(date('Y-m-d'));
             $chats   = $fc->getList(['addtime' => ['gt', $time]], ['avatar', 'content', 'room_id']);
             $chatlog = [];
-            foreach ($chats as $chat) {
-                $chatlog[$chat['room_id']][] = $chat;
+            foreach ($chats as &$chat) {
+                $room_id = $chat['room_id'];
+                unset($chat['room_id']);
+                $chatlog[$room_id][] = $chat;
             }
             foreach ($list as &$item) {
                 if (!empty($chatlog[$item['id']])) {
