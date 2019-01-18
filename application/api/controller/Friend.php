@@ -5,6 +5,8 @@ use app\common\model\FriendChatModel;
 use app\common\model\FriendCommentModel;
 use app\common\model\FriendModel;
 use app\common\model\FriendMoodModel;
+use app\common\model\FriendPchatModel;
+use app\common\model\FriendProomModel;
 use app\common\model\FriendTopicModel;
 use app\common\model\FriendUroomModel;
 use app\common\model\FriendZanModel;
@@ -932,6 +934,69 @@ class Friend extends \think\Controller
         }
         $sum = $fm->getModel($where, ['count(*)' => 'count', 'sum(zan_count)' => 'total_zan']);
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['dynamic' => $list, 'sum' => $sum]]);exit;
+    }
+
+    /**
+     * 获取公聊房间
+     * @author 贺强
+     * @time   2019-01-18 16:18:51
+     * @param  FriendProomModel $fp FriendProomModel 实例
+     * @param  FriendPchatModel $fc FriendPchatModel 实例
+     */
+    public function get_public_room(FriendProomModel $fp, FriendPchatModel $fc)
+    {
+        $list = $fp->getList();
+        if ($list) {
+            $chats   = $fc->getList([], ['avatar', 'content', 'room_id']);
+            $chatlog = [];
+            foreach ($chats as $chat) {
+                $chatlog[$chat['room_id']][] = $chat;
+            }
+            foreach ($list as &$item) {
+                if (!empty($chatlog[$item['id']])) {
+                    $item['chatlog'] = $chatlog[$item['id']];
+                } else {
+                    $item['chatlog'] = [];
+                }
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 公共聊天
+     * @author 贺强
+     * @time   2019-01-18 16:36:21
+     * @param  FriendPchatModel $fc FriendPchatModel 实例
+     */
+    public function public_chat(FriendPchatModel $fc)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '说话者ID不能为空', 'data' => null];
+        } elseif (empty($param['content'])) {
+            $msg = ['status' => 5, 'info' => '说话内容不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid  = $param['uid'];
+        $u    = new UserModel();
+        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex']);
+        if (!empty($user)) {
+            $param['nickname'] = $user['nickname'];
+            $param['avatar']   = $user['avatar'];
+            $param['sex']      = $user['sex'];
+        }
+        $param['addtime'] = time();
+        // 添加
+        $res = $fc->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 40, 'info' => '添加失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '添加成功', 'data' => null]);exit;
     }
 
     public function test()

@@ -215,10 +215,12 @@ return [
     '/api/friend/friends'  => 'api/Friend/friends', // 获取我的关注/粉丝/朋友
     '/api/friend/addroom'  => 'api/Friend/add_room', // 添加私聊房间
     '/api/friend/delroom'  => 'api/Friend/del_room', // 删除未聊过天的房间
-    '/api/friend/chat'     => 'api/Friend/friend_chat', // 对话(聊天)
+    '/api/friend/chat'     => 'api/Friend/friend_chat', // 对话(私聊)
     '/api/friend/chats'    => 'api/Friend/get_chats', // 获取对话列表
     '/api/friend/chatlog'  => 'api/Friend/get_chat_log', // 对话记录
     '/api/friend/userinfo' => 'api/Friend/userinfo', // 主页
     '/api/friend/dynamic'  => 'api/Friend/dynamic', // 动态
+    '/api/friend/proom'    => 'api/Friend/get_public_room', // 获取公聊房间
+    '/api/friend/pchat'    => 'api/Friend/public_chat', // 对话(公聊)
     /*--------   朋友圈 api 结束  --------*/
 ];
