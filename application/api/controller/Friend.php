@@ -796,7 +796,7 @@ class Friend extends \think\Controller
         $uid   = $param['uid'];
         $tid   = $param['tid'];
         $u     = new UserModel();
-        $user  = $u->getModel(['id' => $uid], ['id', 'nickname', 'avatar']);
+        $user  = $u->getModel(['id' => $uid], ['id', 'nickname', 'avatar', 'sex']);
         $f     = new FriendModel();
         $w1    = "(uid1=$tid and follow1=1 and uid2=$uid) or (uid2=$tid and follow2=1 and uid1=$uid)";
         $count = $f->getCount($w1);
