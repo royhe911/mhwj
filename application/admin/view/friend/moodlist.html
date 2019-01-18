@@ -16,7 +16,7 @@
         .ttd{width: 250px;text-align: center;}
         .ttb{width: 80px;text-align: center;}
         .sort_i{width: 50px;display: none;}
-        .avatar{max-width: 80px;max-height: 80px;border-radius: 10px;}
+        .avatar{max-width: 80px;max-height: 80px;border-radius: 50%;}
     </style>
 </head>
 <body class="gray-bg">
@@ -79,10 +79,10 @@
                             <td class="sort"><span class="sort_p">{$item.sort}</span><input type="text" class="sort_i" value="{$item.sort}" data-id="{$item.id}" data-sort="{$item.sort}"></td>
                             <td>{$item.nickname}</td>
                             <td><img src="{$item.avatar}" class="avatar"></td>
-                            <td>{$item.content|mb_substr=0,20,'utf-8'}</td>
+                            <td title="{$item.content}">{$item.content|mb_substr=0,20,'utf-8'}</td>
                             <td>{$item.origin}</td>
                             <td>{$item.addtime}</td>
-                            <td>{if($item.is_recommend===0)}<a href="javascript:;" data-action="tj" data-id="{$item.id}">推荐</a>{else/}<a href="javascript:;" data-action="qx" data-id="{$item.id}">取消推荐</a>{/if} | <a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a></td>
+                            <td>{if($item.is_recommend===0)}<a href="javascript:;" data-action="tj" data-id="{$item.id}">推荐</a>{else/}<a href="javascript:;" data-action="qx" data-id="{$item.id}">取消推荐</a>{/if}{if($item.origin==='官方')} | <a href="/friend/editmood?id={$item.id}">修改</a>{/if} | <a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a></td>
                         </tr>
                         {/foreach}
                         </tbody>

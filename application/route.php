@@ -88,6 +88,7 @@ return [
     '/friend/editmsort'    => 'admin/Friend/editmsort', // 修改心情排序
     '/friend/operatem'     => 'admin/Friend/operatem', // 操作心情
     '/friend/moodlist'     => 'admin/Friend/moodlist', // 官方心情列表
+    '/friend/editmood'     => 'admin/Friend/editmood', // 修改心情
 
     /*--------   api 开始   --------*/
     '/api/carousel'        => 'api/Api/get_carousel', // 获取轮播轮播图

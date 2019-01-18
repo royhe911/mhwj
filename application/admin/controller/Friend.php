@@ -198,7 +198,7 @@ class Friend extends \think\Controller
     }
 
     /**
-     * 修改主题排序
+     * 修改心情排序
      * @author 贺强
      * @time   2019-01-11 12:11:27
      * @param  FriendMoodModel $fm FriendMoodModel 实例
@@ -215,6 +215,48 @@ class Friend extends \think\Controller
                 return ['status' => 2, 'info' => '修改失败'];
             }
             return ['status' => 0, 'info' => '修改成功'];
+        }
+    }
+
+    /**
+     * 修改心情
+     * @author 贺强
+     * @time   2019-01-18 10:43:15
+     * @param  FriendMoodModel $fm FriendMoodModel 实例
+     */
+    public function editmood(FriendMoodModel $fm)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            $type  = 1;
+            if (!empty($param['type'])) {
+                $tpe = $param['type'];
+                if ($tpe === 'mp4' || $tpe === 'avi' || $tpe === 'mov' || $tpe === 'wmv' || $tpe === '3gp') {
+                    $type = 2;
+                }
+            }
+            $param['type'] = $type;
+            // 修改
+            $res = $fm->modify($param, ['id' => $param['id']]);
+            if (!$res) {
+                return ['status' => 4, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        } else {
+            $u     = new UserModel();
+            $users = $u->getList(['type' => 3], ['id', 'nickname', 'avatar', 'sex']);
+            $id    = $this->request->get('id');
+            $mood  = $fm->getModel(['id' => $id]);
+            if (!empty($mood['pic']) && strpos($mood['pic'], 'https://') === false && strpos($mood['pic'], 'http://') === false) {
+                $mood['url'] = config('WEBSITE') . $mood['pic'];
+            }
+            if ($mood['type'] === 1) {
+                $mood['tpe'] = 'jpg';
+            } else {
+                $mood['tpe'] = 'mp4';
+            }
+            $time = time();
+            return $this->fetch('editmood', ['time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time), 'mood' => $mood, 'users' => $users]);
         }
     }
 

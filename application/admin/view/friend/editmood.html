@@ -3,18 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>添加心情</title>
+    <title>修改心情</title>
     <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
     <!-- Data Tables -->
-    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/iCheck/custom.css">
     <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
     <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
     <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
     <style type="text/css">
         .form-control{width: 200px;}
-        #preview,#preview_demo1,#preview_demo2,#preview_demo3{max-width: 120px;max-height: 120px;display: none;}
+        #preview,#preview_demo11,#preview_demo12{max-width: 120px;max-height: 120px;}
         .para_id{width: 80px;}
         .reduce,.plus{cursor: pointer;}
     </style>
@@ -25,7 +24,7 @@
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>添加心情</h5>
+                    <h5>修改心情</h5>
                 </div>
                 <div class="ibox-content">
                     <form class="form-horizontal" onsubmit="return false">
@@ -34,7 +33,7 @@
                             <div class="col-sm-10">
                                 <select id="uid" class="form-control">
                                     {foreach $users as $user}
-                                    <option value="{$user.id}" nickname="{$user.nickname}" avatar="{$user.avatar}" sex="{$user.sex}">{$user.nickname}</option>
+                                    <option value="{$user.id}" nickname="{$user.nickname}" avatar="{$user.avatar}" sex="{$user.sex}"{if($mood.uid===$user.id)} selected="selected" {/if}>{$user.nickname}</option>
                                     {/foreach}
                                 </select>
                             </div>
@@ -48,8 +47,8 @@
                                         <td valign="top" width="120px"><input id="file_upload" name="file_upload" type="file"></td>
                                         <td valign="top"><input class="btn btn-primary" type="button" data-action="upload" value="上传"></td>
                                     </tr>
-                                    <tr><td colspan="2"><div id="progress"></div><input type="hidden" id="pic"><input type="hidden" id="thumb"></td></tr>
-                                    <tr><td colspan="2"><img id="preview" src=""></td></tr>
+                                    <tr><td colspan="2"><div id="progress"></div><input type="hidden" id="pic" value="{$mood.pic}"><input type="hidden" id="thumb" value="{$mood.thumb}"></td></tr>
+                                    <tr><td colspan="2">{if($mood.type===1)}<img id="preview" src="{$mood.url}">{else/}<a href="{$mood.url}" target="_blank">点击查看</a>{/if}</td></tr>
                                 </table>
                             </div>
                         </div>
@@ -57,14 +56,14 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">排序</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" id="sort" value="99">
+                                <input type="text" class="form-control" id="sort" value="{$mood.sort}">
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
                             <label class="col-sm-2 control-label">心情描述</label>
                             <div class="col-sm-10">
-                                <textarea id="content" rows="5" cols="50"></textarea>
+                                <textarea id="content" rows="5" cols="50">{$mood.content}</textarea>
                             </div>
                         </div>
                         <div class="hr-line-dashed"></div>
@@ -82,11 +81,12 @@
 </div>
 </body>
 <script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/h+/js/plugins/iCheck/icheck.min.js"></script>
 <script type="text/javascript" src="/static/layer/layer.js"></script>
 <script type="text/javascript" src="/static/uploadifive/jquery.uploadifive.js"></script>
 <script type="text/javascript">
     $(function(){
-        var type = '';
+        var type = '{$mood.tpe}';
         $('input[data-action]').click(function(){
             $action = $(this).data('action');
             if ($action == 'save') {
@@ -105,20 +105,11 @@
                 }
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
-                    url: '/friend/addmood',
-                    data: {'uid': uid.val(), 'nickname': auth.attr('nickname'), 'avatar': auth.attr('avatar'), 'sex': auth.attr('sex'), 'type': type, 'pic': pic, 'thumb': $('#thumb').val(), 'content': content.val(), 'sort': $('#sort').val()},
+                    url: '/friend/editmood',
+                    data: {'id': {$mood.id}, 'uid': uid.val(), 'nickname': auth.attr('nickname'), 'avatar': auth.attr('avatar'), 'sex': auth.attr('sex'), 'type': type, 'pic': pic, 'thumb': $('#thumb').val(), 'content': content.val(), 'sort': $('#sort').val()},
                     success: function(data){
                         if (data.status == 0) {
-                            // layer.msg(data.info, {icon: 6, time: 1000});
-                            layer.confirm(data.info + '<br />是否继续添加？', {
-                                btn: ['是', '否'],
-                                shade: false,
-                                closeBtn: 0
-                            }, function(){
-                                location.reload()
-                            }, function(){
-                                location.href = '/friend/moodlist'
-                            })
+                            layer.msg(data.info, {icon: 6, time: 1000}, function(){location.href = '/friend/moodlist'});
                         }else{
                             layer.msg(data.info, {icon: 5, time: 1000});
                         }
