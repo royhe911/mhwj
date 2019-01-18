@@ -89,6 +89,10 @@ return [
     '/friend/operatem'     => 'admin/Friend/operatem', // 操作心情
     '/friend/moodlist'     => 'admin/Friend/moodlist', // 官方心情列表
     '/friend/editmood'     => 'admin/Friend/editmood', // 修改心情
+    '/friend/proom'        => 'admin/Friend/get_proom', // 群聊房间列表
+    '/friend/addproom'     => 'admin/Friend/addproom', // 添加群聊房间
+    '/friend/editpsort'    => 'admin/Friend/editpsort', // 修改群聊房间排序
+    '/friend/delproom'     => 'admin/Friend/delproom', // 删除群聊房间
 
     /*--------   api 开始   --------*/
     '/api/carousel'        => 'api/Api/get_carousel', // 获取轮播轮播图

@@ -2,6 +2,7 @@
 namespace app\admin\controller;
 
 use app\common\model\FriendMoodModel;
+use app\common\model\FriendProomModel;
 use app\common\model\FriendTopicModel;
 use app\common\model\UserModel;
 
@@ -310,5 +311,98 @@ class Friend extends \think\Controller
         $u     = new UserModel();
         $users = $u->getList(['type' => 3], ['id', 'nickname', 'avatar', 'sex']);
         return $this->fetch('moodlist', ['list' => $list, 'pages' => $pages, 'users' => $users, 'param' => $param]);
+    }
+
+    /**
+     * 添加群聊房间
+     * @author 贺强
+     * @time   2019-01-18 17:34:59
+     * @param  FriendProomModel $fp FriendProomModel 实例
+     */
+    public function addproom(FriendProomModel $fp)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            // 添加时间
+            $param['addtime'] = time();
+            // 添加
+            $res = $fp->add($param);
+            if (!$res) {
+                return ['status' => 4, 'info' => '添加失败'];
+            }
+            return ['status' => 0, 'info' => '添加成功'];
+        } else {
+            return $this->fetch('addproom');
+        }
+    }
+
+    /**
+     * 删除群聊房间
+     * @author 贺强
+     * @time   2019-01-18 19:21:03
+     * @param  FriendProomModel $fp FriendProomModel 实例
+     */
+    public function delproom(FriendProomModel $fp)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            $ids   = $param['ids'];
+            $res   = $fp->delByWhere(['id' => ['in', $ids]]);
+            if (!$res) {
+                return ['status' => 4, 'info' => '失败'];
+            }
+            return ['status' => 0, 'info' => '成功'];
+        }
+    }
+
+    /**
+     * 修改群聊房间排序
+     * @author 贺强
+     * @time   2019-01-18 19:18:08
+     * @param  FriendProomModel $fp FriendProomModel 实例
+     */
+    public function editpsort(FriendProomModel $fp)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['id'])) {
+                return ['status' => 1, 'info' => '非法参数'];
+            }
+            $res = $fp->modify($param, ['id' => $param['id']]);
+            if ($res === false) {
+                return ['status' => 2, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        }
+    }
+
+    /**
+     * 群聊房间
+     * @author 贺强
+     * @time   2019-01-18 19:02:19
+     * @param  FriendProomModel $fp FriendProomModel 实例
+     */
+    public function get_proom(FriendProomModel $fp)
+    {
+        $where = [];
+        $param = $this->request->get();
+        // 分页参数
+        $page = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = config('PAGESIZE');
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $fp->getList($where, true, "$page,$pagesize", 'addtime desc');
+        foreach ($list as &$item) {
+            if (!empty($item['addtime'])) {
+                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+            }
+        }
+        $count = $fp->getCount($where);
+        $pages = ceil($count / $pagesize);
+        return $this->fetch('proom', ['list' => $list, 'pages' => $pages]);
     }
 }
