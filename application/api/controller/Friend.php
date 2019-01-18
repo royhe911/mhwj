@@ -719,10 +719,11 @@ class Friend extends \think\Controller
         }
         $uid  = $param['uid'];
         $u    = new UserModel();
-        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar']);
+        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex']);
         if (!empty($user)) {
             $param['nickname'] = $user['nickname'];
             $param['avatar']   = $user['avatar'];
+            $param['sex']      = $user['sex'];
         }
         $param['addtime'] = time();
         // 添加
@@ -778,6 +779,41 @@ class Friend extends \think\Controller
     }
 
     /**
+     * 获取私聊记录
+     * @author 贺强
+     * @time   2019-01-18 15:33:02
+     * @param  FriendChatModel $fc FriendChatModel 实例
+     */
+    public function get_chat_log(FriendChatModel $fc)
+    {
+        $param = $this->param;
+        $where = [];
+        if (!empty($param['room_id'])) {
+            $where = ['room_id' => $param['room_id']];
+        } elseif (!empty($param['uid']) && !empty($param['friend_id'])) {
+            $name  = "room_{$param['uid']}_{$param['friend_id']}";
+            $name2 = "room_{$param['friend_id']}_{$param['uid']}";
+            $fu    = new FriendUroomModel();
+            $room  = $fu->getModel(['name' => ['in', [$name, $name2]]], ['id']);
+            if (!empty($room)) {
+                $where = ['room_id' => $room['id']];
+            }
+        }
+        if (empty($where)) {
+            echo json_encode(['status' => 1, 'info' => '非法操作', 'data' => null]);exit;
+        }
+        $list = $fc->getList($where, ['uid', 'avatar', 'content', 'addtime']);
+        foreach ($list as &$item) {
+            if ($item['addtime'] > strtotime(date('Y-m-d'))) {
+                $item['showtime'] = date('H:i', $item['addtime']);
+            } else {
+                $item['showtime'] = date('Y/m/d H:i', $item['addtime']);
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
      * 个人信息
      * @author 贺强
      * @time   2019-01-18 11:22:44
@@ -820,6 +856,9 @@ class Friend extends \think\Controller
         if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
         }
+        if (empty($param['tid'])) {
+            $msg = ['status' => 3, 'info' => '浏览者ID不能为空', 'data' => null];
+        }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
@@ -832,12 +871,16 @@ class Friend extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $uid   = $param['uid'];
+        $tid   = $param['tid'];
         $where = ['uid' => $uid];
-        $list  = $fm->getList($where, ['id', 'addtime', 'zan_count', 'pl_count', 'thumb', 'pic', 'topic'], "$page,$pagesize", 'addtime desc');
+        $list  = $fm->getList($where, ['id', 'addtime', 'content', 'type', 'zan_count', 'pl_count', 'thumb', 'pic', 'topic'], "$page,$pagesize", 'addtime desc');
         if ($list) {
             $ft    = new FriendTopicModel();
             $topic = $ft->getList([], ['id', 'title']);
             $topic = array_column($topic, 'title', 'id');
+            $fz    = new FriendZanModel();
+            $zans  = $fz->getList(['uid' => $tid, 'type' => 1], ['obj_id', 'uid']);
+            $zans  = array_column($zans, 'uid', 'obj_id');
             foreach ($list as &$item) {
                 $diff = time() - $item['addtime'];
                 if ($diff < 60) {
@@ -857,6 +900,12 @@ class Friend extends \think\Controller
                     }
                 }
                 $item['topic'] = $tps;
+                // 是否赞
+                if (!empty($zans[$item['id']])) {
+                    $item['is_zan'] = 1;
+                } else {
+                    $item['is_zan'] = 0;
+                }
                 // 缩略图
                 $thumbs = [];
                 if (!empty($item['thumb'])) {
