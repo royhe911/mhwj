@@ -199,10 +199,8 @@ return [
     '/api/pz/prizeinfo'    => 'api/Prize/prize_info', // 奖品详情
     '/api/pz/mycode'       => 'api/Prize/my_prize_code', // 我的抽奖码
     '/api/pz/myprizes'     => 'api/Prize/my_prizes', // 我的抽奖码
-    '/api/pz/test'         => 'api/Prize/test', // 测试
     /*--------   砍价 api 结束  --------*/
     /*--------   朋友圈 api 开始  --------*/
-    '/api/friend/test'     => 'api/Friend/test', // 测试
     '/api/friend/topics'   => 'api/Friend/get_topic', // 获取心情主题
     '/api/friend/release'  => 'api/Friend/release', // 发布心情
     '/api/friend/zan'      => 'api/Friend/zan', // 点赞

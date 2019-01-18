@@ -322,9 +322,4 @@ class Prize extends \think\Controller
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
-
-    public function test(PrizeModel $p)
-    {
-        $p->luck_draw(1);
-    }
 }

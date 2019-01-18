@@ -489,7 +489,9 @@ class Friend extends \think\Controller
         if (empty($param['uid1'])) {
             $msg = ['status' => 1, 'info' => '关注者ID不能为空', 'data' => null];
         } elseif (empty($param['uid2'])) {
-            $msg = ['status' => 7, 'info' => '被关注者ID不能为空', 'data' => null];
+            $msg = ['status' => 3, 'info' => '被关注者ID不能为空', 'data' => null];
+        } elseif ($param['uid1'] === $param['uid2']) {
+            $msg = ['status' => 5, 'info' => '不能关注自己', 'data' => null];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -1000,11 +1002,5 @@ class Friend extends \think\Controller
             echo json_encode(['status' => 40, 'info' => '添加失败', 'data' => null]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '添加成功', 'data' => null]);exit;
-    }
-
-    public function test()
-    {
-        $res = getVideoCover('https://hkqgg.cn/uploads/cli/img/2019/01/15/1547524052443.mp4', 11, true);
-        var_dump($res);exit;
     }
 }
