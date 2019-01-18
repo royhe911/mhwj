@@ -502,14 +502,16 @@ class Friend extends \think\Controller
         $where = "(uid1=$uid1 and uid2=$uid2) or (uid1=$uid2 and uid2=$uid1)";
         $fnd   = $f->getModel($where);
         if (empty($fnd)) {
-            $users = $u->getList(['id' => ['in', [$uid1, $uid2]]], ['id', 'nickname', 'avatar']);
+            $users = $u->getList(['id' => ['in', [$uid1, $uid2]]], ['id', 'nickname', 'avatar', 'sex']);
             foreach ($users as $user) {
                 if ($user['id'] === $uid1) {
                     $param['nickname1'] = $user['nickname'];
                     $param['avatar1']   = $user['avatar'];
+                    $param['sex1']      = $user['sex'];
                 } elseif ($user['id'] === $uid2) {
                     $param['nickname2'] = $user['nickname'];
                     $param['avatar2']   = $user['avatar'];
+                    $param['sex2']      = $user['sex'];
                 }
             }
             $param['follow1'] = 1;
@@ -607,7 +609,7 @@ class Friend extends \think\Controller
             if (!empty($param['pagesize'])) {
                 $pagesize = $param['pagesize'];
             }
-            $list = $f->getList($where, ['uid1', 'nickname1', 'avatar1', 'uid2', 'nickname2', 'avatar2', 'is_friend'], "$page,$pagesize");
+            $list = $f->getList($where, ['uid1', 'nickname1', 'avatar1', 'sex1', 'uid2', 'nickname2', 'avatar2', 'sex2', 'is_friend'], "$page,$pagesize");
             foreach ($list as &$item) {
                 // 过滤掉本人只取好友信息
                 if ($item['uid1'] === $uid) {
@@ -615,13 +617,15 @@ class Friend extends \think\Controller
                     $item['uid']      = $item['uid2'];
                     $item['nickname'] = $item['nickname2'];
                     $item['avatar']   = $item['avatar2'];
-                    unset($item['uid2'], $item['nickname2'], $item['avatar2']);
+                    $item['sex']      = $item['sex2'];
+                    unset($item['uid2'], $item['nickname2'], $item['avatar2'], $item['sex2']);
                 } elseif ($item['uid2'] === $uid) {
                     unset($item['uid2'], $item['nickname2'], $item['avatar2']);
                     $item['uid']      = $item['uid1'];
                     $item['nickname'] = $item['nickname1'];
-                    $item['avatar2']  = $item['avatar1'];
-                    unset($item['uid1'], $item['nickname1'], $item['avatar1']);
+                    $item['avatar']   = $item['avatar1'];
+                    $item['sex']      = $item['sex1'];
+                    unset($item['uid1'], $item['nickname1'], $item['avatar1'], $item['sex1']);
                 }
             }
             if ($self) {
