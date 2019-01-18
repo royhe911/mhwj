@@ -233,7 +233,7 @@ class Friend extends \think\Controller
         } else {
             $param['uid'] = '';
         }
-        if (isset($param['is_recommend'])) {
+        if (isset($param['is_recommend']) && $param['is_recommend'] !== '') {
             $where['is_recommend'] = $param['is_recommend'];
         } else {
             $param['is_recommend'] = '';
