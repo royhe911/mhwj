@@ -945,9 +945,10 @@ class Friend extends \think\Controller
      */
     public function get_public_room(FriendProomModel $fp, FriendPchatModel $fc)
     {
-        $list = $fp->getList();
+        $list = $fp->getList(['status' => 1], ['id', 'name', 'bgcolor']);
         if ($list) {
-            $chats   = $fc->getList([], ['avatar', 'content', 'room_id']);
+            $time    = strtotime(date('Y-m-d'));
+            $chats   = $fc->getList(['addtime' => ['gt', $time]], ['avatar', 'content', 'room_id']);
             $chatlog = [];
             foreach ($chats as $chat) {
                 $chatlog[$chat['room_id']][] = $chat;
