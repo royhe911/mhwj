@@ -939,6 +939,9 @@ class Friend extends \think\Controller
             }
         }
         $sum = $fm->getModel($where, ['count(*)' => 'count', 'sum(zan_count)' => 'total_zan']);
+        if (empty($sum)) {
+            $sum = ['count' => 0, 'total_zan' => 0];
+        }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['dynamic' => $list, 'sum' => $sum]]);exit;
     }
 
