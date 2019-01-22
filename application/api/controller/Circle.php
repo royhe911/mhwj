@@ -2,6 +2,8 @@
 namespace app\api\controller;
 
 use app\common\model\TFriendModel;
+use app\common\model\TPraiseModel;
+use app\common\model\TUserDynamicCommentModel;
 use app\common\model\TUserDynamicModel;
 use app\common\model\TUserModel;
 
@@ -19,13 +21,13 @@ class Circle extends \think\Controller
         $param = file_get_contents('php://input');
         $param = json_decode($param, true);
         if (empty($param['vericode'])) {
-            echo json_encode(['status' => 300, 'info' => '非法参数', 'data' => null]);exit;
+            echo json_encode(['status' => 300, 'info' => '非法参数']);exit;
         }
         $vericode = $param['vericode'];
         unset($param['vericode']);
         $new_code = md5(config('MD5_PARAM'));
         if ($vericode !== $new_code) {
-            echo json_encode(['status' => 100, 'info' => '非法参数', 'data' => null]);exit;
+            echo json_encode(['status' => 100, 'info' => '非法参数']);exit;
         }
         $this->param = $param;
     }
@@ -40,7 +42,7 @@ class Circle extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['js_code'])) {
-            $msg = ['status' => 1, 'info' => 'js_code 参数不能为空', 'data' => null];
+            $msg = ['status' => 1, 'info' => 'js_code 参数不能为空'];
             echo json_encode($msg);exit;
         }
         $js_code = $param['js_code'];
@@ -50,7 +52,7 @@ class Circle extends \think\Controller
         $data    = $this->curl($url);
         $data    = json_decode($data, true);
         if (empty($data['openid'])) {
-            echo json_encode(['status' => 2, 'info' => 'code 过期', 'data' => null]);exit;
+            echo json_encode(['status' => 2, 'info' => 'code 过期']);exit;
         }
         $user = $u->getModel(['openid' => $data['openid']]);
         if (!empty($user)) {
@@ -62,7 +64,7 @@ class Circle extends \think\Controller
             if ($res) {
                 $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $user['id']]];
             } else {
-                $msg = ['status' => 3, 'info' => '登录失败', 'data' => null];
+                $msg = ['status' => 3, 'info' => '登录失败'];
             }
         } else {
             $data['addtime']    = time();
@@ -72,8 +74,29 @@ class Circle extends \think\Controller
             if ($id) {
                 $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $id]];
             } else {
-                $msg = ['status' => 4, 'info' => '登录失败', 'data' => null];
+                $msg = ['status' => 4, 'info' => '登录失败'];
             }
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
+     * 同步用户信息
+     * @author 贺强
+     * @time   2019-01-22 18:46:13
+     * @param  TUserModel $u TUserModel 实例
+     */
+    public function sync_userinfo(TUserModel $u)
+    {
+        $param = $this->param;
+        if (empty($param['id'])) {
+            echo json_encode(['status' => 1, 'info' => '参数缺失']);exit;
+        }
+        $res = $u->modify($param, ['id' => $param['id']]);
+        if ($res !== false) {
+            $msg = ['status' => 0, 'info' => '同步成功'];
+        } else {
+            $msg = ['status' => 4, 'info' => '同步失败'];
         }
         echo json_encode($msg);exit;
     }
@@ -123,13 +146,16 @@ class Circle extends \think\Controller
         $param = $this->param;
         if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '登录用户ID不能为空'];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 3, 'info' => '要获取的数据类型不能为空'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $where = [];
         $uid   = intval($param['uid']);
-        if (!empty($param['is_follow'])) {
+        $type  = intval($param['type']);
+        if ($type === 1) {
             $f     = new TFriendModel();
             $fw    = "(uid1=$uid and is_follow1=1) or (uid2=$uid and is_follow2=1)";
             $users = $f->getList($fw, ['uid1', 'uid2']);
@@ -141,7 +167,11 @@ class Circle extends \think\Controller
                     $uids[] = $u['uid1'];
                 }
             }
-        } elseif (!empty($param['is_circle'])) {
+            $uids  = array_merge($uids, [$uid]);
+            $where = ['uid' => ['in', $uids]];
+        } elseif ($type === 2) {
+            $where = "is_open=1 or uid=$uid";
+        } elseif ($type === 3) {
             $u    = new TUserModel();
             $user = $u->getModel(['id' => $uid], ['circle']);
             if (!empty($user) && !empty($user['circle'])) {
@@ -150,11 +180,10 @@ class Circle extends \think\Controller
                     $where .= " or find_in_set('$c',circle)";
                 }
                 $where = substr($where, 3);
+                $where .= " or uid=$uid";
             } else {
-                echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => null]);exit;
+                echo json_encode(['status' => 0, 'info' => '获取成功']);exit;
             }
-        } else {
-            $where = ['is_open' => 1];
         }
         $page = 1;
         if (!empty($param['page'])) {
@@ -196,5 +225,57 @@ class Circle extends \think\Controller
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 点赞
+     * @author 贺强
+     * @time   2019-01-22 19:44:34
+     * @param  TPraiseModel $p TPraiseModel 实例
+     */
+    public function zan(TPraiseModel $p)
+    {
+        $param = $this->param;
+        if (empty($param['obj_id'])) {
+            $msg = ['status' => 1, 'info' => '动态或评论ID不能为空'];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '用户ID不能为空'];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 5, 'info' => '类型不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $param['addtime'] = time();
+        // 添加
+        $res = $p->do_zan($param);
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '失败']);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '成功']);exit;
+    }
+
+    public function comment(TUserDynamicCommentModel $fc)
+    {
+        $param = $this->param;
+        if (empty($param['obj_id'])) {
+            $msg = ['status' => 1, 'info' => '心情或评论ID不能为空', 'data' => null];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '评论者ID不能为空', 'data' => null];
+        } elseif (empty($param['content'])) {
+            $msg = ['status' => 5, 'info' => '评论内容不能为空', 'data' => null];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 7, 'info' => '消息类型不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $param['addtime'] = time();
+        // 评论
+        $res = $fc->do_comment($param);
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '评论失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '评论成功', 'data' => null]);exit;
     }
 }

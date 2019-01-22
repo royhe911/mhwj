@@ -227,7 +227,9 @@ return [
     /*--------   朋友圈 api 结束  --------*/
     /*--------   圈子 api 开始  --------*/
     '/api/circle/login'    => 'api/Circle/user_login', // 用户登录
+    '/api/circle/sync'     => 'api/Circle/sync_userinfo', // 同步用户信息
     '/api/circle/release'  => 'api/Circle/release', // 发布动态
     '/api/circle/dynamic'  => 'api/Circle/get_dynamic', // 获取动态
+    '/api/circle/zan'      => 'api/Circle/zan', // 点赞
     /*--------   圈子 api 结束  --------*/
 ];
