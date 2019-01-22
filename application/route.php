@@ -232,5 +232,6 @@ return [
     '/api/circle/dynamic'  => 'api/Circle/get_dynamic', // 获取动态
     '/api/circle/zan'      => 'api/Circle/zan', // 点赞/取消点赞
     '/api/circle/comment'  => 'api/Circle/comment', // 评论/回复
+    '/api/circle/dinfo'    => 'api/Circle/dynamic_info', // 动态详情
     /*--------   圈子 api 结束  --------*/
 ];

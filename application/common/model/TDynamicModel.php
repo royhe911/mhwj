@@ -6,10 +6,10 @@ namespace app\common\model;
  * @author 贺强
  * @time   2019-01-22 16:27:00
  */
-class TUserDynamicModel extends CommonModel
+class TDynamicModel extends CommonModel
 {
     public function __construct()
     {
-        $this->table = 't_user_dynamic';
+        $this->table = 't_dynamic';
     }
 }

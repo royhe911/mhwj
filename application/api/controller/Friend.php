@@ -298,7 +298,7 @@ class Friend extends \think\Controller
         $mood_id = $param['mood_id'];
         $mood    = $fm->getModel(['id' => $mood_id]);
         if ($mood) {
-            $ft    = new FriendTopicModel;
+            $ft    = new FriendTopicModel();
             $topic = $ft->getList([], ['id', 'title']);
             $topic = array_column($topic, 'title', 'id');
             $tps   = [];

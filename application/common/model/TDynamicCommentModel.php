@@ -8,11 +8,11 @@ use think\Db;
  * @author 贺强
  * @time   2019-01-22 16:34:53
  */
-class TUserDynamicCommentModel extends CommonModel
+class TDynamicCommentModel extends CommonModel
 {
     public function __construct()
     {
-        $this->table = 't_user_dynamic_comment';
+        $this->table = 't_dynamic_comment';
     }
 
     /**
@@ -39,7 +39,7 @@ class TUserDynamicCommentModel extends CommonModel
                 return 10;
             }
             // 被评论或回复的动态评论数加 1
-            $fm  = new TUserDynamicModel();
+            $fm  = new TDynamicModel();
             $res = $fm->increment('pl_count', ['id' => $param['did']]);
             if (!$res) {
                 Db::rollback();

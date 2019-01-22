@@ -1,10 +1,11 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\TDynamicCommentModel;
+use app\common\model\TDynamicModel;
 use app\common\model\TFriendModel;
 use app\common\model\TPraiseModel;
-use app\common\model\TUserDynamicCommentModel;
-use app\common\model\TUserDynamicModel;
+use app\common\model\TTopicModel;
 use app\common\model\TUserModel;
 
 /**
@@ -105,9 +106,9 @@ class Circle extends \think\Controller
      * 发布动态
      * @author 贺强
      * @time   2019-01-22 16:27:34
-     * @param  TUserDynamicModel $ud TUserDynamicModel 实例
+     * @param  TDynamicModel $d TDynamicModel 实例
      */
-    public function release(TUserDynamicModel $ud)
+    public function release(TDynamicModel $ud)
     {
         $param = $this->param;
         if (empty($param['uid'])) {
@@ -139,9 +140,9 @@ class Circle extends \think\Controller
      * 获取动态
      * @author 贺强
      * @time   2019-01-22 17:10:57
-     * @param  TUserDynamicModel $ud TUserDynamicModel 实例
+     * @param  TDynamicModel $ud TDynamicModel 实例
      */
-    public function get_dynamic(TUserDynamicModel $ud)
+    public function get_dynamic(TDynamicModel $ud)
     {
         $param = $this->param;
         if (empty($param['uid'])) {
@@ -157,7 +158,7 @@ class Circle extends \think\Controller
         $type  = intval($param['type']);
         if ($type === 1) {
             $f     = new TFriendModel();
-            $fw    = "(uid1=$uid and is_follow1=1) or (uid2=$uid and is_follow2=1)";
+            $fw    = "(uid1=$uid and follow1=1) or (uid2=$uid and follow2=1)";
             $users = $f->getList($fw, ['uid1', 'uid2']);
             $uids  = [];
             foreach ($users as $u) {
@@ -259,9 +260,9 @@ class Circle extends \think\Controller
      * 评论/回复
      * @author 贺强
      * @time   2019-01-22 20:13:44
-     * @param  TUserDynamicCommentModel $udc TUserDynamicCommentModel 实例
+     * @param  TDynamicCommentModel $dc TDynamicCommentModel 实例
      */
-    public function comment(TUserDynamicCommentModel $udc)
+    public function comment(TDynamicCommentModel $dc)
     {
         $param = $this->param;
         if (empty($param['obj_id'])) {
@@ -278,10 +279,161 @@ class Circle extends \think\Controller
         }
         $param['addtime'] = time();
         // 评论
-        $res = $udc->do_comment($param);
+        $res = $dc->do_comment($param);
         if ($res !== true) {
             echo json_encode(['status' => $res, 'info' => '评论失败']);exit;
         }
         echo json_encode(['status' => 0, 'info' => '评论成功']);exit;
+    }
+
+    public function dynamic_info(TDynamicModel $d)
+    {
+        $param = $this->param;
+        if (empty($param['did'])) {
+            $msg = ['status' => 1, 'info' => '动态ID不能为空'];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '用户ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid     = $param['uid'];
+        $did     = $param['did'];
+        $dynamic = $d->getModel(['id' => $did]);
+        if ($dynamic) {
+            $t     = new TTopicModel();
+            $topic = $t->getList([], ['id', 'title']);
+            $topic = array_column($topic, 'title', 'id');
+            $tps   = [];
+            if (!empty($dynamic['topic'])) {
+                $topics = explode(',', $dynamic['topic']);
+                foreach ($topics as $t) {
+                    $tps[] = ['id' => $t, 'title' => $topic[$t]];
+                }
+            }
+            $dynamic['topic'] = $tps;
+            // 获取当前用户是否关注此用户
+            $f     = new TFriendModel();
+            $where = "(uid1=$uid and follow1=1 and uid2={$dynamic['uid']}) or (uid2=$uid and follow2=1 and uid1={$dynamic['uid']})";
+            $count = $f->getCount($where);
+            if ($count) {
+                $dynamic['is_follow'] = 1;
+            } else {
+                $dynamic['is_follow'] = 0;
+            }
+            $thumbs = [];
+            if (!empty($dynamic['thumb'])) {
+                $thumbs = explode(',', $dynamic['thumb']);
+                foreach ($thumbs as &$thumb) {
+                    if (strpos($thumb, 'http://') === false && strpos($thumb, 'https://') === false) {
+                        $thumb = config('WEBSITE') . $thumb;
+                    }
+                }
+            }
+            $dynamic['thumb'] = $thumbs;
+            $pics             = [];
+            if (!empty($dynamic['pic'])) {
+                $pics = explode(',', $dynamic['pic']);
+                foreach ($pics as &$pic) {
+                    if (strpos($pic, 'http://') === false && strpos($pic, 'https://') === false) {
+                        $pic = config('WEBSITE') . $pic;
+                    }
+                }
+            }
+            $dynamic['pic'] = $pics;
+            $zan_arr        = [];
+            // 取得当前用户赞过的
+            $p    = new TPraiseModel();
+            $zans = $p->getList(['uid' => $uid], ['obj_id', 'type', 'uid']);
+            foreach ($zans as $z) {
+                $zan_arr[$z['type'] . '_' . $z['obj_id']] = $z;
+            }
+            if (!empty($zan_arr["2_{$dynamic['id']}"])) {
+                $dynamic['is_zan'] = 1;
+            } else {
+                $dynamic['is_zan'] = 0;
+            }
+            // 显示发布时间
+            $diff = time() - $dynamic['addtime'];
+            if ($diff < 60) {
+                $dynamic['addtime'] = $diff . '秒前';
+            } elseif ($diff < 3600) {
+                $dynamic['addtime'] = intval($diff / 60) . '分钟前';
+            } elseif ($diff < 86400) {
+                $dynamic['addtime'] = intval($diff / 3600) . '小时前';
+            } else {
+                $dynamic['addtime'] = date('Y-m-d H:i:s', $dynamic['addtime']);
+            }
+            $fc   = new TDynamicCommentModel();
+            $list = $fc->getList(['did' => $param['did'], 'type' => 1], ['id', 'uid', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
+            if ($list) {
+                $cos = $fc->getList(['did' => $did, 'type' => 2], ['id', 'did', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'addtime', 'type']);
+                $rpl = [];
+                $rpy = array_column($cos, null, 'id');
+                foreach ($cos as &$cs) {
+                    $diff2 = time() - $cs['addtime'];
+                    if ($diff2 < 60) {
+                        $cs['addtime'] = '刚刚';
+                    } elseif ($diff2 < 3600) {
+                        $cs['addtime'] = intval($diff2 / 60) . '分钟前';
+                    } elseif ($diff2 < 86400) {
+                        $cs['addtime'] = intval($diff2 / 3600) . '小时前';
+                    } else {
+                        $cs['addtime'] = date('Y-m-d H:i:s', $cs['addtime']);
+                    }
+                    if (!empty($rpy[$cs['obj_id']])) {
+                        $ry = $rpy[$cs['obj_id']];
+                        // 赋值
+                        $cs['ruid']      = $ry['uid'];
+                        $cs['rnickname'] = $ry['nickname'];
+                    } else {
+                        $cs['ruid']      = 0;
+                        $cs['rnickname'] = '';
+                    }
+                }
+                foreach ($list as &$item) {
+                    // 判断是否赞过
+                    if (!empty($zan_arr["3_{$item['id']}"])) {
+                        $item['is_zan'] = 1;
+                    } else {
+                        $item['is_zan'] = 0;
+                    }
+                    $diff = time() - $item['addtime'];
+                    if ($diff < 60) {
+                        $item['addtime'] = '刚刚';
+                    } elseif ($diff < 3600) {
+                        $item['addtime'] = intval($diff / 60) . '分钟前';
+                    } elseif ($diff < 86400) {
+                        $item['addtime'] = intval($diff / 3600) . '小时前';
+                    } else {
+                        $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                    }
+                    $rdata = [];
+                    $this->get_reply($item['id'], $cos, $rdata);
+                    $item['reply'] = $rdata;
+                }
+            }
+            $dynamic['comment'] = $list;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $dynamic]);exit;
+    }
+
+    /**
+     * 获取回复信息
+     * @author 贺强
+     * @time   2019-01-22 21:06:48
+     * @param  integer $fid    评论ID
+     * @param  array   $arr    回复数组
+     * @param  array   &$rdata 输出数组
+     */
+    private function get_reply($fid, $arr, &$rdata = [])
+    {
+        foreach ($arr as $k => $ar) {
+            if ($ar['obj_id'] === $fid) {
+                $rdata[] = $ar;
+                unset($arr[$k]);
+                $this->get_reply($ar['id'], $arr, $rdata);
+            }
+        }
     }
 }
