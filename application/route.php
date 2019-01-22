@@ -230,6 +230,7 @@ return [
     '/api/circle/sync'     => 'api/Circle/sync_userinfo', // 同步用户信息
     '/api/circle/release'  => 'api/Circle/release', // 发布动态
     '/api/circle/dynamic'  => 'api/Circle/get_dynamic', // 获取动态
-    '/api/circle/zan'      => 'api/Circle/zan', // 点赞
+    '/api/circle/zan'      => 'api/Circle/zan', // 点赞/取消点赞
+    '/api/circle/comment'  => 'api/Circle/comment', // 评论/回复
     /*--------   圈子 api 结束  --------*/
 ];

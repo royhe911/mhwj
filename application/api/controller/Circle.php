@@ -255,27 +255,33 @@ class Circle extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '成功']);exit;
     }
 
-    public function comment(TUserDynamicCommentModel $fc)
+    /**
+     * 评论/回复
+     * @author 贺强
+     * @time   2019-01-22 20:13:44
+     * @param  TUserDynamicCommentModel $udc TUserDynamicCommentModel 实例
+     */
+    public function comment(TUserDynamicCommentModel $udc)
     {
         $param = $this->param;
         if (empty($param['obj_id'])) {
-            $msg = ['status' => 1, 'info' => '心情或评论ID不能为空', 'data' => null];
+            $msg = ['status' => 1, 'info' => '动态或评论ID不能为空'];
         } elseif (empty($param['uid'])) {
-            $msg = ['status' => 3, 'info' => '评论者ID不能为空', 'data' => null];
+            $msg = ['status' => 3, 'info' => '评论者ID不能为空'];
         } elseif (empty($param['content'])) {
-            $msg = ['status' => 5, 'info' => '评论内容不能为空', 'data' => null];
+            $msg = ['status' => 5, 'info' => '评论内容不能为空'];
         } elseif (empty($param['type'])) {
-            $msg = ['status' => 7, 'info' => '消息类型不能为空', 'data' => null];
+            $msg = ['status' => 7, 'info' => '消息类型不能为空'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $param['addtime'] = time();
         // 评论
-        $res = $fc->do_comment($param);
+        $res = $udc->do_comment($param);
         if ($res !== true) {
-            echo json_encode(['status' => $res, 'info' => '评论失败', 'data' => null]);exit;
+            echo json_encode(['status' => $res, 'info' => '评论失败']);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '评论成功', 'data' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '评论成功']);exit;
     }
 }
