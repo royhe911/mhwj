@@ -31,6 +31,54 @@ class Circle extends \think\Controller
     }
 
     /**
+     * 用户登录
+     * @author 贺强
+     * @time   2019-01-22 17:58:58
+     * @param  TUserModel $u TUserModel 实例
+     */
+    public function user_login(TUserModel $u)
+    {
+        $param = $this->param;
+        if (empty($param['js_code'])) {
+            $msg = ['status' => 1, 'info' => 'js_code 参数不能为空', 'data' => null];
+            echo json_encode($msg);exit;
+        }
+        $js_code = $param['js_code'];
+        $appid   = config('APPID');
+        $secret  = config('APPSECRET');
+        $url     = "https://api.weixin.qq.com/sns/jscode2session?appid={$appid}&secret={$secret}&js_code={$js_code}&grant_type=authorization_code";
+        $data    = $this->curl($url);
+        $data    = json_decode($data, true);
+        if (empty($data['openid'])) {
+            echo json_encode(['status' => 2, 'info' => 'code 过期', 'data' => null]);exit;
+        }
+        $user = $u->getModel(['openid' => $data['openid']]);
+        if (!empty($user)) {
+            $data['login_time'] = time();
+            $data['count']      = $user['count'] + 1;
+            // 修改数据
+            $id  = $user['id'];
+            $res = $u->modify($data, ['id' => $id]);
+            if ($res) {
+                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $user['id']]];
+            } else {
+                $msg = ['status' => 3, 'info' => '登录失败', 'data' => null];
+            }
+        } else {
+            $data['addtime']    = time();
+            $data['login_time'] = time();
+            // 添加
+            $id = $u->add($data);
+            if ($id) {
+                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $id]];
+            } else {
+                $msg = ['status' => 4, 'info' => '登录失败', 'data' => null];
+            }
+        }
+        echo json_encode($msg);exit;
+    }
+
+    /**
      * 发布动态
      * @author 贺强
      * @time   2019-01-22 16:27:34

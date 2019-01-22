@@ -236,6 +236,8 @@ return [
     'PRE_KEY'                => '32292XXYJ629LRPWWLHM127XWNMDGDHL', // 平台设置的密钥key
     'APPID_ACCOMPANY'        => 'wxecd6bfdba0623aa5', // 陪玩端 appid
     'APPSECRET_ACCOMPANY'    => 'fe0bf34796bd39e83f2eff226372a4ff', // 小程序 appSecret
+    'APPID'                  => 'wx5a285ac534f3ca8a', // 圈子 APPID
+    'APPSECRET'              => '40920a8fdda2695e86182b8dc781326b', // 圈子 appSecret
     'START_TIME'             => '11:00', // 活动开启时间
     'END_TIME'               => '12:00', // 活动结束时间
     'GIFT_TYPE'              => [
