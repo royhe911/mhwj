@@ -199,7 +199,7 @@ class Circle extends \think\Controller
         $list = $ud->getList($where, ['id', 'zan_count', 'pl_count', 'uid', 'nickname', 'avatar', 'sex', 'topic', 'content', 'type', 'thumb', 'pic', 'addtime'], "$page,$pagesize");
         if ($list) {
             // 获取我的关注
-            $fnds = $this->friends($uid);
+            $fnds = $this->friends(['uid' => $uid]);
             $fnds = array_column($fnds, 'nickname', 'uid');
             // 获取我的点赞
             $p    = new TPraiseModel();
@@ -282,17 +282,14 @@ class Circle extends \think\Controller
     /**
      * 获取我的关注/粉丝/朋友
      * @author 贺强
-     * @time   2019-01-23 10:31:31
-     * @param  integer $uid 用户 ID
+     * @time   2019-01-23 19:01:22
+     * @param  array  $data 参数
      */
-    public function friends($uid = 0)
+    public function friends($data = [])
     {
         $param = $this->param;
-        $self  = false;
-        if ($uid) {
-            $param['uid']  = $uid;
-            $param['type'] = 1;
-            $self          = true;
+        if ($data) {
+            $param = $data;
         }
         if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '用户ID不能为空'];
@@ -318,6 +315,9 @@ class Circle extends \think\Controller
         $f = new TFriendModel();
         if (!empty($param['is_count'])) {
             $count = $f->getCount($where);
+            if ($data) {
+                return $count;
+            }
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $count]);
         } else {
             $page = 1;
@@ -347,7 +347,7 @@ class Circle extends \think\Controller
                     unset($item['uid1'], $item['nickname1'], $item['avatar1'], $item['sex1']);
                 }
             }
-            if ($self) {
+            if ($data) {
                 return $list;
             }
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
@@ -492,6 +492,16 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $type = intval($param['type']);
+        if ($type === 2) {
+            $comm = $dc->getModel(['id' => $param['obj_id']], ['uid', 'nickname']);
+            if (!empty($comm)) {
+                $param['ruid']      = $comm['uid'];
+                $param['rnickname'] = $comm['nickname'];
+            } else {
+                echo json_encode(['status' => 2, 'info' => '回复的评论被删除']);exit;
+            }
+        }
         $param['addtime'] = time();
         // 评论
         $res = $dc->do_comment($param);
@@ -518,8 +528,8 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $uid     = $param['uid'];
-        $did     = $param['did'];
+        $uid     = intval($param['uid']);
+        $did     = intval($param['did']);
         $dynamic = $d->getModel(['id' => $did]);
         if ($dynamic) {
             $t     = new TTopicModel();
@@ -593,10 +603,9 @@ class Circle extends \think\Controller
             $dc   = new TDynamicCommentModel();
             $list = $dc->getList(['did' => $param['did'], 'type' => 1], ['id', 'uid', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
             if ($list) {
-                $cos = $dc->getList(['did' => $did, 'type' => 2], ['id', 'did', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'addtime', 'type']);
-                $rpl = [];
-                $rpy = array_column($cos, null, 'id');
-                foreach ($cos as &$cs) {
+                $cos = $dc->getList(['did' => $did, 'type' => 2], ['id', 'cid', 'uid', 'nickname', 'sex', 'content', 'addtime', 'ruid', 'rnickname']);
+                $car = [];
+                foreach ($cos as $cs) {
                     $diff2 = time() - $cs['addtime'];
                     if ($diff2 < 60) {
                         $cs['addtime'] = '刚刚';
@@ -607,21 +616,13 @@ class Circle extends \think\Controller
                     } else {
                         $cs['addtime'] = date('Y-m-d H:i:s', $cs['addtime']);
                     }
-                    if (!empty($rpy[$cs['obj_id']])) {
-                        $ry = $rpy[$cs['obj_id']];
-                        // 赋值
-                        $cs['ruid']      = $ry['uid'];
-                        $cs['rnickname'] = $ry['nickname'];
-                    } else {
-                        $cs['ruid']      = 0;
-                        $cs['rnickname'] = '';
-                    }
                     // 判断是否可以删除回复
                     if ($cs['uid'] === $uid || $dynamic['is_del']) {
                         $cs['is_del'] = 1;
                     } else {
                         $cs['is_del'] = 0;
                     }
+                    $car[$cs['cid']][] = $cs;
                 }
                 foreach ($list as &$item) {
                     // 判断是否赞过
@@ -646,9 +647,9 @@ class Circle extends \think\Controller
                     } else {
                         $item['is_del'] = 0;
                     }
-                    $rdata = [];
-                    $this->get_reply($item['id'], $cos, $rdata);
-                    $item['reply'] = $rdata;
+                    if (!empty($car[$item['id']])) {
+                        $item['reply'] = $car[$item['id']];
+                    }
                 }
             }
             $dynamic['comment'] = $list;
@@ -857,7 +858,7 @@ class Circle extends \think\Controller
         if (intval($param['gid']) === 1) {
             if (empty($param['position'])) {
                 $msg = ['status' => 11, 'info' => '常用位置不能为空'];
-            } elseif (empty($param['gang_postion'])) {
+            } elseif (empty($param['gang_position'])) {
                 $msg = ['status' => 13, 'info' => '开黑位置不能为空'];
             }
         } elseif (empty($param['region'])) {
@@ -875,5 +876,50 @@ class Circle extends \think\Controller
             echo json_encode(['status' => 40, 'info' => '添加失败']);exit;
         }
         echo json_encode(['status' => 0, 'info' => '添加成功']);exit;
+    }
+
+    /**
+     * 个人中心
+     * @author 贺强
+     * @time   2019-01-23 18:45:54
+     * @param  TUserModel $u TUserModel 实例
+     */
+    public function userinfo(TUserModel $u)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
+        } elseif (empty($param['tid'])) {
+            $msg = ['status' => 3, 'info' => '浏览者ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid  = $param['uid'];
+        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'age', 'sex', 'inyear', 'school', 'department', 'grade']);
+        if ($user) {
+            $ug    = new TUserGameModel();
+            $games = $ug->getList(['uid' => $uid], ['gid', 'name', 'region', 'duan', 'online', 'position', 'gang_position']);
+            // 拥有的游戏技能
+            $user['games'] = $games;
+            // 获取关注数
+            $follow         = $this->friends(['uid' => $uid, 'type' => 1, 'is_count' => 1]);
+            $user['follow'] = $follow;
+            // 获取粉丝数
+            $fans         = $this->friends(['uid' => $uid, 'type' => 2, 'is_count' => 1]);
+            $user['fans'] = $fans;
+            // 是否关注
+            $tid   = $param['tid'];
+            $f     = new TFriendModel();
+            $count = $f->getCount("(uid1=$tid and follow1=1 and uid2=$uid) or (uid2=$tid and follow2=1 and uid1=$uid)");
+            // 关注赋值
+            $user['is_follow'] = $count;
+            // 是否点赞
+            $p     = new TPraiseModel();
+            $count = $p->getCount(['obj_id' => $uid, 'uid' => $tid, 'type' => 1]);
+            // 点赞赋值
+            $user['is_zan'] = $count;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $user]);exit;
     }
 }
