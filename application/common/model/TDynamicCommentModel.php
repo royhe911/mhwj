@@ -39,11 +39,48 @@ class TDynamicCommentModel extends CommonModel
                 return 10;
             }
             // 被评论或回复的动态评论数加 1
-            $fm  = new TDynamicModel();
-            $res = $fm->increment('pl_count', ['id' => $param['did']]);
+            $d   = new TDynamicModel();
+            $res = $d->increment('pl_count', ['id' => $param['did']]);
             if (!$res) {
                 Db::rollback();
                 return 20;
+            }
+            Db::commit();
+            return true;
+        } catch (\Exception $e) {
+            Db::rollback();
+            return 44;
+        }
+    }
+
+    /**
+     * 删除评论
+     * @author 贺强
+     * @time   2019-01-23 16:15:36
+     * @param  integer $id 要删除的评论ID
+     */
+    public function del_comment($id)
+    {
+        Db::startTrans();
+        try {
+            // 查询数据是否存在
+            $comm = $this->getModel(['id' => $id], true, '', true);
+            if (!$comm) {
+                Db::rollback();
+                return 10;
+            }
+            // 删除评论
+            $res = $this->delById($id);
+            if (!$res) {
+                Db::rollback();
+                return 20;
+            }
+            $d = new TDynamicModel();
+            // 相应动态的评论数减 1
+            $res = $d->decrement('pl_count', ['id' => $comm['did']]);
+            if (!$res) {
+                Db::rollback();
+                return 30;
             }
             Db::commit();
             return true;

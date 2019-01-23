@@ -59,8 +59,6 @@ class Circle extends \think\Controller
         }
         $user = $u->getModel(['openid' => $data['openid']]);
         if (!empty($user)) {
-            $data['login_time'] = time();
-            $data['count']      = $user['count'] + 1;
             // 修改数据
             $id  = $user['id'];
             $res = $u->modify($data, ['id' => $id]);
@@ -70,8 +68,7 @@ class Circle extends \think\Controller
                 $msg = ['status' => 3, 'info' => '登录失败'];
             }
         } else {
-            $data['addtime']    = time();
-            $data['login_time'] = time();
+            $data['addtime'] = time();
             // 添加
             $id = $u->add($data);
             if ($id) {
@@ -121,11 +118,14 @@ class Circle extends \think\Controller
         }
         $u    = new TUserModel();
         $uid  = $param['uid'];
-        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex']);
+        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex', 'circle']);
         if (!empty($user)) {
             $param['nickname'] = $user['nickname'];
             $param['avatar']   = $user['avatar'];
             $param['sex']      = $user['sex'];
+        }
+        if (empty($user['circle'])) {
+            $param['is_open'] = 0;
         }
         $param['addtime'] = time();
         // 添加
@@ -208,6 +208,11 @@ class Circle extends \think\Controller
             $topic = $ft->getList([], ['id', 'title']);
             $topic = array_column($topic, 'title', 'id');
             foreach ($list as &$item) {
+                if ($item['uid'] === $uid) {
+                    $item['is_del'] = 1;
+                } else {
+                    $item['is_del'] = 0;
+                }
                 // 动态话题
                 $tps = [];
                 if (!empty($item['topic'])) {
@@ -576,10 +581,15 @@ class Circle extends \think\Controller
             } else {
                 $dynamic['addtime'] = date('Y-m-d H:i:s', $dynamic['addtime']);
             }
-            $fc   = new TDynamicCommentModel();
-            $list = $fc->getList(['did' => $param['did'], 'type' => 1], ['id', 'uid', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
+            if ($dynamic['uid'] === $uid) {
+                $dynamic['is_del'] = 1;
+            } else {
+                $dynamic['is_del'] = 0;
+            }
+            $dc   = new TDynamicCommentModel();
+            $list = $dc->getList(['did' => $param['did'], 'type' => 1], ['id', 'uid', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
             if ($list) {
-                $cos = $fc->getList(['did' => $did, 'type' => 2], ['id', 'did', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'addtime', 'type']);
+                $cos = $dc->getList(['did' => $did, 'type' => 2], ['id', 'did', 'obj_id', 'uid', 'nickname', 'sex', 'content', 'addtime', 'type']);
                 $rpl = [];
                 $rpy = array_column($cos, null, 'id');
                 foreach ($cos as &$cs) {
@@ -602,6 +612,12 @@ class Circle extends \think\Controller
                         $cs['ruid']      = 0;
                         $cs['rnickname'] = '';
                     }
+                    // 判断是否可以删除回复
+                    if ($cs['uid'] === $uid || $dynamic['is_del']) {
+                        $cs['is_del'] = 1;
+                    } else {
+                        $cs['is_del'] = 0;
+                    }
                 }
                 foreach ($list as &$item) {
                     // 判断是否赞过
@@ -620,6 +636,12 @@ class Circle extends \think\Controller
                     } else {
                         $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
                     }
+                    // 判断是否可以删除评论
+                    if ($dynamic['is_del'] || $item['uid'] === $uid) {
+                        $item['is_del'] = 1;
+                    } else {
+                        $item['is_del'] = 0;
+                    }
                     $rdata = [];
                     $this->get_reply($item['id'], $cos, $rdata);
                     $item['reply'] = $rdata;
@@ -628,6 +650,37 @@ class Circle extends \think\Controller
             $dynamic['comment'] = $list;
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $dynamic]);exit;
+    }
+
+    /**
+     * 删除动态
+     * @author 贺强
+     * @time   2019-01-23 16:03:45
+     */
+    public function del_dynamic()
+    {
+        $param = $this->param;
+        if (empty($param['id'])) {
+            $msg = ['status' => 1, 'info' => '要删除的ID不能为空', 'data' => null];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 3, 'info' => '要删除的类型不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $id   = $param['id'];
+        $type = intval($param['type']);
+        if ($type === 1) {
+            $fm  = new TDynamicModel();
+            $res = $fm->del_mood($id);
+        } else {
+            $dc  = new TDynamicCommentModel();
+            $res = $dc->del_comment($id);
+        }
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '删除失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '删除成功', 'data' => null]);exit;
     }
 
     /**
