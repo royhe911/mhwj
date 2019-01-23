@@ -330,14 +330,14 @@ class Circle extends \think\Controller
             foreach ($list as &$item) {
                 // 过滤掉本人只取好友信息
                 if ($item['uid1'] === $uid) {
-                    unset($item['uid1'], $item['nickname1'], $item['avatar1']);
+                    unset($item['uid1'], $item['nickname1'], $item['avatar1'], $item['sex1']);
                     $item['uid']      = $item['uid2'];
                     $item['nickname'] = $item['nickname2'];
                     $item['avatar']   = $item['avatar2'];
                     $item['sex']      = $item['sex2'];
                     unset($item['uid2'], $item['nickname2'], $item['avatar2'], $item['sex2']);
                 } elseif ($item['uid2'] === $uid) {
-                    unset($item['uid2'], $item['nickname2'], $item['avatar2']);
+                    unset($item['uid2'], $item['nickname2'], $item['avatar2'], $item['sex2']);
                     $item['uid']      = $item['uid1'];
                     $item['nickname'] = $item['nickname1'];
                     $item['avatar']   = $item['avatar1'];
