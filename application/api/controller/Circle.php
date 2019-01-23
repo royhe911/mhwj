@@ -673,8 +673,8 @@ class Circle extends \think\Controller
         $id   = $param['id'];
         $type = intval($param['type']);
         if ($type === 1) {
-            $fm  = new TDynamicModel();
-            $res = $fm->del_mood($id);
+            $d   = new TDynamicModel();
+            $res = $d->delDynamic($id);
         } else {
             $dc  = new TDynamicCommentModel();
             $res = $dc->del_comment($id);

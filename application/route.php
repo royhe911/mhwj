@@ -247,5 +247,6 @@ return [
     '/api/circle/topic'    => 'api/Circle/get_topic', // 获取话题
     '/api/circle/chat'     => 'api/Circle/chat', // 聊天
     '/api/circle/addroom'  => 'api/Circle/add_room', // 添加房间
+    '/api/circle/del'      => 'api/Circle/del_dynamic', // 删除动态、评论、回复
     /*--------   圈子 api 结束  --------*/
 ];
