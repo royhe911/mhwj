@@ -93,13 +93,11 @@ class Circle extends \think\Controller
         if (empty($param['id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失']);exit;
         }
-        $res = $u->modify($param, ['id' => $param['id']]);
-        if ($res !== false) {
-            $msg = ['status' => 0, 'info' => '同步成功'];
-        } else {
-            $msg = ['status' => 4, 'info' => '同步失败'];
+        $res = $u->syncinfo($param);
+        if ($res !== true) {
+            echo json_encode(['status' => $res, 'info' => '同步失败']);exit;
         }
-        echo json_encode($msg);exit;
+        echo json_encode(['status' => 0, 'info' => '同步成功']);exit;
     }
 
     /**
@@ -286,9 +284,9 @@ class Circle extends \think\Controller
             $self          = true;
         }
         if (empty($param['uid'])) {
-            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
         } elseif (empty($param['type'])) {
-            $msg = ['status' => 3, 'info' => '类型不能为空', 'data' => null];
+            $msg = ['status' => 3, 'info' => '类型不能为空'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -355,11 +353,11 @@ class Circle extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['uid1'])) {
-            $msg = ['status' => 1, 'info' => '关注者ID不能为空', 'data' => null];
+            $msg = ['status' => 1, 'info' => '关注者ID不能为空'];
         } elseif (empty($param['uid2'])) {
-            $msg = ['status' => 3, 'info' => '被关注者ID不能为空', 'data' => null];
+            $msg = ['status' => 3, 'info' => '被关注者ID不能为空'];
         } elseif ($param['uid1'] === $param['uid2']) {
-            $msg = ['status' => 5, 'info' => '不能关注自己', 'data' => null];
+            $msg = ['status' => 5, 'info' => '不能关注自己'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -423,9 +421,9 @@ class Circle extends \think\Controller
             }
         }
         if (!$res) {
-            echo json_encode(['status' => 40, 'info' => '关注失败', 'data' => null]);exit;
+            echo json_encode(['status' => 40, 'info' => '关注失败']);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '成功', 'data' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '成功']);exit;
     }
 
     /**
