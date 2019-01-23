@@ -601,7 +601,7 @@ class Circle extends \think\Controller
                 $dynamic['is_del'] = 0;
             }
             $dc   = new TDynamicCommentModel();
-            $list = $dc->getList(['did' => $param['did'], 'type' => 1], ['id', 'uid', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
+            $list = $dc->getList(['did' => $did, 'type' => 1], ['id', 'uid', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
             if ($list) {
                 $cos = $dc->getList(['did' => $did, 'type' => 2], ['id', 'cid', 'uid', 'nickname', 'sex', 'content', 'addtime', 'ruid', 'rnickname']);
                 $car = [];

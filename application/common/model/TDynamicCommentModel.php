@@ -69,16 +69,22 @@ class TDynamicCommentModel extends CommonModel
                 Db::rollback();
                 return 10;
             }
+            // 删除评论下的回复
+            $res = $this->delByWhere(['cid' => $id]);
+            if ($res === false) {
+                Db::rollback();
+                return 40;
+            }
             // 删除评论
             $res = $this->delById($id);
-            if (!$res) {
+            if ($res === false) {
                 Db::rollback();
                 return 20;
             }
             $d = new TDynamicModel();
             // 相应动态的评论数减 1
             $res = $d->decrement('pl_count', ['id' => $comm['did']]);
-            if (!$res) {
+            if ($res === false) {
                 Db::rollback();
                 return 30;
             }
