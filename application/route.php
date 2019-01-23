@@ -249,5 +249,7 @@ return [
     '/api/circle/addroom'  => 'api/Circle/add_room', // 添加房间
     '/api/circle/del'      => 'api/Circle/del_dynamic', // 删除动态、评论、回复
     '/api/circle/friends'  => 'api/Circle/friends', // 获取我的关注/粉丝/朋友
+    '/api/circle/games'    => 'api/Circle/get_games', // 获取游戏
+    '/api/circle/addgame'  => 'api/Circle/add_game', // 添加游戏技能
     /*--------   圈子 api 结束  --------*/
 ];

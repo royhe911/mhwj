@@ -5,9 +5,11 @@ use app\common\model\TChatModel;
 use app\common\model\TDynamicCommentModel;
 use app\common\model\TDynamicModel;
 use app\common\model\TFriendModel;
+use app\common\model\TGameModel;
 use app\common\model\TPraiseModel;
 use app\common\model\TRoomModel;
 use app\common\model\TTopicModel;
+use app\common\model\TUserGameModel;
 use app\common\model\TUserModel;
 
 /**
@@ -813,6 +815,64 @@ class Circle extends \think\Controller
         $res = $c->add($param);
         if (!$res) {
             echo json_encode(['status' => 4, 'info' => '添加失败']);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '添加成功']);exit;
+    }
+
+    /**
+     * 获取游戏
+     * @author 贺强
+     * @time   2019-01-23 17:41:46
+     * @param  TGameModel $g TGameModel 实例
+     */
+    public function get_games(TGameModel $g)
+    {
+        $list = $g->getList();
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 添加游戏技能
+     * @author 贺强
+     * @time   2019-01-23 17:43:07
+     * @param  TUserGameModel $ug TUserGameModel 实例
+     */
+    public function add_game(TUserGameModel $ug)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
+        } elseif (empty($param['gid'])) {
+            $msg = ['status' => 3, 'info' => '游戏ID不能为空'];
+        } elseif (empty($param['name'])) {
+            $msg = ['status' => 5, 'info' => '游戏名称不能为空'];
+        } elseif (empty($param['duan'])) {
+            $msg = ['status' => 7, 'info' => '当前段位不能为空'];
+        } elseif (empty($param['online'])) {
+            $msg = ['status' => 9, 'info' => '在线时间段不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        if (intval($param['gid']) === 1) {
+            if (empty($param['position'])) {
+                $msg = ['status' => 11, 'info' => '常用位置不能为空'];
+            } elseif (empty($param['gang_postion'])) {
+                $msg = ['status' => 13, 'info' => '开黑位置不能为空'];
+            }
+        } elseif (empty($param['region'])) {
+            $msg = ['status' => 15, 'info' => '游戏大区不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $count = $ug->getCount(['uid' => $param['uid'], 'gid' => $param['gid']]);
+        if ($count) {
+            echo json_encode(['status' => 17, 'info' => '已添加过此游戏技能']);exit;
+        }
+        $res = $ug->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 40, 'info' => '添加失败']);exit;
         }
         echo json_encode(['status' => 0, 'info' => '添加成功']);exit;
     }

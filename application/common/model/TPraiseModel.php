@@ -32,10 +32,10 @@ class TPraiseModel extends CommonModel
                     $model = new TUserModel();
                     break;
                 case 2:
-                    $model = new TUserDynamicModel();
+                    $model = new TDynamicModel();
                     break;
                 case 3:
-                    $model = new TUserDynamicCommentModel();
+                    $model = new TDynamicCommentModel();
                     break;
             }
             $data = $model->getModel(['id' => $id], ['id'], '', true);
