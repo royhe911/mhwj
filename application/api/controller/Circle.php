@@ -689,25 +689,6 @@ class Circle extends \think\Controller
     }
 
     /**
-     * 获取回复信息
-     * @author 贺强
-     * @time   2019-01-22 21:06:48
-     * @param  integer $fid    评论ID
-     * @param  array   $arr    回复数组
-     * @param  array   &$rdata 输出数组
-     */
-    private function get_reply($fid, $arr, &$rdata = [])
-    {
-        foreach ($arr as $k => $ar) {
-            if ($ar['obj_id'] === $fid) {
-                $rdata[] = $ar;
-                unset($arr[$k]);
-                $this->get_reply($ar['id'], $arr, $rdata);
-            }
-        }
-    }
-
-    /**
      * 获取话题
      * @author 贺强
      * @time   2019-01-23 10:55:27
