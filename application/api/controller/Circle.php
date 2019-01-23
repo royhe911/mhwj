@@ -663,9 +663,9 @@ class Circle extends \think\Controller
     {
         $param = $this->param;
         if (empty($param['id'])) {
-            $msg = ['status' => 1, 'info' => '要删除的ID不能为空', 'data' => null];
+            $msg = ['status' => 1, 'info' => '要删除的ID不能为空'];
         } elseif (empty($param['type'])) {
-            $msg = ['status' => 3, 'info' => '要删除的类型不能为空', 'data' => null];
+            $msg = ['status' => 3, 'info' => '要删除的类型不能为空'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -680,9 +680,9 @@ class Circle extends \think\Controller
             $res = $dc->del_comment($id);
         }
         if ($res !== true) {
-            echo json_encode(['status' => $res, 'info' => '删除失败', 'data' => null]);exit;
+            echo json_encode(['status' => $res, 'info' => '删除失败']);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '删除成功', 'data' => null]);exit;
+        echo json_encode(['status' => 0, 'info' => '删除成功']);exit;
     }
 
     /**
