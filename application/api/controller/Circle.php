@@ -642,4 +642,17 @@ class Circle extends \think\Controller
             }
         }
     }
+
+    /**
+     * 获取话题
+     * @author 贺强
+     * @time   2019-01-23 10:55:27
+     * @param  TTopicModel $t TTopicModel 实例
+     */
+    public function get_topic(TTopicModel $t)
+    {
+        $param = $this->param;
+        $list  = $t->getList(['status' => 1], ['id', 'title'], null, 'sort');
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
 }

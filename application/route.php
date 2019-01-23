@@ -244,5 +244,6 @@ return [
     '/api/circle/comment'  => 'api/Circle/comment', // 评论/回复
     '/api/circle/dinfo'    => 'api/Circle/dynamic_info', // 动态详情
     '/api/circle/follow'   => 'api/Circle/follow', // 关注/取消关注
+    '/api/circle/topic'    => 'api/Circle/get_topic', // 获取话题
     /*--------   圈子 api 结束  --------*/
 ];
