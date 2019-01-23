@@ -194,10 +194,52 @@ class Circle extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $ud->getList($where, ['id', 'zan_count', 'pl_count', 'uid', 'nickname', 'avatar', 'sex', 'content', 'thumb', 'pic', 'addtime'], "$page,$pagesize");
-        foreach ($list as &$item) {
-            if (!empty($item['addtime'])) {
-                $item['addtime'] = date('Y/m/d H:i:s', $item['addtime']);
+        $list = $ud->getList($where, ['id', 'zan_count', 'pl_count', 'uid', 'nickname', 'avatar', 'sex', 'topic', 'content', 'thumb', 'pic', 'addtime'], "$page,$pagesize");
+        if ($list) {
+            // 获取我的关注
+            $fnds = $this->friends($uid);
+            $fnds = array_column($fnds, 'nickname', 'uid');
+            // 获取我的点赞
+            $p    = new TPraiseModel();
+            $zans = $p->getList(['uid' => $uid, 'type' => 1], ['obj_id', 'uid']);
+            $zans = array_column($zans, 'uid', 'obj_id');
+            // 获取动态话题
+            $ft    = new TTopicModel();
+            $topic = $ft->getList([], ['id', 'title']);
+            $topic = array_column($topic, 'title', 'id');
+            foreach ($list as &$item) {
+                // 动态话题
+                $tps = [];
+                if (!empty($item['topic'])) {
+                    $topics = explode(',', $item['topic']);
+                    foreach ($topics as $t) {
+                        $tps[] = ['id' => $t, 'title' => $topic[$t]];
+                    }
+                }
+                $item['topic'] = $tps;
+                // 当前用户是否关注发布者
+                if (!empty($fnds[$item['uid']])) {
+                    $item['is_follow'] = 1;
+                } else {
+                    $item['is_follow'] = 0;
+                }
+                // 当前用户是否赞过此动态
+                if (!empty($zans[$item['id']])) {
+                    $item['is_zan'] = 1;
+                } else {
+                    $item['is_zan'] = 0;
+                }
+                // 显示发布时间
+                $diff = time() - $item['addtime'];
+                if ($diff < 60) {
+                    $item['addtime'] = '刚刚';
+                } elseif ($diff < 3600) {
+                    $item['addtime'] = intval($diff / 60) . '分钟前';
+                } elseif ($diff < 86400) {
+                    $item['addtime'] = intval($diff / 3600) . '小时前';
+                } else {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
                 if (!empty($item['avatar']) && strpos($item['avatar'], 'http://') === false && strpos($item['avatar'], 'https://') === false) {
                     $item['avatar'] = config('WEBSITE') . $item['avatar'];
                 }
@@ -226,6 +268,164 @@ class Circle extends \think\Controller
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 获取我的关注/粉丝/朋友
+     * @author 贺强
+     * @time   2019-01-23 10:31:31
+     * @param  integer $uid 用户 ID
+     */
+    public function friends($uid = 0)
+    {
+        $param = $this->param;
+        $self  = false;
+        if ($uid) {
+            $param['uid']  = $uid;
+            $param['type'] = 1;
+            $self          = true;
+        }
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空', 'data' => null];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 3, 'info' => '类型不能为空', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid  = intval($param['uid']);
+        $type = intval($param['type']);
+        switch ($type) {
+            case 1:
+                $where = "(uid1=$uid and follow1=1) or (uid2=$uid and follow2=1)";
+                break;
+            case 2:
+                $where = "(uid1=$uid and follow2=1) or (uid2=$uid and follow1=1)";
+                break;
+            default:
+                $where = ['uid1|uid2' => $uid, 'is_friend' => 1];
+                break;
+        }
+        $f = new TFriendModel();
+        if (!empty($param['is_count'])) {
+            $count = $f->getCount($where);
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $count]);
+        } else {
+            $page = 1;
+            if (!empty($param['page'])) {
+                $page = $param['page'];
+            }
+            $pagesize = 10;
+            if (!empty($param['pagesize'])) {
+                $pagesize = $param['pagesize'];
+            }
+            $list = $f->getList($where, ['uid1', 'nickname1', 'avatar1', 'sex1', 'uid2', 'nickname2', 'avatar2', 'sex2', 'is_friend'], "$page,$pagesize");
+            foreach ($list as &$item) {
+                // 过滤掉本人只取好友信息
+                if ($item['uid1'] === $uid) {
+                    unset($item['uid1'], $item['nickname1'], $item['avatar1']);
+                    $item['uid']      = $item['uid2'];
+                    $item['nickname'] = $item['nickname2'];
+                    $item['avatar']   = $item['avatar2'];
+                    $item['sex']      = $item['sex2'];
+                    unset($item['uid2'], $item['nickname2'], $item['avatar2'], $item['sex2']);
+                } elseif ($item['uid2'] === $uid) {
+                    unset($item['uid2'], $item['nickname2'], $item['avatar2']);
+                    $item['uid']      = $item['uid1'];
+                    $item['nickname'] = $item['nickname1'];
+                    $item['avatar']   = $item['avatar1'];
+                    $item['sex']      = $item['sex1'];
+                    unset($item['uid1'], $item['nickname1'], $item['avatar1'], $item['sex1']);
+                }
+            }
+            if ($self) {
+                return $list;
+            }
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+        }
+    }
+
+    /**
+     * 关注/取消关注
+     * @author 贺强
+     * @time   2019-01-23 10:44:08
+     * @param  TFriendModel $f TFriendModel 实例
+     */
+    public function follow(TFriendModel $f)
+    {
+        $param = $this->param;
+        if (empty($param['uid1'])) {
+            $msg = ['status' => 1, 'info' => '关注者ID不能为空', 'data' => null];
+        } elseif (empty($param['uid2'])) {
+            $msg = ['status' => 3, 'info' => '被关注者ID不能为空', 'data' => null];
+        } elseif ($param['uid1'] === $param['uid2']) {
+            $msg = ['status' => 5, 'info' => '不能关注自己', 'data' => null];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $u     = new TUserModel();
+        $uid1  = intval($param['uid1']);
+        $uid2  = intval($param['uid2']);
+        $where = "(uid1=$uid1 and uid2=$uid2) or (uid1=$uid2 and uid2=$uid1)";
+        $fnd   = $f->getModel($where);
+        if (empty($fnd)) {
+            $users = $u->getList(['id' => ['in', [$uid1, $uid2]]], ['id', 'nickname', 'avatar', 'sex']);
+            foreach ($users as $user) {
+                if ($user['id'] === $uid1) {
+                    $param['nickname1'] = $user['nickname'];
+                    $param['avatar1']   = $user['avatar'];
+                    $param['sex1']      = $user['sex'];
+                } elseif ($user['id'] === $uid2) {
+                    $param['nickname2'] = $user['nickname'];
+                    $param['avatar2']   = $user['avatar'];
+                    $param['sex2']      = $user['sex'];
+                }
+            }
+            $param['follow1'] = 1;
+            // 添加
+            $res = $f->add($param);
+        } else {
+            $id    = $fnd['id'];
+            $where = ['id' => $id];
+            if ($fnd['uid1'] === $uid1) {
+                // 如果之前已关注
+                if ($fnd['follow1']) {
+                    // 如果对方已经关注了他，则取消关注
+                    if ($fnd['follow2']) {
+                        $data = ['follow1' => 0, 'is_friend' => 0, 'friend_time' => 0];
+                        $res  = $f->modify($data, $where);
+                    } else {
+                        // 如果对方没有关注，则删除此数据
+                        $res = $f->delById($id);
+                    }
+                } else {
+                    // 如果之前没关注则关注对方并成为好友
+                    $data = ['follow1' => 1, 'is_friend' => 1, 'friend_time' => time()];
+                    $res  = $f->modify($data, $where);
+                }
+            } elseif ($fnd['uid2'] === $uid1) {
+                // 如果之前已关注
+                if ($fnd['follow2']) {
+                    // 如果对方已经关注了他，则取消关注
+                    if ($fnd['follow1']) {
+                        $data = ['follow2' => 0, 'is_friend' => 0, 'friend_time' => 0];
+                        $res  = $f->modify($data, $where);
+                    } else {
+                        // 如果对方没有关注，则删除此数据
+                        $res = $f->delById($id);
+                    }
+                } else {
+                    // 如果之前没关注则关注对方并成为好友
+                    $data = ['follow2' => 1, 'is_friend' => 1, 'friend_time' => time()];
+                    $res  = $f->modify($data, $where);
+                }
+            }
+        }
+        if (!$res) {
+            echo json_encode(['status' => 40, 'info' => '关注失败', 'data' => null]);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '成功', 'data' => null]);exit;
     }
 
     /**
@@ -286,6 +486,12 @@ class Circle extends \think\Controller
         echo json_encode(['status' => 0, 'info' => '评论成功']);exit;
     }
 
+    /**
+     * 动态详情
+     * @author 贺强
+     * @time   2019-01-23 09:12:41
+     * @param  TDynamicModel $d TDynamicModel 实例
+     */
     public function dynamic_info(TDynamicModel $d)
     {
         $param = $this->param;

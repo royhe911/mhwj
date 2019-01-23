@@ -93,6 +93,16 @@ return [
     '/friend/addproom'     => 'admin/Friend/addproom', // 添加群聊房间
     '/friend/editpsort'    => 'admin/Friend/editpsort', // 修改群聊房间排序
     '/friend/delproom'     => 'admin/Friend/delproom', // 删除群聊房间
+    '/circle/addtopic'     => 'admin/Circle/addtopic', // 添加主题
+    '/circle/topic'        => 'admin/Circle/topic_list', // 主题列表
+    '/circle/editsort'     => 'admin/Circle/editsort', // 修改排序
+    '/circle/edittitle'    => 'admin/Circle/edittitle', // 修改主题
+    '/circle/operate'      => 'admin/Circle/operate', // 操作主题
+    '/circle/add'          => 'admin/Circle/add', // 添加圈子
+    '/circle/list'         => 'admin/Circle/lists', // 圈子列表
+    '/circle/editname'     => 'admin/Circle/editname', // 修改圈子名称
+    '/circle/editcsort'    => 'admin/Circle/editcsort', // 修改圈子排序
+    '/circle/del'          => 'admin/Circle/del', // 删除圈子
 
     /*--------   api 开始   --------*/
     '/api/carousel'        => 'api/Api/get_carousel', // 获取轮播轮播图
@@ -233,5 +243,6 @@ return [
     '/api/circle/zan'      => 'api/Circle/zan', // 点赞/取消点赞
     '/api/circle/comment'  => 'api/Circle/comment', // 评论/回复
     '/api/circle/dinfo'    => 'api/Circle/dynamic_info', // 动态详情
+    '/api/circle/follow'   => 'api/Circle/follow', // 关注/取消关注
     /*--------   圈子 api 结束  --------*/
 ];

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主题列表</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/dataTables/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/paging/paging.css">
+    <style type="text/css">
+        .form-control{width: 220px;}
+        .ttd{width: 250px;text-align: center;}
+        .ttb{width: 80px;text-align: center;}
+        .sort_i{width: 50px;display: none;}
+        .title_i{width: 120px;display: none;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <form action="/circle/topic" method="post">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td><a href="/circle/addtopic">添加</a> &nbsp;</td>
+                            <td> &nbsp; <a href="javascript:;" data-action="openAll">启用所选</a> &nbsp;
+                            </td>
+                            <td> &nbsp; <a href="javascript:;" data-action="forbidAll">禁用所选</a> &nbsp;
+                            </td>
+                            <td> &nbsp; <a href="javascript:;" data-action="delAll">删除所选</a>
+                            </td>
+                        </tr>
+                    </table>
+                    </form>
+                </div>
+                <div class="ibox-content">
+                    <table class="table table-striped table-bordered table-hover dataTables-example">
+                        <thead>
+                        <tr>
+                            <th style="width: 40px;"><input type="checkbox" id="selAll"></th>
+                            <th style="width: 100px;">排序</th>
+                            <th>主题</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {foreach $list as $k=>$item}
+                        <tr class="gradeX">
+                            <td><input type="checkbox" class="check" value="{$item.id}"></td>
+                            <td class="sort"><span class="sort_p">{$item.sort}</span><input type="text" class="sort_i" value="{$item.sort}" data-id="{$item.id}" data-sort="{$item.sort}"></td>
+                            <td class="title"><span class="title_p">{$item.title}</span><input type="text" class="title_i" value="{$item.title}" data-id="{$item.id}" data-title="{$item.title}"></td>
+                            <td>{$item.status_txt}</td>
+                            <td>{if($item.status==44)}<a href="javascript:;" data-action="open" data-id="{$item.id}">启用</a>{else/}<a href="javascript:;" data-action="forbid" data-id="{$item.id}">禁用</a>{/if} | <a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a></td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                        <footer>
+                            <tr>
+                                <td colspan="100"><div class="dataTables_paginate paging_simple_numbers paging_page">{$pages}</div></td>
+                            </tr>
+                        </footer>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript" src="/static/paging/paging-min.js"></script>
+<script>
+    $(function () {
+        $('#selAll').click(function(){
+            if ($(this).is(':checked')) {
+                $('.check').prop('checked', true);
+            }else{
+                $('.check').prop('checked', false);
+            }
+        });
+        $('.sort').click(function(){
+            $(this).find('.sort_p').css('display', 'none');
+            $(this).find('.sort_i').css('display', 'block').focus().select();
+        });
+        $('.sort_i').blur(function(){
+            edit_sort($(this))
+        })
+        $('.sort_i').keypress(function(obj){
+            if (obj.keyCode == 13) {
+                edit_sort($(this))
+            }
+        })
+
+        $('.title').click(function(){
+            $(this).find('.title_p').css('display', 'none');
+            $(this).find('.title_i').css('display', 'block').focus().select();
+        });
+        $('.title_i').blur(function(){
+            edit_title($(this))
+        })
+        $('.title_i').keypress(function(obj){
+            if (obj.keyCode == 13) {
+                edit_title($(this))
+            }
+        })
+
+        $('a[data-action]').click(function(){
+            var $action = $(this).data('action'), $id = $(this).data('id');
+            var $ids = '0', $type = '';
+            if($action == 'del' || $action == 'open' || $action == 'forbid'){
+                $ids = '0,' + $id;
+            } else if ($action == 'delAll' || $action == 'openAll' || $action == 'forbidAll') {
+                $('.check').each(function(){
+                    if ($(this).is(':checked')) {
+                        $ids += (',' + $(this).val())
+                    }
+                });
+            }
+            operation($ids, $action)
+        });
+
+        /**
+         * 修改排序
+         * @author 贺强
+         * @time   2019-01-11 11:55:13
+         */
+        function edit_sort($this) {
+            if ($this.val() == $this.data('sort')) {
+                $this.css('display', 'none');
+                $this.prev('.sort_p').css('display', 'block');
+            }else{
+                $id = $this.data('id'), $sort = $this.val();
+                $.ajax({
+                    type: 'post', dataType: 'json', cache: false,
+                    url: '/circle/editsort',
+                    data: {'id': $id, 'sort': $sort},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.info, {icon: 5, time: 2000})
+                        }
+                    }
+                })
+            }
+        }
+
+        /**
+         * 修改主题
+         * @author 贺强
+         * @time   2019-01-11 12:08:54
+         */
+        function edit_title($this) {
+            if ($this.val() == $this.data('title')) {
+                $this.css('display', 'none');
+                $this.prev('.title_p').css('display', 'block');
+            }else{
+                $id = $this.data('id'), $title = $this.val();
+                $.ajax({
+                    type: 'post', dataType: 'json', cache: false,
+                    url: '/circle/edittitle',
+                    data: {'id': $id, 'title': $title},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.info, {icon: 5, time: 2000})
+                        }
+                    }
+                })
+            }
+        }
+
+        function operation($ids, $type) {
+            var $msg = '', $tip = '';
+            if ($type == 'del' || $type == 'delAll') {
+                $msg = '确实要删除吗？';
+                $tip = '删除'
+            } else if ($type == 'open' || $type == 'openAll') {
+                $msg = '确实要启用吗？';
+                $tip = '启用'
+            } else if ($type == 'forbid' || $type == 'forbidAll') {
+                $msg = '确实要禁用吗？';
+                $tip = '禁用'
+            }
+            if ($ids == '0') {
+                layer.msg('请选择要' + $tip + '的项');
+                return false
+            }
+            layer.confirm($msg, {icon: 3}, function(){
+                $.ajax({
+                    type: 'post', cache: false, dataType: 'json',
+                    url: '/circle/operate',
+                    data:{'ids': $ids, 'type': $type},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        }else{
+                            layer.msg(data.info, {icon: 5})
+                        }
+                    }
+                })
+            })
+        }
+    });
+</script>
+</html>
