@@ -194,7 +194,7 @@ class Circle extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $ud->getList($where, ['id', 'zan_count', 'pl_count', 'uid', 'nickname', 'avatar', 'sex', 'topic', 'content', 'thumb', 'pic', 'addtime'], "$page,$pagesize");
+        $list = $ud->getList($where, ['id', 'zan_count', 'pl_count', 'uid', 'nickname', 'avatar', 'sex', 'topic', 'content', 'type', 'thumb', 'pic', 'addtime'], "$page,$pagesize");
         if ($list) {
             // 获取我的关注
             $fnds = $this->friends($uid);
