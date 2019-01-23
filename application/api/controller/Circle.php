@@ -1,10 +1,12 @@
 <?php
 namespace app\api\controller;
 
+use app\common\model\TChatModel;
 use app\common\model\TDynamicCommentModel;
 use app\common\model\TDynamicModel;
 use app\common\model\TFriendModel;
 use app\common\model\TPraiseModel;
+use app\common\model\TRoomModel;
 use app\common\model\TTopicModel;
 use app\common\model\TUserModel;
 
@@ -419,6 +421,12 @@ class Circle extends \think\Controller
                     $res  = $f->modify($data, $where);
                 }
             }
+            $is_friend = 0;
+            if (!empty($data) && $data['is_friend'] === 1) {
+                $is_friend = 1;
+            }
+            $r = new TRoomModel();
+            $r->modifyField('is_friend', $is_friend, "(uid1=$uid1 and uid2=$uid2) or (uid1=$uid2 and uid2=$uid1)");
         }
         if (!$res) {
             echo json_encode(['status' => 40, 'info' => '关注失败']);exit;
@@ -652,5 +660,105 @@ class Circle extends \think\Controller
         $param = $this->param;
         $list  = $t->getList(['status' => 1], ['id', 'title'], null, 'sort');
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 添加房间
+     * @author 贺强
+     * @time   2019-01-23 12:00:44
+     * @param  TRoomModel $r TRoomModel 实例
+     */
+    public function add_room(TRoomModel $r)
+    {
+        $param = $this->param;
+        if (empty($param['uid1']) || empty($param['uid2'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid1 = intval($param['uid1']);
+        $uid2 = intval($param['uid2']);
+        $name = "room_{$uid1}_{$uid2}";
+        $nam2 = "room_{$uid2}_{$uid1}";
+        $room = $r->getModel(['name' => ['in', [$name, $nam2]]], ['id', 'is_friend']);
+        if ($room) {
+            echo json_encode(['status' => 0, 'info' => '创建成功', 'data' => ['room_id' => $room['id'], 'is_friend' => $room['is_friend']]]);exit;
+        }
+        // 房间名称
+        $param['name'] = $name;
+        // 获取说话者昵称、头像、性别
+        $u     = new TUserModel();
+        $users = $u->getList(['id' => ['in', [$uid1, $uid2]]], ['id', 'nickname', 'avatar', 'sex']);
+        foreach ($users as $user) {
+            if ($user['id'] === $uid1) {
+                $param['nickname1'] = $user['nickname'];
+                $param['avatar1']   = $user['avatar'];
+                $param['sex1']      = $user['sex'];
+            } elseif ($user['id'] === $uid2) {
+                $param['nickname2'] = $user['nickname'];
+                $param['avatar2']   = $user['avatar'];
+                $param['sex2']      = $user['sex'];
+            }
+        }
+        $f     = new TFriendModel();
+        $count = $f->getCount("((uid1=$uid1 and uid2=$uid2) or (uid1=$uid2 and uid2=$uid1)) and is_friend=1");
+        if ($count) {
+            $param['is_friend'] = $count;
+        }
+        $res = $r->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 4, 'info' => '创建失败']);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '创建成功', 'data' => ['room_id' => $res, 'is_friend' => $count]]);exit;
+    }
+
+    /**
+     * 聊天
+     * @author 贺强
+     * @time   2019-01-23 11:46:26
+     * @param  TChatModel $c TChatModel 实例
+     */
+    public function chat(TChatModel $c)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空'];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '说话者ID不能为空'];
+        } elseif (empty($param['content'])) {
+            $msg = ['status' => 5, 'info' => '聊天内容不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $room_id   = $param['room_id'];
+        $uid       = $param['uid'];
+        $is_friend = 0;
+        if (!empty($param['is_friend'])) {
+            $is_friend = intval($param['is_friend']);
+        }
+        if (!$is_friend) {
+            // 如果不是好友，一天只能发两条信息
+            $count = $c->getCount(['addtime' => ['gt', time() - 86400], 'room_id' => $room_id, 'uid' => $uid]);
+            if ($count >= 2) {
+                $count = $c->getCount(['room_id' => $room_id, 'uid' => ['<>', $uid]]);
+                if ($count === 0) {
+                    echo json_encode(['status' => 11, 'info' => '你们还不是好友，若对方没回复，24小时内只能发两条信息，赶快互相关注成为好友吧']);exit;
+                }
+            }
+        }
+        $u    = new TUserModel();
+        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex']);
+        if (!empty($user)) {
+            $param = array_merge($param, $user);
+        }
+        $param['addtime'] = time();
+        // 添加
+        $res = $c->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 4, 'info' => '添加失败']);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '添加成功']);exit;
     }
 }

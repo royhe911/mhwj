@@ -1,6 +1,8 @@
 <?php
 namespace app\common\model;
 
+use think\Db;
+
 /**
  * TUserModel类
  * @author 贺强
@@ -13,6 +15,12 @@ class TUserModel extends CommonModel
         $this->table = 't_user';
     }
 
+    /**
+     * 同步用户信息
+     * @author 贺强
+     * @time   2019-01-23 12:07:09
+     * @param  array $param 要同步的参数
+     */
     public function syncinfo($param)
     {
         $data = [];
