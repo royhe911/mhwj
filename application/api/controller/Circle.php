@@ -218,7 +218,9 @@ class Circle extends \think\Controller
                 if (!empty($item['topic'])) {
                     $topics = explode(',', $item['topic']);
                     foreach ($topics as $t) {
-                        $tps[] = ['id' => $t, 'title' => $topic[$t]];
+                        if (!empty($topic[$t])) {
+                            $tps[] = ['id' => $t, 'title' => $topic[$t]];
+                        }
                     }
                 }
                 $item['topic'] = $tps;
