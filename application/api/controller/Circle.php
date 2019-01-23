@@ -196,10 +196,10 @@ class Circle extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $ud->getList($where, ['id', 'zan_count', 'pl_count', 'uid', 'nickname', 'avatar', 'sex', 'topic', 'content', 'type', 'thumb', 'pic', 'addtime'], "$page,$pagesize");
+        $list = $ud->getList($where, true, "$page,$pagesize");
         if ($list) {
             // 获取我的关注
-            $fnds = $this->friends(['uid' => $uid]);
+            $fnds = $this->friends(['uid' => $uid, 'type' => 1]);
             $fnds = array_column($fnds, 'nickname', 'uid');
             // 获取我的点赞
             $p    = new TPraiseModel();
@@ -877,7 +877,7 @@ class Circle extends \think\Controller
             echo json_encode($msg);exit;
         }
         $uid  = $param['uid'];
-        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'age', 'sex', 'inyear', 'school', 'department', 'grade']);
+        $user = $u->getModel(['id' => $uid], ['id', 'nickname', 'avatar', 'age', 'sex', 'inyear', 'school', 'department', 'grade']);
         if ($user) {
             $ug    = new TUserGameModel();
             $games = $ug->getList(['uid' => $uid], ['gid', 'name', 'region', 'duan', 'online', 'position', 'gang_position']);
@@ -902,5 +902,137 @@ class Circle extends \think\Controller
             $user['is_zan'] = $count;
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $user]);exit;
+    }
+
+    /**
+     * 获取个人中心用户动态
+     * @author 贺强
+     * @time   2019-01-23 21:20:04
+     * @param  TDynamicModel $d TDynamicModel 实例
+     */
+    public function userdynamic(TDynamicModel $d)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
+        } elseif (empty($param['tid'])) {
+            $msg = ['status' => 3, 'info' => '浏览者ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid = $param['uid'];
+        $tid = $param['tid'];
+        $f   = new TFriendModel();
+        $fnd = $f->getCount("(uid1=$tid and follow1=1 and uid2=$uid) or (uid2=$tid and follow2=1 and uid1=$uid)");
+        // 判断浏览者有没有权限查看该用户的动态
+        $enable = 0;
+        if ($fnd) {
+            // 如果浏览者关注了该用户则可以查看
+            $enable = 1;
+        } else {
+            $u     = new TUserModel();
+            $users = $u->getList(['id' => ['in', [$uid, $tid]]], ['id', 'circle']);
+            $users = array_column($users, 'circle', 'id');
+            if (!empty($users[$uid])) {
+                $ucir = explode(',', $users[$uid]);
+            }
+            if (!empty($users[$tid])) {
+                $tcir = explode(',', $users[$tid]);
+            }
+            // 如果浏览者和该用户拥有共同的圈子则可以查看
+            if (!empty($ucir) && !empty($tcir)) {
+                foreach ($ucir as $uc) {
+                    if (in_array($uc, $tcir)) {
+                        $enable = 1;
+                        break;
+                    }
+                }
+            }
+        }
+        $where = [];
+        if (!$enable) {
+            $where = ['is_open' => 1];
+        }
+        $page = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $d->getList($where, true, "$page,$pagesize", 'addtime desc');
+        if ($list) {
+            // 获取我的点赞
+            $p    = new TPraiseModel();
+            $zans = $p->getList(['uid' => $tid, 'type' => 1], ['obj_id', 'uid']);
+            $zans = array_column($zans, 'uid', 'obj_id');
+            // 获取动态话题
+            $ft    = new TTopicModel();
+            $topic = $ft->getList([], ['id', 'title']);
+            $topic = array_column($topic, 'title', 'id');
+            foreach ($list as &$item) {
+                if ($item['uid'] === $tid) {
+                    $item['is_del'] = 1;
+                } else {
+                    $item['is_del'] = 0;
+                }
+                // 动态话题
+                $tps = [];
+                if (!empty($item['topic'])) {
+                    $topics = explode(',', $item['topic']);
+                    foreach ($topics as $t) {
+                        if (!empty($topic[$t])) {
+                            $tps[] = ['id' => $t, 'title' => $topic[$t]];
+                        }
+                    }
+                }
+                $item['topic'] = $tps;
+                // 当前用户是否赞过此动态
+                if (!empty($zans[$item['id']])) {
+                    $item['is_zan'] = 1;
+                } else {
+                    $item['is_zan'] = 0;
+                }
+                // 显示发布时间
+                $diff = time() - $item['addtime'];
+                if ($diff < 60) {
+                    $item['addtime'] = '刚刚';
+                } elseif ($diff < 3600) {
+                    $item['addtime'] = intval($diff / 60) . '分钟前';
+                } elseif ($diff < 86400) {
+                    $item['addtime'] = intval($diff / 3600) . '小时前';
+                } else {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+                if (!empty($item['avatar']) && strpos($item['avatar'], 'http://') === false && strpos($item['avatar'], 'https://') === false) {
+                    $item['avatar'] = config('WEBSITE') . $item['avatar'];
+                }
+                $thumbs = [];
+                if (!empty($item['thumb'])) {
+                    $thumb = explode(',', $item['thumb']);
+                    foreach ($thumb as $t) {
+                        if (strpos($t, 'https://') === false && strpos($t, 'http://') === false) {
+                            $t = config('WEBSITE') . $t;
+                        }
+                        $thumbs[] = $t;
+                    }
+                }
+                $item['thumb'] = $thumbs;
+                $pics          = [];
+                if (!empty($item['pic'])) {
+                    $pic = explode(',', $item['pic']);
+                    foreach ($pic as $p) {
+                        if (strpos($p, 'https://') === false && strpos($p, 'http://') === false) {
+                            $p = config('WEBSITE') . $p;
+                        }
+                        $pics[] = $p;
+                    }
+                }
+                $item['pic'] = $pics;
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 }

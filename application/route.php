@@ -252,5 +252,6 @@ return [
     '/api/circle/games'    => 'api/Circle/get_games', // 获取游戏
     '/api/circle/addgame'  => 'api/Circle/add_game', // 添加游戏技能
     '/api/circle/userinfo' => 'api/Circle/userinfo', // 个人中心
+    '/api/circle/udynamic' => 'api/Circle/userdynamic', // 个人中心用户动态
     /*--------   圈子 api 结束  --------*/
 ];
