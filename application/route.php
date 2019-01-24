@@ -103,6 +103,12 @@ return [
     '/circle/editname'     => 'admin/Circle/editname', // 修改圈子名称
     '/circle/editcsort'    => 'admin/Circle/editcsort', // 修改圈子排序
     '/circle/del'          => 'admin/Circle/del', // 删除圈子
+    '/circle/adddy'        => 'admin/Circle/adddynamic', // 添加动态
+    '/circle/dylist'       => 'admin/Circle/dylist', // 动态列表
+    '/circle/editdy'       => 'admin/Circle/modifydy', // 修改动态
+    '/circle/editmsort'    => 'admin/Circle/editmsort', // 修改动态排序
+    '/circle/operatem'     => 'admin/Circle/operatem', // 操作心情
+    '/circle/comment'      => 'admin/Circle/comment', // 评论
 
     /*--------   api 开始   --------*/
     '/api/carousel'        => 'api/Api/get_carousel', // 获取轮播轮播图

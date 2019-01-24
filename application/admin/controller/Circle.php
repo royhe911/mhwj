@@ -2,7 +2,10 @@
 namespace app\admin\controller;
 
 use app\common\model\TCircleModel;
+use app\common\model\TDynamicCommentModel;
+use app\common\model\TDynamicModel;
 use app\common\model\TTopicModel;
+use app\common\model\TUserModel;
 
 /**
  * 圈子-控制器
@@ -239,5 +242,225 @@ class Circle extends \think\Controller
         $count = $t->getCount($where);
         $pages = ceil($count / $pagesize);
         return $this->fetch('list', ['list' => $list, 'pages' => $pages]);
+    }
+
+    /**
+     * 发布动态
+     * @author 贺强
+     * @time   2019-01-24 12:16:45
+     * @param  TDynamicModel $d TDynamicModel 实例
+     */
+    public function adddynamic(TDynamicModel $d)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['uid'])) {
+                return ['status' => 1, 'info' => '用户ID不能为空'];
+            } elseif (empty($param['content'])) {
+                return ['status' => 3, 'info' => '动态内容不能为空'];
+            }
+            if ($param['type'] == 'jpg') {
+                $param['type'] = 1;
+            } elseif ($param['type'] == 'mp4') {
+                $param['type'] = 2;
+            }
+            $u    = new TUserModel();
+            $uid  = $param['uid'];
+            $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex', 'circle']);
+            if (!empty($user)) {
+                $param['nickname'] = $user['nickname'];
+                $param['avatar']   = $user['avatar'];
+                $param['sex']      = $user['sex'];
+            }
+            $param['origin']  = 1;
+            $param['is_open'] = 1;
+            $param['addtime'] = time();
+            // 添加
+            $res = $d->add($param);
+            if (!$res) {
+                return ['status' => 4, 'info' => '发布失败'];
+            }
+            return ['status' => 0, 'info' => '发布成功'];
+        } else {
+            $u     = new TUserModel();
+            $users = $u->getList(['addtime' => 1548303058], ['id', 'nickname', 'avatar']);
+            $time  = time();
+            return $this->fetch('adddynamic', ['time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time), 'users' => $users]);
+        }
+    }
+
+    /**
+     * 修改动态
+     * @author 贺强
+     * @time   2019-01-24 14:36:19
+     * @param  TDynamicModel $d TDynamicModel 实例
+     */
+    public function modifydy(TDynamicModel $d)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            $type  = 1;
+            if (!empty($param['type'])) {
+                $tpe = $param['type'];
+                if ($tpe === 'mp4' || $tpe === 'avi' || $tpe === 'mov' || $tpe === 'wmv' || $tpe === '3gp') {
+                    $type = 2;
+                }
+            }
+            $param['type'] = $type;
+            // 修改
+            $res = $d->modify($param, ['id' => $param['id']]);
+            if (!$res) {
+                return ['status' => 4, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        } else {
+            $u       = new TUserModel();
+            $users   = $u->getList(['addtime' => 1548303058], ['id', 'nickname', 'avatar', 'sex']);
+            $id      = $this->request->get('id');
+            $dynamic = $d->getModel(['id' => $id]);
+            if (!empty($dynamic['pic']) && strpos($dynamic['pic'], 'https://') === false && strpos($dynamic['pic'], 'http://') === false) {
+                $dynamic['url'] = config('WEBSITE') . $dynamic['pic'];
+            }
+            if ($dynamic['type'] === 1) {
+                $dynamic['tpe'] = 'jpg';
+            } else {
+                $dynamic['tpe'] = 'mp4';
+            }
+            $time = time();
+            return $this->fetch('editdy', ['time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time), 'dynamic' => $dynamic, 'users' => $users]);
+        }
+    }
+
+    /**
+     * 修改动态排序
+     * @author 贺强
+     * @time   2019-01-24 14:47:02
+     * @param  TDynamicModel $d TDynamicModel 实例
+     */
+    public function editmsort(TDynamicModel $d)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['id'])) {
+                return ['status' => 1, 'info' => '非法参数'];
+            }
+            $res = $d->modify($param, ['id' => $param['id']]);
+            if ($res === false) {
+                return ['status' => 2, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        }
+    }
+
+    /**
+     * 操作动态
+     * @author 贺强
+     * @time   2019-01-24 14:51:26
+     * @param  TDynamicModel $d TDynamicModel 实例
+     */
+    public function operatem(TDynamicModel $d)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            $type  = $param['type'];
+            $ids   = $param['ids'];
+            if ($type === 'del' || $type === 'delAll') {
+                $res = $d->delByWhere(['id' => ['in', $ids]]);
+            } else {
+                $val = 1;
+                if ($type === 'qx' || $type === 'qxAll') {
+                    $val = 0;
+                }
+                $res = $d->modifyField('is_recommend', $val, ['id' => ['in', $ids]]);
+            }
+            if (!$res) {
+                return ['status' => 4, 'info' => '失败'];
+            }
+            return ['status' => 0, 'info' => '成功'];
+        }
+    }
+
+    /**
+     * 动态列表
+     * @author 贺强
+     * @time   2019-01-24 14:34:51
+     * @param  TDynamicModel $d TDynamicModel 实例
+     */
+    public function dylist(TDynamicModel $d)
+    {
+        $where = [];
+        $param = $this->request->get();
+        if (!empty($param['uid'])) {
+            $where['uid'] = $param['uid'];
+        } else {
+            $param['uid'] = '';
+        }
+        if (isset($param['is_recommend']) && $param['is_recommend'] !== '') {
+            $where['is_recommend'] = $param['is_recommend'];
+        } else {
+            $param['is_recommend'] = '';
+        }
+        if (!empty($param['nickname'])) {
+            $where['nickname'] = ['like', "%{$param['nickname']}%"];
+        } else {
+            $param['nickname'] = '';
+        }
+        // 分页参数
+        $page = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = config('PAGESIZE');
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $d->getList($where, true, "$page,$pagesize", 'addtime desc');
+        foreach ($list as &$item) {
+            if ($item['origin']) {
+                $item['origin'] = '官方';
+            } else {
+                $item['origin'] = '用户';
+            }
+            if (!empty($item['addtime'])) {
+                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+            }
+        }
+        $count = $d->getCount($where);
+        $pages = ceil($count / $pagesize);
+        $u     = new TUserModel();
+        $users = $u->getList(['addtime' => 1548303058], ['id', 'nickname', 'avatar', 'sex']);
+        return $this->fetch('dylist', ['list' => $list, 'pages' => $pages, 'users' => $users, 'param' => $param]);
+    }
+
+    /**
+     * 评论动态
+     * @author 贺强
+     * @time   2019-01-24 15:08:09
+     * @param  TDynamicCommentModel $dc TDynamicCommentModel 实例
+     */
+    public function comment(TDynamicCommentModel $dc, TDynamicModel $d)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['uid'])) {
+                return ['status' => 1, 'info' => '请选择评论者'];
+            } elseif (empty($param['content'])) {
+                return ['status' => 3, 'info' => '评论内容不能为空'];
+            }
+            $param['obj_id'] = $param['did'];
+            // 添加
+            $res = $dc->add($param);
+            if (!$res) {
+                return ['status' => 4, 'info' => '评论失败'];
+            }
+            $d->increment('pl_count', ['id' => $param['did']]);
+            return ['status' => 0, 'info' => '评论成功'];
+        } else {
+            $u     = new TUserModel();
+            $users = $u->getList(['addtime' => 1548303058], ['id', 'nickname', 'avatar', 'sex']);
+            $id    = $this->request->get('id');
+            $dy    = $d->getModel(['id' => $id], ['content']);
+            return $this->fetch('comment', ['did' => $id, 'dycontent' => $dy['content'], 'users' => $users]);
+        }
     }
 }

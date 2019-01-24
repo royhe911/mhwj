@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修改动态</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
+    <style type="text/css">
+        .form-control{width: 200px;}
+        #preview,#preview_demo11,#preview_demo12{max-width: 120px;max-height: 120px;}
+        .para_id{width: 80px;}
+        .reduce,.plus{cursor: pointer;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>修改动态</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal" onsubmit="return false">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">动态作者</label>
+                            <div class="col-sm-10">
+                                <select id="uid" class="form-control">
+                                    {foreach $users as $user}
+                                    <option value="{$user.id}" nickname="{$user.nickname}" avatar="{$user.avatar}" sex="{$user.sex}"{if($dynamic.uid===$user.id)} selected="selected" {/if}>{$user.nickname}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">图片/视频</label>
+                            <div class="col-sm-10">
+                                <table width="100%">
+                                    <tr>
+                                        <td valign="top" width="120px"><input id="file_upload" name="file_upload" type="file"></td>
+                                        <td valign="top"><input class="btn btn-primary" type="button" data-action="upload" value="上传"></td>
+                                    </tr>
+                                    <tr><td colspan="2"><div id="progress"></div><input type="hidden" id="pic" value="{$dynamic.pic}"><input type="hidden" id="thumb" value="{$dynamic.thumb}"></td></tr>
+                                    <tr><td colspan="2">{if($dynamic.type===1)}<img id="preview" src="{$dynamic.url}">{else/}<a href="{$dynamic.url}" target="_blank">点击查看</a>{/if}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">排序</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="sort" value="{$dynamic.sort}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">动态描述</label>
+                            <div class="col-sm-10">
+                                <textarea id="content" rows="5" cols="50">{$dynamic.content}</textarea>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <input class="btn btn-primary" type="button" data-action="save" value="保存内容">
+                                <input class="btn btn-white" type="button" data-action="cancel" value="取消">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/h+/js/plugins/iCheck/icheck.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript" src="/static/uploadifive/jquery.uploadifive.js"></script>
+<script type="text/javascript">
+    $(function(){
+        var type = '{$dynamic.tpe}';
+        $('input[data-action]').click(function(){
+            $action = $(this).data('action');
+            if ($action == 'save') {
+                var uid = $('#uid'), auth = uid.find('option:selected'), pic = $('#pic').val(), content = $('#content');
+                if (uid.val() == '') {
+                    layer.msg('请选择作者', {icon: 5, time: 1000});
+                    return false
+                }
+                if (pic == '') {
+                    layer.msg('请上传图片或视频', {icon: 5, time: 1000});
+                    return false
+                }
+                if (content.val() == '') {
+                    layer.msg('请填写动态描述', {icon: 5, time: 1000}, function(){content.focus()});
+                    return false
+                }
+                $.ajax({
+                    type: 'post', cache: false, dataType: 'json',
+                    url: '/circle/editdy',
+                    data: {'id': {$dynamic.id}, 'uid': uid.val(), 'nickname': auth.attr('nickname'), 'avatar': auth.attr('avatar'), 'sex': auth.attr('sex'), 'type': type, 'pic': pic, 'thumb': $('#thumb').val(), 'content': content.val(), 'sort': $('#sort').val()},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 6, time: 1000}, function(){location.href = '/circle/dylist'});
+                        }else{
+                            layer.msg(data.info, {icon: 5, time: 1000});
+                        }
+                    }
+                })
+            } else if ($action == 'cancel') {
+                location.href = '/circle/dylist'
+            } else if ($action == 'upload') {
+                $('#file_upload').uploadifive('upload')
+            }
+        });
+        $('#file_upload').uploadifive({
+            'auto'             : false,
+            'buttonText'       : '选择图片',
+            'queueID'          : 'progress',
+            'fileTypeDesc'     : '*',
+            'fileTypeExts'     : '*',
+            'multi'            : false,
+            'removeCompleted'  : true,
+            'formData'         : {
+                'timestamp' : '{$time}',
+                'token'     : '{$token}'
+            },
+            'uploadScript'     : '/api/upload',
+            'onUploadComplete' : function(file, data) {
+                // data = eval('(' + data + ')');
+                data = JSON.parse(data);
+                var path = data.path;
+                var start = path.lastIndexOf('.');
+                type = path.substring(start + 1, path.length)
+                $('#pic').val(path);
+                $('#thumb').val(data.thumb)
+            }
+        });
+    });
+</script>
+</html>
