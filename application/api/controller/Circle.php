@@ -419,8 +419,10 @@ class Circle extends \think\Controller
             $result['#'] = $r;
             // 重新组合数组
             $arr = [];
+            $i   = 1;
             foreach ($result as $k => $rst) {
-                $arr[] = ['region' => strtoupper($k), 'items' => $rst];
+                $arr[] = ['id' => $i, 'region' => strtoupper($k), 'items' => $rst];
+                $i++;
             }
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $arr]);exit;
         }
