@@ -1035,7 +1035,7 @@ class Circle extends \think\Controller
             echo json_encode($msg);exit;
         }
         $room_id = $param['room_id'];
-        $where   = ['room_id' => $room_id, 'addtime' => ['gt', 86400]];
+        $where   = "(room_id=$room_id and addtime>86400) or (is_read=0)";
         $page    = 1;
         if (!empty($param['page'])) {
             $page = $param['page'];
