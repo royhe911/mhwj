@@ -1036,7 +1036,7 @@ class Circle extends \think\Controller
         }
         $room_id   = $param['room_id'];
         $starttime = time() - 86400;
-        $where     = "(room_id=$room_id and addtime>$starttime) or (is_read=0)";
+        $where     = "room_id=$room_id and (addtime>$starttime or is_read=0)";
         $page      = 1;
         if (!empty($param['page'])) {
             $page = $param['page'];
