@@ -25,4 +25,5 @@ return [
     'app\common\crontab\Prize',
     'app\common\crontab\MasterScore',
     'app\common\crontab\RoomNotice',
+    'app\common\crontab\Chat',
 ];
