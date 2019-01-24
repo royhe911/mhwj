@@ -884,7 +884,7 @@ class Circle extends \think\Controller
             } else {
                 $chat_time = date('Y-m-d H:i:s', $room['chat_time']);
             }
-            $item = ['id' => $room['id'], 'name' => $room['name'], 'is_friend' => $room['is_friend'], 'content' => $room['content'], 'chat_time' => $chat_time];
+            $item = ['id' => $room['id'], 'is_friend' => $room['is_friend'], 'content' => $room['content'], 'chat_time' => $chat_time];
             if ($room['uid1'] === $uid) {
                 $item = array_merge($item, ['uid' => $room['uid2'], 'nickname' => $room['nickname2'], 'avatar' => $room['avatar2'], 'sex' => $room['sex2']]);
             } else {
