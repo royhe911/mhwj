@@ -867,6 +867,8 @@ class Circle extends \think\Controller
                 $param['nickname2'] = $user['nickname'];
                 $param['avatar2']   = $user['avatar'];
                 $param['sex2']      = $user['sex'];
+                // 聊天对象
+                $nickname = $user['nickname'];
             }
         }
         $f     = new TFriendModel();
@@ -878,7 +880,7 @@ class Circle extends \think\Controller
         if (!$res) {
             echo json_encode(['status' => 4, 'info' => '创建失败']);exit;
         }
-        echo json_encode(['status' => 0, 'info' => '创建成功', 'data' => ['room_id' => $res, 'is_friend' => $count]]);exit;
+        echo json_encode(['status' => 0, 'info' => '创建成功', 'data' => ['room_id' => $res, 'nickname' => $nickname, 'is_friend' => $count]]);exit;
     }
 
     /**
