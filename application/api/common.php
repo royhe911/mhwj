@@ -311,8 +311,15 @@ function utf8_to_gb2312($s)
     return iconv('UTF-8', 'GB2312//IGNORE', $s);
 }
 
-// 字符串必须为GB2312编码
-function to($s, $isfirst = false)
+/**
+ * 获取汉字拼音
+ * @author 贺强
+ * @time   2019-01-24 17:34:19
+ * @param  string  $s       要获取拼音的汉字
+ * @param  boolean $isfirst 是否只获取每个字的首字母
+ * @return string           返回获取到的拼音
+ */
+function get_pinying($s, $isfirst = false)
 {
     $res        = '';
     $len        = strlen($s);
@@ -346,7 +353,14 @@ function to($s, $isfirst = false)
     return $res;
 }
 
-function to_first($s)
+/**
+ * 获取汉字的首字母
+ * @author 贺强
+ * @time   2019-01-24 17:37:19
+ * @param  string $s 要获取首字母的汉字
+ * @return string    返回获取到的首字母
+ */
+function get_first($s)
 {
     $ascii = ord($s{0});
     if ($ascii > 0xE0) {
@@ -462,6 +476,12 @@ function to_first($s)
     return false;
 }
 
+/**
+ * 得到拼音和ASCII码数组
+ * @author 贺强
+ * @time   2019-01-24 17:39:37
+ * @return array 返回得到的数组
+ */
 function get_pinyin_array()
 {
     static $py_arr;

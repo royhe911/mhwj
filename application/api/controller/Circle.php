@@ -405,11 +405,19 @@ class Circle extends \think\Controller
             }
             $result = [];
             foreach ($data as $item) {
-                $first = to_first($item['nickname']);
+                $first = get_first($item['nickname']);
+                if (!$first) {
+                    $first = '#';
+                }
                 // 拼装数组
                 $result[$first][] = $item;
             }
             ksort($result);
+            // 删除第一个元素并返回
+            $r = array_shift($result);
+            // 把第一个元素再赋值给原数组
+            $result['#'] = $r;
+            // 重新组合数组
             $arr = [];
             foreach ($result as $k => $rst) {
                 $arr[] = ['region' => strtoupper($k), 'items' => $rst];
@@ -424,7 +432,7 @@ class Circle extends \think\Controller
     public function zh_to_py()
     {
         $chinese = $this->param['chinese'];
-        echo to_first($chinese);exit;
+        echo get_first($chinese);exit;
     }
 
     /**
