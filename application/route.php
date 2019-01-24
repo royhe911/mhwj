@@ -255,5 +255,7 @@ return [
     '/api/circle/udynamic' => 'api/Circle/userdynamic', // 个人中心用户动态
     '/api/circle/rooms'    => 'api/Circle/get_rooms', // 对话列表
     '/api/circle/chatlog'  => 'api/Circle/get_chatlog', // 聊天记录
+    '/api/circle/flwtip'   => 'api/Circle/follow_tip', // 关注提醒
+    '/api/circle/mtip'     => 'api/Circle/modifytip', // 修改提醒状态
     /*--------   圈子 api 结束  --------*/
 ];

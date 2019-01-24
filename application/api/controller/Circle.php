@@ -355,6 +355,48 @@ class Circle extends \think\Controller
     }
 
     /**
+     * 关注提醒
+     * @author 贺强
+     * @time   2019-01-24 11:08:25
+     * @param  TFriendModel $f TFriendModel 实例
+     */
+    public function follow_tip(TFriendModel $f)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid   = $param['uid'];
+        $where = "(uid1=$uid and follow2=1 and tip2=0) or (uid2=$uid and follow1=1 and tip1=0)";
+        $count = $f->getCount($where);
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $count]);exit;
+    }
+
+    /**
+     * 修改关注提醒
+     * @author 贺强
+     * @time   2019-01-24 11:17:00
+     * @param  TFriendModel $f TFriendModel 实例
+     */
+    public function modifytip(TFriendModel $f)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid = $param['uid'];
+        $f->modifyField('tip1', 1, ['uid2' => $uid, 'follow1' => 1]);
+        $f->modifyField('tip2', 1, ['uid1' => $uid, 'follow2' => 1]);
+        echo json_encode(['status' => 0, 'info' => '修改成功']);exit;
+    }
+
+    /**
      * 关注/取消关注
      * @author 贺强
      * @time   2019-01-23 10:44:08
