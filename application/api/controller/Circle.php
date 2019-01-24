@@ -935,6 +935,32 @@ class Circle extends \think\Controller
     }
 
     /**
+     * 修改聊天信息读取状态
+     * @author 贺强
+     * @time   2019-01-24 19:25:04
+     * @param  TChatModel $c TChatModel 实例
+     */
+    public function mdchattip(TChatModel $c)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空'];
+        } elseif (empty($param['uid'])) {
+            $msg = ['status' => 3, 'info' => '当前登录用户不能为空'];
+        } elseif (empty($param['overtime'])) {
+            $msg = ['status' => 5, 'info' => '离开页面时间不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $room_id  = $param['room_id'];
+        $uid      = $param['uid'];
+        $overtime = strtotime($param['overtime']);
+        $c->modifyField('is_read', 1, ['room_id' => $room_id, 'uid' => ['<>', $uid], 'addtime' => ['lt', $overtime]]);
+        echo json_encode(['status' => 0, 'info' => '修改成功']);exit;
+    }
+
+    /**
      * 获取对话列表
      * @author 贺强
      * @time   2019-01-24 09:59:58
@@ -960,6 +986,11 @@ class Circle extends \think\Controller
             $pagesize = $param['pagesize'];
         }
         $rooms = $r->getList($where, true, "$page,$pagesize", 'chat_time desc');
+        $ids   = array_column($rooms, 'id');
+        // 获取未读消息数量
+        $c     = new TChatModel();
+        $chats = $c->getList(['room_id' => ['in', $ids], 'uid' => ['<>', $uid], 'is_read' => 0], ['count(*)' => 'count', 'room_id'], null, '', 'room_id');
+        $chats = array_column($chats, 'count', 'room_id');
         $data  = [];
         foreach ($rooms as &$room) {
             // 显示发布时间
@@ -973,7 +1004,11 @@ class Circle extends \think\Controller
             } else {
                 $chat_time = date('Y-m-d H:i:s', $room['chat_time']);
             }
-            $item = ['id' => $room['id'], 'is_friend' => $room['is_friend'], 'content' => $room['content'], 'chat_time' => $chat_time];
+            $count = 0;
+            if (!empty($chats[$room['id']])) {
+                $count = $chats[$room['id']];
+            }
+            $item = ['id' => $room['id'], 'is_friend' => $room['is_friend'], 'count' => $count, 'content' => $room['content'], 'chat_time' => $chat_time];
             if ($room['uid1'] === $uid) {
                 $item = array_merge($item, ['uid' => $room['uid2'], 'nickname' => $room['nickname2'], 'avatar' => $room['avatar2'], 'sex' => $room['sex2']]);
             } else {

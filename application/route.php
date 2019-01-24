@@ -252,6 +252,7 @@ return [
     '/api/circle/follow'   => 'api/Circle/follow', // 关注/取消关注
     '/api/circle/topic'    => 'api/Circle/get_topic', // 获取话题
     '/api/circle/chat'     => 'api/Circle/chat', // 聊天
+    '/api/circle/mdtip'    => 'api/Circle/mdchattip', // 修改聊天读取状态
     '/api/circle/addroom'  => 'api/Circle/add_room', // 添加房间
     '/api/circle/del'      => 'api/Circle/del_dynamic', // 删除动态、评论、回复
     '/api/circle/friends'  => 'api/Circle/friends', // 获取我的关注/粉丝/朋友
