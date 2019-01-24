@@ -64,6 +64,13 @@ class TUserModel extends CommonModel
                     Db::rollback();
                     return 30;
                 }
+                // 修改聊天表中用户的昵称、头像、性别
+                $c   = new TChatModel();
+                $res = $c->modify($data, ['uid' => $id]);
+                if ($res === false) {
+                    Db::rollback();
+                    return 60;
+                }
                 // 修改朋友表中用户的昵称、头像、性别
                 $f   = new TFriendModel();
                 $res = $f->modify($fda1, ['uid1' => $id]);
@@ -74,7 +81,19 @@ class TUserModel extends CommonModel
                 $res = $f->modify($fda2, ['uid2' => $id]);
                 if ($res === false) {
                     Db::rollback();
-                    return 30;
+                    return 50;
+                }
+                // 修改房间表中用户的昵称、头像、性别
+                $r   = new TRoomModel();
+                $res = $r->modify($fda1, ['uid1' => $id]);
+                if ($res === false) {
+                    DB::rollback();
+                    return 70;
+                }
+                $res = $r->modify($fda2, ['uid2' => $id]);
+                if ($res === false) {
+                    Db::rollback();
+                    return 80;
                 }
             }
             // 全部修改成功则提交事务

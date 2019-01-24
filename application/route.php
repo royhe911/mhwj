@@ -253,5 +253,7 @@ return [
     '/api/circle/addgame'  => 'api/Circle/add_game', // 添加游戏技能
     '/api/circle/userinfo' => 'api/Circle/userinfo', // 个人中心
     '/api/circle/udynamic' => 'api/Circle/userdynamic', // 个人中心用户动态
+    '/api/circle/rooms'    => 'api/Circle/get_rooms', // 对话列表
+    '/api/circle/chatlog'  => 'api/Circle/get_chatlog', // 聊天记录
     /*--------   圈子 api 结束  --------*/
 ];

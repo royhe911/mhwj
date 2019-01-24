@@ -798,7 +798,104 @@ class Circle extends \think\Controller
         if (!$res) {
             echo json_encode(['status' => 4, 'info' => '添加失败']);exit;
         }
+        $r = new TRoomModel();
+        $r->modify(['content' => $param['content'], 'chat_time' => time()], ['id' => $room_id]);
         echo json_encode(['status' => 0, 'info' => '添加成功']);exit;
+    }
+
+    /**
+     * 获取对话列表
+     * @author 贺强
+     * @time   2019-01-24 09:59:58
+     * @param  TRoomModel $r TRoomModel 实例
+     */
+    public function get_rooms(TRoomModel $r)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid   = intval($param['uid']);
+        $where = ['uid1|uid2' => $uid];
+        $page  = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $rooms = $r->getList($where, true, "$page,$pagesize", 'chat_time desc');
+        $data  = [];
+        foreach ($rooms as &$room) {
+            // 显示发布时间
+            $diff = time() - $room['chat_time'];
+            if ($diff < 60) {
+                $chat_time = '刚刚';
+            } elseif ($diff < 3600) {
+                $chat_time = intval($diff / 60) . '分钟前';
+            } elseif ($diff < 86400) {
+                $chat_time = intval($diff / 3600) . '小时前';
+            } else {
+                $chat_time = date('Y-m-d H:i:s', $room['chat_time']);
+            }
+            $item = ['id' => $room['id'], 'name' => $room['name'], 'is_friend' => $room['is_friend'], 'content' => $room['content'], 'chat_time' => $chat_time];
+            if ($room['uid1'] === $uid) {
+                $item = array_merge($item, ['uid' => $room['uid2'], 'nickname' => $room['nickname2'], 'avatar' => $room['avatar2'], 'sex' => $room['sex2']]);
+            } else {
+                $item = array_merge($item, ['uid' => $room['uid1'], 'nickname' => $room['nickname1'], 'avatar' => $room['avatar1'], 'sex' => $room['sex1']]);
+            }
+            $data[] = $item;
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
+    }
+
+    /**
+     * 获取聊天内容
+     * @author 贺强
+     * @time   2019-01-24 10:24:04
+     * @param  TChatModel $c TChatModel 实例
+     */
+    public function get_chatlog(TChatModel $c)
+    {
+        $param = $this->param;
+        if (empty($param['room_id'])) {
+            $msg = ['status' => 1, 'info' => '房间ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $room_id = $param['room_id'];
+        $where   = ['room_id' => $room_id, 'addtime' => ['gt', 86400]];
+        $page    = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $c->getList($where, true, "$page,$pagesize", 'addtime desc');
+        $list = array_column($list, null, 'addtime');
+        ksort($list);
+        $list = array_merge($list);
+        foreach ($list as &$item) {
+            // 显示发布时间
+            $diff = time() - $item['addtime'];
+            if ($diff < 60) {
+                $item['addtime'] = '刚刚';
+            } elseif ($diff < 3600) {
+                $item['addtime'] = intval($diff / 60) . '分钟前';
+            } elseif ($diff < 86400) {
+                $item['addtime'] = intval($diff / 3600) . '小时前';
+            } else {
+                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
     /**
