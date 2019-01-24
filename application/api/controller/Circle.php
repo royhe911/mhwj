@@ -355,6 +355,79 @@ class Circle extends \think\Controller
     }
 
     /**
+     * 获取通讯录
+     * @author 贺强
+     * @time   2019-01-24 16:03:49]
+     */
+    public function maillist()
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
+        } elseif (empty($param['type'])) {
+            $msg = ['status' => 3, 'info' => '类型不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $uid  = intval($param['uid']);
+        $type = intval($param['type']);
+        switch ($type) {
+            case 1:
+                $where = "(uid1=$uid and follow1=1) or (uid2=$uid and follow2=1)";
+                break;
+            case 2:
+                $where = "(uid1=$uid and follow2=1) or (uid2=$uid and follow1=1)";
+                break;
+        }
+        $f = new TFriendModel();
+        if (!empty($param['is_count'])) {
+            $count = $f->getCount($where);
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $count]);
+        } else {
+            $page = 1;
+            if (!empty($param['page'])) {
+                $page = $param['page'];
+            }
+            $pagesize = 10;
+            if (!empty($param['pagesize'])) {
+                $pagesize = $param['pagesize'];
+            }
+            $list = $f->getList($where, ['uid1', 'nickname1', 'avatar1', 'sex1', 'uid2', 'nickname2', 'avatar2', 'sex2', 'is_friend'], "$page,$pagesize");
+            $data = [];
+            foreach ($list as $item) {
+                // 过滤掉本人只取好友信息
+                if ($item['uid1'] === $uid) {
+                    $data[] = ['uid' => $item['uid2'], 'nickname' => $item['nickname2'], 'avatar' => $item['avatar2'], 'sex' => $item['sex2'], 'isTouchMove' => false];
+                } else {
+                    $data[] = ['uid' => $item['uid2'], 'nickname' => $item['nickname2'], 'avatar' => $item['avatar2'], 'sex' => $item['sex2'], 'isTouchMove' => false];
+                }
+            }
+            $result = [];
+            foreach ($data as $item) {
+                $first = to_first($item['nickname']);
+                // 拼装数组
+                $result[$first][] = $item;
+            }
+            ksort($result);
+            $arr = [];
+            foreach ($result as $k => $rst) {
+                $arr[] = ['region' => strtoupper($k), 'items' => $rst];
+            }
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $arr]);exit;
+        }
+    }
+
+    /**
+     * 汉字转拼音
+     */
+    public function zh_to_py()
+    {
+        $chinese = $this->param['chinese'];
+        echo to_first($chinese);exit;
+    }
+
+    /**
      * 关注提醒
      * @author 贺强
      * @time   2019-01-24 11:08:25

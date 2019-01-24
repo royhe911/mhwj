@@ -255,6 +255,7 @@ return [
     '/api/circle/addroom'  => 'api/Circle/add_room', // 添加房间
     '/api/circle/del'      => 'api/Circle/del_dynamic', // 删除动态、评论、回复
     '/api/circle/friends'  => 'api/Circle/friends', // 获取我的关注/粉丝/朋友
+    '/api/circle/maillist' => 'api/Circle/maillist', // 通讯录
     '/api/circle/games'    => 'api/Circle/get_games', // 获取游戏
     '/api/circle/addgame'  => 'api/Circle/add_game', // 添加游戏技能
     '/api/circle/userinfo' => 'api/Circle/userinfo', // 个人中心
@@ -263,5 +264,6 @@ return [
     '/api/circle/chatlog'  => 'api/Circle/get_chatlog', // 聊天记录
     '/api/circle/flwtip'   => 'api/Circle/follow_tip', // 关注提醒
     '/api/circle/mtip'     => 'api/Circle/modifytip', // 修改提醒状态
+    '/api/circle/zhtopy'   => 'api/Circle/zh_to_py', // 汉字转拼音
     /*--------   圈子 api 结束  --------*/
 ];
