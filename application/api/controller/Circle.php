@@ -1059,7 +1059,7 @@ class Circle extends \think\Controller
             } elseif ($diff < 86400) {
                 $item['addtime'] = intval($diff / 3600) . '小时前';
             } else {
-                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                $item['addtime'] = date('Y/m/d H:i:s', $item['addtime']);
             }
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
