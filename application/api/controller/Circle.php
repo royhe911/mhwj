@@ -200,7 +200,7 @@ class Circle extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $ud->getList($where, true, "$page,$pagesize", 'is_recommend desc,sort');
+        $list = $ud->getList($where, true, "$page,$pagesize", 'is_recommend desc,sort,addtime desc');
         if ($list) {
             // 获取我的关注
             $fnds = $this->friends(['uid' => $uid, 'type' => 1]);
