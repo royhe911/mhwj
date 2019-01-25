@@ -95,6 +95,9 @@ class Circle extends \think\Controller
         if (empty($param['id'])) {
             echo json_encode(['status' => 1, 'info' => '参数缺失']);exit;
         }
+        if (!empty($param['school'])) {
+            $param['circle'] = $param['school'];
+        }
         $res = $u->syncinfo($param);
         if ($res !== true) {
             echo json_encode(['status' => $res, 'info' => '同步失败']);exit;
