@@ -548,6 +548,8 @@ class Circle extends \think\Controller
             $game = $g->getModel(['id' => $id]);
             if (!empty($game['logo'])) {
                 $game['logo1'] = config('WEBSITE') . $game['logo'];
+            } else {
+                $game['logo1'] = '';
             }
             $types = config('GIFT_TYPE');
             $time  = time();
