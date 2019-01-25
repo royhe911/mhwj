@@ -1093,7 +1093,12 @@ class Circle extends \think\Controller
      */
     public function get_games(TGameModel $g)
     {
-        $list = $g->getList(['status' => 1], ['id', 'name', 'type']);
+        $list = $g->getList(['status' => 1], ['id', 'name', 'logo', 'type'], null, 'sort');
+        foreach ($list as &$item) {
+            if (!empty($item['logo']) && strpos($item['logo'], 'http://') === false && strpos($item['logo'], 'https://') === false) {
+                $item['logo'] = config('WEBSITE') . $item['logo'];
+            }
+        }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
