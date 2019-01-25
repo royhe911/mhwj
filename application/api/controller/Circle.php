@@ -1093,7 +1093,7 @@ class Circle extends \think\Controller
      */
     public function get_games(TGameModel $g)
     {
-        $list = $g->getList();
+        $list = $g->getList(['status' => 1]);
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
