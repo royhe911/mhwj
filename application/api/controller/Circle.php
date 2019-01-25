@@ -437,8 +437,24 @@ class Circle extends \think\Controller
      */
     public function zh_to_py()
     {
+        $param   = $this->param;
         $chinese = $this->param['chinese'];
-        echo get_first($chinese);exit;
+        $type    = 0;
+        if (!empty($param['type'])) {
+            $type = intval($param['type']);
+        }
+        switch ($type) {
+            case 1:
+                $res = get_first($chinese);
+                break;
+            case 2:
+                $res = utf8_to($chinese, true);
+                break;
+            default:
+                $res = utf8_to($chinese);
+                break;
+        }
+        echo $res;exit;
     }
 
     /**
