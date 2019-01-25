@@ -8,6 +8,7 @@ use app\common\model\TFriendModel;
 use app\common\model\TGameModel;
 use app\common\model\TPraiseModel;
 use app\common\model\TRoomModel;
+use app\common\model\TSchoolModel;
 use app\common\model\TTopicModel;
 use app\common\model\TUserGameModel;
 use app\common\model\TUserModel;
@@ -1297,6 +1298,32 @@ class Circle extends \think\Controller
                 $item['pic'] = $pics;
             }
         }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 获取学校或院系
+     * @author 贺强
+     * @time   2019-01-25 11:12:02
+     * @param  TSchoolModel $s TSchoolModel 实例
+     */
+    public function get_outfit(TSchoolModel $s)
+    {
+        $param = $this->param;
+        if (empty($param['type'])) {
+            echo json_encode(['status' => 1, 'info' => '获取类型不能为空']);exit;
+        }
+        $pid  = 0;
+        $type = intval($param['type']);
+        if ($type === 2) {
+            if (empty($param['pid'])) {
+                echo json_encode(['status' => 3, 'info' => '所属学校不能为空']);exit;
+            } else {
+                $pid = $param['pid'];
+            }
+        }
+        $where = ['type' => $type, 'pid' => $pid];
+        $list  = $s->getList($where, ['id', 'name']);
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 }
