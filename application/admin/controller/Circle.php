@@ -4,6 +4,7 @@ namespace app\admin\controller;
 use app\common\model\TCircleModel;
 use app\common\model\TDynamicCommentModel;
 use app\common\model\TDynamicModel;
+use app\common\model\TGameModel;
 use app\common\model\TTopicModel;
 use app\common\model\TUserModel;
 
@@ -463,4 +464,149 @@ class Circle extends \think\Controller
             return $this->fetch('comment', ['did' => $id, 'dycontent' => $dy['content'], 'users' => $users]);
         }
     }
+
+    /**
+     * 添加游戏
+     * @author 贺强
+     * @time   2019-01-25 19:21:04
+     * @param  TGameModel $g TGameModel 实例
+     */
+    public function addgame(TGameModel $g)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['name'])) {
+                return ['status' => 1, 'info' => '游戏名称'];
+            }
+            // 添加
+            $res = $g->add($param);
+            if (!$res) {
+                return ['status' => 40, 'info' => '添加失败'];
+            }
+            return ['status' => 0, 'info' => '添加成功'];
+        } else {
+            $time = time();
+            return $this->fetch('addgame', ['time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time)]);
+        }
+    }
+
+    /**
+     * 操作游戏
+     * @author 贺强
+     * @time   2019-01-25 19:10:39
+     * @param  TGameModel $g TGameModel 实例
+     */
+    public function operateg(TGameModel $g)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            $type  = $param['type'];
+            $ids   = $param['ids'];
+            if ($type === 'del' || $type === 'delAll') {
+                $res = $g->delByWhere(['id' => ['in', $ids]]);
+            } else {
+                $val = 1;
+                if ($type === 'disable' || $type === 'disableAll') {
+                    $val = 0;
+                }
+                $res = $g->modifyField('status', $val, ['id' => ['in', $ids]]);
+            }
+            if (!$res) {
+                return ['status' => 4, 'info' => '失败'];
+            }
+            return ['status' => 0, 'info' => '成功'];
+        }
+    }
+
+    /**
+     * 修改游戏
+     * @author 贺强
+     * @time   2019-01-25 19:43:33
+     * @param  TGameModel $g TGameModel 实例
+     */
+    public function editgame(TGameModel $g)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['id'])) {
+                return ['status' => 1, 'info' => '非法参数'];
+            } elseif (empty($param['name'])) {
+                return ['status' => 5, 'info' => '游戏名称不能为空'];
+            } elseif (empty($param['logo'])) {
+                return ['status' => 7, 'info' => '游戏图片不能为空'];
+            }
+            $res = $g->modify($param, ['id' => $param['id']]);
+            if ($res === false) {
+                return ['status' => 40, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        } else {
+            $id = $this->request->get('id');
+            if (empty($id)) {
+                echo '非法参数';exit;
+            }
+            $game = $g->getModel(['id' => $id]);
+            if (!empty($game['logo'])) {
+                $game['logo1'] = config('WEBSITE') . $game['logo'];
+            }
+            $types = config('GIFT_TYPE');
+            $time  = time();
+            return $this->fetch('editgame', ['game' => $game, 'time' => $time, 'token' => md5(config('UPLOAD_SALT') . $time), 'types' => $types]);
+        }
+    }
+
+    /**
+     * 修改游戏排序
+     * @author 贺强
+     * @time   2019-01-25 19:18:20
+     * @param  TGameModel $g TGameModel 实例
+     */
+    public function editgsort(TGameModel $g)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['id'])) {
+                return ['status' => 1, 'info' => '非法参数'];
+            }
+            $res = $g->modify($param, ['id' => $param['id']]);
+            if ($res === false) {
+                return ['status' => 2, 'info' => '修改失败'];
+            }
+            return ['status' => 0, 'info' => '修改成功'];
+        }
+    }
+
+    /**
+     * 游戏列表
+     * @author 贺强
+     * @time   2019-01-25 18:39:37
+     * @param  TGameModel $g TGameModel 实例
+     */
+    public function gamelist(TGameModel $g)
+    {
+        $param = $this->request->get();
+        $page  = 1;
+        if (!empty($param['page'])) {
+            $pagesize = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $g->getList([], true, "$page,$pagesize", 'sort');
+        foreach ($list as &$item) {
+            if (!empty($item['logo']) && strpos($item['logo'], 'http://') === false && strpos($item['logo'], 'https://') === false) {
+                $item['logo'] = config('WEBSITE') . $item['logo'];
+            }
+            if ($item['status']) {
+                $item['status_txt'] = '可用';
+            } else {
+                $item['status_txt'] = '不可用';
+            }
+        }
+        $count = $g->getCount();
+        $pages = ceil($count / $pagesize);
+        return $this->fetch('gamelist', ['list' => $list, 'pages' => $pages]);
+    }
+
 }

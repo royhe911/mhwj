@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>话题列表</title>
+    <title>游戏列表</title>
     <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
     <!-- Data Tables -->
@@ -16,7 +16,7 @@
         .ttd{width: 250px;text-align: center;}
         .ttb{width: 80px;text-align: center;}
         .sort_i{width: 50px;display: none;}
-        .title_i{width: 120px;display: none;}
+        .avatar{max-width: 100px;max-height: 100px;}
     </style>
 </head>
 <body class="gray-bg">
@@ -28,11 +28,9 @@
                     <form action="/circle/topic" method="post">
                     <table cellpadding="0" cellspacing="0" border="0">
                         <tr>
-                            <td><a href="/circle/addtopic">添加</a> &nbsp;</td>
-                            <td> &nbsp; <a href="javascript:;" data-action="openAll">启用所选</a> &nbsp;
-                            </td>
-                            <td> &nbsp; <a href="javascript:;" data-action="forbidAll">禁用所选</a> &nbsp;
-                            </td>
+                            <td><a href="/circle/addgame">添加</a> &nbsp;</td>
+                            <td> &nbsp; <a href="javascript:;" data-action="enableAll">启用所选</a>
+                            <td> &nbsp; <a href="javascript:;" data-action="disableAll">禁用所选</a>
                             <td> &nbsp; <a href="javascript:;" data-action="delAll">删除所选</a>
                             </td>
                         </tr>
@@ -45,8 +43,9 @@
                         <tr>
                             <th style="width: 40px;"><input type="checkbox" id="selAll"></th>
                             <th style="width: 100px;">排序</th>
-                            <th>话题</th>
+                            <th>名称</th>
                             <th>状态</th>
+                            <th>背景</th>
                             <th>操作</th>
                         </tr>
                         </thead>
@@ -55,9 +54,10 @@
                         <tr class="gradeX">
                             <td><input type="checkbox" class="check" value="{$item.id}"></td>
                             <td class="sort"><span class="sort_p">{$item.sort}</span><input type="text" class="sort_i" value="{$item.sort}" data-id="{$item.id}" data-sort="{$item.sort}"></td>
-                            <td class="title"><span class="title_p">{$item.title}</span><input type="text" class="title_i" value="{$item.title}" data-id="{$item.id}" data-title="{$item.title}"></td>
+                            <td class="name">{$item.name}</td>
                             <td>{$item.status_txt}</td>
-                            <td>{if($item.status==44)}<a href="javascript:;" data-action="open" data-id="{$item.id}">启用</a>{else/}<a href="javascript:;" data-action="forbid" data-id="{$item.id}">禁用</a>{/if} | <a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a></td>
+                            <td><img src="{$item.logo}" class="avatar"></td>
+                            <td>{if($item.status)}<a href="javascript:;" data-action="disable" data-id="{$item.id}">禁用</a>{else/}<a href="javascript:;" data-action="enable" data-id="{$item.id}">启用</a>{/if} | <a href="/circle/editgame?id={$item.id}">编辑</a> | <a href="javascript:;" data-action="del" data-id="{$item.id}">删除</a></td>
                         </tr>
                         {/foreach}
                         </tbody>
@@ -98,25 +98,12 @@
             }
         })
 
-        $('.title').click(function(){
-            $(this).find('.title_p').css('display', 'none');
-            $(this).find('.title_i').css('display', 'block').focus().select();
-        });
-        $('.title_i').blur(function(){
-            edit_title($(this))
-        })
-        $('.title_i').keypress(function(obj){
-            if (obj.keyCode == 13) {
-                edit_title($(this))
-            }
-        })
-
         $('a[data-action]').click(function(){
             var $action = $(this).data('action'), $id = $(this).data('id');
-            var $ids = '0', $type = '';
-            if($action == 'del' || $action == 'open' || $action == 'forbid'){
+            var $ids = '0';
+            if($action == 'del' || $action == 'enable' || $action == 'disable'){
                 $ids = '0,' + $id;
-            } else if ($action == 'delAll' || $action == 'openAll' || $action == 'forbidAll') {
+            } else if ($action == 'delAll' || $action == 'enableAll' || $action == 'disableAll') {
                 $('.check').each(function(){
                     if ($(this).is(':checked')) {
                         $ids += (',' + $(this).val())
@@ -139,36 +126,8 @@
                 $id = $this.data('id'), $sort = $this.val();
                 $.ajax({
                     type: 'post', dataType: 'json', cache: false,
-                    url: '/circle/editsort',
+                    url: '/circle/editgsort',
                     data: {'id': $id, 'sort': $sort},
-                    success: function(data){
-                        if (data.status == 0) {
-                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
-                                location.reload();
-                            });
-                        } else {
-                            layer.msg(data.info, {icon: 5, time: 2000})
-                        }
-                    }
-                })
-            }
-        }
-
-        /**
-         * 修改话题
-         * @author 贺强
-         * @time   2019-01-11 12:08:54
-         */
-        function edit_title($this) {
-            if ($this.val() == $this.data('title')) {
-                $this.css('display', 'none');
-                $this.prev('.title_p').css('display', 'block');
-            }else{
-                $id = $this.data('id'), $title = $this.val();
-                $.ajax({
-                    type: 'post', dataType: 'json', cache: false,
-                    url: '/circle/edittitle',
-                    data: {'id': $id, 'title': $title},
                     success: function(data){
                         if (data.status == 0) {
                             layer.msg(data.info, {icon: 1, time: 1000}, function(){
@@ -187,10 +146,10 @@
             if ($type == 'del' || $type == 'delAll') {
                 $msg = '确实要删除吗？';
                 $tip = '删除'
-            } else if ($type == 'open' || $type == 'openAll') {
+            } else if ($type == 'enable' || $type == 'enableAll') {
                 $msg = '确实要启用吗？';
                 $tip = '启用'
-            } else if ($type == 'forbid' || $type == 'forbidAll') {
+            } else if ($type == 'disable' || $type == 'disableAll') {
                 $msg = '确实要禁用吗？';
                 $tip = '禁用'
             }
@@ -201,7 +160,7 @@
             layer.confirm($msg, {icon: 3}, function(){
                 $.ajax({
                     type: 'post', cache: false, dataType: 'json',
-                    url: '/circle/operate',
+                    url: '/circle/operateg',
                     data:{'ids': $ids, 'type': $type},
                     success: function(data){
                         if (data.status == 0) {

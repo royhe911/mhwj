@@ -109,6 +109,11 @@ return [
     '/circle/editmsort'    => 'admin/Circle/editmsort', // 修改动态排序
     '/circle/operatem'     => 'admin/Circle/operatem', // 操作心情
     '/circle/comment'      => 'admin/Circle/comment', // 评论
+    '/circle/gamelist'     => 'admin/Circle/gamelist', // 游戏列表
+    '/circle/addgame'      => 'admin/Circle/addgame', // 添加游戏
+    '/circle/operateg'      => 'admin/Circle/operateg', // 操作
+    '/circle/editgame'     => 'admin/Circle/editgame', // 修改游戏
+    '/circle/editgsort'    => 'admin/Circle/editgsort', // 修改游戏排序
 
     /*--------   api 开始   --------*/
     '/api/carousel'        => 'api/Api/get_carousel', // 获取轮播轮播图

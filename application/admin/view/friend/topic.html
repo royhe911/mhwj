@@ -113,7 +113,7 @@
 
         $('a[data-action]').click(function(){
             var $action = $(this).data('action'), $id = $(this).data('id');
-            var $ids = '0', $type = '';
+            var $ids = '0';
             if($action == 'del' || $action == 'open' || $action == 'forbid'){
                 $ids = '0,' + $id;
             } else if ($action == 'delAll' || $action == 'openAll' || $action == 'forbidAll') {

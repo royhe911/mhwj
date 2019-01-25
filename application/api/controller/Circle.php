@@ -928,6 +928,7 @@ class Circle extends \think\Controller
         if (!empty($param['is_friend'])) {
             $is_friend = intval($param['is_friend']);
         }
+        unset($param['is_friend']);
         if (!$is_friend) {
             // 如果不是好友，一天只能发两条信息
             $count = $c->getCount(['addtime' => ['gt', time() - 86400], 'room_id' => $room_id, 'uid' => $uid]);
