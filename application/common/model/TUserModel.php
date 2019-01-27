@@ -47,7 +47,7 @@ class TUserModel extends CommonModel
             $g    = new TGameModel();
             $game = $g->getModel(['id' => $param['gid']]);
             $gdat = ['uid' => $id, 'name' => $game['name'], 'logo' => $game['logo'], 'online' => $param['online']];
-            unset($game['gid'], $param['online']);
+            unset($param['gid'], $param['online']);
         }
         Db::startTrans();
         try {
@@ -122,7 +122,7 @@ class TUserModel extends CommonModel
             return true;
         } catch (\Exception $e) {
             Db::rollback();
-            return 40;
+            return 44;
         }
     }
 }
