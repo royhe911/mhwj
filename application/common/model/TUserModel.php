@@ -79,16 +79,16 @@ class TUserModel extends CommonModel
                     return 60;
                 }
             }
+            $f = new TFriendModel();
+            $r = new TRoomModel();
             if (!empty($fda1)) {
                 // 修改朋友表中用户的昵称、头像、性别
-                $f   = new TFriendModel();
                 $res = $f->modify($fda1, ['uid1' => $id]);
                 if ($res === false) {
                     Db::rollback();
                     return 40;
                 }
                 // 修改房间表中用户的昵称、头像、性别
-                $r   = new TRoomModel();
                 $res = $r->modify($fda1, ['uid1' => $id]);
                 if ($res === false) {
                     DB::rollback();
