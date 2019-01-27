@@ -113,9 +113,9 @@ class TUserModel extends CommonModel
                 $ug  = new TUserGameModel();
                 $ugm = $ug->getCount(['uid' => $id]);
                 if ($ugm) {
-                    $g->modify($gdat, ['uid' => $id]);
+                    $ug->modify($gdat, ['uid' => $id]);
                 } else {
-                    $g->add($gdat);
+                    $ug->add($gdat);
                 }
             }
             // 全部修改成功则提交事务
