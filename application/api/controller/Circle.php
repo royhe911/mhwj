@@ -1170,7 +1170,12 @@ class Circle extends \think\Controller
         $user = $u->getModel(['id' => $uid], ['id', 'nickname', 'avatar', 'age', 'sex', 'inyear', 'school', 'department', 'grade']);
         if ($user) {
             $ug    = new TUserGameModel();
-            $games = $ug->getList(['uid' => $uid], ['gid', 'name', 'region', 'duan', 'online', 'position', 'gang_position']);
+            $games = $ug->getList(['uid' => $uid], ['gid', 'name', 'online', 'logo']);
+            foreach ($games as &$gm) {
+                if (!empty($gm['logo']) && strpos($gm['logo'], 'http://') === false && strpos($gm['logo'], 'https://') === false) {
+                    $gm['logo'] = config('WEBSITE') . $gm['logo'];
+                }
+            }
             // 拥有的游戏技能
             $user['games'] = $games;
             // 获取关注数

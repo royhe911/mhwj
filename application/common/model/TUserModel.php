@@ -26,6 +26,7 @@ class TUserModel extends CommonModel
         $data = [];
         $fda1 = [];
         $fda2 = [];
+        $gdat = [];
         if (!empty($param['nickname'])) {
             $data['nickname']  = $param['nickname'];
             $fda1['nickname1'] = $param['nickname'];
@@ -42,6 +43,12 @@ class TUserModel extends CommonModel
             $fda2['sex2'] = $param['sex'];
         }
         $id = $param['id'];
+        if (!empty($param['gid'])) {
+            $g    = new TGameModel();
+            $game = $g->getModel(['id' => $param['gid']]);
+            $gdat = ['uid' => $id, 'name' => $game['name'], 'logo' => $game['logo'], 'online' => $param['online']];
+            unset($game['gid'], $param['online']);
+        }
         Db::startTrans();
         try {
             $res = $this->modify($param, ['id' => $id]);
@@ -94,6 +101,14 @@ class TUserModel extends CommonModel
                 if ($res === false) {
                     Db::rollback();
                     return 80;
+                }
+            }
+            if (!empty($gdat)) {
+                $ugm = $g->getCount(['uid' => $id]);
+                if ($ugm) {
+                    $g->modify($gdat, ['uid' => $id]);
+                } else {
+                    $g->add($gdat);
                 }
             }
             // 全部修改成功则提交事务
