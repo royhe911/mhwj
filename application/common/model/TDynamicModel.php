@@ -31,12 +31,6 @@ class TDynamicModel extends CommonModel
                 Db::rollback();
                 return 10;
             }
-            // 删除数据
-            $res = $this->delById($id);
-            if (!$res) {
-                Db::rollback();
-                return 20;
-            }
             // 删除对应的评论
             $dc  = new TDynamicCommentModel();
             $res = $dc->delByWhere(['did' => $id]);
@@ -52,6 +46,12 @@ class TDynamicModel extends CommonModel
                     Db::rollback();
                     return 40;
                 }
+            }
+            // 删除数据
+            $res = $this->delById($id);
+            if (!$res) {
+                Db::rollback();
+                return 20;
             }
             Db::commit();
             return true;
