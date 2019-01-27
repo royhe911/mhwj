@@ -1124,16 +1124,21 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $gid   = $param['gid'];
-        $count = $ug->getCount(['uid' => $param['uid'], 'gid' => $gid]);
-        if ($count) {
-            echo json_encode(['status' => 17, 'info' => '已添加过此游戏技能']);exit;
-        }
+        $uid  = $param['uid'];
+        $gid  = $param['gid'];
         $g    = new TGameModel();
         $game = $g->getModel(['id' => $gid]);
         if ($game) {
             $param['name'] = $game['name'];
             $param['logo'] = $game['logo'];
+        }
+        $count = $ug->getCount(['uid' => $uid, 'gid' => $gid]);
+        if ($count) {
+            $res = $ug->modify($param, ['uid' => $uid, 'gid' => $gid]);
+            if ($res === false) {
+                echo json_encode(['status' => 4, 'info' => '失败']);exit;
+            }
+            echo json_encode(['status' => 0, 'info' => '成功']);exit;
         }
         $res = $ug->add($param);
         if (!$res) {
