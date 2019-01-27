@@ -110,7 +110,8 @@ class TUserModel extends CommonModel
                 }
             }
             if (!empty($gdat)) {
-                $ugm = $g->getCount(['uid' => $id]);
+                $ug  = new TUserGameModel();
+                $ugm = $ug->getCount(['uid' => $id]);
                 if ($ugm) {
                     $g->modify($gdat, ['uid' => $id]);
                 } else {
