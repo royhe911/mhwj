@@ -1119,25 +1119,21 @@ class Circle extends \think\Controller
             $msg = ['status' => 1, 'info' => '用户ID不能为空'];
         } elseif (empty($param['gid'])) {
             $msg = ['status' => 3, 'info' => '游戏ID不能为空'];
-        } elseif (empty($param['name'])) {
-            $msg = ['status' => 5, 'info' => '游戏名称不能为空'];
-        } elseif (empty($param['duan'])) {
-            $msg = ['status' => 7, 'info' => '当前段位不能为空'];
         } elseif (empty($param['online'])) {
             $msg = ['status' => 9, 'info' => '在线时间段不能为空'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        if (intval($param['gid']) === 1) {
-            if (empty($param['position'])) {
-                $msg = ['status' => 11, 'info' => '常用位置不能为空'];
-            } elseif (empty($param['gang_position'])) {
-                $msg = ['status' => 13, 'info' => '开黑位置不能为空'];
-            }
-        } elseif (empty($param['region'])) {
-            $msg = ['status' => 15, 'info' => '游戏大区不能为空'];
-        }
+        // if (intval($param['gid']) === 1) {
+        //     if (empty($param['position'])) {
+        //         $msg = ['status' => 11, 'info' => '常用位置不能为空'];
+        //     } elseif (empty($param['gang_position'])) {
+        //         $msg = ['status' => 13, 'info' => '开黑位置不能为空'];
+        //     }
+        // } elseif (empty($param['region'])) {
+        //     $msg = ['status' => 15, 'info' => '游戏大区不能为空'];
+        // }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
@@ -1248,9 +1244,9 @@ class Circle extends \think\Controller
                 }
             }
         }
-        $where = [];
+        $where = ['uid' => $uid];
         if (!$enable) {
-            $where = ['is_open' => 1];
+            $where['is_open'] = 1;
         }
         $page = 1;
         if (!empty($param['page'])) {
