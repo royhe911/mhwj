@@ -754,7 +754,7 @@ class Circle extends \think\Controller
             $dc   = new TDynamicCommentModel();
             $list = $dc->getList(['did' => $did, 'type' => 1], ['id', 'uid', 'nickname', 'avatar', 'sex', 'content', 'zan_count', 'addtime'], null, 'addtime desc');
             if ($list) {
-                $cos = $dc->getList(['did' => $did, 'type' => 2], ['id', 'cid', 'uid', 'nickname', 'sex', 'content', 'addtime', 'ruid', 'rnickname']);
+                $cos = $dc->getList(['did' => $did, 'type' => 2, 'cid' => ['<>', 0]], ['id', 'cid', 'uid', 'nickname', 'sex', 'content', 'addtime', 'ruid', 'rnickname']);
                 $car = [];
                 foreach ($cos as $cs) {
                     $diff2 = time() - $cs['addtime'];
