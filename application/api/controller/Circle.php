@@ -144,7 +144,7 @@ class Circle extends \think\Controller
         }
         if (!empty($param['topic'])) {
             $t = new TTopicModel();
-            $t->increment('count', ['in' => ['in', $param['topic']]]);
+            $t->increment('count', ['id' => ['in', $param['topic']]]);
         }
         echo json_encode(['status' => 0, 'info' => '发布成功']);exit;
     }
