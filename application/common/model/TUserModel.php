@@ -78,17 +78,14 @@ class TUserModel extends CommonModel
                     Db::rollback();
                     return 60;
                 }
+            }
+            if (!empty($fda1)) {
                 // 修改朋友表中用户的昵称、头像、性别
                 $f   = new TFriendModel();
                 $res = $f->modify($fda1, ['uid1' => $id]);
                 if ($res === false) {
                     Db::rollback();
                     return 40;
-                }
-                $res = $f->modify($fda2, ['uid2' => $id]);
-                if ($res === false) {
-                    Db::rollback();
-                    return 50;
                 }
                 // 修改房间表中用户的昵称、头像、性别
                 $r   = new TRoomModel();
@@ -97,6 +94,15 @@ class TUserModel extends CommonModel
                     DB::rollback();
                     return 70;
                 }
+            }
+            if (!empty($fda2)) {
+                // 修改朋友表中用户的昵称、头像、性别
+                $res = $f->modify($fda2, ['uid2' => $id]);
+                if ($res === false) {
+                    Db::rollback();
+                    return 50;
+                }
+                // 修改房间表中用户的昵称、头像、性别
                 $res = $r->modify($fda2, ['uid2' => $id]);
                 if ($res === false) {
                     Db::rollback();
