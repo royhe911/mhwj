@@ -1124,21 +1124,16 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        // if (intval($param['gid']) === 1) {
-        //     if (empty($param['position'])) {
-        //         $msg = ['status' => 11, 'info' => '常用位置不能为空'];
-        //     } elseif (empty($param['gang_position'])) {
-        //         $msg = ['status' => 13, 'info' => '开黑位置不能为空'];
-        //     }
-        // } elseif (empty($param['region'])) {
-        //     $msg = ['status' => 15, 'info' => '游戏大区不能为空'];
-        // }
-        if (!empty($msg)) {
-            echo json_encode($msg);exit;
-        }
-        $count = $ug->getCount(['uid' => $param['uid'], 'gid' => $param['gid']]);
+        $gid   = $param['gid'];
+        $count = $ug->getCount(['uid' => $param['uid'], 'gid' => $gid]);
         if ($count) {
             echo json_encode(['status' => 17, 'info' => '已添加过此游戏技能']);exit;
+        }
+        $g    = new TGameModel();
+        $game = $g->getModel(['id' => $gid]);
+        if ($game) {
+            $param['name'] = $game['name'];
+            $param['logo'] = $game['logo'];
         }
         $res = $ug->add($param);
         if (!$res) {
