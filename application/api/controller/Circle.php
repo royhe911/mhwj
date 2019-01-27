@@ -177,7 +177,6 @@ class Circle extends \think\Controller
                     $uids[] = $u['uid1'];
                 }
             }
-            $uids  = array_merge($uids, [$uid]);
             $where = ['uid' => ['in', $uids]];
         } elseif ($type === 2) {
             $where = "is_open=1 or uid=$uid";
