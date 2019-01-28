@@ -62,20 +62,19 @@ class Circle extends \think\Controller
         }
         $user = $u->getModel(['openid' => $data['openid']]);
         if (!empty($user)) {
-            // 修改数据
-            $id  = $user['id'];
-            $res = $u->modify($data, ['id' => $id]);
-            if ($res) {
-                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $user['id']]];
-            } else {
-                $msg = ['status' => 3, 'info' => '登录失败'];
+            // 判断是否需要完善资料
+            $perfect = 1;
+            if (empty($user['school']) || empty($user['department']) || empty($user['grade'])) {
+                $perfect = 0;
             }
+            // 修改数据
+            $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $user['id'], 'perfect' => $perfect]];
         } else {
             $data['addtime'] = time();
             // 添加
             $id = $u->add($data);
             if ($id) {
-                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $id]];
+                $msg = ['status' => 0, 'info' => '登录成功', 'data' => ['id' => $id, 'perfect' => 0]];
             } else {
                 $msg = ['status' => 4, 'info' => '登录失败'];
             }
