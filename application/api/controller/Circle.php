@@ -1364,7 +1364,7 @@ class Circle extends \think\Controller
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['age' => $age, 'data' => $grade]]);exit;
         }
         $where = ['type' => $type, 'pid' => $pid];
-        $list  = $s->getList($where, ['name']);
+        $list  = $s->getList($where, ['id', 'name']);
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['age' => $age, 'data' => $list]]);exit;
     }
 }
