@@ -99,9 +99,10 @@ class Circle extends \think\Controller
         }
         if (!empty($param['school'])) {
             $s      = new TSchoolModel();
-            $school = $s->getModel(['name' => $param['school']])
-            // 赋值圈子
-            $param['circle'] = $school['id'];
+            $school = $s->getModel(['name' => $param['school']], ['id']);
+            if (!empty($school)) {
+                $param['circle'] = $school['id'];
+            }
         }
         $res = $u->syncinfo($param);
         if ($res !== true) {
@@ -168,7 +169,7 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $where = [];
+        $where = '';
         $uid   = intval($param['uid']);
         $type  = intval($param['type']);
         if ($type === 1) {
