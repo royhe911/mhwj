@@ -163,15 +163,18 @@ class Circle extends \think\Controller
         $param = $this->param;
         if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '登录用户ID不能为空'];
-        } elseif (empty($param['type'])) {
-            $msg = ['status' => 3, 'info' => '要获取的数据类型不能为空'];
+        } elseif (empty($param['type']) && empty($param['topic'])) {
+            $msg = ['status' => 3, 'info' => '非法操作'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $where = '';
         $uid   = intval($param['uid']);
-        $type  = intval($param['type']);
+        $type  = 0;
+        if (!empty($param['type'])) {
+            $type = intval($param['type']);
+        }
         if ($type === 1) {
             $f     = new TFriendModel();
             $fw    = "(uid1=$uid and follow1=1) or (uid2=$uid and follow2=1)";
