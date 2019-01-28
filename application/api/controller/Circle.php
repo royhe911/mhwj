@@ -1341,30 +1341,22 @@ class Circle extends \think\Controller
     public function get_outfit(TSchoolModel $s)
     {
         $param = $this->param;
-        if (empty($param['type'])) {
-            echo json_encode(['status' => 1, 'info' => '获取类型不能为空']);exit;
-        }
-        $age  = [['name' => '80后'], ['name' => '85后'], ['name' => '90后'], ['name' => '95后'], ['name' => '00后'], ['name' => '05后'], ['name' => '10后']];
-        $pid  = 0;
-        $type = intval($param['type']);
-        if ($type === 2) {
-            if (empty($param['pid'])) {
-                echo json_encode(['status' => 3, 'info' => '所属学校不能为空']);exit;
-            } else {
-                $pid = $param['pid'];
-            }
-        } elseif ($type === 3) {
-            $start = 2000;
-            $end   = date('Y');
-            $grade = [];
+        if ($param['pid']) {
+            $depart = $s->getList(['pid' => $param['pid']], ['name']);
+            $data   = ['depart' => $depart];
+        } else {
+            $school = $s->getList(['pid' => 0], ['id', 'name']);
+            $depart = $s->getList(['pid' => 1], ['name']);
+            $age    = [['name' => '80后'], ['name' => '85后'], ['name' => '90后'], ['name' => '95后'], ['name' => '00后'], ['name' => '05后'], ['name' => '10后']];
+            $start  = 2000;
+            $end    = date('Y');
+            $grade  = [];
             for ($i = $start; $i <= $end; $i++) {
                 $gd      = substr($i, 2) . '级';
                 $grade[] = ['name' => $gd];
             }
-            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['age' => $age, 'data' => $grade]]);exit;
+            $data = ['age' => $age, 'school' => $school, 'depart' => $depart, 'grade' => $grade];
         }
-        $where = ['type' => $type, 'pid' => $pid];
-        $list  = $s->getList($where, ['id', 'name']);
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['age' => $age, 'data' => $list]]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
     }
 }
