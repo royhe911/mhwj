@@ -202,6 +202,8 @@ class Circle extends \think\Controller
             } else {
                 echo json_encode(['status' => 0, 'info' => '获取成功']);exit;
             }
+        } elseif (!empty($param['topic'])) {
+            $where = "find_in_set('{$param['topic']}',topic)";
         }
         $page = 1;
         if (!empty($param['page'])) {
