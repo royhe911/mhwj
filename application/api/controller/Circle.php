@@ -98,7 +98,10 @@ class Circle extends \think\Controller
             echo json_encode(['status' => 3, 'info' => '在线时间段不能为空']);exit;
         }
         if (!empty($param['school'])) {
-            $param['circle'] = $param['school'];
+            $s      = new TSchoolModel();
+            $school = $s->getModel(['name' => $param['school']])
+            // 赋值圈子
+            $param['circle'] = $school['id'];
         }
         $res = $u->syncinfo($param);
         if ($res !== true) {
@@ -192,7 +195,9 @@ class Circle extends \think\Controller
                     $where .= " or find_in_set('$c',circle)";
                 }
                 $where = substr($where, 3);
-                $where .= " or uid=$uid";
+                $ids   = $u->getList($where, ['id']);
+                $ids   = array_column($ids, 'id');
+                $where = ['uid' => ['in', $ids]];
             } else {
                 echo json_encode(['status' => 0, 'info' => '获取成功']);exit;
             }
