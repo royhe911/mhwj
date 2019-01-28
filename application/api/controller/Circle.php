@@ -1344,6 +1344,7 @@ class Circle extends \think\Controller
         if (empty($param['type'])) {
             echo json_encode(['status' => 1, 'info' => '获取类型不能为空']);exit;
         }
+        $age  = [['id' => '80后', 'name' => '80后'], ['id' => '85后', 'name' => '85后'], ['id' => '90后', 'name' => '90后'], ['id' => '95后', 'name' => '95后'], ['id' => '00后', 'name' => '00后'], ['id' => '05后', 'name' => '05后'], ['id' => '10后', 'name' => '10后']];
         $pid  = 0;
         $type = intval($param['type']);
         if ($type === 2) {
@@ -1352,9 +1353,18 @@ class Circle extends \think\Controller
             } else {
                 $pid = $param['pid'];
             }
+        } elseif ($type === 3) {
+            $start = 2000;
+            $end   = date('Y');
+            $grade = [];
+            for ($i = $start; $i <= $end; $i++) {
+                $gd      = substr($i, 2) . '级';
+                $grade[] = ['id' => $gd, 'name' => $gd];
+            }
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['age' => $age, 'data' => $grade]]);exit;
         }
         $where = ['type' => $type, 'pid' => $pid];
         $list  = $s->getList($where, ['id', 'name']);
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => ['age' => $age, 'data' => $list]]);exit;
     }
 }
