@@ -661,10 +661,19 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $type = intval($param['type']);
+        $obj_id = $param['obj_id'];
+        $type   = intval($param['type']);
+        if ($type === 1) {
+            $d  = new TDynamicModel();
+            $dy = $d->getModel(['id' => $obj_id], ['uid']);
+            if (!empty($dy)) {
+                $param['userid'] = $dy['uid'];
+            }
+        }
         if ($type === 2) {
-            $comm = $dc->getModel(['id' => $param['obj_id']], ['uid', 'nickname']);
+            $comm = $dc->getModel(['id' => $obj_id], ['uid', 'nickname']);
             if (!empty($comm)) {
+                $param['userid']    = $comm['uid'];
                 $param['ruid']      = $comm['uid'];
                 $param['rnickname'] = $comm['nickname'];
             } else {
