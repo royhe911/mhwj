@@ -31,6 +31,9 @@ class TDynamicModel extends CommonModel
                 Db::rollback();
                 return 10;
             }
+            // 用户发布的动态数减1
+            $u = new TUserModel();
+            $u->decrement('count', ['id' => $dynamic['uid']]);
             // 删除对应的评论
             $dc  = new TDynamicCommentModel();
             $res = $dc->delByWhere(['did' => $id]);
@@ -40,7 +43,7 @@ class TDynamicModel extends CommonModel
             }
             // 相应话题的发布量减 1
             if (!empty($dynamic['topic'])) {
-                $t  = new TTopicModel();
+                $t   = new TTopicModel();
                 $res = $t->decrement('count', ['id' => ['in', $dynamic['topic']]]);
                 if (!$res) {
                     Db::rollback();

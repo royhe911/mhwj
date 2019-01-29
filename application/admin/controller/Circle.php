@@ -1,11 +1,15 @@
 <?php
 namespace app\admin\controller;
 
+use app\common\model\TChatModel;
 use app\common\model\TCircleModel;
 use app\common\model\TDynamicCommentModel;
 use app\common\model\TDynamicModel;
+use app\common\model\TFriendModel;
 use app\common\model\TGameModel;
+use app\common\model\TRoomModel;
 use app\common\model\TTopicModel;
+use app\common\model\TUserGameModel;
 use app\common\model\TUserModel;
 
 /**
@@ -670,6 +674,21 @@ class Circle extends \think\Controller
             $type  = $param['type'];
             $ids   = $param['ids'];
             if ($type === 'del' || $type === 'delAll') {
+                $d     = new TDynamicModel();
+                $where = ['uid' => ['in', $ids]];
+                $d->delByWhere($where);
+                $dc = new TDynamicCommentModel();
+                $dc->delByWhere($where);
+                $ug = new TUserGameModel();
+                $ug->delByWhere($where);
+                $c = new TChatModel();
+                $c->delByWhere($where);
+                $where2 = ['uid1|uid2' => ['in', $ids]];
+                // 删除朋友、房间
+                $f = new TFriendModel();
+                $f->delByWhere($where2);
+                $r = new TRoomModel();
+                $r->delByWhere($where2);
                 $res = $u->delByWhere(['id' => ['in', $ids]]);
             } else {
                 $val = 1;
