@@ -130,8 +130,11 @@ class Circle extends \think\Controller
         }
         $u    = new TUserModel();
         $uid  = $param['uid'];
-        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex', 'circle']);
+        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex', 'circle', 'status']);
         if (!empty($user)) {
+            if ($user['status'] === 44) {
+                echo json_encode(['status' => 5, 'info' => '您已被禁用，暂时不能发布']);exit;
+            }
             $param['nickname'] = $user['nickname'];
             $param['avatar']   = $user['avatar'];
             $param['sex']      = $user['sex'];
