@@ -137,7 +137,7 @@ class Circle extends \think\Controller
             $param['sex']      = $user['sex'];
         }
         if (empty($user['circle'])) {
-            $param['is_open'] = 0;
+            $param['is_open'] = 1;
         }
         $param['addtime'] = time();
         // 添加
@@ -420,7 +420,7 @@ class Circle extends \think\Controller
                 if ($item['uid1'] === $uid) {
                     $data[] = ['uid' => $item['uid2'], 'nickname' => $item['nickname2'], 'avatar' => $item['avatar2'], 'sex' => $item['sex2'], 'isTouchMove' => false];
                 } else {
-                    $data[] = ['uid' => $item['uid2'], 'nickname' => $item['nickname2'], 'avatar' => $item['avatar2'], 'sex' => $item['sex2'], 'isTouchMove' => false];
+                    $data[] = ['uid' => $item['uid1'], 'nickname' => $item['nickname1'], 'avatar' => $item['avatar1'], 'sex' => $item['sex1'], 'isTouchMove' => false];
                 }
             }
             $result = [];
@@ -433,10 +433,14 @@ class Circle extends \think\Controller
                 $result[$first][] = $item;
             }
             ksort($result);
-            // 删除第一个元素并返回
-            $r = array_shift($result);
-            // 把第一个元素再赋值给原数组
-            $result['#'] = $r;
+            reset($result);
+            $key = key($result);
+            if ($key === '#') {
+                // 删除第一个元素并返回
+                $r = array_shift($result);
+                // 把第一个元素再赋值给原数组
+                $result['#'] = $r;
+            }
             // 重新组合数组
             $arr = [];
             $i   = 1;
