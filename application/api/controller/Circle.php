@@ -167,8 +167,6 @@ class Circle extends \think\Controller
         $param = $this->param;
         if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '登录用户ID不能为空'];
-        } elseif (empty($param['type']) && empty($param['topic'])) {
-            $msg = ['status' => 3, 'info' => '非法操作'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
@@ -182,9 +180,6 @@ class Circle extends \think\Controller
         // 获取未知的评论数量
         $dc    = new TDynamicCommentModel();
         $count = $dc->getCount(['userid' => $uid, 'is_tip' => 0]);
-        if ($count) {
-            $dc->modifyField('is_tip', 1, ['userid' => $uid]);
-        }
         if ($type === 1) {
             $f     = new TFriendModel();
             $fw    = "(uid1=$uid and follow1=1) or (uid2=$uid and follow2=1)";
@@ -217,6 +212,16 @@ class Circle extends \think\Controller
             }
         } elseif (!empty($param['topic'])) {
             $where = "find_in_set('{$param['topic']}',topic)";
+        } elseif (!empty($param['is_tip'])) {
+            $dcs = $dc->getList(['userid' => $uid, 'is_tip' => 0], ['id', 'did']);
+            if (!empty($dcs)) {
+                $ids   = array_column($dcs, 'did');
+                $where = ['id' => ['in', $ids]];
+                $cids  = array_column($dcs, 'id');
+                $dc->modifyField('is_tip', 1, ['id' => ['in', $cids]]);
+            } else {
+                echo json_encode(['status' => 0, 'info' => '暂无数据']);exit;
+            }
         }
         $page = 1;
         if (!empty($param['page'])) {
