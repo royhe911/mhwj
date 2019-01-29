@@ -217,8 +217,6 @@ class Circle extends \think\Controller
             if (!empty($dcs)) {
                 $ids   = array_column($dcs, 'did');
                 $where = ['id' => ['in', $ids]];
-                $cids  = array_column($dcs, 'id');
-                $dc->modifyField('is_tip', 1, ['id' => ['in', $cids]]);
             } else {
                 echo json_encode(['status' => 0, 'info' => '暂无数据']);exit;
             }
@@ -846,6 +844,7 @@ class Circle extends \think\Controller
                 }
             }
             $dynamic['comment'] = $list;
+            $dc->modifyField('is_tip', 1, ['userid' => $uid, 'did' => $did]);
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $dynamic]);exit;
     }
