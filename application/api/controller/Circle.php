@@ -179,6 +179,12 @@ class Circle extends \think\Controller
         if (!empty($param['type'])) {
             $type = intval($param['type']);
         }
+        // 获取未知的评论数量
+        $dc    = new TDynamicCommentModel();
+        $count = $dc->getCount(['userid' => $uid, 'is_tip' => 0]);
+        if ($count) {
+            $dc->modifyField('is_tip', 1, ['userid' => $uid]);
+        }
         if ($type === 1) {
             $f     = new TFriendModel();
             $fw    = "(uid1=$uid and follow1=1) or (uid2=$uid and follow2=1)";
@@ -300,7 +306,7 @@ class Circle extends \think\Controller
                 $item['pic'] = $pics;
             }
         }
-        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list, 'count' => $count]);exit;
     }
 
     /**
@@ -1030,7 +1036,7 @@ class Circle extends \think\Controller
             echo json_encode($msg);exit;
         }
         $uid   = intval($param['uid']);
-        $where = ['uid1|uid2' => $uid];
+        $where = ['uid1|uid2' => $uid, 'chat_time' => ['>', 0]];
         $page  = 1;
         if (!empty($param['page'])) {
             $page = $param['page'];
