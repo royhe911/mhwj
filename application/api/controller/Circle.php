@@ -184,12 +184,12 @@ class Circle extends \think\Controller
             $f     = new TFriendModel();
             $fw    = "(uid1=$uid and follow1=1) or (uid2=$uid and follow2=1)";
             $users = $f->getList($fw, ['uid1', 'uid2']);
-            $uids  = [];
+            $uids  = '0';
             foreach ($users as $u) {
                 if ($uid === $u['uid1']) {
-                    $uids[] = $u['uid2'];
+                    $uids .= ",{$u['uid2']}";
                 } else {
-                    $uids[] = $u['uid1'];
+                    $uids .= ",{$u['uid1']}";
                 }
             }
             $where .= " and uid in ($uids)";
@@ -200,12 +200,12 @@ class Circle extends \think\Controller
             $user = $u->getModel(['id' => $uid], ['circle']);
             if (!empty($user) && !empty($user['circle'])) {
                 $circle = explode(',', $user['circle']);
+                $wherec = '1';
                 foreach ($circle as $c) {
-                    $where .= " or find_in_set('$c',circle)";
+                    $wherec .= " or find_in_set('$c',circle)";
                 }
-                $where = substr($where, 3);
-                $ids   = $u->getList($where, ['id']);
-                $ids   = array_column($ids, 'id');
+                $ids = $u->getList($wherec, ['id']);
+                $ids = array_column($ids, 'id');
                 $where .= " and uid in ($ids)";
             } else {
                 echo json_encode(['status' => 0, 'info' => '获取成功']);exit;
