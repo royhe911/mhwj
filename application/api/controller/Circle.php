@@ -171,7 +171,7 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $where = '';
+        $where = '1';
         $uid   = intval($param['uid']);
         $type  = 0;
         if (!empty($param['type'])) {
@@ -192,9 +192,9 @@ class Circle extends \think\Controller
                     $uids[] = $u['uid1'];
                 }
             }
-            $where = ['uid' => ['in', $uids]];
+            $where .= " and uid in ($uids)";
         } elseif ($type === 2) {
-            $where = "is_open=1 or uid=$uid";
+            $where .= " and is_open=1 or uid=$uid";
         } elseif ($type === 3) {
             $u    = new TUserModel();
             $user = $u->getModel(['id' => $uid], ['circle']);
@@ -206,17 +206,19 @@ class Circle extends \think\Controller
                 $where = substr($where, 3);
                 $ids   = $u->getList($where, ['id']);
                 $ids   = array_column($ids, 'id');
-                $where = ['uid' => ['in', $ids]];
+                $where .= " and uid in ($ids)";
             } else {
                 echo json_encode(['status' => 0, 'info' => '获取成功']);exit;
             }
-        } elseif (!empty($param['topic'])) {
-            $where = "find_in_set('{$param['topic']}',topic)";
-        } elseif (!empty($param['is_tip'])) {
+        }
+        if (!empty($param['topic'])) {
+            $where .= " and find_in_set('{$param['topic']}',topic)";
+        }
+        if (!empty($param['is_tip'])) {
             $dcs = $dc->getList(['userid' => $uid, 'is_tip' => 0], ['id', 'did']);
             if (!empty($dcs)) {
-                $ids   = array_column($dcs, 'did');
-                $where = ['id' => ['in', $ids]];
+                $ids = array_column($dcs, 'did');
+                $where .= " and id in ($ids)";
             } else {
                 echo json_encode(['status' => 0, 'info' => '暂无数据']);exit;
             }
