@@ -226,7 +226,11 @@ class Circle extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $ud->getList($where, true, "$page,$pagesize", 'is_recommend desc,sort,addtime desc');
+        $order = 'sort,addtime desc';
+        if (!empty($param['heat'])) {
+            $order = 'count desc';
+        }
+        $list = $ud->getList($where, ['id', 'zan_count', 'pl_count', 'uid', 'nickname', 'avatar', 'sex', 'sort', 'is_recommend', 'origin', 'is_open', 'topic', 'content', 'thumb', 'type', 'pic', 'addtime', 'sum(zan_count+pl_count) count'], "$page,$pagesize", 'is_recommend desc,' . $order, 'id');
         if ($list) {
             // 获取我的关注
             $fnds = $this->friends(['uid' => $uid, 'type' => 1]);
