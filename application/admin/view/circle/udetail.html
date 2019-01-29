@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户详情</title>
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/font-awesome.min93e3.css?v=4.4.0">
+    <!-- Data Tables -->
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/plugins/iCheck/custom.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/h+/css/style.min.css?v=4.1.0">
+    <link rel="stylesheet" type="text/css" href="/static/layer/skin/layer.css">
+    <link rel="stylesheet" type="text/css" href="/static/uploadifive/uploadifive.css">
+    <style type="text/css">
+        .form-control{width: 200px;}
+        #preview{max-width: 120px;max-height: 120px;display: none;}
+        .level_url{max-width: 80px;max-height: 80px;}
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>用户详情</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal" onsubmit="return false">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">用户昵称</label>
+                            <div class="col-sm-10">{$user.nickname}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">用户类型</label>
+                            <div class="col-sm-10">{$user.type_txt}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">状态</label>
+                            <div class="col-sm-10">{$user.status_txt}{if($user.status===1)} &nbsp; &nbsp; <a href="javascript:;" id="shhe">审核</a>{/if}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">游戏</label>
+                            <div class="col-sm-10">
+                                {if(!empty($user.attrs))}
+                                <table>
+                                    <tr>
+                                        <th style="width: 100px;">游戏名称</th>
+                                        <th style="width: 100px;">当前段位</th>
+                                        <th style="width: 100px;">陪玩段位</th>
+                                        <th style="width: 100px;">陪玩类型</th>
+                                        <th>状态</th>
+                                        <th>水平截图</th>
+                                    </tr>
+                                    {foreach($user.attrs as $attr)}
+                                    <tr>
+                                        <td>{$attr.game_name}</td>
+                                        <td>{$attr.curr_para}</td>
+                                        <td>{$attr.play_para}</td>
+                                        <td>{$attr.play_type}</td>
+                                        <td>{$attr.status_txt}{if($attr.status==1)} &nbsp; &nbsp; <a href="#" data-id="{$attr.id}" class="skill_audit">审核</a>{/if}</td>
+                                        <td>
+                                            {foreach $attr.level_url as $url}<a href="{$url}" target="_blank"><img class="level_url" src="{$url}"></a>{/foreach}
+                                        </td>
+                                    </tr>
+                                    {/foreach}
+                                </table>
+                                {/if}
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">手机</label>
+                            <div class="col-sm-10">{$user.mobile}</div>
+                        </div>
+                        <div class="hr-line-dashed kf"></div>
+                        <div class="form-group kf">
+                            <label class="col-sm-2 control-label">QQ</label>
+                            <div class="col-sm-10">{$user.qq}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group sj">
+                            <label class="col-sm-2 control-label">微信</label>
+                            <div class="col-sm-10">{$user.wx}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">头像</label>
+                            <div class="col-sm-10">
+                                <img id="preview" src="{$user.avatar}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">年龄</label>
+                            <div class="col-sm-10">{$user.age}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">性别</label>
+                            <div class="col-sm-10">{$user.sex}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">简介</label>
+                            <div class="col-sm-10">{$user.introduce}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">贡献值</label>
+                            <div class="col-sm-10">{$user.contribution}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">评分</label>
+                            <div class="col-sm-10">{$user.score}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">入驻时间</label>
+                            <div class="col-sm-10">{$user.addtime}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">登录时间</label>
+                            <div class="col-sm-10">{$user.login_time}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">登录次数</label>
+                            <div class="col-sm-10">{$user.count}</div>
+                        </div>
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-2">
+                                <input class="btn btn-white" type="button" data-action="cancel" value="返回">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/static/h+/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/layer/layer.js"></script>
+<script type="text/javascript">
+    $(function(){
+        layer.config({extend: 'extend/layer.ext.js'});
+        $('#shhe').click(function(){
+            layer.confirm('陪玩师审核', {
+                btn: ['通过', '不通过', '取消'],
+                shade: false,
+                closeBtn: 0
+            }, function(){
+                auditor({$user.id}, 8)
+            }, function(){
+                layer.prompt({
+                    formType: 2,
+                    title: '请输入驳回原因'
+                }, function(v, i, e){
+                    layer.close(i);
+                    auditor({$user.id}, 4, v)
+                })
+            })
+        })
+        $('.skill_audit').click(function(){
+            var $id = $(this).data('id')
+            layer.confirm('陪玩师技能审核', {
+                btn: ['通过', '不通过', '取消'],
+                shade: false,
+                closeBtn: 0
+            }, function(){
+                auditor($id, 8, '', 1)
+            }, function(){
+                layer.prompt({
+                    formType: 2,
+                    title: '请输入驳回原因'
+                }, function(v, i, e){
+                    layer.close(i);
+                    auditor($id, 4, v, 1)
+                })
+            })
+        })
+        $('input[data-action]').click(function(){
+            $action = $(this).data('action');
+            if ($action == 'cancel') {
+                location.href = '/user/list';
+            }
+        });
+        function auditor($id, $status, $v, $is_skill) {
+            var $msg = '确实审核通过吗？';
+            if ($status == 4) {
+                $msg = '确实审核不通过吗？';
+            }
+            layer.confirm($msg, {icon: 3}, function(){
+                $.ajax({
+                    type: 'post', cache: false, dataType: 'json',
+                    url: '/user/auditor',
+                    data: {'id': $id, 'status': $status, 'reason': $v, 'is_skill': $is_skill},
+                    success: function(data){
+                        if (data.status == 0) {
+                            layer.msg(data.info, {icon: 1, time: 1000}, function(){
+                                location.reload();
+                            });
+                        }else{
+                            layer.msg(data.info, {icon: 5, time: 1000})
+                        }
+                    }
+                })
+            })
+        }
+    });
+</script>
+</html>

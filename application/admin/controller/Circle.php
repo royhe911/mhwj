@@ -611,4 +611,78 @@ class Circle extends \think\Controller
         return $this->fetch('gamelist', ['list' => $list, 'pages' => $pages]);
     }
 
+    /**
+     * 用户列表
+     * @author 贺强
+     * @time   2019-01-29 09:19:47
+     * @param  TUserModel $u TUserModel 实例
+     */
+    public function users(TUserModel $u)
+    {
+        $param = $this->request->get();
+        $page  = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $where = [];
+        if (!empty($param['nickname'])) {
+            $where = ['nickname' => ['like', "%{$param['nickname']}%"]];
+        } else {
+            $param['nickname'] = '';
+        }
+        $list = $u->getList($where, true, "$page,$pagesize", 'addtime desc');
+        foreach ($list as &$item) {
+            if ($item['status'] === 1) {
+                $item['status_txt'] = '启用';
+            } else {
+                $item['status_txt'] = '禁用';
+            }
+            if ($item['sex'] === 1) {
+                $item['sex'] = '男';
+            } elseif ($item['sex'] === 2) {
+                $item['sex'] = '女';
+            } else {
+                $item['sex'] = '保密';
+            }
+            if (!empty($item['addtime'])) {
+                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+            }
+        }
+        $count = $u->getCount($where);
+        $pages = ceil($count / $pagesize);
+        return $this->fetch('users', ['list' => $list, 'pages' => $pages, 'param' => $param]);
+    }
+
+    /**
+     * 操作用户
+     * @author 贺强
+     * @time   2019-01-29 09:44:15
+     * @param  TUserModel $u TUserModel 实例
+     */
+    public function operateu(TUserModel $u)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            $type  = $param['type'];
+            $ids   = $param['ids'];
+            if ($type === 'del' || $type === 'delAll') {
+                $res = $u->delByWhere(['id' => ['in', $ids]]);
+            } else {
+                $val = 1;
+                if ($type === 'disable' || $type === 'disableAll') {
+                    $val = 44;
+                }
+                $res = $u->modifyField('status', $val, ['id' => ['in', $ids]]);
+            }
+            if (!$res) {
+                return ['status' => 4, 'info' => '失败'];
+            }
+            return ['status' => 0, 'info' => '成功'];
+        }
+    }
+
 }
