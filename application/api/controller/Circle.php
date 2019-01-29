@@ -422,9 +422,9 @@ class Circle extends \think\Controller
             foreach ($list as $item) {
                 // 过滤掉本人只取好友信息
                 if ($item['uid1'] === $uid) {
-                    $data[] = ['uid' => $item['uid2'], 'nickname' => $item['nickname2'], 'avatar' => $item['avatar2'], 'sex' => $item['sex2'], 'isTouchMove' => false];
+                    $data[] = ['uid' => $item['uid2'], 'nickname' => $item['nickname2'], 'avatar' => $item['avatar2'], 'sex' => $item['sex2'], 'is_friend' => $item['is_friend'], 'isTouchMove' => false];
                 } else {
-                    $data[] = ['uid' => $item['uid1'], 'nickname' => $item['nickname1'], 'avatar' => $item['avatar1'], 'sex' => $item['sex1'], 'isTouchMove' => false];
+                    $data[] = ['uid' => $item['uid1'], 'nickname' => $item['nickname1'], 'avatar' => $item['avatar1'], 'sex' => $item['sex1'], 'is_friend' => $item['is_friend'], 'isTouchMove' => false];
                 }
             }
             $result = [];
