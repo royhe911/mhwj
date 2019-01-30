@@ -106,7 +106,11 @@ class Circle extends \think\Controller
         }
         $res = $u->syncinfo($param);
         if ($res !== true) {
-            echo json_encode(['status' => $res, 'info' => '同步失败']);exit;
+            $info = '同步失败';
+            if ($res === 90) {
+                $info = '您的账号已禁用，不能修改';
+            }
+            echo json_encode(['status' => $res, 'info' => $info]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '同步成功']);exit;
     }
@@ -561,7 +565,7 @@ class Circle extends \think\Controller
         }
         $u    = new TUserModel();
         $uid1 = intval($param['uid1']);
-        $uuu = $u->getModel(['id' => $uid1], ['status']);
+        $uuu  = $u->getModel(['id' => $uid1], ['status']);
         if ($uuu['status']) {
             echo json_encode(['status' => 7, 'info' => '您的账号已禁用，不能关注']);exit;
         }

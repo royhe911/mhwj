@@ -42,7 +42,11 @@ class TUserModel extends CommonModel
             $fda1['sex1'] = $param['sex'];
             $fda2['sex2'] = $param['sex'];
         }
-        $id = $param['id'];
+        $id   = $param['id'];
+        $user = $this->getModel(['id' => $id], ['status']);
+        if ($user['status'] === 44) {
+            return 90;
+        }
         if (!empty($param['gid'])) {
             $g    = new TGameModel();
             $game = $g->getModel(['id' => $param['gid']]);
