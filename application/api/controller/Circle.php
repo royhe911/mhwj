@@ -200,7 +200,7 @@ class Circle extends \think\Controller
             $user = $u->getModel(['id' => $uid], ['circle']);
             if (!empty($user) && !empty($user['circle'])) {
                 $circle = explode(',', $user['circle']);
-                $wherec = '1';
+                $wherec = '0';
                 foreach ($circle as $c) {
                     $wherec .= " or find_in_set('$c',circle)";
                 }
