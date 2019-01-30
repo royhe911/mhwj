@@ -1044,8 +1044,8 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $room_id  = $param['room_id'];
-        $uid      = $param['uid'];
+        $room_id = $param['room_id'];
+        $uid     = $param['uid'];
         $c->modifyField('is_read', 1, ['is_read' => 0, 'room_id' => $room_id, 'uid' => ['<>', $uid], 'addtime' => ['lt', time()]]);
         echo json_encode(['status' => 0, 'info' => '修改成功']);exit;
     }
@@ -1099,6 +1099,9 @@ class Circle extends \think\Controller
             $count = 0;
             if (!empty($chats[$room['id']])) {
                 $count = $chats[$room['id']];
+            }
+            if (strpos($room['content'], 'https://') !== false) {
+                $room['content'] = '[图片]';
             }
             $item = ['id' => $room['id'], 'is_friend' => $room['is_friend'], 'count' => $count, 'content' => $room['content'], 'chat_time' => $chat_time];
             if ($room['uid1'] === $uid) {
