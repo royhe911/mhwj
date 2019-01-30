@@ -918,11 +918,14 @@ class Circle extends \think\Controller
         $nam2 = "room_{$uid2}_{$uid1}";
         $room = $r->getModel(['name' => ['in', [$name, $nam2]]], ['id', 'is_friend', 'uid1', 'nickname1', 'uid2', 'nickname2']);
         if ($room) {
+            $id       = $room['id'];
             $nickname = $room['nickname1'];
             if ($uid1 === $room['uid1']) {
                 $nickname = $room['nickname2'];
             }
-            echo json_encode(['status' => 0, 'info' => '创建成功', 'data' => ['room_id' => $room['id'], 'nickname' => $nickname, 'is_friend' => $room['is_friend']]]);exit;
+            $c = new TChatModel();
+            $c->modifyField('is_read', 1, ['room_id' => $id, 'uid' => $uid1]);
+            echo json_encode(['status' => 0, 'info' => '创建成功', 'data' => ['room_id' => $id, 'nickname' => $nickname, 'is_friend' => $room['is_friend']]]);exit;
         }
         // 房间名称
         $param['name'] = $name;
