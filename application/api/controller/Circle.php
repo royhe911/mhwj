@@ -535,8 +535,8 @@ class Circle extends \think\Controller
             echo json_encode($msg);exit;
         }
         $uid = $param['uid'];
-        $f->modifyField('tip1', 1, ['uid2' => $uid, 'follow1' => 1]);
-        $f->modifyField('tip2', 1, ['uid1' => $uid, 'follow2' => 1]);
+        $f->modifyField('tip1', 1, ['tip1' => 0, 'uid2' => $uid, 'follow1' => 1]);
+        $f->modifyField('tip2', 1, ['tip2' => 0, 'uid1' => $uid, 'follow2' => 1]);
         echo json_encode(['status' => 0, 'info' => '修改成功']);exit;
     }
 
@@ -923,8 +923,6 @@ class Circle extends \think\Controller
             if ($uid1 === $room['uid1']) {
                 $nickname = $room['nickname2'];
             }
-            $c = new TChatModel();
-            $c->modifyField('is_read', 1, ['room_id' => $id, 'uid' => $uid1]);
             echo json_encode(['status' => 0, 'info' => '创建成功', 'data' => ['room_id' => $id, 'nickname' => $nickname, 'is_friend' => $room['is_friend']]]);exit;
         }
         // 房间名称
@@ -1031,7 +1029,7 @@ class Circle extends \think\Controller
         $room_id  = $param['room_id'];
         $uid      = $param['uid'];
         $overtime = strtotime($param['overtime']);
-        $c->modifyField('is_read', 1, ['room_id' => $room_id, 'uid' => ['<>', $uid], 'addtime' => ['lt', $overtime]]);
+        $c->modifyField('is_read', 1, ['is_read' => 0, 'room_id' => $room_id, 'uid' => ['<>', $uid], 'addtime' => ['lt', $overtime]]);
         echo json_encode(['status' => 0, 'info' => '修改成功']);exit;
     }
 
