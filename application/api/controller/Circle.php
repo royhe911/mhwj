@@ -990,8 +990,14 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $room_id   = $param['room_id'];
-        $uid       = $param['uid'];
+        $room_id = $param['room_id'];
+        $uid     = $param['uid'];
+        $u       = new TUserModel();
+        $user    = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex', 'status']);
+        if ($user['status'] === 44) {
+            echo json_encode(['status' => 7, 'info' => '您的账号已禁用，不能聊天']);exit;
+        }
+        unset($user['status']);
         $is_friend = 0;
         if (!empty($param['is_friend'])) {
             $is_friend = intval($param['is_friend']);
@@ -1007,8 +1013,6 @@ class Circle extends \think\Controller
                 }
             }
         }
-        $u    = new TUserModel();
-        $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex']);
         if (!empty($user)) {
             $param = array_merge($param, $user);
         }
