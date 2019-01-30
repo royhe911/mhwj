@@ -559,8 +559,12 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $u     = new TUserModel();
-        $uid1  = intval($param['uid1']);
+        $u    = new TUserModel();
+        $uid1 = intval($param['uid1']);
+        $uuu = $u->getModel(['id' => $uid1], ['status']);
+        if ($uuu['status']) {
+            echo json_encode(['status' => 7, 'info' => '您的账号已禁用，不能关注']);exit;
+        }
         $uid2  = intval($param['uid2']);
         $where = "(uid1=$uid1 and uid2=$uid2) or (uid1=$uid2 and uid2=$uid1)";
         $fnd   = $f->getModel($where);
