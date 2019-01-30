@@ -26,7 +26,7 @@ class TDynamicCommentModel extends CommonModel
         Db::startTrans();
         try {
             $u    = new TUserModel();
-            $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'sex']);
+            $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'sex', 'status']);
             if (!empty($user)) {
                 if ($user['status'] === 44) {
                     return 43;
