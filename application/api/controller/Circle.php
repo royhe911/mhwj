@@ -701,7 +701,11 @@ class Circle extends \think\Controller
         // 评论
         $res = $dc->do_comment($param);
         if ($res !== true) {
-            echo json_encode(['status' => $res, 'info' => '评论失败']);exit;
+            $info = '评论失败';
+            if ($res === 43) {
+                $info = '您的账号已禁用，不能评论';
+            }
+            echo json_encode(['status' => $res, 'info' => $info]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '评论成功']);exit;
     }

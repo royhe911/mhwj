@@ -28,6 +28,9 @@ class TDynamicCommentModel extends CommonModel
             $u    = new TUserModel();
             $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'sex']);
             if (!empty($user)) {
+                if ($user['status'] === 44) {
+                    return 43;
+                }
                 // 获取评论者的昵称、头像、性别
                 $param['nickname'] = $user['nickname'];
                 $param['avatar']   = $user['avatar'];
