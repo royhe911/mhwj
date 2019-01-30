@@ -1039,17 +1039,14 @@ class Circle extends \think\Controller
         if (empty($param['room_id'])) {
             $msg = ['status' => 1, 'info' => '房间ID不能为空'];
         } elseif (empty($param['uid'])) {
-            $msg = ['status' => 3, 'info' => '当前登录用户不能为空'];
-        } elseif (empty($param['overtime'])) {
-            $msg = ['status' => 5, 'info' => '离开页面时间不能为空'];
+            $msg = ['status' => 3, 'info' => '当前登录用户ID不能为空'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
         $room_id  = $param['room_id'];
         $uid      = $param['uid'];
-        $overtime = strtotime($param['overtime']);
-        $c->modifyField('is_read', 1, ['is_read' => 0, 'room_id' => $room_id, 'uid' => ['<>', $uid], 'addtime' => ['lt', $overtime]]);
+        $c->modifyField('is_read', 1, ['is_read' => 0, 'room_id' => $room_id, 'uid' => ['<>', $uid], 'addtime' => ['lt', time()]]);
         echo json_encode(['status' => 0, 'info' => '修改成功']);exit;
     }
 

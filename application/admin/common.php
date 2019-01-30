@@ -208,7 +208,7 @@ function curl($url, $post = '', $charset = 'utf-8')
  * @param  boolean $is_win 是否是 windows 系统
  * @return string          返回截取的图片保存路径
  */
-function getVideoCover($file, $s = 11, $is_win = false)
+function getVideoCover($file, $s = 1, $is_win = false)
 {
     $ffmpeg = '/monchickey/ffmpeg/bin/ffmpeg';
     $root   = ROOT_PATH . 'public';
