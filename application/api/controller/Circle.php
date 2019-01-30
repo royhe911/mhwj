@@ -566,7 +566,7 @@ class Circle extends \think\Controller
         $u    = new TUserModel();
         $uid1 = intval($param['uid1']);
         $uuu  = $u->getModel(['id' => $uid1], ['status']);
-        if ($uuu['status']) {
+        if ($uuu['status'] === 44) {
             echo json_encode(['status' => 7, 'info' => '您的账号已禁用，不能关注']);exit;
         }
         $uid2  = intval($param['uid2']);
@@ -1080,11 +1080,13 @@ class Circle extends \think\Controller
         }
         $rooms = $r->getList($where, true, "$page,$pagesize", 'chat_time desc');
         $ids   = array_column($rooms, 'id');
-        // 获取未读消息数量
-        $c     = new TChatModel();
-        $chats = $c->getList(['room_id' => ['in', $ids], 'uid' => ['<>', $uid], 'is_read' => 0], ['count(*)' => 'count', 'room_id'], null, '', 'room_id');
-        $chats = array_column($chats, 'count', 'room_id');
-        $data  = [];
+        if (!empty($ids)) {
+            // 获取未读消息数量
+            $c     = new TChatModel();
+            $chats = $c->getList(['room_id' => ['in', $ids], 'uid' => ['<>', $uid], 'is_read' => 0], ['count(*)' => 'count', 'room_id'], null, '', 'room_id');
+            $chats = array_column($chats, 'count', 'room_id');
+        }
+        $data = [];
         foreach ($rooms as &$room) {
             // 显示发布时间
             $diff = time() - $room['chat_time'];
