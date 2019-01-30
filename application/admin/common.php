@@ -210,7 +210,7 @@ function curl($url, $post = '', $charset = 'utf-8')
  */
 function getVideoCover($file, $s = 11, $is_win = false)
 {
-    $ffmpeg = 'ffmpeg';
+    $ffmpeg = '/monchickey/ffmpeg/bin/ffmpeg';
     $root   = ROOT_PATH . 'public';
     if ($is_win) {
         $ffmpeg = 'D:/ffmpeg/bin/ffmpeg.exe';

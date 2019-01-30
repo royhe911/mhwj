@@ -194,7 +194,7 @@ class Circle extends \think\Controller
             }
             $where .= " and uid in ($uids)";
         } elseif ($type === 2) {
-            $where .= " and is_open=1 or uid=$uid";
+            $where .= " and (is_open=1 or uid=$uid)";
         } elseif ($type === 3) {
             $u    = new TUserModel();
             $user = $u->getModel(['id' => $uid], ['circle']);
@@ -206,6 +206,7 @@ class Circle extends \think\Controller
                 }
                 $ids = $u->getList($wherec, ['id']);
                 $ids = array_column($ids, 'id');
+                $ids = implode(',', $ids);
                 $where .= " and uid in ($ids)";
             } else {
                 echo json_encode(['status' => 0, 'info' => '获取成功']);exit;
@@ -218,6 +219,7 @@ class Circle extends \think\Controller
             $dcs = $dc->getList(['userid' => $uid, 'is_tip' => 0], ['id', 'did']);
             if (!empty($dcs)) {
                 $ids = array_column($dcs, 'did');
+                $ids = implode(',', $ids);
                 $where .= " and id in ($ids)";
             } else {
                 echo json_encode(['status' => 0, 'info' => '暂无数据']);exit;
