@@ -38,12 +38,19 @@ class TPraiseModel extends CommonModel
                     $model = new TDynamicCommentModel();
                     break;
             }
+            $uid  = $param['uid'];
+            $u    = new TUserModel();
+            $user = $u->getModel(['id' => $uid], ['status']);
+            if (empty($user) || $user['status'] === 44) {
+                Db::rollback();
+                return 40;
+            }
             $data = $model->getModel(['id' => $id], ['id'], '', true);
             if (!$data) {
                 Db::rollback();
                 return 10;
             }
-            $where = ['obj_id' => $id, 'uid' => $param['uid'], 'type' => $type];
+            $where = ['obj_id' => $id, 'uid' => $uid, 'type' => $type];
             $count = $this->getCount($where);
             if (!$count) {
                 $res = $model->increment('zan_count', ['id' => $id]);

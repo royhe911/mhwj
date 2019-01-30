@@ -638,7 +638,7 @@ class Circle extends \think\Controller
     }
 
     /**
-     * 点赞
+     * 点赞/取消点赞
      * @author 贺强
      * @time   2019-01-22 19:44:34
      * @param  TPraiseModel $p TPraiseModel 实例
@@ -660,7 +660,11 @@ class Circle extends \think\Controller
         // 添加
         $res = $p->do_zan($param);
         if ($res !== true) {
-            echo json_encode(['status' => $res, 'info' => '失败']);exit;
+            $info = '失败';
+            if ($res === 40) {
+                $info = '您的账号已禁用，不能点赞';
+            }
+            echo json_encode(['status' => $res, 'info' => $info]);exit;
         }
         echo json_encode(['status' => 0, 'info' => '成功']);exit;
     }

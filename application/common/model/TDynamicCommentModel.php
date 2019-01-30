@@ -29,6 +29,7 @@ class TDynamicCommentModel extends CommonModel
             $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'sex', 'status']);
             if (!empty($user)) {
                 if ($user['status'] === 44) {
+                    Db::rollback();
                     return 43;
                 }
                 // 获取评论者的昵称、头像、性别
