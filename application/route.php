@@ -266,6 +266,7 @@ return [
     '/api/circle/maillist' => 'api/Circle/maillist', // 通讯录
     '/api/circle/games'    => 'api/Circle/get_games', // 获取游戏
     '/api/circle/addgame'  => 'api/Circle/add_game', // 添加游戏技能
+    '/api/circle/delgame'  => 'api/Circle/del_game', // 删除游戏技能
     '/api/circle/userinfo' => 'api/Circle/userinfo', // 个人中心
     '/api/circle/udynamic' => 'api/Circle/userdynamic', // 个人中心用户动态
     '/api/circle/rooms'    => 'api/Circle/get_rooms', // 对话列表

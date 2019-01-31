@@ -126,7 +126,7 @@ class Circle extends \think\Controller
         $param = $this->param;
         if (empty($param['uid'])) {
             $msg = ['status' => 1, 'info' => '用户ID不能为空'];
-        } elseif (empty($param['content'])) {
+        } elseif (empty($param['content']) && empty($param['pic'])) {
             $msg = ['status' => 3, 'info' => '动态内容不能为空'];
         }
         if (!empty($msg)) {
@@ -1217,6 +1217,27 @@ class Circle extends \think\Controller
             echo json_encode(['status' => 40, 'info' => '添加失败']);exit;
         }
         echo json_encode(['status' => 0, 'info' => '添加成功']);exit;
+    }
+
+    /**
+     * 删除游戏技能
+     * @author 贺强
+     * @time   2019-01-30 19:39:47
+     * @param  TUserGameModel $ug TUserGameModel 实例
+     */
+    public function del_game(TUserGameModel $ug)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
+        } elseif (empty($param['gid'])) {
+            $msg = ['status' => 3, 'info' => '游戏ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $ug->delByWhere(['uid' => $param['uid'], 'gid' => $param['gid']]);
+        echo json_encode(['status' => 0, 'info' => '成功']);exit;
     }
 
     /**
