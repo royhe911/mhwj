@@ -25,8 +25,19 @@ class TDynamicCommentModel extends CommonModel
     {
         Db::startTrans();
         try {
-            $u    = new TUserModel();
-            $user = $u->getModel(['id' => $param['uid']], ['nickname', 'avatar', 'sex', 'status']);
+            $u      = new TUserModel();
+            $uid    = $param['uid'];
+            $did    = $param['did'];
+            $type   = intval($param['type']);
+            $d      = new TDynamicModel();
+            $dy     = $d->getModel(['id' => $did], ['uid']);
+            $obj_id = $param['obj_id'];
+            $ddat   = ['did' => $did, 'obj_id' => $obj_id, 'type' => 1, 'content' => $param['content'], 'uid' => $dy['uid'], 'tid' => $uid, 'addtime' => time()];
+            if ($type === 2) {
+                $obj  = $this->getModel(['id' => $obj_id], ['uid']);
+                $cdat = ['did' => $did, 'obj_id' => $obj_id, 'type' => 1, 'content' => $param['content'], 'uid' => $obj['uid'], 'tid' => $uid, 'addtime' => time()];
+            }
+            $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'sex', 'status']);
             if (!empty($user)) {
                 if ($user['status'] === 44) {
                     Db::rollback();
@@ -36,15 +47,32 @@ class TDynamicCommentModel extends CommonModel
                 $param['nickname'] = $user['nickname'];
                 $param['avatar']   = $user['avatar'];
                 $param['sex']      = $user['sex'];
+                $ddat['nickname']  = $user['nickname'];
+                $ddat['avatar']    = $user['avatar'];
+                if (!empty($cdat)) {
+                    $cdat['nickname'] = $user['nickname'];
+                    $cdat['avatar']   = $user['avatar'];
+                }
             }
             $res = $this->add($param);
             if (!$res) {
                 Db::rollback();
                 return 10;
             }
+            // 添加评论/回复通知
+            $n = new TNoticeModel();
+            if (!empty($cdat)) {
+                $res = $n->addArr([$ddat, $cdat]);
+            } else {
+                $res = $n->add($ddat);
+            }
+            if (!$res) {
+                Db::rollback();
+                return 30;
+            }
             // 被评论或回复的动态评论数加 1
             $d   = new TDynamicModel();
-            $res = $d->increment('pl_count', ['id' => $param['did']]);
+            $res = $d->increment('pl_count', ['id' => $did]);
             if (!$res) {
                 Db::rollback();
                 return 20;

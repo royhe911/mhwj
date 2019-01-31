@@ -1,6 +1,7 @@
 <?php
 namespace app\common\model;
 
+use app\common\model\TNoticeModel;
 use think\Db;
 
 /**
@@ -26,35 +27,55 @@ class TPraiseModel extends CommonModel
         Db::startTrans();
         try {
             $id   = $param['obj_id'];
+            $uid  = $param['uid'];
             $type = intval($param['type']);
+            $ndat = ['type' => 3, 'obj_id' => $id, 'tid' => $uid, 'addtime' => time()];
             switch ($type) {
                 case 1:
                     $model = new TUserModel();
                     break;
                 case 2:
                     $model = new TDynamicModel();
+                    // 赋值动态ID
+                    $ndat['did'] = $id;
                     break;
                 case 3:
                     $model = new TDynamicCommentModel();
                     break;
             }
-            $uid  = $param['uid'];
             $u    = new TUserModel();
-            $user = $u->getModel(['id' => $uid], ['status']);
+            $user = $u->getModel(['id' => $uid], ['nickname', 'avatar', 'status']);
             if (empty($user) || $user['status'] === 44) {
                 Db::rollback();
                 return 40;
             }
-            $data = $model->getModel(['id' => $id], ['id'], '', true);
+            $ndat['nickname'] = $user['nickname'];
+            $ndat['avatar']   = $user['avatar'];
+            // 获取点赞对象
+            $data = $model->getModel(['id' => $id], true, '', true);
             if (!$data) {
                 Db::rollback();
                 return 10;
             }
+            if ($type === 3) {
+                $ndat['did'] = $data['did'];
+                // 获取评论的动态
+                $d  = new TDynamicModel();
+                $dy = $d->getModel(['id' => $data['did']], ['uid']);
+                if ($dy) {
+                    $ndat['uid'] = $dy['uid'];
+                }
+            } elseif ($type === 2) {
+                $ndat['uid'] = $data['uid'];
+            }
             $where = ['obj_id' => $id, 'uid' => $uid, 'type' => $type];
             $count = $this->getCount($where);
+            $n     = new TNoticeModel();
             if (!$count) {
+                $n->add($ndat);
                 $res = $model->increment('zan_count', ['id' => $id]);
             } else {
+                $n->delByWhere(['type' => 3, 'tid' => $uid, 'obj_id' => $id]);
                 $res = $model->decrement('zan_count', ['id' => $id]);
             }
             if (!$res) {
