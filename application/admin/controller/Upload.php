@@ -43,7 +43,8 @@ class Upload extends \think\Controller
         // 上传
         $res = move_uploaded_file($tmp_file, $target_file);
         if ($res) {
-            $thumb = $this->thumb($target_file, 100, 100);
+            // $thumb = $this->thumb($target_file, 100, 100);
+            $thumb = $this->imagecropper($target_file, 100, 100);
             $msg   = ['status' => 0, 'info' => '上传成功', 'path' => $upload_dir . $filename];
             if (!empty($thumb)) {
                 $msg['thumb'] = $upload_dir . '/' . $thumb;
@@ -104,7 +105,8 @@ class Upload extends \think\Controller
         $res = move_uploaded_file($tmp_file, $target_file);
         if ($res) {
             if ($is_pic) {
-                $thumb = $this->thumb($target_file, $thumb_w, $thumb_h);
+                // $thumb   = $this->thumb($target_file, $thumb_w, $thumb_h);
+                $thumb = $this->imagecropper($target_file, $thumb_w, $thumb_h);
                 $thumb = $upload_dir . '/' . $thumb;
             }
             $msg = ['status' => 0, 'info' => '上传成功', 'path' => $upload_dir . $filename];
@@ -200,6 +202,88 @@ class Upload extends \think\Controller
         imagedestroy($src);
 
         //返回新的缩略图的文件名
+        return $prefix . $filename;
+    }
+
+    /**
+     * 生成裁剪图
+     * @author 贺强
+     * @time   2019-01-31 09:25:54
+     * @param  string $source_path   源图路径
+     * @param  int    $target_width  裁剪宽度
+     * @param  int    $target_height 裁剪高度
+     * @param  string $prefix        裁剪图片名称前缀
+     * @return string                返回裁剪后图片名称
+     */
+    public function imagecropper($source_path, $target_width, $target_height, $prefix = 'cropped_')
+    {
+        $source_info   = getimagesize($source_path);
+        $source_width  = $source_info[0];
+        $source_height = $source_info[1];
+        $source_mime   = $source_info['mime'];
+        $source_ratio  = $source_height / $source_width;
+        $target_ratio  = $target_height / $target_width;
+
+        // 源图过高
+        if ($source_ratio > $target_ratio) {
+            $cropped_width  = $source_width;
+            $cropped_height = $source_width * $target_ratio;
+            $source_x       = 0;
+            $source_y       = ($source_height - $cropped_height) / 2;
+        }
+        // 源图过宽
+        elseif ($source_ratio < $target_ratio) {
+            $cropped_width  = $source_height / $target_ratio;
+            $cropped_height = $source_height;
+            $source_x       = ($source_width - $cropped_width) / 2;
+            $source_y       = 0;
+        }
+        // 源图适中
+        else {
+            $cropped_width  = $source_width;
+            $cropped_height = $source_height;
+            $source_x       = 0;
+            $source_y       = 0;
+        }
+
+        switch ($source_mime) {
+            case 'image/gif':
+                $source_image = imagecreatefromgif($source_path);
+                break;
+
+            case 'image/jpeg':
+                $source_image = imagecreatefromjpeg($source_path);
+                break;
+
+            case 'image/png':
+                $source_image = imagecreatefrompng($source_path);
+                break;
+
+            default:
+                return false;
+                break;
+        }
+
+        $target_image  = imagecreatetruecolor($target_width, $target_height);
+        $cropped_image = imagecreatetruecolor($cropped_width, $cropped_height);
+
+        // 图片裁剪
+        imagecopy($cropped_image, $source_image, 0, 0, $source_x, $source_y, $cropped_width, $cropped_height);
+        // 图片缩放
+        imagecopyresampled($target_image, $cropped_image, 0, 0, 0, 0, $target_width, $target_height, $cropped_width, $cropped_height);
+
+        //文件名
+        $filename = basename($source_path);
+        //文件夹名
+        $foldername = substr(dirname($source_path), 0);
+        //缩略图存放路径
+        $cropped_path = $foldername . '/' . $prefix . $filename;
+
+        header('Content-Type: image/jpeg');
+        imagejpeg($target_image, $cropped_path);
+        imagedestroy($source_image);
+        imagedestroy($target_image);
+        imagedestroy($cropped_image);
         return $prefix . $filename;
     }
 
