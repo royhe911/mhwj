@@ -432,7 +432,7 @@ class Circle extends \think\Controller
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $count]);
         } else {
             $w_fan = "(uid1=$uid and follow2=1 and tip2=0) or (uid2=$uid and follow1=1 and tip1=0)";
-            $t_fan = $f->getCount($where);
+            $t_fan = $f->getCount($w_fan);
             $page  = 1;
             if (!empty($param['page'])) {
                 $page = $param['page'];
