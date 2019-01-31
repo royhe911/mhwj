@@ -6,6 +6,7 @@ use app\common\model\TDynamicCommentModel;
 use app\common\model\TDynamicModel;
 use app\common\model\TFriendModel;
 use app\common\model\TGameModel;
+use app\common\model\TNoticeModel;
 use app\common\model\TPraiseModel;
 use app\common\model\TRoomModel;
 use app\common\model\TSchoolModel;
@@ -181,9 +182,9 @@ class Circle extends \think\Controller
         if (!empty($param['type'])) {
             $type = intval($param['type']);
         }
-        // 获取未知的评论数量
-        $dc    = new TDynamicCommentModel();
-        $count = $dc->getCount(['userid' => $uid, 'is_tip' => 0]);
+        // 获取通知数量
+        $n     = new TNoticeModel();
+        $count = $n->getCount(['uid' => $uid]);
         if ($type === 1) {
             $f     = new TFriendModel();
             $fw    = "(uid1=$uid and follow1=1) or (uid2=$uid and follow2=1)";
@@ -723,6 +724,58 @@ class Circle extends \think\Controller
     }
 
     /**
+     * 获取用户通知
+     * @author 贺强
+     * @time   2019-01-31 12:04:54
+     * @param  TNoticeModel $n TNoticeModel 实例
+     */
+    public function get_notice(TNoticeModel $n)
+    {
+        $param = $this->param;
+        if (empty($param['uid'])) {
+            $msg = ['status' => 1, 'info' => '用户ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $list = $n->getList(['uid' => $param['uid']], ['id', 'did', 'obj_id', 'content', 'tid' => 'uid', 'nickname', 'avatar', 'addtime'], null, 'addtime desc');
+        foreach ($list as &$item) {
+            if (!empty($item['addtime'])) {
+                $diff = time() - $item['addtime'];
+                if ($diff < 60) {
+                    $item['addtime'] = '刚刚';
+                } elseif ($diff < 3600) {
+                    $item['addtime'] = intval($diff / 60) . '分钟前';
+                } elseif ($diff < 86400) {
+                    $item['addtime'] = intval($diff / 3600) . '小时前';
+                } else {
+                    $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+                }
+            }
+        }
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 删除通知
+     * @author 贺强
+     * @time   2019-01-31 11:55:02
+     * @param  TNoticeModel $n TNoticeModel 实例
+     */
+    public function del_notice(TNoticeModel $n)
+    {
+        $param = $this->param;
+        if (empty($param['nids'])) {
+            $msg = ['status' => 1, 'info' => '通知ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $n->delByWhere(['id' => ['in', $param['nids']]]);
+        echo json_encode(['status' => 0, 'info' => '删除成功']);exit;
+    }
+
+    /**
      * 动态详情
      * @author 贺强
      * @time   2019-01-23 09:12:41
@@ -864,7 +917,9 @@ class Circle extends \think\Controller
                 }
             }
             $dynamic['comment'] = $list;
-            $dc->modifyField('is_tip', 1, ['userid' => $uid, 'did' => $did]);
+            // 删除通知
+            $n = new TNoticeModel();
+            $n->delByWhere(['uid' => $uid, 'did' => $did]);
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $dynamic]);exit;
     }

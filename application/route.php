@@ -275,5 +275,7 @@ return [
     '/api/circle/mtip'     => 'api/Circle/modifytip', // 修改提醒状态
     '/api/circle/zhtopy'   => 'api/Circle/zh_to_py', // 汉字转拼音
     '/api/circle/outfit'   => 'api/Circle/get_outfit', // 获取学校或院系
+    '/api/circle/notice'   => 'api/Circle/get_notice', // 获取通知
+    '/api/circle/deltz'    => 'api/Circle/del_notice', // 删除通知
     /*--------   圈子 api 结束  --------*/
 ];
