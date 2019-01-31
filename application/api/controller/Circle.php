@@ -431,7 +431,9 @@ class Circle extends \think\Controller
             $count = $f->getCount($where);
             echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $count]);
         } else {
-            $page = 1;
+            $w_fan = "(uid1=$uid and follow2=1 and tip2=0) or (uid2=$uid and follow1=1 and tip1=0)";
+            $t_fan = $f->getCount($where);
+            $page  = 1;
             if (!empty($param['page'])) {
                 $page = $param['page'];
             }
@@ -439,14 +441,14 @@ class Circle extends \think\Controller
             if (!empty($param['pagesize'])) {
                 $pagesize = $param['pagesize'];
             }
-            $list = $f->getList($where, ['uid1', 'nickname1', 'avatar1', 'sex1', 'uid2', 'nickname2', 'avatar2', 'sex2', 'is_friend'], "$page,$pagesize");
+            $list = $f->getList($where, ['uid1', 'nickname1', 'avatar1', 'sex1', 'uid2', 'nickname2', 'avatar2', 'sex2', 'is_friend', 'tip1', 'tip2'], "$page,$pagesize");
             $data = [];
             foreach ($list as $item) {
                 // 过滤掉本人只取好友信息
                 if ($item['uid1'] === $uid) {
-                    $data[] = ['uid' => $item['uid2'], 'nickname' => $item['nickname2'], 'avatar' => $item['avatar2'], 'sex' => $item['sex2'], 'is_friend' => $item['is_friend'], 'isTouchMove' => false];
+                    $data[] = ['uid' => $item['uid2'], 'nickname' => $item['nickname2'], 'avatar' => $item['avatar2'], 'sex' => $item['sex2'], 'is_tip' => $item['tip2'], 'is_friend' => $item['is_friend'], 'isTouchMove' => false];
                 } else {
-                    $data[] = ['uid' => $item['uid1'], 'nickname' => $item['nickname1'], 'avatar' => $item['avatar1'], 'sex' => $item['sex1'], 'is_friend' => $item['is_friend'], 'isTouchMove' => false];
+                    $data[] = ['uid' => $item['uid1'], 'nickname' => $item['nickname1'], 'avatar' => $item['avatar1'], 'sex' => $item['sex1'], 'is_tip' => $item['tip1'], 'is_friend' => $item['is_friend'], 'isTouchMove' => false];
                 }
             }
             $result = [];
@@ -474,7 +476,7 @@ class Circle extends \think\Controller
                 $arr[] = ['id' => $i, 'region' => strtoupper($k), 'items' => $rst];
                 $i++;
             }
-            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $arr]);exit;
+            echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $arr, 'count' => $t_fan]);exit;
         }
     }
 
@@ -738,8 +740,11 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $list = $n->getList(['uid' => $param['uid']], ['id', 'did', 'obj_id', 'content', 'tid' => 'uid', 'nickname', 'avatar', 'addtime'], null, 'addtime desc');
+        $list = $n->getList(['uid' => $param['uid']], ['id', 'did', 'type', 'obj_id', 'content', 'tid' => 'uid', 'nickname', 'avatar', 'addtime'], null, 'addtime desc');
         foreach ($list as &$item) {
+            if ($item['type'] === 3) {
+                $item['content'] = '给你的动态点了赞';
+            }
             if (!empty($item['addtime'])) {
                 $diff = time() - $item['addtime'];
                 if ($diff < 60) {
