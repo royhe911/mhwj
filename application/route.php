@@ -279,5 +279,6 @@ return [
     '/api/circle/deltz'    => 'api/Circle/del_notice', // 删除通知
     '/api/circle/question' => 'api/Circle/get_question', // 常见问题
     '/api/circle/answer'   => 'api/Circle/get_answer', // 问题答案
+    '/api/circle/feedback' => 'api/Circle/feedback', // 建议反馈
     /*--------   圈子 api 结束  --------*/
 ];

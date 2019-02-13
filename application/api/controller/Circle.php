@@ -4,6 +4,7 @@ namespace app\api\controller;
 use app\common\model\TChatModel;
 use app\common\model\TDynamicCommentModel;
 use app\common\model\TDynamicModel;
+use app\common\model\TFeedbackModel;
 use app\common\model\TFriendModel;
 use app\common\model\TGameModel;
 use app\common\model\TNoticeModel;
@@ -1528,7 +1529,7 @@ class Circle extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $q->getList([], ['id', 'title'], "$page,$pagesize");
+        $list = $q->getList(['pid' => 0], ['id', 'title'], "$page,$pagesize");
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
@@ -1540,13 +1541,40 @@ class Circle extends \think\Controller
      */
     public function get_answer(TQuestionModel $q)
     {
-        $param=$this->param;
-        if (empty($param['id'])) {
-            $msg=['status'=>1,'info'=>'问题ID不能为空'];
+        $param = $this->param;
+        if (empty($param['qid'])) {
+            $msg = ['status' => 1, 'info' => '问题ID不能为空'];
         }
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
+        $qust = $q->getModel(['pid' => $param['qid']], ['answer']);
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $qust]);exit;
+    }
 
+    /**
+     * 建议反馈
+     * @author 贺强
+     * @time   2019-02-13 15:49:54
+     * @param  TFeedbackModel $f TFeedbackModel 实例
+     */
+    public function feedback(TFeedbackModel $f)
+    {
+        $param = $this->param;
+        if (empty($param['content']) && empty($param['screen'])) {
+            $msg = ['status' => 1, 'info' => '反馈内容和反馈截图不能都为空'];
+        } elseif (empty($param['contact'])) {
+            $msg = ['status' => 3, 'info' => '联系方式不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+        $param['addtime'] = time();
+        // 添加
+        $res = $f->add($param);
+        if (!$res) {
+            echo json_encode(['status' => 4, 'info' => '反馈失败']);exit;
+        }
+        echo json_encode(['status' => 0, 'info' => '反馈成功']);exit;
     }
 }
