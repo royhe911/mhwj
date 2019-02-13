@@ -122,8 +122,10 @@ class Admin extends \think\Controller
         $r        = new RoleAccessModel();
         $role_arr = $r->getList(['role_id' => $admin['role_id']], 'menu_id');
         $roles    = [];
-        foreach ($role_arr as $role) {
-            $roles[] = $role['menu_id'];
+        if (!empty($role_arr)) {
+            foreach ($role_arr as $role) {
+                $roles[] = $role['menu_id'];
+            }
         }
         $admin['roles'] = $roles;
         session('admin', $admin);

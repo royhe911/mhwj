@@ -248,15 +248,15 @@ class Upload extends \think\Controller
 
         switch ($source_mime) {
             case 'image/gif':
-                $source_image = imagecreatefromgif($source_path);
+                $source_image = @imagecreatefromgif($source_path);
                 break;
 
             case 'image/jpeg':
-                $source_image = imagecreatefromjpeg($source_path);
+                $source_image = @imagecreatefromjpeg($source_path);
                 break;
 
             case 'image/png':
-                $source_image = imagecreatefrompng($source_path);
+                $source_image = @imagecreatefrompng($source_path);
                 break;
 
             default:
@@ -279,7 +279,7 @@ class Upload extends \think\Controller
         //缩略图存放路径
         $cropped_path = $foldername . '/' . $prefix . $filename;
 
-        header('Content-Type: image/jpeg');
+        // header('Content-Type: image/jpeg');
         imagejpeg($target_image, $cropped_path);
         imagedestroy($source_image);
         imagedestroy($target_image);

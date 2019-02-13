@@ -8,6 +8,7 @@ use app\common\model\TFriendModel;
 use app\common\model\TGameModel;
 use app\common\model\TNoticeModel;
 use app\common\model\TPraiseModel;
+use app\common\model\TQuestionModel;
 use app\common\model\TRoomModel;
 use app\common\model\TSchoolModel;
 use app\common\model\TTopicModel;
@@ -1508,5 +1509,44 @@ class Circle extends \think\Controller
             $data = ['age' => $age, 'school' => $school, 'depart' => $depart, 'grade' => $grade];
         }
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $data]);exit;
+    }
+
+    /**
+     * 常见问题
+     * @author 贺强
+     * @time   2019-02-13 14:55:13
+     * @param  TQuestionModel $q TQuestionModel 实例
+     */
+    public function get_question(TQuestionModel $q)
+    {
+        $param = $this->param;
+        $page  = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $q->getList([], ['id', 'title'], "$page,$pagesize");
+        echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
+    }
+
+    /**
+     * 获取问题的答案
+     * @author 贺强
+     * @time   2019-02-13 15:04:32
+     * @param  TQuestionModel $q TQuestionModel 实例
+     */
+    public function get_answer(TQuestionModel $q)
+    {
+        $param=$this->param;
+        if (empty($param['id'])) {
+            $msg=['status'=>1,'info'=>'问题ID不能为空'];
+        }
+        if (!empty($msg)) {
+            echo json_encode($msg);exit;
+        }
+
     }
 }
