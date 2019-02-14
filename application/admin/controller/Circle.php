@@ -5,6 +5,7 @@ use app\common\model\TChatModel;
 use app\common\model\TCircleModel;
 use app\common\model\TDynamicCommentModel;
 use app\common\model\TDynamicModel;
+use app\common\model\TFeedbackModel;
 use app\common\model\TFriendModel;
 use app\common\model\TGameModel;
 use app\common\model\TQuestionModel;
@@ -786,6 +787,49 @@ class Circle extends \think\Controller
         if ($this->request->isAjax()) {
             $ids = $this->request->post('ids');
             $q->delByWhere(['id' => ['in', $ids]]);
+            return ['status' => 0, 'info' => '成功'];
+        }
+    }
+
+    /**
+     * 用户反馈
+     * @author 贺强
+     * @time   2019-02-14 10:37:12
+     * @param  TFeedbackModel $f TFeedbackModel 实例
+     */
+    public function feedback(TFeedbackModel $f)
+    {
+        $param = $this->request->get();
+        $page  = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list = $f->getList([], true, "$page,$pagesize", 'addtime desc');
+        foreach ($list as &$item) {
+            if (!empty($item['addtime'])) {
+                $item['addtime'] = date('Y-m-d H:i:s', $item['addtime']);
+            }
+        }
+        $count = $f->getCount();
+        $pages = ceil($count / $pagesize);
+        return $this->fetch('feedback', ['list' => $list, 'pages' => $pages]);
+    }
+
+    /**
+     * 删除用户反馈
+     * @author 贺强
+     * @time   2019-02-14 10:46:52
+     * @param  TFeedbackModel $f TFeedbackModel 实例
+     */
+    public function operatef(TFeedbackModel $f)
+    {
+        if ($this->request->isAjax()) {
+            $ids = $this->request->post('ids');
+            $f->delByWhere(['id' => ['in', $ids]]);
             return ['status' => 0, 'info' => '成功'];
         }
     }

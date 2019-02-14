@@ -1529,7 +1529,7 @@ class Circle extends \think\Controller
         if (!empty($param['pagesize'])) {
             $pagesize = $param['pagesize'];
         }
-        $list = $q->getList(['pid' => 0], ['id', 'title'], "$page,$pagesize");
+        $list = $q->getList([], ['id', 'title'], "$page,$pagesize");
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $list]);exit;
     }
 
@@ -1548,7 +1548,7 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $qust = $q->getModel(['id' => $param['qid']], ['answer']);
+        $qust = $q->getModel(['id' => $param['qid']], ['title', 'answer']);
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $qust]);exit;
     }
 

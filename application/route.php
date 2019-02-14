@@ -121,6 +121,7 @@ return [
     '/circle/editqust'     => 'admin/Circle/editqust', // 修改问题
     '/circle/operateq'     => 'admin/Circle/operateq', // 操作常见问题
     '/circle/feedback'     => 'admin/Circle/feedback', // 用户反馈
+    '/circle/operatef'     => 'admin/Circle/operatef', // 操作用户反馈
 
     /*--------   api 开始   --------*/
     '/api/carousel'        => 'api/Api/get_carousel', // 获取轮播轮播图
