@@ -216,20 +216,21 @@ class Circle extends \think\Controller
                 $ids = implode(',', $ids);
                 $where .= " and uid in ($ids)";
             } else {
-                echo json_encode(['status' => 0, 'info' => '获取成功']);exit;
+                echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => []]);exit;
             }
         }
         if (!empty($param['topic'])) {
             $where .= " and find_in_set('{$param['topic']}',topic)";
         }
         if (!empty($param['is_tip'])) {
+            $dc  = new TDynamicCommentModel();
             $dcs = $dc->getList(['userid' => $uid, 'is_tip' => 0], ['id', 'did']);
             if (!empty($dcs)) {
                 $ids = array_column($dcs, 'did');
                 $ids = implode(',', $ids);
                 $where .= " and id in ($ids)";
             } else {
-                echo json_encode(['status' => 0, 'info' => '暂无数据']);exit;
+                echo json_encode(['status' => 0, 'info' => '暂无数据', 'data' => []]);exit;
             }
         }
         $page = 1;
