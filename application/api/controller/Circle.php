@@ -1548,7 +1548,7 @@ class Circle extends \think\Controller
         if (!empty($msg)) {
             echo json_encode($msg);exit;
         }
-        $qust = $q->getModel(['pid' => $param['qid']], ['answer']);
+        $qust = $q->getModel(['id' => $param['qid']], ['answer']);
         echo json_encode(['status' => 0, 'info' => '获取成功', 'data' => $qust]);exit;
     }
 

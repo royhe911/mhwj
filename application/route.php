@@ -116,6 +116,11 @@ return [
     '/circle/editgsort'    => 'admin/Circle/editgsort', // 修改游戏排序
     '/circle/users'        => 'admin/Circle/users', // 用户列表
     '/circle/operateu'     => 'admin/Circle/operateu', // 操作用户
+    '/circle/question'     => 'admin/Circle/question', // 常见问题
+    '/circle/addqust'      => 'admin/Circle/addqust', // 添加问题
+    '/circle/editqust'     => 'admin/Circle/editqust', // 修改问题
+    '/circle/operateq'     => 'admin/Circle/operateq', // 操作常见问题
+    '/circle/feedback'     => 'admin/Circle/feedback', // 用户反馈
 
     /*--------   api 开始   --------*/
     '/api/carousel'        => 'api/Api/get_carousel', // 获取轮播轮播图

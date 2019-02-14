@@ -7,6 +7,7 @@ use app\common\model\TDynamicCommentModel;
 use app\common\model\TDynamicModel;
 use app\common\model\TFriendModel;
 use app\common\model\TGameModel;
+use app\common\model\TQuestionModel;
 use app\common\model\TRoomModel;
 use app\common\model\TTopicModel;
 use app\common\model\TUserGameModel;
@@ -700,6 +701,91 @@ class Circle extends \think\Controller
             if (!$res) {
                 return ['status' => 4, 'info' => '失败'];
             }
+            return ['status' => 0, 'info' => '成功'];
+        }
+    }
+
+    /**
+     * 常见问题
+     * @author 贺强
+     * @time   2019-02-13 16:02:07
+     * @param  TQuestionModel $q TQuestionModel 实例
+     */
+    public function question(TQuestionModel $q)
+    {
+        $param = $this->request->get();
+        $page  = 1;
+        if (!empty($param['page'])) {
+            $page = $param['page'];
+        }
+        $pagesize = 10;
+        if (!empty($param['pagesize'])) {
+            $pagesize = $param['pagesize'];
+        }
+        $list  = $q->getList([], true, "$page,$pagesize", 'sort');
+        $count = $q->getCount();
+        $pages = ceil($count / $pagesize);
+        return $this->fetch('question', ['list' => $list, 'pages' => $pages]);
+    }
+
+    /**
+     * 添加常见问题
+     * @author 贺强
+     * @time   2019-02-13 16:26:27
+     * @param  TQuestionModel $q TQuestionModel 实例
+     */
+    public function addqust(TQuestionModel $q)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            if (empty($param['title'])) {
+                return ['status' => 1, 'info' => '问题描述不能为空'];
+            } elseif (empty($param['answer'])) {
+                return ['status' => 2, 'info' => '问题答案不能为空'];
+            }
+            $res = $q->add($param);
+            if (!$res) {
+                return ['status' => 4, 'info' => '添加失败'];
+            }
+            return ['status' => 0, 'info' => '添加成功'];
+        } else {
+            return $this->fetch('addqust');
+        }
+    }
+
+    /**
+     * 编辑常见问题
+     * @author 贺强
+     * @time   2019-02-13 16:58:10
+     * @param  TQuestionModel $q TQuestionModel 实例
+     */
+    public function editqust(TQuestionModel $q)
+    {
+        if ($this->request->isAjax()) {
+            $param = $this->request->post();
+            $res   = $q->modify($param, ['id' => $param['id']]);
+            if ($res !== false) {
+                return ['status' => 0, 'info' => '修改成功'];
+            }
+            return ['status' => 4, 'info' => '修改失败'];
+        } else {
+            $id   = $this->request->get('id');
+            $qust = $q->getModel(['id' => $id]);
+            return $this->fetch('editqust', ['qust' => $qust]);
+        }
+    }
+
+    /**
+     * 删除常见问题
+     * @author 贺强
+     * @time   2019-02-13 16:22:19
+     * @param  TQuestionModel $q TQuestionModel 实例
+     */
+    public function operateq(TQuestionModel $q)
+    {
+        if ($this->request->isAjax()) {
+            $ids = $this->request->post('ids');
+            $q->delByWhere(['id' => ['in', $ids]]);
             return ['status' => 0, 'info' => '成功'];
         }
     }
